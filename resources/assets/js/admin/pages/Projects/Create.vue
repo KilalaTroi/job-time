@@ -1,0 +1,298 @@
+<template>
+    <div class="modal fade" id="itemCreate">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-light">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Create Project</h4>
+                    <button type="button" class="btn btn-xs btn-danger ml-2" data-dismiss="modal">
+                        <i aria-hidden="true" class="fa fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <hr>
+                    <form @submit="emitCreateItem">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="">Clients</label>
+                                    <div>
+                                        <Select2 :options="clientOptions" v-model="client_id" class="select2">
+                                            <option disabled value="0">Select one</option>
+                                        </Select2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="">Departments</label>
+                                    <div>
+                                        <Select2 :options="departmentOptions" v-model="dept_id" class="select2">
+                                            <option disabled value="0">Select one</option>
+                                        </Select2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="">Types</label>
+                                    <div>
+                                        <Select2Type :options="typeOptions" v-model="type_id" class="select2">
+                                            <option disabled value="0">Select one</option>
+                                        </Select2Type>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="">Is training?</label>
+                                    <input v-model="is_training" type="checkbox" name="is_training"
+                                           class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">Name</label>
+                                    <input v-model="p_name" type="text" name="p_name" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">Name VI</label>
+                                    <input v-model="p_name_vi" type="text" name="p_name_vi" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">Name JA</label>
+                                    <input v-model="p_name_ja" type="text" name="p_name_ja" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">Issue</label>
+                                    <input v-model="i_name" type="text" name="i_name" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">Start date</label>
+                                    <datepicker
+                                            name="startDate"
+                                            input-class="form-control"
+                                            placeholder="Select Date"
+                                            v-model="start_date"
+                                            :format="customFormatter"
+                                            :disabled-dates="disabledEndDates()">
+                                    </datepicker>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">End date</label>
+                                    <datepicker
+                                            name="endDate"
+                                            input-class="form-control"
+                                            placeholder="Select Date"
+                                            v-model="end_date"
+                                            :format="customFormatter"
+                                            :language="ja"
+                                            :disabled-dates="disabledStartDates()">
+                                    </datepicker>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+    import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
+    import Datepicker from 'vuejs-datepicker';
+    import {en, ja} from 'vuejs-datepicker/dist/locale'
+    import moment from 'moment'
+
+    export default {
+        name: 'CreateItem',
+        components: {
+            Select2,
+            Select2Type,
+            datepicker: Datepicker
+        },
+        props: ['clients', 'departments', 'types'],
+        data() {
+            return {
+                client_id: 0,
+                dept_id: 0,
+                type_id: 0,
+                p_name: '',
+                p_name_vi: '',
+                p_name_ja: '',
+                is_training: false,
+                i_name: '',
+                start_date: '',
+                end_date: '',
+                en: en,
+                ja: ja,
+                clientOptions: [],
+                departmentOptions: [],
+                typeOptions: []
+            }
+        },
+        mounted() {
+        },
+        methods: {
+            getDataClients(data) {
+                if (data.length) {
+                    let dataOptions = [];
+                    let obj = {
+                        id: 0,
+                        text: "Select one"
+                    };
+                    dataOptions.push(obj);
+
+                    for (let i = 0; i < data.length; i++) {
+                        let obj = {
+                            id: data[i].id,
+                            text: data[i].text
+                        };
+                        dataOptions.push(obj);
+                    }
+                    this.clientOptions = dataOptions;
+                }
+            },
+            getDataDepartments(data) {
+                if (data.length) {
+                    let dataOptions = [];
+                    let obj = {
+                        id: 0,
+                        text: "Select one"
+                    };
+                    dataOptions.push(obj);
+
+                    for (let i = 0; i < data.length; i++) {
+                        let obj = {
+                            id: data[i].id,
+                            text: data[i].text
+                        };
+                        dataOptions.push(obj);
+                    }
+                    this.departmentOptions = dataOptions;
+                }
+            },
+            getDataTypes(data) {
+                if (data.length) {
+                    let dataTypes = [];
+                    let obj = {
+                        id: 0,
+                        text: '<div>Select one</div>'
+                    };
+                    dataTypes.push(obj);
+
+                    for (let i = 0; i < data.length; i++) {
+                        let obj = {
+                            id: data[i].id,
+                            text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
+                        };
+                        dataTypes.push(obj);
+                    }
+                    this.typeOptions = dataTypes;
+                }
+            },
+            emitCreateItem(e) {
+                e.preventDefault()
+
+                const newItem = {
+                    client_id: this.client_id,
+                    dept_id: this.dept_id,
+                    type_id: this.type_id,
+                    p_name: this.p_name,
+                    p_name_vi: this.p_name_vi,
+                    p_name_ja: this.p_name_ja,
+                    is_training: this.is_training,
+                    i_name: this.i_name,
+                    start_date: this.start_date,
+                    end_date: this.end_date
+                };
+
+                this.$emit('create-item', newItem);
+
+                // Reset
+                this.client_id = 0;
+                this.dept_id = 0;
+                this.type_id = 0;
+                this.p_name = '';
+                this.p_name_vi = '';
+                this.p_name_ja = '';
+                this.is_training = false;
+                this.i_name = '';
+                this.start_date = '';
+                this.end_date = '';
+            },
+            customFormatter(date) {
+                return moment(date).format('DD-MM-YYYY');
+            },
+            disabledStartDates() {
+                let obj = {
+                    to: new Date(this.start_date), // Disable all dates after specific date
+                    // days: [0], // Disable Saturday's and Sunday's
+                };
+                return obj;
+            },
+            disabledEndDates() {
+                let obj = {
+                    from: new Date(this.end_date), // Disable all dates after specific date
+                    // days: [0], // Disable Saturday's and Sunday's
+                };
+                return obj;
+            }
+        },
+        watch: {
+            clients: [{
+                handler: 'getDataClients'
+            }],
+            departments: [{
+                handler: 'getDataDepartments'
+            }],
+            types: [{
+                handler: 'getDataTypes'
+            }],
+            start_date: [{
+                handler: 'disabledStartDates'
+            }],
+            end_date: [{
+                handler: 'disabledEndDates'
+            }]
+        }
+    }
+</script>
+<style lang="scss">
+    input[type="radio"], input[type="checkbox"] {
+        &.form-control {
+            width: 40px;
+        }
+    }
+</style>
