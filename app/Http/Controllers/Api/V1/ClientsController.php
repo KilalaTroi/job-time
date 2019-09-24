@@ -26,6 +26,10 @@ class ClientsController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => 'required|unique:clients|max:255'
+        ]);
+
         $client = Client::create($request->all());
 
         return response()->json(array(
@@ -54,10 +58,16 @@ class ClientsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->validate($request, [
+            'name' => 'required|unique:clients,name,'.$id.'|max:255'
+        ]);
+
         $client = Client::findOrFail($id);
         $client->update($request->all());
 
-        return response()->json('Successfully.');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 
     /**
@@ -71,6 +81,8 @@ class ClientsController extends Controller
         $client = Client::findOrFail($id);
         $client->delete();
 
-        return response()->json('Successfully');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 }
