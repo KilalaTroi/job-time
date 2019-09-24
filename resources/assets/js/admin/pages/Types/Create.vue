@@ -43,13 +43,19 @@
 </template>
 
 <script>
+    import ErrorItem from '../../components/Validations/Error'
+    import SuccessItem from '../../components/Validations/Success'
+    import Modal from '../../components/Modals/Modal'
     import ChromePicker from '../../components/ColorPicker/ChromePicker.vue'
-
     export default {
-        name: 'CreateItem',
+        name: 'create-item',
         components: {
+            Modal,
+            ErrorItem,
+            SuccessItem,
             ChromePicker
         },
+        props: ['errors', 'success'],
         data() {
             return {
                 slug: '',
@@ -61,22 +67,27 @@
         methods: {
             emitCreateItem(e) {
                 e.preventDefault()
-
                 const newItem = {
                     slug: this.slug,
                     slug_vi: this.slug_vi,
                     slug_ja: this.slug_ja,
-                    value: this.value,
-                }
-
+                };
                 this.$emit('create-item', newItem);
-
+            },
+            resetData(data) {
                 // Reset
-                this.slug = '';
-                this.slug_vi = '';
-                this.slug_ja = '';
-                this.value = '#000000';
+                if ( data.length ) {
+                    this.slug = '';
+                    this.slug_vi = '';
+                    this.slug_ja = '';
+                    this.value = '#000000';
+                }
             }
+        },
+        watch: {
+            success: [{
+                handler: 'resetData'
+            }]
         }
     }
 </script>

@@ -26,6 +26,10 @@ class DepartmentsController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => 'required|unique:departments|max:255'
+        ]);
+
         $department = Department::create($request->all());
 
         return response()->json(array(
@@ -54,10 +58,17 @@ class DepartmentsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->validate($request, [
+            'name' => 'required|unique:departments,name,'.$id.'|max:255'
+        ]);
+
         $department = Department::findOrFail($id);
         $department->update($request->all());
 
-        return response()->json('Successfully.');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
+
     }
 
     /**
