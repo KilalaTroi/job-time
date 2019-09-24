@@ -29,7 +29,7 @@ import TableList from './admin/pages/TableList.vue';
 import Typography from './admin/pages/Typography.vue';
 import Icons from './admin/pages/Icons.vue';
 import Notifications from './admin/pages/Notifications.vue';
-import Clients from './admin/pages/Clients.vue';
+import Clients from './admin/pages/Clients/Index';
 import Departments from './admin/pages/Departments.vue';
 import Types from './admin/pages/Types.vue';
 import Projects from './admin/pages/Projects.vue';
