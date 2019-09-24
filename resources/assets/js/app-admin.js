@@ -18,21 +18,21 @@ import LightBootstrap from './admin/light-bootstrap-main'
 window.Vue.use(VueRouter);
 window.Vue.use(LightBootstrap);
 
-import DashboardLayout from './admin/layout/DashboardLayout.vue'
+import DashboardLayout from './admin/layout/DashboardLayout'
 // GeneralViews
-import NotFound from './admin/pages/NotFoundPage.vue'
+import NotFound from './admin/pages/NotFoundPage'
 
 // Admin pages
 import Overview from './admin/pages/Overview';
-import UserProfile from './admin/pages/UserProfile.vue';
-import TableList from './admin/pages/TableList.vue';
-import Typography from './admin/pages/Typography.vue';
-import Icons from './admin/pages/Icons.vue';
-import Notifications from './admin/pages/Notifications.vue';
+import UserProfile from './admin/pages/UserProfile';
+import TableList from './admin/pages/TableList';
+import Typography from './admin/pages/Typography';
+import Icons from './admin/pages/Icons';
+import Notifications from './admin/pages/Notifications';
 import Clients from './admin/pages/Clients/Index';
-import Departments from './admin/pages/Departments.vue';
-import Types from './admin/pages/Types.vue';
-import Projects from './admin/pages/Projects.vue';
+import Departments from './admin/pages/Departments/Index';
+import Types from './admin/pages/Types/Index';
+import Projects from './admin/pages/Projects';
 
 const routes = [
     {

@@ -26,6 +26,11 @@ class TypesController extends Controller
      */
     public function store(Request $request)
     {
+
+        $this->validate($request, [
+            'slug' => 'required|unique:types|max:255'
+        ]);
+
         $type = Type::create($request->all());
 
         return response()->json(array(
@@ -54,10 +59,16 @@ class TypesController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->validate($request, [
+            'slug' => 'required|unique:types,slug,'.$id.'|max:255'
+        ]);
+
         $type = Type::findOrFail($id);
         $type->update($request->all());
 
-        return response()->json('Successfully.');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 
     /**
