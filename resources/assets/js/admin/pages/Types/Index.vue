@@ -1,9 +1,11 @@
 <template>
     <div class="content">
         <div class="container-fluid">
-            <create-button>
-                <template slot="title">Create new</template>
-            </create-button>
+            <div class="form-group">
+                <create-button>
+                    <template slot="title">Create new type</template>
+                </create-button>
+            </div>
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
@@ -42,30 +44,10 @@ import CreateItem from "./Create";
 import EditItem from "./Edit";
 import CreateButton from "../../components/Buttons/Create";
 const tableColumns = [
-        {
-            id: 'slug',
-            value: 'Slug',
-            width: '',
-            class: ''
-        },
-        {
-            id: 'type_color',
-            value: 'Type color',
-            width: '',
-            class: 'type-color'
-        },
-        {
-            id: 'slug_vi',
-            value: 'Slug VI',
-            width: '',
-            class: ''
-        },
-        {
-            id: 'slug_ja',
-            value: 'Slug JA',
-            width: '',
-            class: ''
-        }
+        { id: 'slug', value: 'Slug', width: '', class: '' },
+        { id: 'value', value: 'Type color', width: '110', class: 'text-center' },
+        { id: 'slug_vi', value: 'Slug VI', width: '', class: '' },
+        { id: 'slug_ja', value: 'Slug JA', width: '', class: '' }
     ];
 export default {
   components: {
@@ -110,7 +92,7 @@ export default {
         .post(uri, newItem)
         .then(res => {
           let addIdItem = Object.assign({}, { id: res.data.id }, newItem);
-          this.types = [...this.clients, addIdItem];
+          this.types = [...this.types, addIdItem];
           this.validationSuccess = res.data.message;
         })
         .catch(err => {
@@ -158,11 +140,6 @@ export default {
             this.validationErrors = err.response.data;
           }
         });
-    },
-    setBackground(color) {
-      return {
-        background: color
-      };
     },
     resetValidate() {
       this.validationSuccess = "";

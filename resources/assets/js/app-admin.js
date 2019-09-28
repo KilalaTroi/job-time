@@ -29,9 +29,9 @@ import TableList from './admin/pages/TableList';
 import Typography from './admin/pages/Typography';
 import Icons from './admin/pages/Icons';
 import Notifications from './admin/pages/Notifications';
-import Clients from './admin/pages/Clients/Index';
-import Departments from './admin/pages/Departments/Index';
-import Types from './admin/pages/Types/Index';
+import Clients from './admin/pages/Clients';
+import Departments from './admin/pages/Departments';
+import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
 
 const routes = [

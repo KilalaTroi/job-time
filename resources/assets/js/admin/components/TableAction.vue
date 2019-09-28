@@ -11,11 +11,17 @@
     <tbody>
     <tr v-for="(item, index) in data" :key="index">
       <slot :row="item">
-        <td v-for="(column, index) in columns" :key="index" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
-        <td v-else>--</td>
+        <td v-for="(column, index) in columns" :key="index" :class="column.class">
+          <span v-if="checkTypeColor(column)" :style="setBackground(itemValue(item, column))" class="type-color"></span>
+          <span v-else>{{itemValue(item, column)}}</span>
+        </td>
       </slot>
       <td class="text-center">
-        <button @click="$emit('get-item', item.id)" type="button" class="btn btn-xs btn-default"
+        <button v-if="item.issue_id" @click="$emit('get-item', item.id, item.issue_id)" type="button" class="btn btn-xs btn-default"
+                data-toggle="modal" data-target="#itemDetail" data-backdrop="static" data-keyboard="false">
+          <i class="fa fa-pencil" aria-hidden="true"></i>
+        </button>
+        <button v-else @click="$emit('get-item', item.id)" type="button" class="btn btn-xs btn-default"
                 data-toggle="modal" data-target="#itemDetail" data-backdrop="static" data-keyboard="false">
           <i class="fa fa-pencil" aria-hidden="true"></i>
         </button>
@@ -40,7 +46,15 @@
                 return item[column.id.toLowerCase()]
             },
             itemValue (item, column) {
-                return item[column.id.toLowerCase()]
+                return item[column.id.toLowerCase()] ? item[column.id.toLowerCase()] : '--'
+            },
+            checkTypeColor (data) {
+                return data.value == 'Type color';
+            },
+            setBackground(color) {
+                return {
+                    background: color
+                };
             }
         }
     }

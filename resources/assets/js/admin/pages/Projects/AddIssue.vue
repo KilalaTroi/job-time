@@ -1,83 +1,76 @@
 <template>
-    <div class="modal fade" id="issueCreate">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-light">
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h4 class="modal-title">Add new issue</h4>
-                    <button type="button" class="btn btn-xs btn-danger ml-2" data-dismiss="modal">
-                        <i aria-hidden="true" class="fa fa-times"></i>
-                    </button>
-                </div>
-
-                <!-- Modal body -->
-                <div class="modal-body">
-                    <hr>
-                    <form @submit="emitAddItem">
-                        <div class="form-group">
-                            <label class="">Project</label>
-                            <div>
-                                <Select2 :options="projectOptions" v-model="project_id" class="select2">
-                                    <option disabled value="0">Select one</option>
-                                </Select2>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="">Issue name</label>
-                            <input v-model="i_name" type="text" name="i_name" class="form-control">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="">Start date</label>
-                            <datepicker
-                                    name="startDate"
-                                    input-class="form-control"
-                                    placeholder="Select Date"
-                                    v-model="start_date"
-                                    :format="customFormatter"
-                                    :disabled-dates="disabledEndDates()">
-                            </datepicker>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="">End date</label>
-                            <datepicker
-                                    name="endDate"
-                                    input-class="form-control"
-                                    placeholder="Select Date"
-                                    v-model="end_date"
-                                    :format="customFormatter"
-                                    :language="ja"
-                                    :disabled-dates="disabledStartDates()">
-                            </datepicker>
-                        </div>
-                        <hr>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Add</button>
-                            <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
+    <modal id="issueCreate" v-on:reset-validation="$emit('reset-validation')">
+        <template slot="title">Add new issue</template>
+        <form @submit="emitAddItem">
+            <div class="form-group">
+                <label class="">Project</label>
+                <div>
+                    <select-2 :options="projectOptions" v-model="project_id" class="select2">
+                        <option disabled value="0">Select one</option>
+                    </select-2>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <div class="form-group">
+                <label class="">Issue name</label>
+                <input v-model="i_name" type="text" name="i_name" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label class="">Start date</label>
+                <datepicker
+                    name="startDate"
+                    input-class="form-control"
+                    placeholder="Select Date"
+                    v-model="start_date"
+                    :format="customFormatter"
+                    :disabled-dates="disabledEndDates()">
+                </datepicker>
+            </div>
+
+            <div class="form-group">
+                <label class="">End date</label>
+                <datepicker
+                    name="endDate"
+                    input-class="form-control"
+                    placeholder="Select Date"
+                    v-model="end_date"
+                    :format="customFormatter"
+                    :language="ja"
+                    :disabled-dates="disabledStartDates()">
+                </datepicker>
+            </div>
+            <error-item :errors="errors"></error-item>
+            <success-item :success="success"></success-item>
+            <hr>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Add</button>
+                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+            </div>
+        </form>
+    </modal>
 </template>
 
 <script>
     import Select2 from '../../components/SelectTwo/SelectTwo.vue'
     import Datepicker from 'vuejs-datepicker';
     import {en, ja} from 'vuejs-datepicker/dist/locale'
+    import ErrorItem from '../../components/Validations/Error'
+    import SuccessItem from '../../components/Validations/Success'
+    import Modal from '../../components/Modals/Modal'
     import moment from 'moment'
 
     export default {
         name: 'AddIssue',
         components: {
             Select2,
-            datepicker: Datepicker
+            datepicker: Datepicker,
+            ErrorItem,
+            SuccessItem,
+            Modal
         },
-        props: ['projects'],
+        props: ['projects','errors', 'success'],
         data() {
             return {
                 project_id: 0,
@@ -127,12 +120,6 @@
                 };
 
                 this.$emit('add-issue', newIssue);
-
-                // Reset
-                this.project_id = 0;
-                this.i_name = '';
-                this.start_date = '';
-                this.end_date = '';
             },
             customFormatter(date) {
                 return moment(date).format('DD-MM-YYYY');
@@ -150,6 +137,15 @@
                     // days: [0], // Disable Saturday's and Sunday's
                 };
                 return obj;
+            },
+            resetData(data) {
+                // Reset
+                if ( data.length ) {
+                    this.project_id = 0;
+                    this.i_name = '';
+                    this.start_date = '';
+                    this.end_date = '';
+                }
             }
         },
         watch: {
@@ -161,6 +157,9 @@
             }],
             end_date: [{
                 handler: 'disabledEndDates'
+            }],
+            success: [{
+                handler: 'resetData'
             }]
         }
     }

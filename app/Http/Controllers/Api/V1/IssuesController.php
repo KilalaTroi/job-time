@@ -16,6 +16,11 @@ class IssuesController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => 'required|max:255',
+            'project_id' => 'required|numeric|min:0|not_in:0'
+        ]);
+
         $start_date = $request->get('start_date');
         if ( strpos($start_date, 'T') !== false ) {
             $start_date = explode('T', $start_date);

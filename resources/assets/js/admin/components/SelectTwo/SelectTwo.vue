@@ -5,7 +5,7 @@
 </template>
 <script>
     export default {
-        name: 'Select2',
+        name: 'select-2',
         props: ['options', 'value'],
         mounted: function () {
             var vm = this;

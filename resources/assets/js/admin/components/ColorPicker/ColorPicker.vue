@@ -11,7 +11,7 @@
     import { Chrome } from 'vue-color'
 
     export default {
-        name: 'ChromePicker',
+        name: 'color-picker',
         components: {
             'chrome-picker': Chrome
         },

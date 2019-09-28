@@ -1,9 +1,11 @@
 <template>
     <div class="content">
         <div class="container-fluid">
-            <create-button>
-                <template slot="title">Create new department</template>
-            </create-button>
+            <div class="form-group">
+                <create-button>
+                    <template slot="title">Create new department</template>
+                </create-button>
+            </div>
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">

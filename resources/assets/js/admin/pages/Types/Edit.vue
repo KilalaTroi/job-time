@@ -16,7 +16,7 @@
       </div>
       <div class="form-group">
         <label class>Type Color</label>
-        <ChromePicker :color="currentItem.value" v-model="currentItem.value"></ChromePicker>
+        <color-picker :color="currentItem.value" v-model="currentItem.value"></color-picker>
       </div>
       <error-item :errors="errors"></error-item>
       <success-item :success="success"></success-item>
@@ -37,7 +37,7 @@
 import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
 import Modal from "../../components/Modals/Modal";
-import ChromePicker from "../../components/ColorPicker/ChromePicker.vue";
+import ColorPicker from "../../components/ColorPicker/ColorPicker";
 
 export default {
   name: "edit-item",
@@ -45,7 +45,7 @@ export default {
     Modal,
     ErrorItem,
     SuccessItem,
-    ChromePicker
+    ColorPicker
   },
   props: ["currentItem", "errors", "success"]
 };
