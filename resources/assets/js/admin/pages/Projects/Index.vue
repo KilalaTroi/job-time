@@ -34,6 +34,8 @@
                 :clients="clients"
                 :departments="departments"
                 :types="types"
+                :errors="validationErrors"
+                :success="validationSuccess"
                 v-on:create-item="createItem"
                 v-on:reset-validation="resetValidate">
             </CreateItem>
@@ -43,12 +45,16 @@
                 :clients="clients"
                 :departments="departments"
                 :types="types"
+                :errors="validationErrors"
+                :success="validationSuccess"
                 v-on:update-item="updateItem"
                 v-on:reset-validation="resetValidate">
             </EditItem>
 
             <AddIssue
                 :projects="projects"
+                :errors="validationErrors"
+                :success="validationSuccess"
                 v-on:add-issue="AddIssueFunc"
                 v-on:reset-validation="resetValidate">
             </AddIssue>
@@ -238,6 +244,10 @@
             customFormatter(date) {
                 return moment(date).format('DD-MM-YYYY');
             },
+            resetValidate() {
+                this.validationSuccess = '';
+                this.validationErrors = '';
+            }
         },
         watch: {
             projects: [{

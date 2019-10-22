@@ -13,7 +13,7 @@
 
             <div class="form-group">
                 <label class="">Issue name</label>
-                <input v-model="i_name" type="text" name="i_name" class="form-control">
+                <input v-model="i_name" type="text" name="i_name" class="form-control" required>
             </div>
 
             <div class="form-group">

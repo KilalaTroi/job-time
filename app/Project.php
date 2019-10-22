@@ -16,6 +16,6 @@ class Project extends Model
     ];
 
     public function issues() {
-        return $this->hasMany(Task::class);
+        return $this->hasMany(Issue::class);
     }
 }

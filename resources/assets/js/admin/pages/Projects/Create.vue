@@ -1,136 +1,126 @@
 <template>
-    <div class="modal fade" id="itemCreate">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content bg-light">
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h4 class="modal-title">Create Project</h4>
-                    <button type="button" class="btn btn-xs btn-danger ml-2" data-dismiss="modal">
-                        <i aria-hidden="true" class="fa fa-times"></i>
-                    </button>
+    <modal id="itemCreate" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
+        <template slot="title">Create Project</template>
+        <form @submit="emitCreateItem">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Clients</label>
+                        <div>
+                            <select-2 :options="clientOptions" v-model="client_id" class="select2">
+                                <option disabled value="0">Select one</option>
+                            </select-2>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Modal body -->
-                <div class="modal-body">
-                    <hr>
-                    <form @submit="emitCreateItem">
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label class="">Clients</label>
-                                    <div>
-                                        <Select2 :options="clientOptions" v-model="client_id" class="select2">
-                                            <option disabled value="0">Select one</option>
-                                        </Select2>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label class="">Departments</label>
-                                    <div>
-                                        <Select2 :options="departmentOptions" v-model="dept_id" class="select2">
-                                            <option disabled value="0">Select one</option>
-                                        </Select2>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Departments</label>
+                        <div>
+                            <select-2 :options="departmentOptions" v-model="dept_id" class="select2">
+                                <option disabled value="0">Select one</option>
+                            </select-2>
                         </div>
-
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label class="">Types</label>
-                                    <div>
-                                        <Select2Type :options="typeOptions" v-model="type_id" class="select2">
-                                            <option disabled value="0">Select one</option>
-                                        </Select2Type>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label class="">Is training?</label>
-                                    <input v-model="is_training" type="checkbox" name="is_training"
-                                           class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                        <hr>
-
-                        <div class="row">
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label class="">Name</label>
-                                    <input v-model="p_name" type="text" name="p_name" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label class="">Name VI</label>
-                                    <input v-model="p_name_vi" type="text" name="p_name_vi" class="form-control">
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label class="">Name JA</label>
-                                    <input v-model="p_name_ja" type="text" name="p_name_ja" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                        <hr>
-
-                        <div class="row">
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label class="">Issue</label>
-                                    <input v-model="i_name" type="text" name="i_name" class="form-control">
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label class="">Start date</label>
-                                    <datepicker
-                                            name="startDate"
-                                            input-class="form-control"
-                                            placeholder="Select Date"
-                                            v-model="start_date"
-                                            :format="customFormatter"
-                                            :disabled-dates="disabledEndDates()">
-                                    </datepicker>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label class="">End date</label>
-                                    <datepicker
-                                            name="endDate"
-                                            input-class="form-control"
-                                            placeholder="Select Date"
-                                            v-model="end_date"
-                                            :format="customFormatter"
-                                            :language="ja"
-                                            :disabled-dates="disabledStartDates()">
-                                    </datepicker>
-                                </div>
-                            </div>
-                        </div>
-                        <hr>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Add</button>
-                            <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Types</label>
+                        <div>
+                            <select2-type :options="typeOptions" v-model="type_id" class="select2">
+                                <option disabled value="0">Select one</option>
+                            </select2-type>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Is training?</label>
+                        <input v-model="is_training" type="checkbox" name="is_training"
+                               class="form-control">
+                    </div>
+                </div>
+            </div>
+            <hr>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Name</label>
+                        <input v-model="p_name" type="text" name="p_name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Name VI</label>
+                        <input v-model="p_name_vi" type="text" name="p_name_vi" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Name JA</label>
+                        <input v-model="p_name_ja" type="text" name="p_name_ja" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <hr>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Issue</label>
+                        <input v-model="i_name" type="text" name="i_name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Start date</label>
+                        <datepicker
+                            name="startDate"
+                            input-class="form-control"
+                            placeholder="Select Date"
+                            v-model="start_date"
+                            :format="customFormatter"
+                            :disabled-dates="disabledEndDates()">
+                        </datepicker>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">End date</label>
+                        <datepicker
+                            name="endDate"
+                            input-class="form-control"
+                            placeholder="Select Date"
+                            v-model="end_date"
+                            :format="customFormatter"
+                            :language="ja"
+                            :disabled-dates="disabledStartDates()">
+                        </datepicker>
+                    </div>
+                </div>
+            </div>
+            <error-item :errors="errors"></error-item>
+            <success-item :success="success"></success-item>
+            <hr>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Add</button>
+                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+            </div>
+        </form>
+    </modal>
 </template>
 
 <script>
     import Select2 from '../../components/SelectTwo/SelectTwo.vue'
     import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
+    import Modal from '../../components/Modals/Modal'
+    import ErrorItem from '../../components/Validations/Error'
+    import SuccessItem from '../../components/Validations/Success'
     import Datepicker from 'vuejs-datepicker';
     import {en, ja} from 'vuejs-datepicker/dist/locale'
     import moment from 'moment'
@@ -140,9 +130,12 @@
         components: {
             Select2,
             Select2Type,
-            datepicker: Datepicker
+            datepicker: Datepicker,
+            ErrorItem,
+            SuccessItem,
+            Modal
         },
-        props: ['clients', 'departments', 'types'],
+        props: ['clients', 'departments', 'types', 'errors'],
         data() {
             return {
                 client_id: 0,
@@ -157,6 +150,7 @@
                 end_date: '',
                 en: en,
                 ja: ja,
+                modalLg: 'modal-lg',
                 clientOptions: [],
                 departmentOptions: [],
                 typeOptions: []
@@ -239,18 +233,6 @@
                 };
 
                 this.$emit('create-item', newItem);
-
-                // Reset
-                this.client_id = 0;
-                this.dept_id = 0;
-                this.type_id = 0;
-                this.p_name = '';
-                this.p_name_vi = '';
-                this.p_name_ja = '';
-                this.is_training = false;
-                this.i_name = '';
-                this.start_date = '';
-                this.end_date = '';
             },
             customFormatter(date) {
                 return moment(date).format('DD-MM-YYYY');
@@ -268,6 +250,21 @@
                     // days: [0], // Disable Saturday's and Sunday's
                 };
                 return obj;
+            },
+            resetData(data) {
+                // Reset
+                if ( data.length ) {
+                    this.client_id = 0;
+                    this.dept_id = 0;
+                    this.type_id = 0;
+                    this.p_name = '';
+                    this.p_name_vi = '';
+                    this.p_name_ja = '';
+                    this.is_training = false;
+                    this.i_name = '';
+                    this.start_date = '';
+                    this.end_date = '';
+                }
             }
         },
         watch: {
@@ -285,6 +282,9 @@
             }],
             end_date: [{
                 handler: 'disabledEndDates'
+            }],
+            success: [{
+                handler: 'resetData'
             }]
         }
     }
