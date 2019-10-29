@@ -242,7 +242,7 @@
                 }).catch(err => console.log(err));
             },
             customFormatter(date) {
-                return moment(date).format('DD-MM-YYYY');
+                return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('DD-MM-YYYY') : '--';
             },
             resetValidate() {
                 this.validationSuccess = '';

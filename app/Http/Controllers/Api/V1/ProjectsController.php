@@ -56,6 +56,13 @@ class ProjectsController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'p_name' => 'required|max:255',
+            'client_id' => 'required|numeric|min:0|not_in:0',
+            'dept_id' => 'required|numeric|min:0|not_in:0',
+            'type_id' => 'required|numeric|min:0|not_in:0',
+        ]);
+
         $project = Project::create([
             'name' => $request->get('p_name'),
             'name_vi' => $request->get('p_name_vi'),
@@ -138,6 +145,13 @@ class ProjectsController extends Controller
      */
     public function update($id, Request $request)
     {
+        $this->validate($request, [
+            'p_name' => 'required|max:255',
+            'client_id' => 'required|numeric|min:0|not_in:0',
+            'dept_id' => 'required|numeric|min:0|not_in:0',
+            'type_id' => 'required|numeric|min:0|not_in:0',
+        ]);
+
         $project = Project::findOrFail($id);
         $project->update([
             'name' => $request->get('p_name'),

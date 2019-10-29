@@ -135,7 +135,7 @@
             SuccessItem,
             Modal
         },
-        props: ['clients', 'departments', 'types', 'errors'],
+        props: ['clients', 'departments', 'types', 'errors', 'success'],
         data() {
             return {
                 client_id: 0,
