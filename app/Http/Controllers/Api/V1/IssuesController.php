@@ -91,7 +91,9 @@ class IssuesController extends Controller
             'end_date' => $end_date,
         ]);
 
-        return response()->json('Successfully.');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 
     /**
@@ -107,6 +109,8 @@ class IssuesController extends Controller
             'status' => 'disable'
         ]);
 
-        return response()->json('Successfully');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 }

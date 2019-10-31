@@ -1,135 +1,128 @@
 <template>
-    <div class="modal fade" id="itemDetail">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div v-if="currentItem" class="modal-content">
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h4 class="modal-title">Edit Project</h4>
-                    <button type="button" class="btn btn-xs btn-danger ml-2" data-dismiss="modal">
-                        <i aria-hidden="true" class="fa fa-times"></i>
-                    </button>
-                </div>
+    <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
+        <template slot="title">Edit Project</template>
 
-                <!-- Modal body -->
-                <div class="modal-body">
-                    <hr>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label class="">Clients</label>
-                                <div>
-                                    <Select2 :options="clientOptions" v-model="currentItem.client_id" class="select2">
-                                        <option disabled value="0">Select one</option>
-                                    </Select2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label class="">Departments</label>
-                                <div>
-                                    <Select2 :options="departmentOptions" v-model="currentItem.dept_id" class="select2">
-                                        <option disabled value="0">Select one</option>
-                                    </Select2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label class="">Types</label>
-                                <div>
-                                    <Select2Type :options="typeOptions" v-model="currentItem.type_id" class="select2">
-                                        <option disabled value="0">Select one</option>
-                                    </Select2Type>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label class="">Is training?</label>
-                                <input v-model="currentItem.is_training" type="checkbox" name="name_ja" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label class="">Name</label>
-                                <input v-model="currentItem.p_name" type="text" name="name" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label class="">Name VI</label>
-                                <input v-model="currentItem.p_name_vi" type="text" name="name_vi" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label class="">Name JA</label>
-                                <input v-model="currentItem.p_name_ja" type="text" name="name_ja" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label class="">Issue</label>
-                                <input v-model="currentItem.i_name" type="text" name="issue" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label class="">Start date</label>
-                                <datepicker
-                                        name="startDate"
-                                        input-class="form-control"
-                                        placeholder="Select Date"
-                                        v-model="currentItem.start_date"
-                                        :format="customFormatter"
-                                        :disabled-dates="disabledEndDates()">
-                                </datepicker>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label class="">End date</label>
-                                <datepicker
-                                        name="endDate"
-                                        input-class="form-control"
-                                        placeholder="Select Date"
-                                        v-model="currentItem.end_date"
-                                        :format="customFormatter"
-                                        :language="ja"
-                                        :disabled-dates="disabledStartDates()">
-                                </datepicker>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
+        <div v-if="currentItem">
+            <div class="row">
+                <div class="col-sm-6">
                     <div class="form-group">
-                        <button @click="$emit('update-item', currentItem)" type="button" class="btn btn-primary">
-                            Update
-                        </button>
-                        <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+                        <label class="">Clients</label>
+                        <div>
+                            <select-2 :options="clientOptions" v-model="currentItem.client_id" class="select2">
+                                <option disabled value="0">Select one</option>
+                            </select-2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Departments</label>
+                        <div>
+                            <select-2 :options="departmentOptions" v-model="currentItem.dept_id" class="select2">
+                                <option disabled value="0">Select one</option>
+                            </select-2>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Types</label>
+                        <div>
+                            <select2-type :options="typeOptions" v-model="currentItem.type_id" class="select2">
+                                <option disabled value="0">Select one</option>
+                            </select2-type>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Is training?</label>
+                        <input v-model="currentItem.is_training" type="checkbox" name="name_ja" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <hr>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Name</label>
+                        <input v-model="currentItem.p_name" type="text" name="name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Name VI</label>
+                        <input v-model="currentItem.p_name_vi" type="text" name="name_vi" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Name JA</label>
+                        <input v-model="currentItem.p_name_ja" type="text" name="name_ja" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <hr>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Issue</label>
+                        <input v-model="currentItem.i_name" type="text" name="issue" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">Start date</label>
+                        <datepicker
+                            name="startDate"
+                            input-class="form-control"
+                            placeholder="Select Date"
+                            v-model="currentItem.start_date"
+                            :format="customFormatter"
+                            :disabled-dates="disabledEndDates()">
+                        </datepicker>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="">End date</label>
+                        <datepicker
+                            name="endDate"
+                            input-class="form-control"
+                            placeholder="Select Date"
+                            v-model="currentItem.end_date"
+                            :format="customFormatter"
+                            :language="ja"
+                            :disabled-dates="disabledStartDates()">
+                        </datepicker>
+                    </div>
+                </div>
+            </div>
+            <error-item :errors="errors"></error-item>
+            <success-item :success="success"></success-item>
+            <hr>
+
+            <div class="form-group">
+                <button @click="$emit('update-item', currentItem)" type="button" class="btn btn-primary">
+                    Update
+                </button>
+                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+            </div>
         </div>
-    </div>
+    </modal>
 </template>
 
 <script>
     import Select2 from '../../components/SelectTwo/SelectTwo.vue'
     import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
-
+    import Modal from '../../components/Modals/Modal'
+    import ErrorItem from '../../components/Validations/Error'
+    import SuccessItem from '../../components/Validations/Success'
     import Datepicker from 'vuejs-datepicker';
     import {en, ja} from 'vuejs-datepicker/dist/locale'
     import moment from 'moment'
@@ -139,9 +132,12 @@
         components: {
             Select2,
             Select2Type,
-            datepicker: Datepicker
+            datepicker: Datepicker,
+            ErrorItem,
+            SuccessItem,
+            Modal
         },
-        props: ['currentItem', 'clients', 'departments', 'types'],
+        props: ['currentItem', 'clients', 'departments', 'types', 'errors', 'success'],
         data() {
             return {
                 clientOptions: [],
@@ -149,6 +145,7 @@
                 typeOptions: [],
                 en: en,
                 ja: ja,
+                modalLg: 'modal-lg',
             }
         },
         methods: {

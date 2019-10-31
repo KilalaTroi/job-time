@@ -163,7 +163,9 @@ class ProjectsController extends Controller
             'type_id' => $request->get('type_id'),
         ]);
 
-        return response()->json('Successfully.');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 
     /**
@@ -177,6 +179,8 @@ class ProjectsController extends Controller
         $project = Project::findOrFail($id);
         $project->delete();
 
-        return response()->json('Successfully');
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 }

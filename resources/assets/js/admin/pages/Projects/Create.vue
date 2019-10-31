@@ -217,7 +217,7 @@
                 }
             },
             emitCreateItem(e) {
-                e.preventDefault()
+                e.preventDefault();
 
                 const newItem = {
                     client_id: this.client_id,

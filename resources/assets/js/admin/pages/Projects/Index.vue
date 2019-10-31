@@ -207,7 +207,7 @@
                     let uri = '/api/v1/issues/' + issue_id;
                     axios.delete(uri).then((res) => {
                         this.projects = this.projects.filter(item => item.issue_id !== issue_id);
-                        console.log(res.data);
+                        console.log(res.data.message);
                     }).catch(err => console.log(err));
                 }
             },
@@ -238,7 +238,7 @@
 
                 let uri_issue = '/api/v1/issues/' + item.issue_id;
                 axios.patch(uri_issue, item).then((res) => {
-                    console.log(res.data);
+                    console.log(res.data.message);
                 }).catch(err => console.log(err));
             },
             customFormatter(date) {

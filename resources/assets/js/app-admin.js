@@ -33,6 +33,7 @@ import Clients from './admin/pages/Clients';
 import Departments from './admin/pages/Departments';
 import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
+import Schedules from './admin/pages/Schedules';
 
 const routes = [
     {
@@ -94,6 +95,11 @@ const routes = [
                 path: 'projects',
                 name: 'Projects',
                 component: Projects
+            },
+            {
+                path: 'schedules',
+                name: 'Schedules',
+                component: Schedules
             }
         ]
     },
