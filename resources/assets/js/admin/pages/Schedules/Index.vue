@@ -2,29 +2,28 @@
   <div class="content">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-4">
-          <div id='external-events'>
-            <h4>Draggable Events</h4>
+        <div class="col-sm-4 col-xl-3">
+          <card>
+            <template slot="header">
+              <h4 class="card-title">Project Schedule</h4>
+            </template>
 
-            <div id='external-events-list'>
-              <div class='fc-event' id="tsu-140" start="2019-09-15" end="2019-09-21T12:00:00" color="red"
-                   style="background: red; border: 1px solid red;">TSUCHIONE 140</div>
-              <div class='fc-event' id="kilala" start="2019-09-15" end="2019-09-21" color="orange"
-                   style="background: orange; border: 1px solid orange;">KILALA</div>
-              <div class='fc-event' id="quvalie" start="2019-09-15" end="2019-09-21" color="darkblue"
-                   style="background: darkblue; border: 1px solid darkblue;">Quvalie 10/4</div>
-              <div class='fc-event' id="kilala" start="2019-09-15" end="2019-09-21" color="green"
-                   style="background: green; border: 1px solid green;">Quvalie TR</div>
-              <div class='fc-event' id="tsu-tr" start="2019-09-01" end="2019-09-22" color="brown"
-                   style="background: brown; border: 1px solid brown;">TSUCHIONE TR</div>
+            <div id='external-events'>
+              <div id='external-events-list'>
+                <div class="alert alert-success fc-event" v-for="(item, index) in projectData" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value"
+                     :style="setStyles(item.value)">
+                  <button type="button" aria-hidden="true" class="close" data-dismiss="alert">
+                    <i class="nc-icon nc-simple-remove"></i>
+                  </button>
+                  <span>{{ item.project }} {{ item.issue }}</span>
+                </div>
+
+
+              </div>
             </div>
-            <!-- <p>
-              <input type='checkbox' id='drop-remove' />
-              <label for='drop-remove'>remove after drop</label>
-            </p> -->
-          </div>
+          </card>
         </div>
-        <div class="col-sm-8">
+        <div class="col-sm-8 col-xl-9">
           <FullCalendar
               defaultView="timeGridWeek"
               :scroll-time="scrollTime"
@@ -44,15 +43,22 @@
     import FullCalendar from '@fullcalendar/vue'
     import dayGridPlugin from '@fullcalendar/daygrid'
     import timeGridPlugin from '@fullcalendar/timeGrid'
-    import interactionPlugin from '@fullcalendar/interaction'
+    import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
     import listPlugin from '@fullcalendar/list'
+    import Card from '../../components/Cards/Card'
+    import moment from 'moment'
 
     export default {
         components: {
-            FullCalendar // make the <FullCalendar> tag available
+            FullCalendar, // make the <FullCalendar> tag available
+            Card
         },
         data() {
             return {
+                types: [],
+                projects: [],
+                projectData: [],
+
                 scrollTime : '8:00:00',
                 calendarPlugins: [ dayGridPlugin, listPlugin, interactionPlugin, timeGridPlugin ],
                 calendarHeader: {
@@ -79,32 +85,86 @@
             }
         },
         mounted() {
+            this.fetchItems();
             this.makeDraggable();
         },
         methods: {
-            makeDraggable() {
-                let { Draggable } = interactionPlugin.ExternalDraggable;
-                let containerEl = $('#external-events-list');
-
-                new Draggable(containerEl, {
-                    itemSelector: '.fc-event',
-                    eventData: function (eventEl, aaaa) {
-                        console.log("event ~~~~ Data", eventEl, aaaa);
-                        return {
-                            title: eventEl.innerText.trim(),
-                            id: eventEl.getAttribute("id"),
-                            borderColor: eventEl.getAttribute("color"),
-                            backgroundColor: eventEl.getAttribute("color"),
-                            constraint: {
-                                start: eventEl.getAttribute("start"),
-                                end: eventEl.getAttribute("end")
-                            },
-                            overlap: true,
-                            duration: '1:00:00'
-                        }
-                    }
+            fetchItems() {
+                let uri = '/api/v1/schedules';
+                axios.get(uri)
+                    .then(res => {
+                        this.types = res.data.types;
+                        this.projects = res.data.projects;
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        alert("Could not load projects");
+                    });
+            },
+            getObjectValue(data, id) {
+                let obj = data.filter(function (elem) {
+                    if (elem.id == id) return elem;
                 });
-            }
+
+                if (obj.length > 0)
+                    return obj[0];
+            },
+            getDataProjects(data) {
+                if ( data.length ) {
+                    let dataProjects = [];
+
+                    for (let i = 0; i < data.length; i++) {
+                        let obj = {
+                            id: data[i].id,
+                            project: data[i].p_name,
+                            issue: data[i].i_name,
+                            issue_id: data[i].issue_id,
+                            value: this.getObjectValue(this.types, data[i].type_id).value,
+                            start_date: this.customFormatter(data[i].start_date),
+                            end_date: this.customFormatter(data[i].end_date)
+                        };
+                        dataProjects.push(obj);
+                    }
+                    this.projectData = dataProjects;
+                }
+            },
+            makeDraggable() {
+                document.addEventListener('DOMContentLoaded', function() {
+                    let draggableEl = document.getElementById('external-events-list');
+
+                    new Draggable(draggableEl, {
+                        itemSelector: '.fc-event',
+                        eventData: function (eventEl) {
+                            return {
+                                title: eventEl.innerText.trim(),
+                                dataIssue: eventEl.getAttribute("data-issue"),
+                                borderColor: eventEl.getAttribute("color"),
+                                backgroundColor: eventEl.getAttribute("color"),
+                                constraint: {
+                                    start: eventEl.getAttribute("start"),
+                                    end: eventEl.getAttribute("end"),
+                                },
+                                overlap: true,
+                                duration: '1:00:00'
+                            }
+                        }
+                    });
+                });
+            },
+            setStyles(color) {
+                return {
+                    backgroundColor: color,
+                    borderColor: color
+                };
+            },
+            customFormatter(date) {
+                return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY-MM-DD') : '--';
+            },
+        },
+        watch: {
+            projects: [{
+                handler: 'getDataProjects'
+            }]
         }
     }
 </script>
@@ -113,4 +173,17 @@
   @import '~@fullcalendar/daygrid/main.css';
   @import '~@fullcalendar/timegrid/main.css';
   @import '~@fullcalendar/list/main.css';
+
+  .fc-time-grid .fc-event {
+    padding: 5px;
+  }
+
+  .fc-time-grid-event .fc-time, .fc-time-grid-event .fc-title {
+    color: #ffffff;
+  }
+
+  tr:first-child > td > .fc-day-grid-event {
+    padding: 5px;
+    color: #ffffff;
+  }
 </style>
