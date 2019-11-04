@@ -19,25 +19,25 @@
             <div class="form-group">
                 <label class="">Start date</label>
                 <datepicker
-                    name="startDate"
-                    input-class="form-control"
-                    placeholder="Select Date"
-                    v-model="start_date"
-                    :format="customFormatter"
-                    :disabled-dates="disabledEndDates()">
+                        name="startDate"
+                        input-class="form-control"
+                        placeholder="Select Date"
+                        v-model="start_date"
+                        :format="customFormatter"
+                        :disabled-dates="disabledEndDates()">
                 </datepicker>
             </div>
 
             <div class="form-group">
                 <label class="">End date</label>
                 <datepicker
-                    name="endDate"
-                    input-class="form-control"
-                    placeholder="Select Date"
-                    v-model="end_date"
-                    :format="customFormatter"
-                    :language="ja"
-                    :disabled-dates="disabledStartDates()">
+                        name="endDate"
+                        input-class="form-control"
+                        placeholder="Select Date"
+                        v-model="end_date"
+                        :format="customFormatter"
+                        :language="ja"
+                        :disabled-dates="disabledStartDates()">
                 </datepicker>
             </div>
             <error-item :errors="errors"></error-item>
@@ -70,7 +70,7 @@
             SuccessItem,
             Modal
         },
-        props: ['projects','errors', 'success'],
+        props: ['projects', 'errors', 'success'],
         data() {
             return {
                 project_id: 0,
@@ -86,7 +86,7 @@
         },
         methods: {
             getDataProjects(data) {
-                if ( data.length ) {
+                if (data.length) {
                     let dataOptions = [];
                     let obj = {
                         id: 0,
@@ -98,7 +98,7 @@
                         let objCheck = dataOptions.filter(function (elem) {
                             if (elem.id == data[i].id) return elem;
                         });
-                        if ( !(objCheck.length > 0) ) {
+                        if (!(objCheck.length > 0)) {
                             let obj = {
                                 id: data[i].id,
                                 text: data[i].p_name
@@ -140,7 +140,7 @@
             },
             resetData(data) {
                 // Reset
-                if ( data.length ) {
+                if (data.length) {
                     this.project_id = 0;
                     this.i_name = '';
                     this.start_date = '';

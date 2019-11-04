@@ -34,6 +34,7 @@
     import SuccessItem from '../../components/Validations/Success'
     import Modal from '../../components/Modals/Modal'
     import ColorPicker from '../../components/ColorPicker/ColorPicker'
+
     export default {
         name: 'create-item',
         components: {
@@ -64,7 +65,7 @@
             },
             resetData(data) {
                 // Reset
-                if ( data.length ) {
+                if (data.length) {
                     this.slug = '';
                     this.slug_vi = '';
                     this.slug_ja = '';

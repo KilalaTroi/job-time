@@ -59,7 +59,7 @@
             },
             resetData(data) {
                 // Reset
-                if ( data.length ) {
+                if (data.length) {
                     this.name = '';
                     this.name_vi = '';
                     this.name_ja = '';

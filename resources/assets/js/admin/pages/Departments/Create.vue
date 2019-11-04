@@ -29,6 +29,7 @@
     import ErrorItem from '../../components/Validations/Error'
     import SuccessItem from '../../components/Validations/Success'
     import Modal from '../../components/Modals/Modal'
+
     export default {
         name: 'create-item',
         components: {
@@ -56,7 +57,7 @@
             },
             resetData(data) {
                 // Reset
-                if ( data.length ) {
+                if (data.length) {
                     this.name = '';
                     this.name_vi = '';
                     this.name_ja = '';

@@ -22,41 +22,41 @@
                     <h4 class="card-title">Projects list</h4>
                 </template>
                 <action-table
-                    class="table-hover table-bordered table-striped"
-                    :columns="columns"
-                    :data="projectData"
-                    v-on:get-item="getItem"
-                    v-on:delete-item="deleteItem">
+                        class="table-hover table-bordered table-striped"
+                        :columns="columns"
+                        :data="projectData"
+                        v-on:get-item="getItem"
+                        v-on:delete-item="deleteItem">
                 </action-table>
             </card>
 
             <CreateItem
-                :clients="clients"
-                :departments="departments"
-                :types="types"
-                :errors="validationErrors"
-                :success="validationSuccess"
-                v-on:create-item="createItem"
-                v-on:reset-validation="resetValidate">
+                    :clients="clients"
+                    :departments="departments"
+                    :types="types"
+                    :errors="validationErrors"
+                    :success="validationSuccess"
+                    v-on:create-item="createItem"
+                    v-on:reset-validation="resetValidate">
             </CreateItem>
 
             <EditItem
-                :currentItem="currentItem"
-                :clients="clients"
-                :departments="departments"
-                :types="types"
-                :errors="validationErrors"
-                :success="validationSuccess"
-                v-on:update-item="updateItem"
-                v-on:reset-validation="resetValidate">
+                    :currentItem="currentItem"
+                    :clients="clients"
+                    :departments="departments"
+                    :types="types"
+                    :errors="validationErrors"
+                    :success="validationSuccess"
+                    v-on:update-item="updateItem"
+                    v-on:reset-validation="resetValidate">
             </EditItem>
 
             <AddIssue
-                :projects="projects"
-                :errors="validationErrors"
-                :success="validationSuccess"
-                v-on:add-issue="AddIssueFunc"
-                v-on:reset-validation="resetValidate">
+                    :projects="projects"
+                    :errors="validationErrors"
+                    :success="validationSuccess"
+                    v-on:add-issue="AddIssueFunc"
+                    v-on:reset-validation="resetValidate">
             </AddIssue>
         </div>
     </div>
@@ -71,14 +71,14 @@
     import moment from 'moment'
 
     const tableColumns = [
-        {id: 'client', value: 'Client', width: '', class: '' },
-        {id: 'department', value: 'Department', width: '', class: '' },
-        {id: 'project', value: 'Project', width: '', class: '' },
-        {id: 'issue', value: 'Issue', width: '', class: '' },
-        {id: 'type', value: 'Type', width: '', class: '' },
-        {id: 'value', value: 'Type color', width: '110', class: 'text-center' },
-        {id: 'start_date', value: 'Start date', width: '', class: '' },
-        {id: 'end_date', value: 'End date', width: '', class: '' }
+        {id: 'client', value: 'Client', width: '', class: ''},
+        {id: 'department', value: 'Department', width: '', class: ''},
+        {id: 'project', value: 'Project', width: '', class: ''},
+        {id: 'issue', value: 'Issue', width: '', class: ''},
+        {id: 'type', value: 'Type', width: '', class: ''},
+        {id: 'value', value: 'Type color', width: '110', class: 'text-center'},
+        {id: 'start_date', value: 'Start date', width: '', class: ''},
+        {id: 'end_date', value: 'End date', width: '', class: ''}
     ];
 
     export default {
@@ -116,7 +116,7 @@
                     return obj[0];
             },
             getDataProjects(data) {
-                if ( data.length ) {
+                if (data.length) {
                     let dataProjects = [];
 
                     for (let i = 0; i < data.length; i++) {
@@ -168,7 +168,7 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        if (err.response.status == 422){
+                        if (err.response.status == 422) {
                             this.validationErrors = err.response.data;
                         }
                     });
@@ -197,7 +197,7 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        if (err.response.status == 422){
+                        if (err.response.status == 422) {
                             this.validationErrors = err.response.data;
                         }
                     });
@@ -229,12 +229,12 @@
                     this.projects = [...this.projects];
                     this.validationSuccess = res.data.message;
                 })
-                .catch(err => {
-                    console.log(err);
-                    if (err.response.status == 422){
-                        this.validationErrors = err.response.data;
-                    }
-                });
+                    .catch(err => {
+                        console.log(err);
+                        if (err.response.status == 422) {
+                            this.validationErrors = err.response.data;
+                        }
+                    });
 
                 let uri_issue = '/api/v1/issues/' + item.issue_id;
                 axios.patch(uri_issue, item).then((res) => {

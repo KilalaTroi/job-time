@@ -12,27 +12,27 @@
                     <h4 class="card-title">Clients list</h4>
                 </template>
                 <action-table
-                    class="table-hover table-bordered table-striped"
-                    :columns="columns"
-                    :data="clients"
-                    v-on:get-item="getItem"
-                    v-on:delete-item="deleteItem">
+                        class="table-hover table-bordered table-striped"
+                        :columns="columns"
+                        :data="clients"
+                        v-on:get-item="getItem"
+                        v-on:delete-item="deleteItem">
                 </action-table>
             </card>
 
             <create-item
-                :errors="validationErrors"
-                :success="validationSuccess"
-                v-on:create-item="createItem"
-                v-on:reset-validation="resetValidate">
+                    :errors="validationErrors"
+                    :success="validationSuccess"
+                    v-on:create-item="createItem"
+                    v-on:reset-validation="resetValidate">
             </create-item>
 
             <edit-item
-                :errors="validationErrors"
-                :success="validationSuccess"
-                :currentItem="currentItem"
-                v-on:update-item="updateItem"
-                v-on:reset-validation="resetValidate">
+                    :errors="validationErrors"
+                    :success="validationSuccess"
+                    :currentItem="currentItem"
+                    v-on:update-item="updateItem"
+                    v-on:reset-validation="resetValidate">
             </edit-item>
         </div>
     </div>
@@ -111,7 +111,7 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        if (err.response.status == 422){
+                        if (err.response.status == 422) {
                             this.validationErrors = err.response.data;
                         }
                     });
@@ -147,7 +147,7 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        if (err.response.status == 422){
+                        if (err.response.status == 422) {
                             this.validationErrors = err.response.data;
                         }
                     });

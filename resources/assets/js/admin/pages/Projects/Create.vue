@@ -79,12 +79,12 @@
                     <div class="form-group">
                         <label class="">Start date</label>
                         <datepicker
-                            name="startDate"
-                            input-class="form-control"
-                            placeholder="Select Date"
-                            v-model="start_date"
-                            :format="customFormatter"
-                            :disabled-dates="disabledEndDates()">
+                                name="startDate"
+                                input-class="form-control"
+                                placeholder="Select Date"
+                                v-model="start_date"
+                                :format="customFormatter"
+                                :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </div>
                 </div>
@@ -92,13 +92,13 @@
                     <div class="form-group">
                         <label class="">End date</label>
                         <datepicker
-                            name="endDate"
-                            input-class="form-control"
-                            placeholder="Select Date"
-                            v-model="end_date"
-                            :format="customFormatter"
-                            :language="ja"
-                            :disabled-dates="disabledStartDates()">
+                                name="endDate"
+                                input-class="form-control"
+                                placeholder="Select Date"
+                                v-model="end_date"
+                                :format="customFormatter"
+                                :language="ja"
+                                :disabled-dates="disabledStartDates()">
                         </datepicker>
                     </div>
                 </div>
@@ -253,7 +253,7 @@
             },
             resetData(data) {
                 // Reset
-                if ( data.length ) {
+                if (data.length) {
                     this.client_id = 0;
                     this.dept_id = 0;
                     this.type_id = 0;

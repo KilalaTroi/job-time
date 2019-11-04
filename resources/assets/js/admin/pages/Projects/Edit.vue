@@ -79,12 +79,12 @@
                     <div class="form-group">
                         <label class="">Start date</label>
                         <datepicker
-                            name="startDate"
-                            input-class="form-control"
-                            placeholder="Select Date"
-                            v-model="currentItem.start_date"
-                            :format="customFormatter"
-                            :disabled-dates="disabledEndDates()">
+                                name="startDate"
+                                input-class="form-control"
+                                placeholder="Select Date"
+                                v-model="currentItem.start_date"
+                                :format="customFormatter"
+                                :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </div>
                 </div>
@@ -92,13 +92,13 @@
                     <div class="form-group">
                         <label class="">End date</label>
                         <datepicker
-                            name="endDate"
-                            input-class="form-control"
-                            placeholder="Select Date"
-                            v-model="currentItem.end_date"
-                            :format="customFormatter"
-                            :language="ja"
-                            :disabled-dates="disabledStartDates()">
+                                name="endDate"
+                                input-class="form-control"
+                                placeholder="Select Date"
+                                v-model="currentItem.end_date"
+                                :format="customFormatter"
+                                :language="ja"
+                                :disabled-dates="disabledStartDates()">
                         </datepicker>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
         },
         methods: {
             getDataClients(data) {
-                if ( data.length ) {
+                if (data.length) {
                     let dataOptions = [];
                     let obj = {
                         id: 0,
@@ -169,7 +169,7 @@
                 }
             },
             getDataDepartments(data) {
-                if ( data.length ) {
+                if (data.length) {
                     let dataOptions = [];
                     let obj = {
                         id: 0,
@@ -188,7 +188,7 @@
                 }
             },
             getDataTypes(data) {
-                if ( data.length ) {
+                if (data.length) {
                     let dataTypes = [];
                     let obj = {
                         id: 0,
@@ -210,7 +210,7 @@
                 return moment(date).format('DD-MM-YYYY');
             },
             disabledStartDates() {
-                if ( this.currentItem.start_date ) {
+                if (this.currentItem.start_date) {
                     let obj = {
                         to: new Date(this.currentItem.start_date), // Disable all dates after specific date
                         // days: [0], // Disable Saturday's and Sunday's
@@ -219,7 +219,7 @@
                 }
             },
             disabledEndDates() {
-                if ( this.currentItem.end_date ) {
+                if (this.currentItem.end_date) {
                     let obj = {
                         from: new Date(this.currentItem.end_date), // Disable all dates after specific date
                         // days: [0], // Disable Saturday's and Sunday's
