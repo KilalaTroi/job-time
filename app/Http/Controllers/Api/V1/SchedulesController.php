@@ -15,6 +15,7 @@ class SchedulesController extends Controller
      */
     public function index()
     {
+        $now = date("Y-m-d");
         $types = DB::table('types')->select('id', 'value')->get()->toArray();
         $projects = DB::table('projects as p')
             ->select(
@@ -29,6 +30,10 @@ class SchedulesController extends Controller
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->where('i.status', '=', 'publish')
             ->where('is_training', false)
+            ->where(function ($query) use ($now) {
+                $query->where('end_date', '>=',  $now)
+                      ->orWhere('end_date', '=',  NULL);
+            })
             ->orderBy('p_name', 'desc')
             ->get()->toArray();
 

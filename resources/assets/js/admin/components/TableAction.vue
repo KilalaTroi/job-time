@@ -28,11 +28,11 @@
 
         <button v-if="item.issue_id" @click="$emit('delete-item', item.issue_id)" type="button"
                 class="btn btn-xs btn-danger ml-2">
-          <i class="fa fa-times" aria-hidden="true"></i>
+          <i class="fa fa-trash" aria-hidden="true"></i>
         </button>
         <button v-else @click="$emit('delete-item', item.id)" type="button"
                 class="btn btn-xs btn-danger ml-2">
-          <i class="fa fa-times" aria-hidden="true"></i>
+          <i class="fa fa-trash" aria-hidden="true"></i>
         </button>
       </td>
     </tr>

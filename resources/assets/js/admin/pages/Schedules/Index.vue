@@ -2,7 +2,7 @@
     <div class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-4 col-xl-3">
+                <div class="col-sm-4 col-lg-9 col-xl-2">
                     <card>
                         <template slot="header">
                             <h4 class="card-title">Project Schedule</h4>
@@ -25,7 +25,7 @@
                         </div>
                     </card>
                 </div>
-                <div class="col-sm-8 col-xl-9">
+                <div class="col-sm-8 col-lg-9 col-xl-10">
                     <FullCalendar
                             defaultView="timeGridWeek"
                             :scroll-time="scrollTime"
@@ -36,7 +36,8 @@
                             :droppable="true"
                             :events="schedules"
                             :event-overlap="true"
-                            :event-start-editable="abc"
+                            @eventDragStop="showEvent"
+                            @eventReceive="addEvent"
                     />
                 </div>
             </div>
@@ -86,13 +87,18 @@
                         startTime: '08:00', // a start time (10am in this example)
                         endTime: '12:00', // an end time (6pm in this example)
                     }
-                ]
+                ],
+
+                newEvent: {
+                    title: "",
+                    dataIssue: ""
+                },
             }
         },
         mounted() {
             this.fetchItems();
             this.makeDraggable();
-            console.log(this.schedules);
+            // console.log(this.schedules);
         },
         methods: {
             fetchItems() {
@@ -142,7 +148,7 @@
                     eventData: function (eventEl) {
                         return {
                             title: eventEl.innerText.trim(),
-                            dataIssue: eventEl.getAttribute("data-issue"),
+                            id: eventEl.getAttribute("data-issue"),
                             borderColor: eventEl.getAttribute("color"),
                             backgroundColor: eventEl.getAttribute("color"),
                             constraint: {
@@ -164,8 +170,12 @@
             customFormatter(date) {
                 return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY-MM-DD') : '--';
             },
-            abc() {
-                console.log('abc');
+            showEvent(arg) {
+                // console.log(arg);
+            },
+            addEvent(info) {
+                let { id } = info.event;
+                console.log(id);
             }
         },
         watch: {

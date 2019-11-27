@@ -74,7 +74,7 @@
         {id: 'client', value: 'Client', width: '', class: ''},
         {id: 'department', value: 'Department', width: '', class: ''},
         {id: 'project', value: 'Project', width: '', class: ''},
-        {id: 'issue', value: 'Issue', width: '', class: ''},
+        {id: 'issue', value: 'Issue', width: '60', class: 'text-center'},
         {id: 'type', value: 'Type', width: '', class: ''},
         {id: 'value', value: 'Type color', width: '110', class: 'text-center'},
         {id: 'start_date', value: 'Start date', width: '', class: ''},
