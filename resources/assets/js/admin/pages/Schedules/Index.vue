@@ -10,13 +10,13 @@
 
                         <div id='external-events'>
                             <div id='external-events-list'>
-                                <div class="alert alert-success fc-event" v-for="(item, index) in projectData"
+                                <div class="alert alert-success fc-event" v-for="(item, index) in projects"
                                      :data-issue="item.issue_id" :key="index" :start="item.start_date"
                                      :end="item.end_date" :color="item.value"
                                      :style="setStyles(item.value)">
-                                    <button type="button" aria-hidden="true" class="close" data-dismiss="alert">
+                                    <!-- <button type="button" aria-hidden="true" class="close" data-dismiss="alert">
                                         <i class="nc-icon nc-simple-remove"></i>
-                                    </button>
+                                    </button> -->
                                     <span>{{ item.project }} {{ item.issue }}</span>
                                 </div>
 
@@ -32,12 +32,14 @@
                             :plugins="calendarPlugins"
                             :header="calendarHeader"
                             :business-hours="businessHours"
-                            :editable="true"
-                            :droppable="true"
+                            :editable="editable"
+                            :droppable="droppable"
                             :events="schedules"
                             :event-overlap="true"
-                            @eventDragStop="showEvent"
                             @eventReceive="addEvent"
+                            @eventDrop="dropEvent"
+                            @eventResize="resizeEvent"
+                            @eventClick="deleteEvent"
                     />
                 </div>
             </div>
@@ -64,6 +66,7 @@
                 projects: [],
                 projectData: [],
                 schedules: [],
+                scheduleData: [],
 
                 scrollTime: '8:00:00',
                 calendarPlugins: [dayGridPlugin, listPlugin, interactionPlugin, timeGridPlugin],
@@ -88,11 +91,8 @@
                         endTime: '12:00', // an end time (6pm in this example)
                     }
                 ],
-
-                newEvent: {
-                    title: "",
-                    dataIssue: ""
-                },
+                editable: true,
+                droppable: true,
             }
         },
         mounted() {
@@ -106,7 +106,8 @@
                 axios.get(uri)
                     .then(res => {
                         this.types = res.data.types;
-                        this.projects = res.data.projects;
+                        this.projectData = res.data.projects;
+                        this.scheduleData = res.data.schedules;
                     })
                     .catch(err => {
                         console.log(err);
@@ -137,7 +138,25 @@
                         };
                         dataProjects.push(obj);
                     }
-                    this.projectData = dataProjects;
+                    this.projects = dataProjects;
+                }
+            },
+            getDataSchedules(data) {
+                if (data.length) {
+                    let dataSchedules = [];
+
+                    for (let i = 0; i < data.length; i++) {
+                        let obj = {
+                            id: data[i].id,
+                            title: data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name,
+                            borderColor: this.getObjectValue(this.types, data[i].type_id).value,
+                            backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
+                            start: moment(data[i].date + ' ' +data[i].start_time).format(),
+                            end: moment(data[i].date + ' ' +data[i].end_time).format()
+                        };
+                        dataSchedules.push(obj);
+                    }
+                    this.schedules = dataSchedules;
                 }
             },
             makeDraggable() {
@@ -152,8 +171,8 @@
                             borderColor: eventEl.getAttribute("color"),
                             backgroundColor: eventEl.getAttribute("color"),
                             constraint: {
-                                start: eventEl.getAttribute("start"),
-                                end: eventEl.getAttribute("end"),
+                                start: moment(eventEl.getAttribute("start") + ' ' + '08:00').format(),
+                                end: moment(eventEl.getAttribute("end") + ' ' + '17:00').format()
                             },
                             overlap: true,
                             duration: '1:00:00',
@@ -170,17 +189,117 @@
             customFormatter(date) {
                 return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY-MM-DD') : '--';
             },
-            showEvent(arg) {
-                // console.log(arg);
+            hourFormatter(date) {
+                return  moment(date).format('HH:mm');
+            },
+            deleteEvent(info) {
+                if (confirm("Are you sure delete this event?")) {
+                    let { id } = info.event;
+                    console.log(id);
+                    let uri = '/api/v1/schedules/' + id;
+                    axios.delete(uri).then((res) => {
+                        this.schedules = this.schedules.filter(function (elem) {
+                            if (elem.id != id) return elem;
+                        });
+                        console.log(res.data.message);
+                    }).catch(err => console.log(err));
+                }
+            },
+            resizeEvent(info) {
+                this.editable = false;
+                this.droppable = false;
+
+                if (!confirm("Are you sure about this change?")) {
+                    info.revert();
+                    this.editable = true;
+                    this.droppable = true;
+                } else {
+                    let { event } = info;
+                    let { id, start, end } = event;
+                    let uri = '/api/v1/schedules/' + id;
+                    let newItem = {
+                        start_time: this.hourFormatter(start),
+                        end_time: this.hourFormatter(end)
+                    };
+                    axios.patch(uri, newItem)
+                        .then(res => {
+                            this.editable = true;
+                            this.droppable = true;
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            this.editable = true;
+                            this.droppable = true;
+                        });
+                }
+
+                
+            },
+            dropEvent(info) {
+                this.editable = false;
+                this.droppable = false;
+
+                if (!confirm("Are you sure about this change?")) {
+                    info.revert();
+                    this.editable = true;
+                    this.droppable = true;
+                } else {
+                    let { event } = info;
+                    let { id, start, end } = event;
+                    let uri = '/api/v1/schedules/' + id;
+                    let newItem = {
+                        date: this.customFormatter(start),
+                        start_time: this.hourFormatter(start),
+                        end_time: this.hourFormatter(end)
+                    };
+                    axios.patch(uri, newItem)
+                        .then(res => {
+                            this.editable = true;
+                            this.droppable = true;
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            this.editable = true;
+                            this.droppable = true;
+                        });
+                }
             },
             addEvent(info) {
-                let { id } = info.event;
-                console.log(id);
+                this.editable = false;
+                this.droppable = false;
+
+                let { event } = info;
+                let { id, start, end, title, borderColor, backgroundColor } = event;
+                let uri = '/api/v1/schedules';
+                let newItem = {
+                    issue_id: id,
+                    title: title,
+                    borderColor: borderColor,
+                    backgroundColor: backgroundColor,
+                    date: this.customFormatter(start),
+                    start_time: this.hourFormatter(start),
+                    end_time: this.hourFormatter(end)
+                };
+                axios.post(uri, newItem)
+                    .then(res => {
+                        this.schedules = [...this.schedules, res.data.event];
+                        info.event.remove();
+                        this.editable = true;
+                        this.droppable = true;
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        this.editable = true;
+                        this.droppable = true;
+                    });
             }
         },
         watch: {
-            projects: [{
+            projectData: [{
                 handler: 'getDataProjects'
+            }],
+            scheduleData: [{
+                handler: 'getDataSchedules'
             }]
         }
     }
@@ -195,6 +314,10 @@
         padding: 5px;
     }
 
+    .fc-event {
+        cursor: move;
+    }
+
     .fc-time-grid-event .fc-time, .fc-time-grid-event .fc-title {
         color: #ffffff;
     }
@@ -202,5 +325,9 @@
     tr:first-child > td > .fc-day-grid-event {
         padding: 5px;
         color: #ffffff;
+    }
+
+    .fc-time-grid .fc-slats td {
+        height: 2.5em;
     }
 </style>
