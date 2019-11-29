@@ -24,7 +24,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
@@ -39,13 +38,11 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Is training?</label>
-                        <input v-model="is_training" type="checkbox" name="is_training"
-                               class="form-control">
+                        <input v-model="is_training" type="checkbox" name="is_training" class="form-control">
                     </div>
                 </div>
             </div>
             <hr>
-
             <div class="row">
                 <div class="col-sm-4">
                     <div class="form-group">
@@ -67,7 +64,6 @@
                 </div>
             </div>
             <hr>
-
             <div class="row">
                 <div class="col-sm-4">
                     <div class="form-group">
@@ -78,27 +74,14 @@
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label class="">Start date</label>
-                        <datepicker
-                                name="startDate"
-                                input-class="form-control"
-                                placeholder="Select Date"
-                                v-model="start_date"
-                                :format="customFormatter"
-                                :disabled-dates="disabledEndDates()">
+                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label class="">End date</label>
-                        <datepicker
-                                name="endDate"
-                                input-class="form-control"
-                                placeholder="Select Date"
-                                v-model="end_date"
-                                :format="customFormatter"
-                                :language="ja"
-                                :disabled-dates="disabledStartDates()">
+                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
                         </datepicker>
                     </div>
                 </div>
@@ -106,7 +89,6 @@
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
-
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Add</button>
                 <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
@@ -114,185 +96,184 @@
         </form>
     </modal>
 </template>
-
 <script>
-    import Select2 from '../../components/SelectTwo/SelectTwo.vue'
-    import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
-    import Modal from '../../components/Modals/Modal'
-    import ErrorItem from '../../components/Validations/Error'
-    import SuccessItem from '../../components/Validations/Success'
-    import Datepicker from 'vuejs-datepicker';
-    import {en, ja} from 'vuejs-datepicker/dist/locale'
-    import moment from 'moment'
+import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
+import Modal from '../../components/Modals/Modal'
+import ErrorItem from '../../components/Validations/Error'
+import SuccessItem from '../../components/Validations/Success'
+import Datepicker from 'vuejs-datepicker';
+import { en, ja } from 'vuejs-datepicker/dist/locale'
+import moment from 'moment'
 
-    export default {
-        name: 'CreateItem',
-        components: {
-            Select2,
-            Select2Type,
-            datepicker: Datepicker,
-            ErrorItem,
-            SuccessItem,
-            Modal
-        },
-        props: ['clients', 'departments', 'types', 'errors', 'success'],
-        data() {
-            return {
-                client_id: 0,
-                dept_id: 0,
-                type_id: 0,
-                p_name: '',
-                p_name_vi: '',
-                p_name_ja: '',
-                is_training: false,
-                i_name: '',
-                start_date: '',
-                end_date: '',
-                en: en,
-                ja: ja,
-                modalLg: 'modal-lg',
-                clientOptions: [],
-                departmentOptions: [],
-                typeOptions: []
+export default {
+    name: 'CreateItem',
+    components: {
+        Select2,
+        Select2Type,
+        datepicker: Datepicker,
+        ErrorItem,
+        SuccessItem,
+        Modal
+    },
+    props: ['clients', 'departments', 'types', 'errors', 'success'],
+    data() {
+        return {
+            client_id: 0,
+            dept_id: 0,
+            type_id: 0,
+            p_name: '',
+            p_name_vi: '',
+            p_name_ja: '',
+            is_training: false,
+            i_name: '',
+            start_date: '',
+            end_date: '',
+            en: en,
+            ja: ja,
+            modalLg: 'modal-lg',
+            clientOptions: [],
+            departmentOptions: [],
+            typeOptions: []
+        }
+    },
+    mounted() {},
+    methods: {
+        getDataClients(data) {
+            if (data.length) {
+                let dataOptions = [];
+                let obj = {
+                    id: 0,
+                    text: "Select one"
+                };
+                dataOptions.push(obj);
+
+                for (let i = 0; i < data.length; i++) {
+                    let obj = {
+                        id: data[i].id,
+                        text: data[i].text
+                    };
+                    dataOptions.push(obj);
+                }
+                this.clientOptions = dataOptions;
             }
         },
-        mounted() {
+        getDataDepartments(data) {
+            if (data.length) {
+                let dataOptions = [];
+                let obj = {
+                    id: 0,
+                    text: "Select one"
+                };
+                dataOptions.push(obj);
+
+                for (let i = 0; i < data.length; i++) {
+                    let obj = {
+                        id: data[i].id,
+                        text: data[i].text
+                    };
+                    dataOptions.push(obj);
+                }
+                this.departmentOptions = dataOptions;
+            }
         },
-        methods: {
-            getDataClients(data) {
-                if (data.length) {
-                    let dataOptions = [];
-                    let obj = {
-                        id: 0,
-                        text: "Select one"
-                    };
-                    dataOptions.push(obj);
+        getDataTypes(data) {
+            if (data.length) {
+                let dataTypes = [];
+                let obj = {
+                    id: 0,
+                    text: '<div>Select one</div>'
+                };
+                dataTypes.push(obj);
 
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].text
-                        };
-                        dataOptions.push(obj);
-                    }
-                    this.clientOptions = dataOptions;
-                }
-            },
-            getDataDepartments(data) {
-                if (data.length) {
-                    let dataOptions = [];
+                for (let i = 0; i < data.length; i++) {
                     let obj = {
-                        id: 0,
-                        text: "Select one"
-                    };
-                    dataOptions.push(obj);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].text
-                        };
-                        dataOptions.push(obj);
-                    }
-                    this.departmentOptions = dataOptions;
-                }
-            },
-            getDataTypes(data) {
-                if (data.length) {
-                    let dataTypes = [];
-                    let obj = {
-                        id: 0,
-                        text: '<div>Select one</div>'
+                        id: data[i].id,
+                        text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
                     };
                     dataTypes.push(obj);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
-                        };
-                        dataTypes.push(obj);
-                    }
-                    this.typeOptions = dataTypes;
                 }
-            },
-            emitCreateItem(e) {
-                e.preventDefault();
-
-                const newItem = {
-                    client_id: this.client_id,
-                    dept_id: this.dept_id,
-                    type_id: this.type_id,
-                    p_name: this.p_name,
-                    p_name_vi: this.p_name_vi,
-                    p_name_ja: this.p_name_ja,
-                    is_training: this.is_training,
-                    i_name: this.i_name,
-                    start_date: this.start_date,
-                    end_date: this.end_date
-                };
-
-                this.$emit('create-item', newItem);
-            },
-            customFormatter(date) {
-                return moment(date).format('DD-MM-YYYY');
-            },
-            disabledStartDates() {
-                let obj = {
-                    to: new Date(this.start_date), // Disable all dates after specific date
-                    // days: [0], // Disable Saturday's and Sunday's
-                };
-                return obj;
-            },
-            disabledEndDates() {
-                let obj = {
-                    from: new Date(this.end_date), // Disable all dates after specific date
-                    // days: [0], // Disable Saturday's and Sunday's
-                };
-                return obj;
-            },
-            resetData(data) {
-                // Reset
-                if (data.length) {
-                    this.client_id = 0;
-                    this.dept_id = 0;
-                    this.type_id = 0;
-                    this.p_name = '';
-                    this.p_name_vi = '';
-                    this.p_name_ja = '';
-                    this.is_training = false;
-                    this.i_name = '';
-                    this.start_date = '';
-                    this.end_date = '';
-                }
+                this.typeOptions = dataTypes;
             }
         },
-        watch: {
-            clients: [{
-                handler: 'getDataClients'
-            }],
-            departments: [{
-                handler: 'getDataDepartments'
-            }],
-            types: [{
-                handler: 'getDataTypes'
-            }],
-            start_date: [{
-                handler: 'disabledStartDates'
-            }],
-            end_date: [{
-                handler: 'disabledEndDates'
-            }],
-            success: [{
-                handler: 'resetData'
-            }]
+        emitCreateItem(e) {
+            e.preventDefault();
+
+            const newItem = {
+                client_id: this.client_id,
+                dept_id: this.dept_id,
+                type_id: this.type_id,
+                p_name: this.p_name,
+                p_name_vi: this.p_name_vi,
+                p_name_ja: this.p_name_ja,
+                is_training: this.is_training,
+                i_name: this.i_name,
+                start_date: this.start_date,
+                end_date: this.end_date
+            };
+
+            this.$emit('create-item', newItem);
+        },
+        customFormatter(date) {
+            return moment(date).format('DD-MM-YYYY');
+        },
+        disabledStartDates() {
+            let obj = {
+                to: new Date(this.start_date), // Disable all dates after specific date
+                // days: [0], // Disable Saturday's and Sunday's
+            };
+            return obj;
+        },
+        disabledEndDates() {
+            let obj = {
+                from: new Date(this.end_date), // Disable all dates after specific date
+                // days: [0], // Disable Saturday's and Sunday's
+            };
+            return obj;
+        },
+        resetData(data) {
+            // Reset
+            if (data.length) {
+                this.client_id = 0;
+                this.dept_id = 0;
+                this.type_id = 0;
+                this.p_name = '';
+                this.p_name_vi = '';
+                this.p_name_ja = '';
+                this.is_training = false;
+                this.i_name = '';
+                this.start_date = '';
+                this.end_date = '';
+            }
         }
+    },
+    watch: {
+        clients: [{
+            handler: 'getDataClients'
+        }],
+        departments: [{
+            handler: 'getDataDepartments'
+        }],
+        types: [{
+            handler: 'getDataTypes'
+        }],
+        start_date: [{
+            handler: 'disabledStartDates'
+        }],
+        end_date: [{
+            handler: 'disabledEndDates'
+        }],
+        success: [{
+            handler: 'resetData'
+        }]
     }
+}
 </script>
 <style lang="scss">
-    input[type="radio"], input[type="checkbox"] {
-        &.form-control {
-            width: 40px;
-        }
+input[type="radio"],
+input[type="checkbox"] {
+    &.form-control {
+        width: 40px;
     }
+}
 </style>

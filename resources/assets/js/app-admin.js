@@ -1,4 +1,3 @@
-
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -34,9 +33,9 @@ import Departments from './admin/pages/Departments';
 import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
+import Jobs from './admin/pages/Jobs';
 
-const routes = [
-    {
+const routes = [{
         path: '/',
         component: DashboardLayout,
         redirect: '/overview'
@@ -45,8 +44,7 @@ const routes = [
         path: '/',
         component: DashboardLayout,
         redirect: '/overview',
-        children: [
-            {
+        children: [{
                 path: 'overview',
                 name: 'Overview',
                 component: Overview
@@ -100,6 +98,11 @@ const routes = [
                 path: 'schedules',
                 name: 'Schedules',
                 component: Schedules
+            },
+            {
+                path: 'jobs',
+                name: 'Jobs',
+                component: Jobs
             }
         ]
     },
@@ -111,7 +114,7 @@ const router = new VueRouter({
     linkActiveClass: 'nav-item active',
     scrollBehavior: (to) => {
         if (to.hash) {
-            return {selector: to.hash}
+            return { selector: to.hash }
         } else {
             return { x: 0, y: 0 }
         }

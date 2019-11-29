@@ -1,7 +1,6 @@
 <template>
     <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
         <template slot="title">Edit Project</template>
-
         <div v-if="currentItem">
             <div class="row">
                 <div class="col-sm-6">
@@ -25,7 +24,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
@@ -45,7 +43,6 @@
                 </div>
             </div>
             <hr>
-
             <div class="row">
                 <div class="col-sm-4">
                     <div class="form-group">
@@ -67,7 +64,6 @@
                 </div>
             </div>
             <hr>
-
             <div class="row">
                 <div class="col-sm-4">
                     <div class="form-group">
@@ -78,27 +74,14 @@
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label class="">Start date</label>
-                        <datepicker
-                                name="startDate"
-                                input-class="form-control"
-                                placeholder="Select Date"
-                                v-model="currentItem.start_date"
-                                :format="customFormatter"
-                                :disabled-dates="disabledEndDates()">
+                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="currentItem.start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label class="">End date</label>
-                        <datepicker
-                                name="endDate"
-                                input-class="form-control"
-                                placeholder="Select Date"
-                                v-model="currentItem.end_date"
-                                :format="customFormatter"
-                                :language="ja"
-                                :disabled-dates="disabledStartDates()">
+                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="currentItem.end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
                         </datepicker>
                     </div>
                 </div>
@@ -106,7 +89,6 @@
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
-
             <div class="form-group">
                 <button @click="$emit('update-item', currentItem)" type="button" class="btn btn-primary">
                     Update
@@ -116,128 +98,127 @@
         </div>
     </modal>
 </template>
-
 <script>
-    import Select2 from '../../components/SelectTwo/SelectTwo.vue'
-    import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
-    import Modal from '../../components/Modals/Modal'
-    import ErrorItem from '../../components/Validations/Error'
-    import SuccessItem from '../../components/Validations/Success'
-    import Datepicker from 'vuejs-datepicker';
-    import {en, ja} from 'vuejs-datepicker/dist/locale'
-    import moment from 'moment'
+import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
+import Modal from '../../components/Modals/Modal'
+import ErrorItem from '../../components/Validations/Error'
+import SuccessItem from '../../components/Validations/Success'
+import Datepicker from 'vuejs-datepicker';
+import { en, ja } from 'vuejs-datepicker/dist/locale'
+import moment from 'moment'
 
-    export default {
-        name: 'EditItem',
-        components: {
-            Select2,
-            Select2Type,
-            datepicker: Datepicker,
-            ErrorItem,
-            SuccessItem,
-            Modal
-        },
-        props: ['currentItem', 'clients', 'departments', 'types', 'errors', 'success'],
-        data() {
-            return {
-                clientOptions: [],
-                departmentOptions: [],
-                typeOptions: [],
-                en: en,
-                ja: ja,
-                modalLg: 'modal-lg',
+export default {
+    name: 'EditItem',
+    components: {
+        Select2,
+        Select2Type,
+        datepicker: Datepicker,
+        ErrorItem,
+        SuccessItem,
+        Modal
+    },
+    props: ['currentItem', 'clients', 'departments', 'types', 'errors', 'success'],
+    data() {
+        return {
+            clientOptions: [],
+            departmentOptions: [],
+            typeOptions: [],
+            en: en,
+            ja: ja,
+            modalLg: 'modal-lg',
+        }
+    },
+    methods: {
+        getDataClients(data) {
+            if (data.length) {
+                let dataOptions = [];
+                let obj = {
+                    id: 0,
+                    text: "Select one"
+                };
+                dataOptions.push(obj);
+
+                for (let i = 0; i < data.length; i++) {
+                    let obj = {
+                        id: data[i].id,
+                        text: data[i].text
+                    };
+                    dataOptions.push(obj);
+                }
+                this.clientOptions = dataOptions;
             }
         },
-        methods: {
-            getDataClients(data) {
-                if (data.length) {
-                    let dataOptions = [];
+        getDataDepartments(data) {
+            if (data.length) {
+                let dataOptions = [];
+                let obj = {
+                    id: 0,
+                    text: "Select one"
+                };
+                dataOptions.push(obj);
+
+                for (let i = 0; i < data.length; i++) {
                     let obj = {
-                        id: 0,
-                        text: "Select one"
+                        id: data[i].id,
+                        text: data[i].text
                     };
                     dataOptions.push(obj);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].text
-                        };
-                        dataOptions.push(obj);
-                    }
-                    this.clientOptions = dataOptions;
                 }
-            },
-            getDataDepartments(data) {
-                if (data.length) {
-                    let dataOptions = [];
-                    let obj = {
-                        id: 0,
-                        text: "Select one"
-                    };
-                    dataOptions.push(obj);
+                this.departmentOptions = dataOptions;
+            }
+        },
+        getDataTypes(data) {
+            if (data.length) {
+                let dataTypes = [];
+                let obj = {
+                    id: 0,
+                    text: '<div>Select one</div>'
+                };
+                dataTypes.push(obj);
 
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].text
-                        };
-                        dataOptions.push(obj);
-                    }
-                    this.departmentOptions = dataOptions;
-                }
-            },
-            getDataTypes(data) {
-                if (data.length) {
-                    let dataTypes = [];
+                for (let i = 0; i < data.length; i++) {
                     let obj = {
-                        id: 0,
-                        text: '<div>Select one</div>'
+                        id: data[i].id,
+                        text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
                     };
                     dataTypes.push(obj);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
-                        };
-                        dataTypes.push(obj);
-                    }
-                    this.typeOptions = dataTypes;
                 }
-            },
-            customFormatter(date) {
-                return moment(date).format('DD-MM-YYYY');
-            },
-            disabledStartDates() {
-                if (this.currentItem.start_date) {
-                    let obj = {
-                        to: new Date(this.currentItem.start_date), // Disable all dates after specific date
-                        // days: [0], // Disable Saturday's and Sunday's
-                    };
-                    return obj;
-                }
-            },
-            disabledEndDates() {
-                if (this.currentItem.end_date) {
-                    let obj = {
-                        from: new Date(this.currentItem.end_date), // Disable all dates after specific date
-                        // days: [0], // Disable Saturday's and Sunday's
-                    };
-                    return obj;
-                }
+                this.typeOptions = dataTypes;
             }
         },
-        watch: {
-            clients: [{
-                handler: 'getDataClients'
-            }],
-            departments: [{
-                handler: 'getDataDepartments'
-            }],
-            types: [{
-                handler: 'getDataTypes'
-            }]
+        customFormatter(date) {
+            return moment(date).format('DD-MM-YYYY');
+        },
+        disabledStartDates() {
+            if (this.currentItem.start_date) {
+                let obj = {
+                    to: new Date(this.currentItem.start_date), // Disable all dates after specific date
+                    // days: [0], // Disable Saturday's and Sunday's
+                };
+                return obj;
+            }
+        },
+        disabledEndDates() {
+            if (this.currentItem.end_date) {
+                let obj = {
+                    from: new Date(this.currentItem.end_date), // Disable all dates after specific date
+                    // days: [0], // Disable Saturday's and Sunday's
+                };
+                return obj;
+            }
         }
+    },
+    watch: {
+        clients: [{
+            handler: 'getDataClients'
+        }],
+        departments: [{
+            handler: 'getDataDepartments'
+        }],
+        types: [{
+            handler: 'getDataTypes'
+        }]
     }
+}
 </script>

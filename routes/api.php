@@ -24,4 +24,5 @@ Route::group(['prefix' => '/v1', 'namespace' => 'Api\V1', 'as' => 'api.'], funct
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
+    Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
 });

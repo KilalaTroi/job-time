@@ -9,13 +9,13 @@ import Card from './components/Cards/Card.vue'
  */
 
 const GlobalComponents = {
-  install (Vue) {
-    Vue.component(BaseInput.name, BaseInput)
-    Vue.component(BaseCheckbox.name, BaseCheckbox)
-    Vue.component(BaseRadio.name, BaseRadio)
-    Vue.component(BaseDropdown.name, BaseDropdown)
-    Vue.component('card', Card)
-  }
+    install(Vue) {
+        Vue.component(BaseInput.name, BaseInput)
+        Vue.component(BaseCheckbox.name, BaseCheckbox)
+        Vue.component(BaseRadio.name, BaseRadio)
+        Vue.component(BaseDropdown.name, BaseDropdown)
+        Vue.component('card', Card)
+    }
 }
 
 export default GlobalComponents
