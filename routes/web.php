@@ -29,6 +29,7 @@ Route::get('/logout', function () {
 Auth::routes();
 
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
+Route::get('/manager', 'ManagerController@index')->name('manager');
 
 
 # Get Token
