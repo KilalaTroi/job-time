@@ -103,10 +103,13 @@ const routes = [{
                 path: 'jobs',
                 name: 'Jobs',
                 component: Jobs
+            },
+            {
+                path: '*',
+                component: NotFound
             }
         ]
-    },
-    { path: '*', component: NotFound }
+    }
 ];
 
 const router = new VueRouter({

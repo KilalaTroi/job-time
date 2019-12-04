@@ -5,7 +5,7 @@
        :data-image="backgroundImage">
     <div class="sidebar-wrapper">
       <div class="logo">
-        <router-link :to="{name: 'Overview'}" class="simple-text logo__container">
+        <router-link :to="{path: '/'}" class="simple-text logo__container">
           <div class="logo-img">
             <img src="/images/logo.png" :alt="title">
           </div>

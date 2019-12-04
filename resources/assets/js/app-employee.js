@@ -17,56 +17,32 @@ import LightBootstrap from './admin/light-bootstrap-main'
 window.Vue.use(VueRouter);
 window.Vue.use(LightBootstrap);
 
-import DashboardLayout from './admin/layout/ManagerLayout'
+import DashboardLayout from './admin/layout/EmployeeLayout'
 // GeneralViews
 import NotFound from './admin/pages/NotFoundPage'
 
 // Admin pages
-import Clients from './admin/pages/Clients';
-import Departments from './admin/pages/Departments';
-import Types from './admin/pages/Types';
-import Projects from './admin/pages/Projects';
-import Schedules from './admin/pages/Schedules';
+import Schedules from './admin/pages/SchedulesEmployee';
 import Jobs from './admin/pages/Jobs';
 
 const routes = [{
         path: '/',
         component: DashboardLayout,
-        redirect: '/projects'
+        redirect: '/jobs'
     },
     {
         path: '/',
         component: DashboardLayout,
-        redirect: '/projects',
+        redirect: '/jobs',
         children: [{
-                path: 'projects',
-                name: 'Projects',
-                component: Projects
-            },
-            {
-                path: 'clients',
-                name: 'Clients',
-                component: Clients
-            },
-            {
-                path: 'departments',
-                name: 'Departments',
-                component: Departments
-            },
-            {
-                path: 'types',
-                name: 'Types',
-                component: Types
+                path: 'jobs',
+                name: 'Jobs',
+                component: Jobs
             },
             {
                 path: 'schedules',
                 name: 'Schedules',
                 component: Schedules
-            },
-            {
-                path: 'jobs',
-                name: 'Jobs',
-                component: Jobs
             },
             {
                 path: '*',

@@ -2,7 +2,7 @@
     <div class="wrapper">
         <side-bar>
             <mobile-menu slot="content"></mobile-menu>
-            <sidebar-link to="/overview">
+            <sidebar-link to="/">
                 <i class="nc-icon nc-palette"></i>
                 <p>Dashboard</p>
             </sidebar-link>

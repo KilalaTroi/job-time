@@ -2,29 +2,13 @@
     <div class="wrapper">
         <side-bar>
             <mobile-menu slot="content"></mobile-menu>
-            <sidebar-link to="/projects">
-                <i class="nc-icon nc-bag"></i>
-                <p>Projects</p>
-            </sidebar-link>
-            <sidebar-link to="/schedules">
-                <i class="nc-icon nc-paper-2"></i>
-                <p>Schedules</p>
-            </sidebar-link>
             <sidebar-link to="/jobs">
                 <i class="nc-icon nc-watch-time"></i>
                 <p>Jobs</p>
             </sidebar-link>
-            <sidebar-link to="/clients">
-                <i class="nc-icon nc-money-coins"></i>
-                <p>Clients</p>
-            </sidebar-link>
-            <sidebar-link to="/departments">
-                <i class="nc-icon nc-bank"></i>
-                <p>Departments</p>
-            </sidebar-link>
-            <sidebar-link to="/types">
-                <i class="nc-icon nc-tag-content"></i>
-                <p>Types</p>
+            <sidebar-link to="/schedules">
+                <i class="nc-icon nc-paper-2"></i>
+                <p>Schedules</p>
             </sidebar-link>
         </side-bar>
         <div class="main-panel">

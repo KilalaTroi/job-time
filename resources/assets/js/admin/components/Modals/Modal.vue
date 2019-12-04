@@ -5,7 +5,7 @@
         <!-- Modal Header -->
         <div class="modal-header">
           <h4 class="modal-title">
-            <slot name="title"></slot>
+            <strong><slot name="title"></slot></strong>
           </h4>
           <button type="button" class="btn btn-xs btn-danger ml-2" data-dismiss="modal" @click="$emit('reset-validation')">
             <i aria-hidden="true" class="fa fa-times"></i>

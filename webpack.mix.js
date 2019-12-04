@@ -18,3 +18,4 @@ mix.js('resources/assets/js/app-admin.js', 'public/js')
     .sass('resources/assets/sass/app-admin.scss', 'public/css');
 
 mix.js('resources/assets/js/app-manager.js', 'public/js');
+mix.js('resources/assets/js/app-employee.js', 'public/js');

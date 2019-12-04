@@ -21,9 +21,17 @@ class DashboardController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         // redirect view by user
-        return view('dashboard');
+        if ( $request->user()->authorizeRoles('admin') ) { 
+            return view('dashboard');
+        } else {
+            if ( $request->user()->authorizeRoles('manager') ) {
+                return view('manager');
+            } else {
+                return view('employee');
+            }
+        }
     }
 }

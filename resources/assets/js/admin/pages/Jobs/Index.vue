@@ -17,10 +17,13 @@
                     <job-table
                         class="table-hover table-bordered table-striped"
                         :columns="columns"
-                        :data="jobs">
+                        :data="jobs"
+                        v-on:get-job="getJob">
                     </job-table>
                 </div>
             </div>
+
+            <AddTime :currentJob="currentJob" :errors="validationErrors" :success="validationSuccess"  v-on:add-time="addTime" v-on:reset-validation="resetValidate"></AddTime> 
         </div>
     </div>
 </template>
@@ -30,6 +33,7 @@ import Datepicker from 'vuejs-datepicker';
 import { en, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 import JobTable from '../../components/TableJob'
+import AddTime from './AddTime'
 
 const tableColumns = [
     { id: 'client', value: 'Client', width: '', class: '' },
@@ -43,17 +47,24 @@ export default {
     components: {
         Card,
         datepicker: Datepicker,
-        JobTable
+        JobTable,
+        AddTime
     },
     data() {
         return {
+            userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             columns: [...tableColumns],
             clients: [],
             departments: [],
             jobs: [],
             jobData: [],
+            jobsTime: [],
+            currentJob: null,
 
-            start_date: new Date()
+            start_date: new Date(),
+
+            validationErrors: '',
+            validationSuccess: ''
         }
     },
     mounted() {
@@ -61,12 +72,13 @@ export default {
     },
     methods: {
         fetchItems() {
-            let uri = '/api/v1/jobs/?date=' + this.dateFormatter(this.start_date);
+            let uri = '/api/v1/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID;
             axios.get(uri)
                 .then(res => {
                     this.clients = res.data.clients;
                     this.departments = res.data.departments;
                     this.jobData = res.data.jobs;
+                    this.jobsTime = res.data.jobsTime;
                 })
                 .catch(err => {
                     console.log(err);
@@ -86,13 +98,14 @@ export default {
                 let dataJobs = [];
 
                 for (let i = 0; i < data.length; i++) {
+                    let time = typeof(this.getObjectValue(this.jobsTime, data[i].id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, data[i].id).total : false;
                     let obj = {
-                        id: data[i].issue_id,
+                        id: data[i].id,
                         client: this.getObjectValue(this.clients, data[i].client_id).text,
                         department: this.getObjectValue(this.departments, data[i].dept_id).text,
                         project: data[i].p_name,
                         issue: data[i].i_name,
-                        time: ''
+                        time: time ? this.hourFormatter(time) : '00:00'
                     };
                     dataJobs.push(obj);
                 }
@@ -101,11 +114,57 @@ export default {
                 this.jobs = [];
             }
         },
+        getJob(id) {
+            let job = this.getObjectValue(this.jobs, id);
+            let obj = {
+                id: job.id,
+                c_name: job.client,
+                d_name: job.department,
+                p_name: job.project,
+                i_name: job.issue,
+                date: this.start_date
+            };
+            this.currentJob = obj;
+        },
+        addTime(newTime) {
+            // Reset validate
+            this.validationErrors = '';
+            this.validationSuccess = '';
+
+            let uri = '/api/v1/jobs';
+            newTime.user_id = this.userID;
+            newTime.date = this.dateFormatter(this.start_date);
+
+            axios.post(uri, newTime)
+                .then(res => {
+                    let newJob = res.data.job;
+                    this.validationSuccess = res.data.message;
+                })
+                .catch(err => {
+                    console.log(err);
+                    if (err.response.status == 422) {
+                        this.validationErrors = err.response.data;
+                    }
+                });
+        },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('DD MMM YYYY') : '';
         },
         dateFormatter(date) {
             return moment(date).format('YYYY-MM-DD');
+        },
+        hourFormatter(totalSeconds) {
+            var hours   = Math.floor(totalSeconds / 3600);
+            var minutes = Math.floor((totalSeconds - (hours * 3600)) / 60);
+
+            var result = (hours < 10 ? "0" + hours : hours);
+            result += ":" + (minutes < 10 ? "0" + minutes : minutes);
+
+            return result;
+        },
+        resetValidate() {
+            this.validationSuccess = '';
+            this.validationErrors = '';
         }
     },
     watch: {
