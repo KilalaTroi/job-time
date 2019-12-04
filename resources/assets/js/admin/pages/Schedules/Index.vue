@@ -81,7 +81,7 @@ export default {
     },
     methods: {
         fetchItems() {
-            let uri = '/api/v1/schedules';
+            let uri = '/data/schedules';
             axios.get(uri)
                 .then(res => {
                     this.types = res.data.types;
@@ -175,7 +175,7 @@ export default {
             if (confirm("Are you sure delete this event?")) {
                 let { id } = info.event;
                 console.log(id);
-                let uri = '/api/v1/schedules/' + id;
+                let uri = '/data/schedules/' + id;
                 axios.delete(uri).then((res) => {
                     this.schedules = this.schedules.filter(function(elem) {
                         if (elem.id != id) return elem;
@@ -195,7 +195,7 @@ export default {
             } else {
                 let { event } = info;
                 let { id, start, end } = event;
-                let uri = '/api/v1/schedules/' + id;
+                let uri = '/data/schedules/' + id;
                 let newItem = {
                     start_time: this.hourFormatter(start),
                     end_time: this.hourFormatter(end)
@@ -225,7 +225,7 @@ export default {
             } else {
                 let { event } = info;
                 let { id, start, end } = event;
-                let uri = '/api/v1/schedules/' + id;
+                let uri = '/data/schedules/' + id;
                 let newItem = {
                     date: this.customFormatter(start),
                     start_time: this.hourFormatter(start),
@@ -249,7 +249,7 @@ export default {
 
             let { event } = info;
             let { id, start, end, title, borderColor, backgroundColor } = event;
-            let uri = '/api/v1/schedules';
+            let uri = '/data/schedules';
             let newItem = {
                 issue_id: id,
                 title: title,

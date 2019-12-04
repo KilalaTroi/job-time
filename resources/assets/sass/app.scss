@@ -7,3 +7,9 @@
 
 // Bootstrap
 @import "~bootstrap/scss/bootstrap";
+
+body {
+  background-size: cover;
+  background-image: url("/images/bg-japan.jpg");
+  min-height: 100vh;
+}

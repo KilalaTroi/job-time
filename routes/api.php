@@ -17,12 +17,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['prefix' => '/v1', 'namespace' => 'Api\V1', 'as' => 'api.'], function () {
-    Route::resource('clients', 'ClientsController', ['except' => ['create', 'edit']]);
-    Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
-    Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
-    Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
-    Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
-    Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
-    Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
-});
+#API
+//Route::group(['middleware' => ['auth:api'], 'prefix' => '/v1', 'namespace' => 'Api\V1', 'as' => 'api.'], function () {
+//    Route::resource('clients', 'ClientsController', ['except' => ['create', 'edit']]);
+//    Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
+//    Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
+//    Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
+//    Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
+//    Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
+//    Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
+//});

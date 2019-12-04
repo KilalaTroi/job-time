@@ -109,7 +109,7 @@ export default {
             }
         },
         fetchItems() {
-            let uri = '/api/v1/projects';
+            let uri = '/data/projects';
             axios.get(uri)
                 .then(res => {
                     this.clients = res.data.clients;
@@ -127,7 +127,7 @@ export default {
             this.validationErrors = '';
             this.validationSuccess = '';
 
-            let uri = '/api/v1/projects';
+            let uri = '/data/projects';
             axios.post(uri, newItem)
                 .then(res => {
                     let addIdItem = Object.assign({}, {
@@ -149,7 +149,7 @@ export default {
             this.validationErrors = '';
             this.validationSuccess = '';
 
-            let uri = '/api/v1/issues';
+            let uri = '/data/issues';
             axios.post(uri, newIssue)
                 .then(res => {
                     let addIdItem = Object.assign({}, {
@@ -175,7 +175,7 @@ export default {
         },
         deleteItem(issue_id) {
             if (confirm("Are you sure want to delete this record?")) {
-                let uri = '/api/v1/issues/' + issue_id;
+                let uri = '/data/issues/' + issue_id;
                 axios.delete(uri).then((res) => {
                     this.projects = this.projects.filter(item => item.issue_id !== issue_id);
                     console.log(res.data.message);
@@ -183,7 +183,7 @@ export default {
             }
         },
         getItem(id, issue_id) {
-            let uri = '/api/v1/projects/' + id + '?issue_id=' + issue_id;
+            let uri = '/data/projects/' + id + '?issue_id=' + issue_id;
             axios.get(uri).then((response) => {
                 this.currentItem = response.data;
             });
@@ -193,7 +193,7 @@ export default {
             this.validationErrors = '';
             this.validationSuccess = '';
 
-            let uri = '/api/v1/projects/' + item.id;
+            let uri = '/data/projects/' + item.id;
             axios.patch(uri, item).then((res) => {
                     let foundIndex = this.projects.findIndex(x => x.issue_id == item.issue_id);
                     this.projects[foundIndex] = item;
@@ -207,7 +207,7 @@ export default {
                     }
                 });
 
-            let uri_issue = '/api/v1/issues/' + item.issue_id;
+            let uri_issue = '/data/issues/' + item.issue_id;
             axios.patch(uri_issue, item).then((res) => {
                 console.log(res.data.message);
             }).catch(err => console.log(err));

@@ -30,6 +30,18 @@ Auth::routes();
 
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 
+# Get Data
+Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
+    Route::resource('clients', 'ClientsController', ['except' => ['create', 'edit']]);
+    Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
+    Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
+    Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
+    Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
+    Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
+    Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
+});
+# End Get Data
+
 # Get Token
 //Route::get('/redirect', function () {
 //    $query = http_build_query([

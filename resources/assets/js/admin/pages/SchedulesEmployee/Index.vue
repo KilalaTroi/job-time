@@ -76,7 +76,7 @@ export default {
     },
     methods: {
         fetchItems() {
-            let uri = '/api/v1/schedules';
+            let uri = '/data/schedules';
             axios.get(uri)
                 .then(res => {
                     this.types = res.data.types;

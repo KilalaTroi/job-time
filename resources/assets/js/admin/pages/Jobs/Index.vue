@@ -72,7 +72,7 @@ export default {
     },
     methods: {
         fetchItems() {
-            let uri = '/api/v1/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID;
+            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID;
             axios.get(uri)
                 .then(res => {
                     this.clients = res.data.clients;
@@ -131,14 +131,15 @@ export default {
             this.validationErrors = '';
             this.validationSuccess = '';
 
-            let uri = '/api/v1/jobs';
+            let uri = '/data/jobs';
             newTime.user_id = this.userID;
             newTime.date = this.dateFormatter(this.start_date);
 
             axios.post(uri, newTime)
                 .then(res => {
                     let newJob = res.data.job;
-                    this.validationSuccess = res.data.message;
+                    // this.validationSuccess = res.data.message;
+                    this.fetchItems();
                 })
                 .catch(err => {
                     console.log(err);

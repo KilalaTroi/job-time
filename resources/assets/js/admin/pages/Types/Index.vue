@@ -72,7 +72,7 @@
         },
         methods: {
             fetchItems() {
-                let uri = "/api/v1/types";
+                let uri = "/data/types";
                 axios
                     .get(uri)
                     .then(res => {
@@ -88,7 +88,7 @@
                 this.validationErrors = "";
                 this.validationSuccess = "";
 
-                let uri = "/api/v1/types";
+                let uri = "/data/types";
                 axios
                     .post(uri, newItem)
                     .then(res => {
@@ -105,7 +105,7 @@
             },
             deleteItem(id) {
                 if (confirm("Are you sure want to delete this record?")) {
-                    let uri = "/api/v1/types/" + id;
+                    let uri = "/data/types/" + id;
                     axios
                         .delete(uri)
                         .then(res => {
@@ -116,7 +116,7 @@
                 }
             },
             getItem(id) {
-                let uri = "/api/v1/types/" + id;
+                let uri = "/data/types/" + id;
                 axios.get(uri).then(response => {
                     this.currentItem = response.data;
                 });
@@ -126,7 +126,7 @@
                 this.validationErrors = "";
                 this.validationSuccess = "";
 
-                let uri = "/api/v1/types/" + item.id;
+                let uri = "/data/types/" + item.id;
                 axios
                     .patch(uri, item)
                     .then(res => {
