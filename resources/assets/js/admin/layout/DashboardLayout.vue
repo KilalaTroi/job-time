@@ -7,8 +7,8 @@
                 <p>Dashboard</p>
             </sidebar-link>
             <sidebar-link to="/user">
-                <i class="nc-icon nc-circle-09"></i>
-                <p>User Profile</p>
+                <i class="nc-icon nc-badge"></i>
+                <p>Users</p>
             </sidebar-link>
             <sidebar-link to="/notifications">
                 <i class="nc-icon nc-bell-55"></i>

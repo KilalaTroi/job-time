@@ -28,6 +28,7 @@ import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Jobs from './admin/pages/Jobs';
+import Profile from './admin/pages/Profile';
 
 const routes = [{
         path: '/',
@@ -67,6 +68,11 @@ const routes = [{
                 path: 'jobs',
                 name: 'Jobs',
                 component: Jobs
+            },
+            {
+                path: 'profile',
+                name: 'Profile',
+                component: Profile
             },
             {
                 path: '*',

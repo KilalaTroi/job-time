@@ -62,6 +62,7 @@ class IssuesController extends Controller
             'message' => 'Successfully.'
         ), 200);
     }
+    
     /**
      * Update the specified resource in storage.
      *
