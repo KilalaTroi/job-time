@@ -39,6 +39,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
+    Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
 
     Route::get('report/{year}', 'ReportsController@report');
 });
