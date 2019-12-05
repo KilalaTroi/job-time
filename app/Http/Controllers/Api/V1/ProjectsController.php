@@ -59,7 +59,7 @@ class ProjectsController extends Controller
         $this->validate($request, [
             'p_name' => 'required|max:255',
             'client_id' => 'required|numeric|min:0|not_in:0',
-            'dept_id' => 'required|numeric|min:0|not_in:0',
+            // 'dept_id' => 'required|numeric|min:0|not_in:0',
             'type_id' => 'required|numeric|min:0|not_in:0',
         ]);
 
@@ -148,7 +148,7 @@ class ProjectsController extends Controller
         $this->validate($request, [
             'p_name' => 'required|max:255',
             'client_id' => 'required|numeric|min:0|not_in:0',
-            'dept_id' => 'required|numeric|min:0|not_in:0',
+            // 'dept_id' => 'required|numeric|min:0|not_in:0',
             'type_id' => 'required|numeric|min:0|not_in:0',
         ]);
 

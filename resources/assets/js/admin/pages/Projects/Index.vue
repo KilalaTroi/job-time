@@ -94,7 +94,7 @@ export default {
                     let obj = {
                         id: data[i].id,
                         client: this.getObjectValue(this.clients, data[i].client_id).text,
-                        department: this.getObjectValue(this.departments, data[i].dept_id).text,
+                        department: typeof(this.getObjectValue(this.departments, data[i].dept_id)) !== 'undefined' ? this.getObjectValue(this.departments, data[i].dept_id).text : '',
                         project: data[i].p_name,
                         issue: data[i].i_name,
                         issue_id: data[i].issue_id,
