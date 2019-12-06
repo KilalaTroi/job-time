@@ -19,9 +19,9 @@
                     <button type="button" @click="$emit('get-job', item.id)" class="btn btn-xs d-flex btn-primary" data-toggle="modal" data-target="#addTime" data-backdrop="static" data-keyboard="false">
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </button>
-                    <button type="button" class="btn btn-xs d-flex btn-default ml-2">
+                    <!-- <button type="button" class="btn btn-xs d-flex btn-default ml-2">
                         <i class="fa fa-history" aria-hidden="true"></i>
-                    </button>
+                    </button> -->
                 </td>
             </tr>
         </tbody>

@@ -10,10 +10,6 @@
                 <i class="nc-icon nc-badge"></i>
                 <p>Users</p>
             </sidebar-link>
-            <sidebar-link to="/notifications">
-                <i class="nc-icon nc-bell-55"></i>
-                <p>Notifications</p>
-            </sidebar-link>
             <sidebar-link to="/clients">
                 <i class="nc-icon nc-money-coins"></i>
                 <p>Clients</p>

@@ -23,7 +23,7 @@ import NotFound from './admin/pages/NotFoundPage'
 
 // Admin pages
 import Overview from './admin/pages/Overview';
-import UserProfile from './admin/pages/UserProfile';
+import UserProfile from './admin/pages/UserProfile/Index.vue';
 import TableList from './admin/pages/TableList';
 import Typography from './admin/pages/Typography';
 import Icons from './admin/pages/Icons';

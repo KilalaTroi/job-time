@@ -31,12 +31,14 @@
                 <span class="no-icon">Profile</span>
             </a>
         </li> -->
-        <router-link :to="{path: '/profile'}" class="nav-link">
-            <span class="no-icon">Profile</span>
-        </router-link>
+        <li class="nav-item">
+            <router-link :to="{path: '/profile'}" class="nav-link">
+                <i class="nc-icon nc-circle-09"></i> Profile
+            </router-link>
+        </li>
         <li class="nav-item">
             <a class="nav-link" href="/logout">
-                <span class="no-icon">Log out</span>
+                <i class="nc-icon nc-button-power"></i> Log out
             </a>
         </li>
     </ul>

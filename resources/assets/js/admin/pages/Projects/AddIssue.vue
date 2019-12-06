@@ -103,7 +103,7 @@ export default {
             this.$emit('add-issue', newIssue);
         },
         customFormatter(date) {
-            return moment(date).format('DD-MM-YYYY');
+            return moment(date).format('YYYY/MM/DD');
         },
         disabledStartDates() {
             let obj = {

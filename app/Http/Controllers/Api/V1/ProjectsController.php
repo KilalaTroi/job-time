@@ -37,7 +37,7 @@ class ProjectsController extends Controller
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->where('i.status', '=', 'publish')
-            ->orderBy('p_name', 'desc')
+            ->orderBy('issue_id', 'asc')
             ->get()->toArray();
 
         return response()->json([
