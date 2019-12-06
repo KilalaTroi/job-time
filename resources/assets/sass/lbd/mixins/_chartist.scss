@@ -22,6 +22,7 @@ $ct-class-vertical: ct-vertical !default;
 $ct-class-horizontal: ct-horizontal !default;
 $ct-class-start: ct-start !default;
 $ct-class-end: ct-end !default;
+$ct-class-legend: ct-legend !default;
 
 // Container ratio
 $ct-container-ratio: (1/1.618) !default;
@@ -48,7 +49,7 @@ $ct-point-shape: round !default;
 $ct-area-opacity: 0.8 !default;
 
 // Bar chart bar width
-$ct-bar-width: 10px !default;
+$ct-bar-width: 30px !default;
 
 // Donut width (If donut width is to big it can cause issues where the shape gets distorted)
 $ct-donut-width: 60px !default;

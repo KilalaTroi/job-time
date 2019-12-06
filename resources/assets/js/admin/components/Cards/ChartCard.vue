@@ -21,6 +21,10 @@
       Card
     },
     props: {
+      chartId: {
+        type: String,
+        default: 'no-id'
+      },
       chartType: {
         type: String,
         default: 'Line' // Line | Pie | Bar
@@ -44,7 +48,6 @@
     },
     data () {
       return {
-        chartId: 'no-id',
         $Chartist: null,
         chart: null
       }
@@ -54,9 +57,8 @@
        * Initializes the chart by merging the chart options sent via props and the default chart options
        */
       initChart () {
-        var chartIdQuery = `#${this.chartId}`
-        this.chart = this.$Chartist[this.chartType](chartIdQuery, this.chartData, this.chartOptions, this.responsiveOptions)
-        this.$emit('initialized', this.chart)
+        this.chart = this.$Chartist[this.chartType]('#' + this.chartId, this.chartData, this.chartOptions, this.responsiveOptions);
+        this.$emit('initialized', this.chart);
         if (this.chartType === 'Line') {
           this.animateLineChart()
         }
@@ -64,21 +66,10 @@
           this.animateBarChart()
         }
       },
-      /***
-       * Assigns a random id to the chart
-       */
-      updateChartId () {
-        const currentTime = new Date().getTime().toString()
-        const randomInt = this.getRandomInt(0, currentTime)
-        this.chartId = `div_${randomInt}`
-      },
-      getRandomInt (min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min
-      },
       animateLineChart () {
-        let seq = 0
-        let durations = 500
-        let delays = 80
+        let seq = 0;
+        let durations = 500;
+        let delays = 80;
         this.chart.on('draw', (data) => {
           if (data.type === 'line' || data.type === 'area') {
             data.element.animate({
@@ -91,7 +82,7 @@
               }
             })
           } else if (data.type === 'point') {
-            seq++
+            seq++;
             data.element.animate({
               opacity: {
                 begin: seq * delays,
@@ -102,16 +93,16 @@
               }
             })
           }
-        })
+        });
         seq = 0
       },
       animateBarChart () {
-        let seq = 0
-        let durations = 500
-        let delays = 80
+        let seq = 0;
+        let durations = 500;
+        let delays = 80;
         this.chart.on('draw', (data) => {
           if (data.type === 'bar') {
-            seq++
+            seq++;
             data.element.animate({
               opacity: {
                 begin: seq * delays,
@@ -125,12 +116,9 @@
         })
       }
     },
-    async mounted () {
-      // this.updateChartId();
-      // // const Chartist = await import('chartist');
-      // // this.$Chartist = Chartist.default || Chartist;
-      // this.$Chartist = Chartist;
-      // this.initChart();
+    mounted () {
+      this.$Chartist = Chartist.default || Chartist;
+      this.initChart()
     }
   }
 </script>
