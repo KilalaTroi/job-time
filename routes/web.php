@@ -42,6 +42,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
 
     Route::get('report/{year}', 'ReportsController@report');
+    Route::get('export-report/{year}/{file_extension}', 'ReportsController@exportReport');
 });
 # End Get Data
 

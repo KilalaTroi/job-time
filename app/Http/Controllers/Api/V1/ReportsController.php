@@ -6,6 +6,7 @@ use App\Type;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Excel;
 
 class ReportsController extends Controller
 {
@@ -16,6 +17,13 @@ class ReportsController extends Controller
      */
     public function report($year)
     {
+        $reponse = $this->getData($year);
+        return response()->json(
+            [
+                'data' => $reponse,
+            ]);
+    }
+    public function getData($year) {
         $arrayMonth = array(
             1 => "Jan",
             2 => "Feb",
@@ -29,10 +37,10 @@ class ReportsController extends Controller
             10 => "Oct",
             11 => "Now",
             12 => "Dec",
-            );
-         $numberUsers = DB::table('role_user')
-             ->join('roles', 'roles.id', '=', 'role_user.role_id')
-             ->where('roles.name', "<>", "admin")->count();
+        );
+        $numberUsers = DB::table('role_user')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('roles.name', "<>", "admin")->count();
         $typeDate = CAL_GREGORIAN;
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
@@ -50,7 +58,7 @@ class ReportsController extends Controller
         $totalPercentOfMonth = array();
         $totalPercentOfType = array();
         foreach ($typeList as $key => $type) {
-            $reponse[$type['slug']] = ['slug_ja'=>$type['slug_ja']];
+            $reponse[$type['slug']] = ['slug' => $type['slug'], 'slug_ja'=>$type['slug_ja']];
             foreach ($arrayMonth as $key1 =>$month) {
                 $reponse[$type['slug']][$month] = "0.0%";
             }
@@ -83,15 +91,73 @@ class ReportsController extends Controller
             $totalPercentOfMonth[$arrayMonth[$month]] += $percentJob;
             $totalPercentOfType[$slug]   += $percentJob;
         }
+        foreach ($reponse as $key => $value) {
+            if(isset($totalPercentOfType[$key])) {
+                $reponse[$key]['Total'] = round($totalPercentOfType[$key] / 12, 1, PHP_ROUND_HALF_UP). "%";
+            } else {
+                $reponse[$key]['Total'] = "0.0%";
+            }
+        }
+
+        $listTotalOfMonth['title'] = 'Total';
+        $listTotalOfMonth['skipColumn'] = '';
         foreach($arrayMonth as $month) {
             $listTotalOfMonth[$month] = "0.0%";
         }
         foreach ($totalPercentOfMonth as $key =>$value) {
             $listTotalOfMonth[$key] = $value . "%";
         }
-        foreach ($totalPercentOfType as $key =>$value) {
-            $reponse[$key]['total'] = $value . "%";
-        }
+        $reponse['totalOfMonth'] = $listTotalOfMonth;
+        return $reponse;
+    }
+    public function exportReport($year,$file_extension)
+    {
+        $reponse = $this->getData($year);
+        $numberRows = count($reponse) + 1;
+        return Excel::create('Report_'. $year, function($excel) use ($reponse, $numberRows) {
+            $excel->setTitle('Report Job Time');
+            $excel->setCreator('Kilala Job Time')
+                ->setCompany('Kilala');
+
+            $excel->sheet('sheet1', function($sheet) use ($reponse, $numberRows) {
+                $sheet->setStyle([
+                    'borders' => [
+                        'allborders' => [
+                            'color' => [
+                                'rgb' => '020202'
+                            ]
+                        ]
+                    ]
+                ]);
+                $sheet->fromArray($reponse);
+                $sheet->setCellValue('A1', 'Job type');
+                $sheet->setCellValue('B1', 'Japanese');
+                $sheet->cell('A1:O1', function($cells) {
+                    // Set black background
+                    //$cells->setBackground('#dee2e6');
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '11',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                });
+                $sheet->mergeCells('A'.$numberRows.':B'.$numberRows);
+                $sheet->cell('A'. $numberRows.':O'.$numberRows, function($cells) {
+                    // Set black background
+                    //$cells->setBackground('#dee2e6');
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '11',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                });
+
+            });
+
+
+        })->download($file_extension);
         return response()->json(
             [
                 'data' => $reponse,
