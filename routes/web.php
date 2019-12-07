@@ -41,6 +41,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
 
+    Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
+
     Route::get('report/{year}', 'ReportsController@report');
     Route::get('export-report/{year}/{file_extension}', 'ReportsController@exportReport');
 });

@@ -64,7 +64,7 @@
                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id">
                         <template slot="header">
                             <h4 class="card-title">{{ year }} Working Time</h4>
-                            <p class="card-category">Kilala VN time allocation</p>
+                            <p class="card-category">Kilala VN Time allocation</p>
                         </template>
                         <template slot="footer">
                             <div class="legend">
@@ -101,7 +101,7 @@
         data() {
             return {
                 year: new Date().getFullYear(),
-                exportLink: '/data/export-report/'+ this.year +'/xlsx',
+                exportLink: '/data/export-report/'+ new Date().getFullYear() +'/xlsx',
                 barChart: {
                     id: 'time-allocation',
                     data: {
