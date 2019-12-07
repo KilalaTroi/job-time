@@ -27,7 +27,7 @@ class ReportsController extends Controller
 
             $arrayMonth = array();
             $monthYear = date( 'Y-m-01' );
-            $monthYear = "2019-10-01";
+            //$monthYear = "2019-10-01";
             for($i = 0; $i < 12; $i++)
             {
 
