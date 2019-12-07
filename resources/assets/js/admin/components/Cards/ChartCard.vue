@@ -52,6 +52,15 @@
         chart: null
       }
     },
+    mounted() {
+      this.$Chartist = Chartist.default || Chartist;
+      this.initChart();
+      if(window.__exampleAnimateTimeout) {
+        clearTimeout(window.__exampleAnimateTimeout);
+        window.__exampleAnimateTimeout = null;
+      }
+      window.__exampleAnimateTimeout = setTimeout(this.chart.update.bind(this.chart), 3000);
+    },
     methods: {
       /***
        * Initializes the chart by merging the chart options sent via props and the default chart options
@@ -98,8 +107,8 @@
       },
       animateBarChart () {
         let seq = 0;
-        let durations = 500;
-        let delays = 80;
+        let durations = 300;
+        let delays = 40;
         this.chart.on('draw', (data) => {
           if (data.type === 'bar') {
             seq++;
@@ -115,10 +124,6 @@
           }
         })
       }
-    },
-    mounted () {
-      this.$Chartist = Chartist.default || Chartist;
-      this.initChart()
     }
   }
 </script>

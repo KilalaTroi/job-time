@@ -63,16 +63,12 @@
                 <div class="col-md-12">
                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id">
                         <template slot="header">
-                            <h4 class="card-title">{{ year }} Working Time</h4>
-                            <p class="card-category">Kilala VN Time allocation</p>
+                            <h4 class="card-title">Kilala VN Time allocation</h4>
+                            <p class="card-category">{{ customFormatter(startEndDate[0]) }} - {{ customFormatter(yesterday(startEndDate[1])) }}</p>
                         </template>
                         <template slot="footer">
                             <div class="legend">
-                                <span class="ct-series-a"><i class="fa fa-circle ct-legend"></i> Project Type 1</span>
-                                <span class="ct-series-b"><i class="fa fa-circle ct-legend"></i> Project Type 2</span>
-                                <span class="ct-series-c"><i class="fa fa-circle ct-legend"></i> Project Type 3</span>
-                                <span class="ct-series-d"><i class="fa fa-circle ct-legend"></i> Project Type 4</span>
-                                <span class="ct-series-e"><i class="fa fa-circle ct-legend"></i> Project Type 5</span>
+                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i> {{ type.slug }}</span>
                             </div>
                             <hr>
                             <div class="row">
@@ -91,6 +87,7 @@
     import ChartCard from '../components/Cards/ChartCard.vue'
     import StatsCard from '../components/Cards/StatsCard.vue'
     import LTable from '../components/Table.vue'
+    import moment from 'moment'
 
     export default {
         components: {
@@ -101,18 +98,14 @@
         data() {
             return {
                 year: new Date().getFullYear(),
+                startEndDate: [],
                 exportLink: '/data/export-report/'+ new Date().getFullYear() +'/xlsx',
+                types: [],
                 barChart: {
                     id: 'time-allocation',
                     data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                        series: [
-                            [5, 4, 3, 7, 3, 2, 9, 5, 1, 5, 8, 4],
-                            [3, 2, 9, 5, 1, 5, 8, 4, 2, 3, 4, 6],
-                            [1, 5, 8, 4, 2, 3, 4, 6, 4, 1, 2, 1],
-                            [2, 3, 4, 6, 4, 1, 2, 1, 5, 4, 3, 7],
-                            [4, 1, 2, 1, 5, 4, 3, 7, 3, 2, 9, 5]
-                        ]
+                        labels: [],
+                        series: []
                     },
                     options: {
                         seriesBarDistance: 30,
@@ -133,6 +126,41 @@
                         }]
                     ]
                 }
+            }
+        },
+        mounted() {
+            this.fetch();
+        },
+        methods: {
+            fetch() {
+                let uri = '/data/statistic/time-allocation';
+                axios.get(uri)
+                    .then(res => {
+                        this.barChart.data.labels = res.data.monthsText;
+                        this.barChart.data.series = [
+                            [5, 4, 3, 7, 3, 2, 9, 5, 1, 5, 8, 4],
+                            [3, 2, 9, 5, 1, 5, 8, 4, 2, 3, 4, 6],
+                            [1, 5, 8, 4, 2, 3, 4, 6, 4, 1, 2, 1],
+                            [2, 3, 4, 6, 4, 1, 2, 1, 5, 4, 3, 7],
+                            [4, 1, 2, 1, 5, 4, 3, 7, 3, 2, 9, 5]
+                        ];
+                        this.types = res.data.types;
+                        this.startEndDate = res.data.startEndYear;
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        alert("Could not load data");
+                    });
+            },
+            customFormatter(date) {
+                return moment(date).format('YYYY/MM/DD');
+            },
+            yesterday(date) {
+                date = new Date(date);
+                return date.setDate(date.getDate() - 1);
+            },
+            circleClass(cl) {
+                return cl + ' text-uppercase ml-3';
             }
         }
     }

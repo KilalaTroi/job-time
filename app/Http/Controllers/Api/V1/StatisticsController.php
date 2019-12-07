@@ -13,173 +13,125 @@ class StatisticsController extends Controller
 {
     public function timeAllocation()
     {
-        $reponse = $this->getDataTimeAllocation();
-        return response()->json(
-            [
-                'data' => $reponse,
-            ]);
+        $response = $this->getDataTimeAllocation();
+        return response()->json($response);
     }
 
     public function getDataTimeAllocation() {
-        $reponse = array();
+        $response = array();
+
+        // Return project type
+        $aplabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'];
         $type_work = Type::all();
-        $reponse['type'] = $type_work;
+        foreach ($type_work as $key => $value) {
+            $type_work[$key]->class = 'ct-series-' . $aplabet[$key];
+        }
+        $response['types'] = $type_work;
+
+        // Return months, monthsText, startEndYear
         $dta = Carbon::now()->addMonths(1);
         $dtb = Carbon::now();
         $dtm = Carbon::now();
-        $startMonth = $dtb->month;
+        $startYearMonth = $dtb->month < 10 ? ($dtb->year - 1) . '0' . $dtb->month : ($dtb->year - 1) . '' . $dtb->month;
+        $beforeCurrentM = $dtb->month - 1;
+        $isJan = $beforeCurrentM == 0 ? $dtb->year - 1 : $dtb->year;
+        $endYearMonth = $beforeCurrentM < 10 ? $isJan . '0' . $beforeCurrentM : $isJan . '' . $beforeCurrentM;
+        $daysOfMonth = array();
+        $monthsText = array();
 
         for ($i = 1; $i <= 12; $i++) {
-            $beginCurrentMonth = $dta->subMonths(1)->format('Y-m-01');
-            $beforeAMonth = $dtb->subMonths(1)->format('Y-m-01');
+            $endMonth = $dta->subMonths(1)->format('Y-m-01');
+            $startMonth = $dtb->subMonths(1)->format('Y-m-01');
+            $monthsText[] = $dtm->subMonths(1)->format('M');
 
-            $reponse['months'][$dtb->month] = array(
-                'start' => $beforeAMonth,
-                'end' => $beginCurrentMonth
-            );
-            $reponse['monthsText'][] = $dtm->subMonths(1)->format('M');
+             $inYearMonth = $dtb->month < 10 ? $dtb->year . '0' . $dtb->month : $dtb->year . '' . $dtb->month;
+            $daysOfMonth[$inYearMonth] = array(
+                 'start' => $startMonth,
+                 'end' => $endMonth
+             );
         }
 
-        $reponse['startEndYear'] = array(
-            $reponse['months'][$startMonth]['start'], 
-            $reponse['months'][$startMonth - 1 == 0 ? 12 : $startMonth - 1]['end']
+        $monthsText = array_reverse($monthsText);
+        $response['monthsText'] = $monthsText;
+
+        // $response['months'] = $daysOfMonth;
+        $response['startEndYear'] = array(
+            $daysOfMonth[$startYearMonth]['start'],
+            $daysOfMonth[$endYearMonth]['end']
         );
 
-        $usersInMonth = DB::table('role_user')
+        // Return usersOld
+        $usersOld = DB::table('role_user')
+            ->select('users.id')
+            ->join('users', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('roles.name', "<>", "admin")
+            ->where('users.created_at', "<", $response['startEndYear'][0])
+            ->count();
+
+        // Return newUsersInMonth
+        $newUsersInMonth = DB::table('role_user')
             ->select(
-                DB::raw('month(users.created_at) as month'),
+                DB::raw('concat(year(users.created_at),"", LPAD(month(users.created_at), 2, "0")) as yearMonth'),
                 DB::raw('COUNT(users.id) as number')
             )
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
             ->where('roles.name', "<>", "admin")
-            ->where('users.created_at', ">=", $reponse['startEndYear'][0])
-            ->where('users.created_at', "<", $reponse['startEndYear'][1])
-            ->groupBy('month')
+            ->where('users.created_at', ">=", $response['startEndYear'][0])
+            ->where('users.created_at', "<", $response['startEndYear'][1])
+            ->orderBy('yearMonth', 'desc')
+            ->groupBy('yearMonth')
             ->get()->toArray();
 
         $convertUserMonth = array();
-        foreach ($usersInMonth as $key => $value) {
-            $convertUserMonth[$value->month] = $value->number;
+
+        foreach ($newUsersInMonth as $key => $value) {
+            $convertUserMonth[$value->yearMonth] = $value->number;
         }
 
-        $reponse['usersOfMonth'] = $convertUserMonth;
+        $response['newUsersInMonth'] = $convertUserMonth;
 
-        
-        foreach ($reponse['months'] as $key => $value) {
+        // Return totalHoursOfMonth
+        ksort($daysOfMonth);
+        $totalHoursOfMonth = array();
+
+        foreach ($daysOfMonth as $key => $value) {
             $daysInMonth = 0;
             $arrayStart = explode('-', $value['start']);
             $monthYear = Carbon::createFromDate($arrayStart[0],$arrayStart[1]*1);
-            for ($d=1; $d <= $monthYear->daysInMonth ; $d++) { 
+            for ($d=1; $d <= $monthYear->daysInMonth ; $d++) {
                 $day = Carbon::createFromDate($arrayStart[0],$arrayStart[1]*1,$d);
                 if ( $day->isWeekday() ) $daysInMonth++;
             }
 
-            if ( isset($convertUserMonth[$arrayStart[1]*1]) && $convertUserMonth[$arrayStart[1]*1] > 0 ) {
-                $totalHoursOfMonth = $convertUserMonth[$arrayStart[1]*1] * 8 * $daysInMonth + 8;
+            if ( isset($convertUserMonth[$key]) ) {
+                $usersOld += $convertUserMonth[$key];
+                $totalHoursOfMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
             } else {
-                $totalHoursOfMonth = 0;
+                $totalHoursOfMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
             }
-            
-            $reponse['totalHoursOfMonth'][] = $totalHoursOfMonth;
         }
-        
 
-        // foreach ($type_work as $key => $value) {
-        //     if ( $totalHoursOfMonth > 0 ) {
-        //         $reponse['workPer'][$value->slug][] = 2;
-        //     } else {
-        //         $reponse['workPer'][$value->slug][] = 0;
-        //     }
-            
-        // }
+        $response['totalHoursOfMonth'] = $totalHoursOfMonth;
 
-        
+        // Return total hours in month of per project type
+        $hoursPerProject = DB::table('jobs')
+            ->select(
+                'projects.type_id as id',
+                DB::raw('concat(year(jobs.date),"", LPAD(month(jobs.date), 2, "0")) as yearMonth'),
+                DB::raw('SUM(TIME_TO_SEC(jobs.time))/3600 as total')
+            )
+            ->join('issues', 'issues.id', '=', 'jobs.issue_id')
+            ->join('projects', 'projects.id', '=', 'issues.project_id')
+            ->where('jobs.date', ">=", $response['startEndYear'][0])
+            ->where('jobs.date', "<", $response['startEndYear'][1])
+            ->orderBy('id', 'asc')
+            ->groupBy('id', 'yearMonth')
+            ->get()->toArray();
 
-        // $arrayMonth = array(
-        //     1 => "Jan",
-        //     2 => "Feb",
-        //     3 => "Mar",
-        //     4 => "Apr",
-        //     5 => "May",
-        //     6 => "Jun",
-        //     7 => "Jul",
-        //     8 => "Aug",
-        //     9 => "Sep",
-        //     10 => "Oct",
-        //     11 => "Now",
-        //     12 => "Dec",
-        // );
-        // $numberUsers = DB::table('role_user')
-        //     ->join('roles', 'roles.id', '=', 'role_user.role_id')
-        //     ->where('roles.name', "<>", "admin")->count();
-        // $typeDate = CAL_GREGORIAN;
-        // $data = DB::table('types as t')
-        //     ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
-        //     ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
-        //     ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
-        //     ->select(DB::raw('concat(t.slug, "_" , month(j.date)) as keyType'),DB::raw('concat(year(j.date),"/", month(j.date)) as dateReport'),DB::raw('month(j.date) as monthReport'), 't.slug', 't.slug_ja', DB::raw('SUM(TIME_TO_SEC(j.time)) as total'))
-        //     ->where(DB::raw('year(j.date)'),$year)
-        //     ->groupBy('dateReport')
-        //     ->groupBy('t.id')
-        //     ->orderBy('t.slug')
-        //     ->orderBy('monthReport')
-        //     ->get()->keyBy('keyType')->toArray();
-        
-        // $typeList = Type::all();
-        // $totalPercentOfMonth = array();
-        // $totalPercentOfType = array();
-        // foreach ($typeList as $key => $type) {
-        //     $reponse[$type['slug']] = ['slug' => $type['slug'], 'slug_ja'=>$type['slug_ja']];
-        //     foreach ($arrayMonth as $key1 =>$month) {
-        //         $reponse[$type['slug']][$month] = "0.0%";
-        //     }
-        // }
-        // foreach ($data as $keyType => $type) {
-        //     $slipSlugAndMonth = explode("_", $keyType);
-        //     $sliced = array_slice($slipSlugAndMonth, 0, -1);
-        //     $slug = implode("_", $sliced);
-        //     $month = $slipSlugAndMonth[count($slipSlugAndMonth)-1];
-        //     $type = (array)$type;
-        //     $numberWorkdays = 0;
-        //     $day_count = cal_days_in_month($typeDate, $month, $year);
-        //     for ($i = 1; $i <= $day_count; $i++) {
-        //         $date = $year.'/'.$month.'/'.$i;
-        //         $get_name = date('l', strtotime($date));
-        //         $day_name = substr($get_name, 0, 3);
-        //         if($day_name != 'Sun' && $day_name != 'Sat'){
-        //             $numberWorkdays++;
-        //         }
-        //     }
-        //     $hoursForMonth = $numberUsers * 8 * $numberWorkdays * 3600;
-        //     $percentJob = round($type['total']/$hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
-        //     $reponse[$slug][$arrayMonth[$month]] = $percentJob . "%";
-        //     if (empty($totalPercentOfMonth[$arrayMonth[$month]])) {
-        //         $totalPercentOfMonth[$arrayMonth[$month]] = 0;
-        //     }
-        //     if (empty($totalPercentOfType[$slug])) {
-        //         $totalPercentOfType[$slug] = 0;
-        //     }
-        //     $totalPercentOfMonth[$arrayMonth[$month]] += $percentJob;
-        //     $totalPercentOfType[$slug]   += $percentJob;
-        // }
-        // foreach ($reponse as $key => $value) {
-        //     if(isset($totalPercentOfType[$key])) {
-        //         $reponse[$key]['Total'] = round($totalPercentOfType[$key] / 12, 1, PHP_ROUND_HALF_UP). "%";
-        //     } else {
-        //         $reponse[$key]['Total'] = "0.0%";
-        //     }
-        // }
+        $response['hoursPerProject'][] = $hoursPerProject;
 
-        // $listTotalOfMonth['title'] = 'Total';
-        // $listTotalOfMonth['skipColumn'] = '';
-        // foreach($arrayMonth as $month) {
-        //     $listTotalOfMonth[$month] = "0.0%";
-        // }
-        // foreach ($totalPercentOfMonth as $key =>$value) {
-        //     $listTotalOfMonth[$key] = $value . "%";
-        // }
-        // $reponse['totalOfMonth'] = $listTotalOfMonth;
-        return $reponse;
+        return $response;
     }
 }
