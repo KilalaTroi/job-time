@@ -121,6 +121,13 @@
                         axisX: {
                             showGrid: true
                         },
+                        axisY: {
+                            offset: 40,
+                            labelInterpolationFnc: function(value) {
+                                return value + '%'
+                            },
+                            scaleMinSpace: 60
+                        },
                         height: '360px'
                     },
                     responsiveOptions: [

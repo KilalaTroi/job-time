@@ -137,8 +137,7 @@ export default {
 
             axios.post(uri, newTime)
                 .then(res => {
-                    let newJob = res.data.job;
-                    // this.validationSuccess = res.data.message;
+                    this.validationSuccess = res.data.message;
                     this.fetchItems();
                 })
                 .catch(err => {
