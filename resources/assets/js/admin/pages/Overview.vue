@@ -8,11 +8,11 @@
                             <i class="nc-icon nc-chart text-warning"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">Capacity</p>
-                            <h4 class="card-title">105GB</h4>
+                            <p class="card-category">Time Worked</p>
+                            <h4 class="card-title">{{ totalArrayObject(hoursPerProject) }}/{{ totalObject(totalHoursPerMonth) }} hrs</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-refresh"></i>Updated now
+                            <i class="fa fa-calendar-o mr-1"></i>{{ getTimeWorked(startEndYear) }}
                         </div>
                     </stats-card>
                 </div>
@@ -22,11 +22,11 @@
                             <i class="nc-icon nc-light-3 text-success"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">Revenue</p>
-                            <h4 class="card-title">$1,345</h4>
+                            <p class="card-category">Time Working</p>
+                            <h4 class="card-title"> {{ getCurrentMonth(currentMonth) }} hrs</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o"></i>Last day
+                            <i class="fa fa-calendar-o mr-1"></i>{{ customFormatter(startEndYear[1]) }} - {{ currentFormatterDate() }}
                         </div>
                     </stats-card>
                 </div>
@@ -36,25 +36,25 @@
                             <i class="nc-icon nc-vector text-danger"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">Errors</p>
-                            <h4 class="card-title">23</h4>
+                            <p class="card-category">Current Jobs</p>
+                            <h4 class="card-title">{{ jobs }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-clock-o"></i>Last day
+                            <i class="fa fa-calendar-o mr-1"></i>{{ currentFormatterDate() }}
                         </div>
                     </stats-card>
                 </div>
                 <div class="col-xl-3 col-md-6">
                     <stats-card>
                         <div slot="header" class="icon-info">
-                            <i class="nc-icon nc-favourite-28 text-primary"></i>
+                            <i class="nc-icon nc-circle-09 text-primary"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">Followers</p>
-                            <h4 class="card-title">+45</h4>
+                            <p class="card-category">New Users</p>
+                            <h4 class="card-title">+{{ totalObject(newUsersPerMonth) }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-refresh"></i>Updated now
+                            <i class="fa fa-calendar-o mr-1"></i>{{ getTimeWorked(startEndYear) }}
                         </div>
                     </stats-card>
                 </div>
@@ -64,7 +64,7 @@
                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id">
                         <template slot="header">
                             <h4 class="card-title">Kilala VN Time allocation</h4>
-                            <p class="card-category">{{ customFormatter(startEndDate[0]) }} - {{ customFormatter(yesterday(startEndDate[1])) }}</p>
+                            <p class="card-category">{{ getTimeWorked(startEndYear) }}</p>
                         </template>
                         <template slot="footer">
                             <div class="legend">
@@ -98,9 +98,17 @@
         data() {
             return {
                 year: new Date().getFullYear(),
-                startEndDate: [],
                 exportLink: '/data/export-report/'+ new Date().getFullYear() +'/xlsx',
                 types: [],
+                monthsText: [],
+                series: [],
+                startEndYear: [],
+                newUsersPerMonth: {},
+                totalHoursPerMonth: {},
+                hoursPerProject: [],
+                jobs: 0,
+                currentMonth: {},
+
                 barChart: {
                     id: 'time-allocation',
                     data: {
@@ -136,21 +144,33 @@
                 let uri = '/data/statistic/time-allocation';
                 axios.get(uri)
                     .then(res => {
-                        this.barChart.data.labels = res.data.monthsText;
-                        this.barChart.data.series = [
-                            [5, 4, 3, 7, 3, 2, 9, 5, 1, 5, 8, 4],
-                            [3, 2, 9, 5, 1, 5, 8, 4, 2, 3, 4, 6],
-                            [1, 5, 8, 4, 2, 3, 4, 6, 4, 1, 2, 1],
-                            [2, 3, 4, 6, 4, 1, 2, 1, 5, 4, 3, 7],
-                            [4, 1, 2, 1, 5, 4, 3, 7, 3, 2, 9, 5]
-                        ];
                         this.types = res.data.types;
-                        this.startEndDate = res.data.startEndYear;
+                        this.startEndYear = res.data.startEndYear;
+                        this.newUsersPerMonth = res.data.newUsersPerMonth;
+                        this.totalHoursPerMonth = res.data.totalHoursPerMonth;
+                        this.hoursPerProject = res.data.hoursPerProject;
+                        this.jobs = res.data.jobs;
+                        this.currentMonth = res.data.currentMonth;
+                        this.monthsText = this.barChart.data.labels = res.data.monthsText;
+                        this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
                     })
                     .catch(err => {
                         console.log(err);
                         alert("Could not load data");
                     });
+            },
+            hasObjectValue(data, id, yearMonth) {
+                let obj = data.filter(function(elem) {
+                    if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem;
+                });
+
+                if (obj.length > 0)
+                    return obj[0];
+
+                return false;
+            },
+            currentFormatterDate() {
+                return moment().format('YYYY/MM/DD');
             },
             customFormatter(date) {
                 return moment(date).format('YYYY/MM/DD');
@@ -161,6 +181,44 @@
             },
             circleClass(cl) {
                 return cl + ' text-uppercase ml-3';
+            },
+            getTimeWorked(date) {
+                return this.customFormatter(date[0]) + ' - ' + this.customFormatter(this.yesterday(date[1]));
+            },
+            totalObject(obj) {
+                let total = [];
+                Object.entries(obj).forEach(([key, val]) => {
+                    total.push(val)
+                });
+                return total.reduce(function(total, num){ return total + num }, 0);
+            },
+            totalArrayObject(arr) {
+                let total = [];
+                arr.map(function(value, key) {
+                    total.push(Math.round(value.total))
+                });
+                return total.reduce(function(total, num){ return total + num }, 0);
+            },
+            getCurrentMonth(data) {
+                if (typeof(data.hours) !== 'undefined') return Math.round(data.hours[0].total) + '/' + data.total;
+            },
+            getSeries(projectTypes, totalHoursPerMonth, hoursPerProject) {
+                let series = [];
+                let _this = this;
+                projectTypes.map(function(value, key) {
+                    let id = value.id;
+                    let row = [];
+                    Object.entries(totalHoursPerMonth).forEach(([key, val]) => {
+                        if ( _this.hasObjectValue(hoursPerProject, id, key) ) {
+                            let percents = (Math.round(_this.hasObjectValue(hoursPerProject, id, key).total)/val*100).toFixed(2);
+                            row.push(percents);
+                        } else {
+                            row.push(0);
+                        }
+                    });
+                    series.push(row);
+                });
+                this.series = this.barChart.data.series = series;
             }
         }
     }

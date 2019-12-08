@@ -16,6 +16,7 @@ class JobsController extends Controller
      */
     public function index()
     {
+        $now = date("Y-m-d");
     	$clients = DB::table('clients')->select('id', 'name as text')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
 
@@ -36,8 +37,28 @@ class JobsController extends Controller
             ->where('s.date', '=',  $selectDate)
             ->get()->toArray();
 
+        $jobs2 = DB::table('projects as p')
+            ->select(
+                'i.id as id',
+                'client_id',
+                'dept_id',
+                DB::raw('concat(p.name," (TR)") as p_name'),
+                'i.name as i_name'
+            )
+            ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+            ->where('i.status', '=', 'publish')
+            ->where('is_training', true)
+            ->where(function ($query) use ($now) {
+                $query->where('end_date', '>=',  $now)
+                    ->orWhere('end_date', '=',  NULL);
+            })
+            ->orderBy('p_name', 'desc')
+            ->get()->toArray();
+
+        $totalJobs = array_merge($jobs, $jobs2);
+
         $jobsID = array();
-        foreach ($jobs as $value) {
+        foreach ($totalJobs as $value) {
             $jobsID[] = $value->id;
         }
 
@@ -54,7 +75,7 @@ class JobsController extends Controller
         return response()->json([
             'clients' => $clients,
             'departments' => $departments,
-            'jobs' => $jobs ? $jobs : array(),
+            'jobs' => $totalJobs ? $totalJobs : array(),
             'jobsTime' => $jobsTime ? $jobsTime : array()
         ]);
     }

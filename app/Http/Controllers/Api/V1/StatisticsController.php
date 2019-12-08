@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Type;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Excel;
 
 class StatisticsController extends Controller
 {
-    public function timeAllocation()
-    {
+    public function timeAllocation() {
         $response = $this->getDataTimeAllocation();
         return response()->json($response);
     }
@@ -60,6 +57,41 @@ class StatisticsController extends Controller
             $daysOfMonth[$endYearMonth]['end']
         );
 
+        // Number current jobs
+        $jobs = DB::table('issues as i')
+            ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+            ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+            ->where('i.status', '=', 'publish')
+            ->where('s.date', '=',  Carbon::now()->format('Y-m-d'))
+            ->count();
+
+        $response['jobs'] = $jobs;
+
+        // Return usersCurrent, CurrentMonth
+        $currentDate = Carbon::now();
+        $usersCurrent = DB::table('role_user')
+            ->select('users.id')
+            ->join('users', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('roles.name', "<>", "admin")
+            ->count();
+
+        $hoursCurrentMonth = DB::table('jobs')
+            ->select(
+                DB::raw('SUM(TIME_TO_SEC(jobs.time))/3600 as total')
+            )
+            ->where('jobs.date', ">=", $response['startEndYear'][1])
+            ->get();
+
+        $daysCurrentMonth = 0;
+        for ($d=1; $d <= $currentDate->daysInMonth ; $d++) {
+            $day = Carbon::createFromDate($currentDate->year,$currentDate->month,$d);
+            if ( $day->isWeekday() ) $daysCurrentMonth++;
+        }
+
+        $response['currentMonth']['hours'] = $hoursCurrentMonth;
+        $response['currentMonth']['total'] = $usersCurrent * (8 * $daysCurrentMonth + 8);
+
         // Return usersOld
         $usersOld = DB::table('role_user')
             ->select('users.id')
@@ -70,7 +102,7 @@ class StatisticsController extends Controller
             ->count();
 
         // Return newUsersInMonth
-        $newUsersInMonth = DB::table('role_user')
+        $newUsersPerMonth = DB::table('role_user')
             ->select(
                 DB::raw('concat(year(users.created_at),"", LPAD(month(users.created_at), 2, "0")) as yearMonth'),
                 DB::raw('COUNT(users.id) as number')
@@ -86,15 +118,15 @@ class StatisticsController extends Controller
 
         $convertUserMonth = array();
 
-        foreach ($newUsersInMonth as $key => $value) {
+        foreach ($newUsersPerMonth as $key => $value) {
             $convertUserMonth[$value->yearMonth] = $value->number;
         }
 
-        $response['newUsersInMonth'] = $convertUserMonth;
+        $response['newUsersPerMonth'] = $convertUserMonth;
 
         // Return totalHoursOfMonth
         ksort($daysOfMonth);
-        $totalHoursOfMonth = array();
+        $totalHoursPerMonth = array();
 
         foreach ($daysOfMonth as $key => $value) {
             $daysInMonth = 0;
@@ -107,13 +139,13 @@ class StatisticsController extends Controller
 
             if ( isset($convertUserMonth[$key]) ) {
                 $usersOld += $convertUserMonth[$key];
-                $totalHoursOfMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
+                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
             } else {
-                $totalHoursOfMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
+                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
             }
         }
 
-        $response['totalHoursOfMonth'] = $totalHoursOfMonth;
+        $response['totalHoursPerMonth'] = $totalHoursPerMonth;
 
         // Return total hours in month of per project type
         $hoursPerProject = DB::table('jobs')
@@ -130,7 +162,7 @@ class StatisticsController extends Controller
             ->groupBy('id', 'yearMonth')
             ->get()->toArray();
 
-        $response['hoursPerProject'][] = $hoursPerProject;
+        $response['hoursPerProject'] = $hoursPerProject;
 
         return $response;
     }
