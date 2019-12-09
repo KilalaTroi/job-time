@@ -26,18 +26,21 @@ class ReportsController extends Controller
     }
     public function getData($year) {
 
-            $arrayMonth = array();
-            $monthYear = date( 'Y-m-01' );
-            //$monthYear = "2019-10-01";
-            for($i = 0; $i < 12; $i++)
-            {
-                $months[$i] = date("Y-m-01", strtotime( $monthYear." -$i months"));
-                $noMonth = date("n", strtotime($months[$i]));
-                $abtMonth = date("M", strtotime($months[$i]));
-                $arrayMonth[12-$i] = $abtMonth;
-            };
-            ksort($arrayMonth);
+        $arrayMonth = array();
+        $monthYear = date( 'Y-m-01' );
+
+        //get list month from now to befor 12 month
+        for($i = 0; $i < 12; $i++)
+        {
+            $months[$i] = date("Y-m-01", strtotime( $monthYear." -$i months"));
+            $noMonth = date("n", strtotime($months[$i]));
+            $abtMonth = date("M", strtotime($months[$i]));
+            $arrayMonth[12-$i] = $abtMonth;
+        };
+        ksort($arrayMonth);
         $typeDate = CAL_GREGORIAN;
+
+        //query
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
@@ -49,17 +52,20 @@ class ReportsController extends Controller
             ->orderBy('t.slug')
             ->orderBy('monthReport')
             ->get()->keyBy('keyType')->toArray();
-        dd($data);
+
+        //get date report have data and unique date report
         $listDateReport = array_column($data, 'dateReport');
         $listDateReport = array_unique($listDateReport);
+
+        //get user
         $arrayNumberUser = array();
         foreach ($listDateReport as $dateReport) {
-            //$dateFormmat = Carbon::createFromFormat('Y/m/d', $dateReport."/01");
+            $dateFormmat = Carbon::createFromFormat('Y/m/d', $dateReport."/01")->addMonths(1);
             $numberUsers = DB::table('role_user')
                 ->join('roles', 'roles.id', '=', 'role_user.role_id')
                 ->join('users', 'role_user.user_id', '=', 'users.id')
                 ->where('roles.name', "<>", "admin")
-                ->where('users.created_at', "<=", $dateReport."/01")->count();
+                ->where('users.created_at', "<=", $dateFormmat)->count();
             $arrayNumberUser[$dateReport]= $numberUsers;
         }
 
@@ -67,6 +73,8 @@ class ReportsController extends Controller
         $typeList = Type::all();
         $totalPercentOfMonth = array();
         $totalPercentOfType = array();
+
+        //generate all recored with 0.0% for a month
         foreach ($typeList as $key => $type) {
             $reponse[$type['slug']] = ['slug' => $type['slug'], 'slug_ja'=>$type['slug_ja']];
             foreach ($arrayMonth as $key1 =>$month) {
@@ -74,6 +82,8 @@ class ReportsController extends Controller
             }
         }
         $arrayNumberMonthOfSlug = array();
+
+        //override data in database into 0.0%
         foreach ($data as $keyType => $type) {
             $slipSlugAndMonthYear = explode("-", $keyType);
             $slicedSlug = array_slice($slipSlugAndMonthYear, 0, -2);
@@ -82,7 +92,9 @@ class ReportsController extends Controller
             $yearOfData = $slipSlugAndMonthYear[count($slipSlugAndMonthYear)-2];
             $type = (array)$type;
             $numberWorkdays = 0;
+            //get number days in month
             $day_count = cal_days_in_month($typeDate, $month, $yearOfData);
+            //get number work days in month except sun and sat
             for ($i = 1; $i <= $day_count; $i++) {
                 $date = $yearOfData.'/'.$month.'/'.$i;
                 $get_name = date('l', strtotime($date));
@@ -91,12 +103,14 @@ class ReportsController extends Controller
                     $numberWorkdays++;
                 }
             }
+            //all hours of users must be work in a month and get percent
             $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * ((8 * $numberWorkdays)+8) * 3600 ;
             $percentJob = round($type['total']/$hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
             $monthName = date('M', mktime(0, 0, 0, $month, 10));
 
             $reponse[$slug][$monthName] = $percentJob . "%";
 
+            //set number month have data of project to cal avegare and cal total percent in a month
             if (empty($totalPercentOfMonth[$monthName])) {
                 $totalPercentOfMonth[$monthName] = 0;
             }
@@ -110,6 +124,7 @@ class ReportsController extends Controller
             $totalPercentOfType[$slug]   += $percentJob;
             $arrayNumberMonthOfSlug[$slug] += 1;
         }
+        //cal avegare on project
         foreach ($reponse as $key => $value) {
             if(isset($totalPercentOfType[$key])) {
                 $reponse[$key]['Total'] = round($totalPercentOfType[$key] / $arrayNumberMonthOfSlug[$key], 1, PHP_ROUND_HALF_UP). "%";
@@ -118,6 +133,7 @@ class ReportsController extends Controller
             }
         }
 
+        //total and skipColumn to merge column in excel
         $listTotalOfMonth['title'] = 'Total';
         $listTotalOfMonth['skipColumn'] = '';
         foreach($arrayMonth as $month) {
