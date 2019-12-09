@@ -73,7 +73,7 @@
                             <hr>
                             <div class="row">
                                 <div class="export col-auto ml-auto">
-                                    <a :href="exportLink" target="_blank"><i class="fa fa-download"></i> Export</a>
+                                    <a :href="exportLink" target="_blank"><i class="fa fa-download"></i> Export excel</a>
                                 </div>
                             </div>
                         </template>
@@ -87,6 +87,8 @@
     import ChartCard from '../components/Cards/ChartCard.vue'
     import StatsCard from '../components/Cards/StatsCard.vue'
     import LTable from '../components/Table.vue'
+    import Chartist from 'chartist'
+    import chartistPluginTooltip from 'chartist-plugin-tooltip'
     import moment from 'moment'
 
     export default {
@@ -126,9 +128,14 @@
                             labelInterpolationFnc: function(value) {
                                 return value + '%'
                             },
-                            scaleMinSpace: 60
+                            scaleMinSpace: 40,
+                            high: 100,
+                            low: 0
                         },
-                        height: '360px'
+                        height: '360px',
+                        plugins: [
+                            Chartist.plugins.tooltip()
+                        ]
                     },
                     responsiveOptions: [
                         ['screen and (max-width: 640px)', {
@@ -223,12 +230,56 @@
                             row.push(0);
                         }
                     });
-                    series.push(row);
+                    let obj = {
+                        name: value.slug+" (%)",
+                        data: row
+                    }
+                    series.push(obj);
                 });
                 this.series = this.barChart.data.series = series;
             }
         }
     }
 </script>
-<style>
+<style lang="scss">
+$chart-tooltip-bg: #F4C63D;
+$chart-tooltip-color: #453D3F;
+.ct-tooltip {
+    position: absolute;
+    margin-top: 100px;
+    display: inline-block;
+    opacity: 1;
+    min-width: 5em;
+    padding: .5em;
+    background: $chart-tooltip-bg;
+    color: $chart-tooltip-color;
+    font-family: Oxygen,Helvetica,Arial,sans-serif;
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+    z-index: 1;
+    -webkit-transition: opacity .2s linear;
+    -moz-transition: opacity .2s linear;
+    -o-transition: opacity .2s linear;
+    transition: opacity .2s linear;
+    text-transform: uppercase;
+
+    &:before {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        margin-left: -15px;
+        border: 15px solid transparent;
+        border-top-color: $chart-tooltip-bg;
+    }
+    &.tooltip-show {
+        opacity: 1;
+    }
+}
+.ct-area, .ct-line {
+    pointer-events: none;
+}
 </style>

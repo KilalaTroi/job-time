@@ -1,19 +1,21 @@
 <template>
-    <div class="input-group color-picker" ref="colorpicker">
-        <input type="text" class="form-control" v-model="colorValue" @focus="showPicker()" @input="updateFromInput"/>
-        <span class="input-group-append color-picker-container">
-            <span class="current-color" :style="'background-color: ' + colorValue" @click="togglePicker()"></span>
-            <chrome-picker :value="colors" @input="updateFromPicker" v-if="displayPicker"/>
-        </span>
+    <div>
+        <div class="input-group color-picker" ref="colorpicker">
+            <span class="input-group-append color-picker-container rounded-left overflow-hidden">
+                <span class="current-color" :style="'background-color: ' + colorValue"></span>
+            </span>
+            <input type="text" class="form-control" v-model="colorValue" @focus="showPicker()" @input="updateFromInput"/>
+        </div>
+        <compact :value="colors" class="w-100 mt-2" @input="updateFromPicker" v-if="displayPicker"/>
     </div>
 </template>
 <script>
-    import { Chrome } from 'vue-color'
+    import { Compact } from 'vue-color'
 
     export default {
         name: 'color-picker',
         components: {
-            'chrome-picker': Chrome
+            'compact': Compact
         },
         props: ['color'],
         data() {
@@ -22,7 +24,7 @@
                     hex: '#000000',
                 },
                 colorValue: '',
-                displayPicker: false,
+                displayPicker: true,
             }
         },
         mounted() {
@@ -48,17 +50,6 @@
                     }
                 }
             },
-            showPicker() {
-                document.addEventListener('click', this.documentClick);
-                this.displayPicker = true;
-            },
-            hidePicker() {
-                document.removeEventListener('click', this.documentClick);
-                this.displayPicker = false;
-            },
-            togglePicker() {
-                this.displayPicker ? this.hidePicker() : this.showPicker();
-            },
             updateFromInput() {
                 this.updateColors(this.colorValue);
             },
@@ -71,26 +62,16 @@
                     this.colorValue = 'rgba(' + color.rgba.r + ', ' + color.rgba.g + ', ' + color.rgba.b + ', ' + color.rgba.a + ')';
                 }
             },
-            documentClick(e) {
-                var el = this.$refs.colorpicker,
-                    target = e.target;
-                if(el !== target && !el.contains(target)) {
-                    this.hidePicker();
-                    console.log(this.color);
-                }
-            }
         },
         watch: {
             colorValue(val) {
                 if(val) {
                     this.updateColors(val);
                     this.$emit('input', val);
-                    //document.body.style.background = val;
                 }
             },
             color: function(newVal, oldVal) { // watch it
                 this.setColor(newVal);
-                // console.log('Prop changed: ', newVal, ' | was: ', oldVal)
             }
         },
     }
@@ -107,6 +88,5 @@
         width: 40px;
         height: 40px;
         background-color: #000;
-        cursor: pointer;
     }
 </style>
