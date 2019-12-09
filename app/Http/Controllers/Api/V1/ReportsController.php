@@ -49,6 +49,7 @@ class ReportsController extends Controller
             ->orderBy('t.slug')
             ->orderBy('monthReport')
             ->get()->keyBy('keyType')->toArray();
+        dd($data);
         $listDateReport = array_column($data, 'dateReport');
         $listDateReport = array_unique($listDateReport);
         $arrayNumberUser = array();
@@ -90,7 +91,7 @@ class ReportsController extends Controller
                     $numberWorkdays++;
                 }
             }
-            $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * 8 * $numberWorkdays * 3600;
+            $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * ((8 * $numberWorkdays)+8) * 3600 ;
             $percentJob = round($type['total']/$hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
             $monthName = date('M', mktime(0, 0, 0, $month, 10));
 
@@ -167,11 +168,7 @@ class ReportsController extends Controller
                 $sheet->setBorder('A1:P'.$numberRows, 'thin');
             });
         })->download($file_extension);
-        return response()->json(
-            [
-                'data' => $reponse,
-                'listTotalOfMonth' => $listTotalOfMonth
-            ]);
+
     }
 
 }
