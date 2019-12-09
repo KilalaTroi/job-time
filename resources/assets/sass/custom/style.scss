@@ -1,0 +1,58 @@
+/********************************************/
+/**************    TABLE           *********/
+/******************************************/
+$table-border: 1px solid #4e4737;
+.table-striped {
+  border: $table-border;
+  thead {
+    tr {
+      background-color: #ffd05b;
+      th {
+        // color: #fff;
+        font-size: 14px;
+        line-height: 1.8;
+        border: $table-border;
+      }
+    }
+  }
+  tbody {
+    tr {
+      td {
+        border: $table-border;
+      }
+      &:nth-of-type(odd) {
+        background-color: rgba(142, 142, 142, 0.05);
+      }
+      &:nth-of-type(even) {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      &:hover {
+        background-color: rgba(255, 210, 85, 0.15);
+      }
+    }
+  }
+}
+
+/********************************************/
+/**************    BUTTON          *********/
+/******************************************/
+table {
+  .btn-default {
+    color: #f19300;
+    background-color: white;
+    border-color: #b7740a;
+    &:hover {
+      color: #b77000;
+      border-color: #7d4d00;
+    }
+  }
+
+  .btn-danger {
+    background-color: white;
+  }
+
+  .btn {
+    border-width: 1px;
+    padding: 2px 5px;
+  }
+}
