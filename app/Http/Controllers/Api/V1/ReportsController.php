@@ -16,14 +16,14 @@ class ReportsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function report($year)
-    {
+    public function report($year){
         $reponse = $this->getData($year);
         return response()->json(
             [
                 'data' => $reponse,
             ]);
     }
+
     public function getData($year) {
 
         $arrayMonth = array();
@@ -145,8 +145,8 @@ class ReportsController extends Controller
         $reponse['totalOfMonth'] = $listTotalOfMonth;
         return $reponse;
     }
-    public function exportReport($year,$file_extension)
-    {
+
+    public function exportReport($year,$file_extension){
         $reponse = $this->getData($year);
         $numberRows = count($reponse) + 1;
         return Excel::create('Report_'. $year, function($excel) use ($reponse, $numberRows) {
