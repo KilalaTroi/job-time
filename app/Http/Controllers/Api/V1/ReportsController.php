@@ -79,7 +79,11 @@ class ReportsController extends Controller
         foreach ($typeList as $key => $type) {
             $reponse[$type['slug']] = ['slug' => $type['slug'], 'slug_ja'=>$type['slug_ja']];
             foreach ($arrayMonth as $key1 =>$month) {
-                $reponse[$type['slug']][$month] = "0.0%";
+                if ($month == Carbon::now()->format('M')) {
+                    $reponse[$type['slug']][$month] = "";
+                } else {
+                    $reponse[$type['slug']][$month] = "0.0%";
+                }
             }
         }
         $arrayNumberMonthOfSlug = array();
@@ -142,7 +146,11 @@ class ReportsController extends Controller
         $listTotalOfMonth['title'] = 'Total';
         $listTotalOfMonth['skipColumn'] = '';
         foreach($arrayMonth as $month) {
-            $listTotalOfMonth[$month] = "0.0%";
+            if ($month == Carbon::now()->format('M')) {
+                $listTotalOfMonth[$month] =  "";
+            } else {
+                $listTotalOfMonth[$month] = "0.0%";
+            }
         }
         foreach ($totalPercentOfMonth as $key =>$value) {
             $listTotalOfMonth[$key] = $value . "%";
