@@ -27,6 +27,7 @@ class ReportsController extends Controller
     public function getData($year) {
         $arrayMonth = array();
         $monthYear = $year . "-" . Carbon::now()->format('m') . "-01";
+
         //get list month from now to befor 12 month
         for($i = 0; $i < 12; $i++)
         {
@@ -90,8 +91,10 @@ class ReportsController extends Controller
             $yearOfData = $slipSlugAndMonthYear[count($slipSlugAndMonthYear)-2];
             $type = (array)$type;
             $numberWorkdays = 0;
+
             //get number days in month
             $day_count = cal_days_in_month($typeDate, $month, $yearOfData);
+
             //get number work days in month except sun and sat
             for ($i = 1; $i <= $day_count; $i++) {
                 $date = $yearOfData.'/'.$month.'/'.$i;
@@ -101,6 +104,7 @@ class ReportsController extends Controller
                     $numberWorkdays++;
                 }
             }
+
             //all hours of users must be work in a month and get percent
             $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * ((8 * $numberWorkdays)+8) * 3600 ;
             $percentJob = round($type['total']/$hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
@@ -122,6 +126,7 @@ class ReportsController extends Controller
             $totalPercentOfType[$slug]   += $percentJob;
             $arrayNumberMonthOfSlug[$slug] += 1;
         }
+
         //cal avegare on project
         foreach ($reponse as $key => $value) {
             if(isset($totalPercentOfType[$key])) {
@@ -144,7 +149,7 @@ class ReportsController extends Controller
         return $reponse;
     }
 
-    public function exportReport($year,$file_extension){
+    public function exportReport($year,$file_extension) {
         $reponse = $this->getData($year);
         $numberRows = count($reponse) + 1;
         return Excel::create('Report_'. $year, function($excel) use ($reponse, $numberRows) {
@@ -182,7 +187,6 @@ class ReportsController extends Controller
                 $sheet->setBorder('A1:P'.$numberRows, 'thin');
             });
         })->download($file_extension);
-
     }
 
 }

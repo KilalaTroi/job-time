@@ -42,7 +42,7 @@ class JobsController extends Controller
                 'i.id as id',
                 'client_id',
                 'dept_id',
-                DB::raw('concat(p.name," (TR)") as p_name'),
+                'p.name as p_name',
                 'i.name as i_name'
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
