@@ -30,10 +30,6 @@
                 <i class="nc-icon nc-paper-2"></i>
                 <p>Schedules</p>
             </sidebar-link>
-            <sidebar-link to="/jobs">
-                <i class="nc-icon nc-watch-time"></i>
-                <p>Jobs</p>
-            </sidebar-link>
         </side-bar>
         <div class="main-panel">
             <top-navbar></top-navbar>
