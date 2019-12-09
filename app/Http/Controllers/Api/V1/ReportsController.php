@@ -25,6 +25,7 @@ class ReportsController extends Controller
     }
 
     public function getData($year) {
+
         $arrayMonth = array();
         $monthYear = $year . "-" . Carbon::now()->format('m') . "-01";
 
@@ -51,6 +52,7 @@ class ReportsController extends Controller
             ->orderBy('t.slug')
             ->orderBy('monthReport')
             ->get()->keyBy('keyType')->toArray();
+        $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
         //get date report have data and unique date report
         $listDateReport = array_column($data, 'dateReport');
