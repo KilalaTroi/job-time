@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Type;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +28,7 @@ class ReportsController extends Controller
 
             $arrayMonth = array();
             $monthYear = date( 'Y-m-01' );
-            //$monthYear = "2019-10-01";
+            $monthYear = "2019-10-01";
             for($i = 0; $i < 12; $i++)
             {
 
@@ -38,9 +39,7 @@ class ReportsController extends Controller
             };
             ksort($arrayMonth);
 
-        $numberUsers = DB::table('role_user')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.name', "<>", "admin")->count();
+
         $typeDate = CAL_GREGORIAN;
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
@@ -53,6 +52,19 @@ class ReportsController extends Controller
             ->orderBy('t.slug')
             ->orderBy('monthReport')
             ->get()->keyBy('keyType')->toArray();
+        $listDateReport = array_column($data, 'dateReport');
+        $listDateReport = array_unique($listDateReport);
+        $arrayNumberUser = array();
+        foreach ($listDateReport as $dateReport) {
+            //$dateFormmat = Carbon::createFromFormat('Y/m/d', $dateReport."/01");
+            $numberUsers = DB::table('role_user')
+                ->join('roles', 'roles.id', '=', 'role_user.role_id')
+                ->join('users', 'role_user.user_id', '=', 'users.id')
+                ->where('roles.name', "<>", "admin")
+                ->where('users.created_at', "<=", $dateReport."/01")->count();
+            $arrayNumberUser[$dateReport]= $numberUsers;
+        }
+
         $reponse = array();
         $typeList = Type::all();
         $totalPercentOfMonth = array();
@@ -81,7 +93,7 @@ class ReportsController extends Controller
                     $numberWorkdays++;
                 }
             }
-            $hoursForMonth = $numberUsers * 8 * $numberWorkdays * 3600;
+            $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * 8 * $numberWorkdays * 3600;
             $percentJob = round($type['total']/$hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
             $monthName = date('M', mktime(0, 0, 0, $month, 10));
 
