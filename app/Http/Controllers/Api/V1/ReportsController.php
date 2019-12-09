@@ -25,10 +25,8 @@ class ReportsController extends Controller
     }
 
     public function getData($year) {
-
         $arrayMonth = array();
-        $monthYear = date( 'Y-m-01' );
-
+        $monthYear = $year . "-" . Carbon::now()->format('m') . "-01";
         //get list month from now to befor 12 month
         for($i = 0; $i < 12; $i++)
         {
