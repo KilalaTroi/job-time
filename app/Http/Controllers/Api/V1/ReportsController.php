@@ -152,7 +152,9 @@ class ReportsController extends Controller
     public function exportReport($year,$file_extension) {
         $reponse = $this->getData($year);
         $numberRows = count($reponse) + 1;
-        return Excel::create('Report_'. $year, function($excel) use ($reponse, $numberRows) {
+        $curentTimestampe = Carbon::now()->timestamp;
+
+        return Excel::create('Report_'. $year. "_" . $curentTimestampe, function($excel) use ($reponse, $numberRows) {
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
