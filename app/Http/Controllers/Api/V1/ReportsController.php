@@ -28,18 +28,15 @@ class ReportsController extends Controller
 
             $arrayMonth = array();
             $monthYear = date( 'Y-m-01' );
-            $monthYear = "2019-10-01";
+            //$monthYear = "2019-10-01";
             for($i = 0; $i < 12; $i++)
             {
-
                 $months[$i] = date("Y-m-01", strtotime( $monthYear." -$i months"));
                 $noMonth = date("n", strtotime($months[$i]));
                 $abtMonth = date("M", strtotime($months[$i]));
                 $arrayMonth[12-$i] = $abtMonth;
             };
             ksort($arrayMonth);
-
-
         $typeDate = CAL_GREGORIAN;
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
