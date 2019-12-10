@@ -161,21 +161,37 @@ class ReportsController extends Controller
 
     public function exportReport($year,$file_extension) {
         $reponse = $this->getData($year);
-        $numberRows = count($reponse) + 1;
+
+        $numberRows = count($reponse) + 4;
         $curentTimestampe = Carbon::now()->timestamp;
 
-        return Excel::create('Report_'. $year. "_" . $curentTimestampe, function($excel) use ($reponse, $numberRows) {
+        return Excel::create('Report_'. $year. "_" . $curentTimestampe, function($excel) use ($reponse, $numberRows, $year) {
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
-
-            $excel->sheet('sheet1', function($sheet) use ($reponse, $numberRows) {
-                $sheet->fromArray($reponse);
-                $sheet->setCellValue('A1', 'Job type');
-                $sheet->setCellValue('B1', 'Japanese');
+            $excel->sheet('sheet1', function($sheet) use ($reponse, $numberRows, $year) {
+                $sheet->setCellValue('A1', "Job Time Report ". $year);
+                $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                $sheet->fromArray($reponse, null, 'A4', true);
+                $sheet->setCellValue('A4', 'Job type');
+                $sheet->setCellValue('B4', 'Japanese');
+                $sheet->mergeCells('A1:O1');
+                $sheet->mergeCells('A2:O2');
                 $sheet->cell('A1:O1', function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '16',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setValignment('middle');
+                });
+                $sheet->cell('A2:O2', function($cells) {
+                    $cells->setAlignment('center');
+                });
+                $sheet->cell('A4:O4', function($cells) {
                     // Set black background
-                    //$cells->setBackground('#dee2e6');
+                    $cells->setBackground('#ffd05b');
                     // Set font
                     $cells->setFont([
                         'size'       => '11',
@@ -183,11 +199,12 @@ class ReportsController extends Controller
                     ]);
                     $cells->setAlignment('center');
                     $cells->setBorder('thin','thin','thin','thin');
+                });
+                $sheet->cell('C5:O'.$numberRows , function($cells) {
+                    $cells->setAlignment('center');
                 });
                 $sheet->mergeCells('A'.$numberRows.':B'.$numberRows);
                 $sheet->cell('A'. $numberRows.':O'.$numberRows, function($cells) {
-                    // Set black background
-                    //$cells->setBackground('#dee2e6');
                     // Set font
                     $cells->setFont([
                         'size'       => '11',
@@ -196,7 +213,12 @@ class ReportsController extends Controller
                     $cells->setAlignment('center');
                     $cells->setBorder('thin','thin','thin','thin');
                 });
-                $sheet->setBorder('A1:P'.$numberRows, 'thin');
+                $sheet->cell('A4:A'.$numberRows , function($cells) {
+                    $cells->setFont([
+                        'bold'       =>  true
+                    ]);
+                });
+                $sheet->setBorder('A4:P'.$numberRows, 'thin');
             });
         })->download($file_extension);
     }
