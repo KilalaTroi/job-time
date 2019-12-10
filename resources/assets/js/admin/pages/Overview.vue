@@ -152,6 +152,11 @@
         },
         mounted() {
             this.fetch();
+            $(document).on('mouseenter', '.ct-bar', function() {
+                var seriesDesc = $(this).attr('ct:meta'),
+                value = $(this).attr('ct:value');
+                $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
+            });
         },
         methods: {
             fetch() {
@@ -225,16 +230,18 @@
                     Object.entries(totalHoursPerMonth).forEach(([key, val]) => {
                         if ( _this.hasObjectValue(hoursPerProject, id, key) ) {
                             let percents = (Math.round(_this.hasObjectValue(hoursPerProject, id, key).total)/val*100).toFixed(2);
-                            row.push(percents);
+                            row.push({
+                                value: percents,
+                                meta: value.slug
+                            });
                         } else {
-                            row.push(0);
+                            row.push({
+                                value: 0,
+                                meta: value.slug
+                            });
                         }
                     });
-                    let obj = {
-                        name: value.slug+" (%)",
-                        data: row
-                    }
-                    series.push(obj);
+                    series.push(row);
                 });
                 this.series = this.barChart.data.series = series;
             }

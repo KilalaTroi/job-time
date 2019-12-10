@@ -20,7 +20,7 @@
                     </card>
                 </div>
                 <div class="col-sm-8 col-lg-9 col-xl-10">
-                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="deleteEvent" />
+                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="deleteEvent" />
                 </div>
             </div>
         </div>
@@ -72,6 +72,9 @@ export default {
             ],
             editable: true,
             droppable: true,
+            minTime: '08:00:00',
+            maxTime: '17:00:00',
+            allDaySlot: false
         }
     },
     mounted() {
