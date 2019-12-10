@@ -17,7 +17,7 @@
                     </card>
                 </div>
                 <div class="col-sm-8 col-lg-9 col-xl-10">
-                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" />
+                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" />
                 </div>
             </div>
         </div>
@@ -69,6 +69,11 @@ export default {
             ],
             editable: false,
             droppable: false,
+            minTime: '08:00:00',
+            maxTime: '17:00:00',
+            allDaySlot: false,
+            height: 'auto',
+            hiddenDays: [0]
         }
     },
     mounted() {
@@ -168,12 +173,24 @@ export default {
     color: #ffffff;
 }
 
-tr:first-child>td>.fc-day-grid-event {
-    padding: 5px;
-    color: #ffffff;
-}
+// tr:first-child>td>.fc-day-grid-event {
+//     padding: 5px;
+//     color: #ffffff;
+// }
 
 .fc-time-grid .fc-slats td {
-    height: 2.5em;
+    height: 2em;
+}
+
+.fc-unthemed td.fc-today {
+    background-color: transparent;
+}
+
+.fc .fc-view-container .fc-head .fc-today {
+    background-color: #ffd05b;
+}
+
+.fc-unthemed th, .fc-unthemed td, .fc-unthemed thead, .fc-unthemed tbody, .fc-unthemed .fc-divider, .fc-unthemed .fc-row, .fc-unthemed .fc-content, .fc-unthemed .fc-popover, .fc-unthemed .fc-list-view, .fc-unthemed .fc-list-heading td {
+    border-color: #b3aeae;
 }
 </style>
