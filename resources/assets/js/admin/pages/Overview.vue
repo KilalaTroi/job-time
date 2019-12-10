@@ -249,19 +249,21 @@
     }
 </script>
 <style lang="scss">
-$chart-tooltip-bg: #F4C63D;
-$chart-tooltip-color: #453D3F;
+$chart-tooltip-bg: rgba(40, 40, 40, 0.75) ;
+$chart-tooltip-color: #fff;
 .ct-tooltip {
     position: absolute;
     margin-top: 100px;
     display: inline-block;
-    opacity: 1;
-    min-width: 5em;
-    padding: .5em;
+    opacity: 0.75;
+    min-width: 130px;
+    padding: 5px 10px;
+    border-radius: 5px;
     background: $chart-tooltip-bg;
     color: $chart-tooltip-color;
-    font-family: Oxygen,Helvetica,Arial,sans-serif;
-    font-weight: 700;
+    font-family: Roboto, Helvetica Neue, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 12px;
     text-align: center;
     pointer-events: none;
     z-index: 1;
@@ -278,12 +280,12 @@ $chart-tooltip-color: #453D3F;
         left: 50%;
         width: 0;
         height: 0;
-        margin-left: -15px;
-        border: 15px solid transparent;
+        margin-left: -7px;
+        border: 7px solid transparent;
         border-top-color: $chart-tooltip-bg;
     }
-    &.tooltip-show {
-        opacity: 1;
+    span:last-child {
+        font-size: 14px;
     }
 }
 .ct-area, .ct-line {
