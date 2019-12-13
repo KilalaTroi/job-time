@@ -9,7 +9,7 @@
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
-                    <h4 class="card-title">Types list</h4>
+                    <h4 class="card-title">Job types list</h4>
                 </template>
                 <action-table
                         class="table-hover table-bordered table-striped"
@@ -45,10 +45,10 @@
     import CreateButton from "../../components/Buttons/Create";
 
     const tableColumns = [
-        {id: 'slug', value: 'Slug', width: '', class: ''},
-        {id: 'value', value: 'Type color', width: '110', class: 'text-center'},
-        {id: 'slug_vi', value: 'Slug VI', width: '', class: ''},
-        {id: 'slug_ja', value: 'Slug JA', width: '', class: ''}
+        {id: 'slug', value: 'Name', width: '', class: ''},
+        {id: 'value', value: 'Color', width: '110', class: 'text-center'},
+        {id: 'slug_vi', value: 'Name VI', width: '', class: ''},
+        {id: 'slug_ja', value: 'Name JA', width: '', class: ''}
     ];
     export default {
         components: {
