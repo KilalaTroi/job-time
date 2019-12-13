@@ -35,12 +35,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <!--<div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Is training?</label>
                         <input v-model="is_training" type="checkbox" name="is_training" class="form-control">
                     </div>
-                </div>
+                </div>-->
             </div>
             <hr>
             <div class="row">
@@ -65,23 +65,31 @@
             </div>
             <hr>
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Issue</label>
                         <input v-model="i_name" type="text" name="i_name" class="form-control">
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">No period</label>
+                        <input v-model="no_period" type="checkbox" name="no_period" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Start date</label>
-                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
+                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :disabled='isDisabledDate'>
                         </datepicker>
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">End date</label>
-                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
+                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :disabled='isDisabledDate'>
                         </datepicker>
                     </div>
                 </div>
@@ -126,6 +134,7 @@ export default {
             p_name_vi: '',
             p_name_ja: '',
             is_training: false,
+            no_period: false,
             i_name: '',
             start_date: '',
             end_date: '',
@@ -135,6 +144,11 @@ export default {
             clientOptions: [],
             departmentOptions: [],
             typeOptions: []
+        }
+    },
+    computed: {
+        isDisabledDate: function(){
+            return !this.no_period;
         }
     },
     mounted() {},
@@ -209,7 +223,8 @@ export default {
                 is_training: this.is_training,
                 i_name: this.i_name,
                 start_date: this.start_date,
-                end_date: this.end_date
+                end_date: this.end_date,
+                no_period: this.no_period,
             };
 
             this.$emit('create-item', newItem);
@@ -241,6 +256,7 @@ export default {
                 this.p_name_vi = '';
                 this.p_name_ja = '';
                 this.is_training = false;
+                this.no_period = false;
                 this.i_name = '';
                 this.start_date = '';
                 this.end_date = '';
