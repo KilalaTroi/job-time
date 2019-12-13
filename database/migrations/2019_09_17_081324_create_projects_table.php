@@ -22,6 +22,7 @@ class CreateProjectsTable extends Migration
             $table->string('name_ja', 100)->nullable();
             $table->boolean('is_training');
             $table->integer('type_id');
+            $table->boolean('no_period');
             $table->timestamps();
         });
     }

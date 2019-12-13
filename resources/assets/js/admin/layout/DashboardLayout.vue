@@ -20,7 +20,7 @@
             </sidebar-link>
             <sidebar-link to="/types">
                 <i class="nc-icon nc-tag-content"></i>
-                <p>Types</p>
+                <p>Job Types</p>
             </sidebar-link>
             <sidebar-link to="/projects">
                 <i class="nc-icon nc-bag"></i>

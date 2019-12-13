@@ -1,21 +1,21 @@
 <template>
     <modal id="itemCreate" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Create Type</template>
+        <template slot="title">Create Job Type</template>
         <form @submit="emitCreateItem">
             <div class="form-group">
-                <label class="">Slug</label>
+                <label class="">Name</label>
                 <input v-model="slug" type="text" name="slug" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="">Slug VI</label>
+                <label class="">Name VI</label>
                 <input v-model="slug_vi" type="text" name="slug_vi" class="form-control">
             </div>
             <div class="form-group">
-                <label class="">Slug JA</label>
+                <label class="">Name JA</label>
                 <input v-model="slug_ja" type="text" name="slug_ja" class="form-control">
             </div>
             <div class="form-group">
-                <label class="">Type Color</label>
+                <label class="">Color</label>
                 <color-picker :color="value" v-model="value"></color-picker>
             </div>
             <error-item :errors="errors"></error-item>

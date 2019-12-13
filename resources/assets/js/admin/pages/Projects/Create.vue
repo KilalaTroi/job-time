@@ -35,12 +35,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <!--<div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Is training?</label>
                         <input v-model="is_training" type="checkbox" name="is_training" class="form-control">
                     </div>
-                </div>
+                </div>-->
             </div>
             <hr>
             <div class="row">
@@ -65,20 +65,28 @@
             </div>
             <hr>
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Issue</label>
                         <input v-model="i_name" type="text" name="i_name" class="form-control">
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">No period</label>
+                        <input v-model="no_period" type="checkbox" name="is_training" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Start date</label>
                         <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">End date</label>
                         <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
