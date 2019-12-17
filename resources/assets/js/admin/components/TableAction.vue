@@ -54,7 +54,7 @@
                 return item[column.id.toLowerCase()] ? item[column.id.toLowerCase()] : '--'
             },
             checkTypeColor (data) {
-                return data.value == 'Type color';
+                return data.value == 'Color';
             },
             setBackground(color) {
                 return {

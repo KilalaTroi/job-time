@@ -12,7 +12,7 @@ class Project extends Model
      * @var array
      */
     protected $fillable = [
-        'client_id', 'dept_id', 'name', 'name_vi', 'name_ja', 'is_training', 'type_id'
+        'dept_id', 'name', 'name_vi', 'name_ja', 'type_id'
     ];
 
     public function issues() {

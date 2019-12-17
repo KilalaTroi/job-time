@@ -23,9 +23,9 @@
                 <action-table class="table-hover table-bordered table-striped" :columns="columns" :data="projectData" v-on:get-item="getItem" v-on:delete-item="deleteItem">
                 </action-table>
             </card>
-            <CreateItem :clients="clients" :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
+            <CreateItem :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
-            <EditItem :currentItem="currentItem" :clients="clients" :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-item="updateItem" v-on:reset-validation="resetValidate">
+            <EditItem :currentItem="currentItem" :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-item="updateItem" v-on:reset-validation="resetValidate">
             </EditItem>
             <AddIssue :projects="projects" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
@@ -42,12 +42,11 @@ import ActionTable from '../../components/TableAction'
 import moment from 'moment'
 
 const tableColumns = [
-    { id: 'client', value: 'Client', width: '', class: '' },
     { id: 'department', value: 'Department', width: '', class: '' },
     { id: 'project', value: 'Project', width: '', class: '' },
     { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
     { id: 'type', value: 'Type', width: '', class: '' },
-    { id: 'value', value: 'Type color', width: '110', class: 'text-center' },
+    { id: 'value', value: 'Color', width: '110', class: 'text-center' },
     { id: 'start_date', value: 'Start date', width: '', class: '' },
     { id: 'end_date', value: 'End date', width: '', class: '' }
 ];
@@ -64,7 +63,6 @@ export default {
     data() {
         return {
             columns: [...tableColumns],
-            clients: [],
             departments: [],
             types: [],
             projects: [],
@@ -93,7 +91,6 @@ export default {
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
                         id: data[i].id,
-                        client: this.getObjectValue(this.clients, data[i].client_id).text,
                         department: typeof(this.getObjectValue(this.departments, data[i].dept_id)) !== 'undefined' ? this.getObjectValue(this.departments, data[i].dept_id).text : '',
                         project: data[i].p_name,
                         issue: data[i].i_name,
@@ -112,7 +109,6 @@ export default {
             let uri = '/data/projects';
             axios.get(uri)
                 .then(res => {
-                    this.clients = res.data.clients;
                     this.departments = res.data.departments;
                     this.types = res.data.types;
                     this.projects = res.data.projects;
@@ -155,7 +151,6 @@ export default {
                     let addIdItem = Object.assign({}, {
                         id: res.data.id,
                         issue_id: res.data.issue_id,
-                        client_id: res.data.client_id,
                         dept_id: res.data.dept_id,
                         type_id: res.data.type_id,
                         p_name: res.data.p_name,
