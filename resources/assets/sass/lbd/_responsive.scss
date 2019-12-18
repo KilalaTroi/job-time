@@ -98,12 +98,12 @@
         .main-panel{
             position: absolute;
             left: 0;
-            @include transform-translate-3d(-250px);
+            @include transform-translate-3d(-200px);
             @include transition (0.5s, cubic-bezier(0.685, 0.0473, 0.346, 1));
         }
 
         .sidebar{
-            @include transform-translate-3d(10px);
+            @include transform-translate-3d(0px);
             @include transition (0.5s, cubic-bezier(0.685, 0.0473, 0.346, 1));
         }
     }
@@ -111,6 +111,10 @@
     .main-panel{
         @include transform-translate-3d(0px);
         @include transition (0.5s, cubic-bezier(0.685, 0.0473, 0.346, 1));
+
+        .modal-open & {
+            transform: none!important;
+        }
     }
 
 

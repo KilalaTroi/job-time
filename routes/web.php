@@ -36,6 +36,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
+    Route::get('issues/archive/{id}', 'IssuesController@archive');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);

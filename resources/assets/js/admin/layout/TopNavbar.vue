@@ -1,57 +1,25 @@
 <template>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <p class="navbar-brand"><i class="nc-icon nc-android mr-2 ic-custom"></i>Welcome {{ currentUser.name }}</p>
+            <router-link :to="{path: '/'}" class="py-1 d-block d-sm-none">
+                <div class="logo-img">
+                    <img width="50" src="/images/logo.png" :alt="title">
+                </div>
+            </router-link>
+            <p class="navbar-brand d-none d-sm-block"><i class="nc-icon nc-android mr-2 ic-custom"></i>Welcome {{ currentUser.name }}</p>
             <button type="button" class="navbar-toggler navbar-toggler-right" :class="{toggled: $sidebar.showSidebar}" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation" @click="toggleSidebar">
                 <span class="navbar-toggler-bar burger-lines"></span>
                 <span class="navbar-toggler-bar burger-lines"></span>
                 <span class="navbar-toggler-bar burger-lines"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end">
-                <!-- <ul class="nav navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-toggle="dropdown">
-                            <i class="nc-icon nc-palette"></i>
-                        </a>
-                    </li>
-                    <base-dropdown tag="li">
-                        <template slot="title">
-                            <i class="nc-icon nc-planet"></i>
-                            <b class="caret"></b>
-                            <span class="notification">5</span>
-                        </template>
-                        <a class="dropdown-item" href="#">Notification 1</a>
-                        <a class="dropdown-item" href="#">Notification 2</a>
-                        <a class="dropdown-item" href="#">Notification 3</a>
-                        <a class="dropdown-item" href="#">Notification 4</a>
-                        <a class="dropdown-item" href="#">Another notification</a>
-                    </base-dropdown>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nc-icon nc-zoom-split"></i>
-                            <span class="d-lg-block">&nbsp;Search</span>
-                        </a>
-                    </li>
-                </ul> -->
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <!-- <a class="nav-link" to="/profile">
-                            Profile
-                        </a> -->
                         <router-link :to="{path: '/profile'}" class="nav-link">
                             <i class="nc-icon nc-circle-09 mr-2 ic-custom-2"></i> 
                             Profile
                         </router-link>
                     </li>
-                    <!-- <base-dropdown title="Dropdown">
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <a class="dropdown-item" href="#">Something</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <a class="dropdown-item" href="#">Something</a>
-                        <div class="divider"></div>
-                        <a class="dropdown-item" href="#">Separated link</a>
-                    </base-dropdown> -->
                     <li class="nav-item">
                         <a href="/logout" class="nav-link">
                             <i class="nc-icon nc-button-power mr-2 ic-custom-2"></i> 
@@ -75,7 +43,8 @@ export default {
         return {
             activeNotifications: false,
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
-            currentUser: {}
+            currentUser: {},
+            title: 'Job Time',
         }
     },
     mounted() {

@@ -3,13 +3,13 @@
         <div class="container-fluid">
             <div class="form-group">
                 <div class="row">
-                    <div class="col-auto">
+                    <div class="col-12 col-sm-auto">
                         <create-button>
                             <template slot="title">Create new project</template>
                         </create-button>
                     </div>
-                    <div class="col-auto ml-auto">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#issueCreate">
+                    <div class="col-12 col-sm-auto ml-auto">
+                        <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#issueCreate">
                             <i class="fa fa-plus"></i>
                             Add new issue
                         </button>
@@ -18,10 +18,15 @@
             </div>
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
-                    <h4 class="card-title">Projects list</h4>
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title">Projects list</h4>
+                        <base-checkbox v-model="showArchive" class="align-self-end">View archive</base-checkbox>
+                    </div>
                 </template>
-                <action-table class="table-hover table-bordered table-striped" :columns="columns" :data="projectData" v-on:get-item="getItem" v-on:delete-item="deleteItem">
-                </action-table>
+                <div class="table-responsive">
+                    <action-table class="table-hover table-striped" :columns="columns" :data="projectData" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
+                    </action-table>
+                </div>
             </card>
             <CreateItem :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
@@ -68,6 +73,7 @@ export default {
             projects: [],
             projectData: [],
             currentItem: null,
+            showArchive: false,
             validationErrors: '',
             validationSuccess: ''
         }
@@ -91,7 +97,7 @@ export default {
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
                         id: data[i].id,
-                        department: typeof(this.getObjectValue(this.departments, data[i].dept_id)) !== 'undefined' ? this.getObjectValue(this.departments, data[i].dept_id).text : '',
+                        department: this.getObjectValue(this.departments, data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, data[i].dept_id).text : '',
                         project: data[i].p_name,
                         issue: data[i].i_name,
                         issue_id: data[i].issue_id,
@@ -118,6 +124,21 @@ export default {
                     alert("Could not load projects");
                 });
         },
+        getArchiveProjects(archive) {
+            if ( archive ) {
+                let uri = '/data/projects/?archive=' + archive;
+                axios.get(uri)
+                    .then(res => {
+                        this.projects = res.data.projects;
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        alert("Could not load projects");
+                    });
+            } else {
+                this.fetchItems();
+            }
+        },
         createItem(newItem) {
             // Reset validate
             this.validationErrors = '';
@@ -130,7 +151,7 @@ export default {
                         id: res.data.id,
                         issue_id: res.data.issue_id
                     }, newItem);
-                    this.projects = [...this.projects, addIdItem];
+                    this.projects = [addIdItem, ...this.projects];
                     this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
@@ -156,9 +177,8 @@ export default {
                         p_name: res.data.p_name,
                         p_name_vi: res.data.p_name_vi,
                         p_name_ja: res.data.p_name_ja,
-                        is_training: res.data.is_training
                     }, newIssue);
-                    this.projects = [...this.projects, addIdItem];
+                    this.projects = [addIdItem, ...this.projects];
                     this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
@@ -177,11 +197,18 @@ export default {
                 }).catch(err => console.log(err));
             }
         },
+        archiveItem(issue_id) {
+            let uri = '/data/issues/archive/' + issue_id;
+            axios.get(uri).then((response) => {
+                if ( !this.showArchive )
+                    this.projects = this.projects.filter(item => item.issue_id !== issue_id);
+            }).catch(err => console.log(err));
+        },
         getItem(id, issue_id) {
             let uri = '/data/projects/' + id + '?issue_id=' + issue_id;
             axios.get(uri).then((response) => {
                 this.currentItem = response.data;
-            });
+            }).catch(err => console.log(err));
         },
         updateItem(item) {
             // Reset validate
@@ -218,6 +245,9 @@ export default {
     watch: {
         projects: [{
             handler: 'getDataProjects'
+        }],
+        showArchive: [{
+            handler: 'getArchiveProjects'
         }]
     }
 }
@@ -228,5 +258,8 @@ export default {
     height: 20px;
     display: inline-block;
     vertical-align: middle;
+}
+thead th:last-child {
+    width: 150px;
 }
 </style>

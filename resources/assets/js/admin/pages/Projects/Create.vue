@@ -18,7 +18,6 @@
                         <label class="">Departments</label>
                         <div>
                             <select-2 :options="departmentOptions" v-model="dept_id" class="select2">
-                                <option disabled value="0">Select one</option>
                             </select-2>
                         </div>
                     </div>
@@ -109,7 +108,7 @@ export default {
     props: ['departments', 'types', 'errors', 'success'],
     data() {
         return {
-            dept_id: 0,
+            dept_id: 1,
             type_id: 0,
             p_name: '',
             p_name_vi: '',
@@ -131,11 +130,6 @@ export default {
         getDataDepartments(data) {
             if (data.length) {
                 let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                dataOptions.push(obj);
 
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
@@ -187,7 +181,6 @@ export default {
                 i_name: this.i_name,
                 start_date: this.start_date,
                 end_date: this.end_date,
-                no_period: this.no_period,
             };
 
             this.$emit('create-item', newItem);
@@ -212,7 +205,7 @@ export default {
         resetData(data) {
             // Reset
             if (data.length) {
-                this.dept_id = 0;
+                this.dept_id = 1;
                 this.type_id = 0;
                 this.p_name = '';
                 this.p_name_vi = '';

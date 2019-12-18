@@ -21,13 +21,13 @@ $table-border: 1px solid #4e4737;
         border: $table-border;
       }
       &:nth-of-type(odd) {
-        background-color: rgba(142, 142, 142, 0.05);
+        background-color: rgba(142, 142, 142, 0.15);
       }
       &:nth-of-type(even) {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: rgba(255, 255, 255, 0.15);
       }
       &:hover {
-        background-color: rgba(255, 210, 85, 0.15);
+        background-color: rgba(255, 210, 85, 0.3);
       }
     }
   }

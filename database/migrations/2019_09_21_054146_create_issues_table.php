@@ -17,7 +17,6 @@ class CreateIssuesTable extends Migration
             $table->increments('id');
             $table->integer('project_id')->unsigned();
             $table->string('name')->nullable();
-            $table->boolean('no_period');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('status', 50)->nullable();

@@ -26,12 +26,17 @@
           <i class="fa fa-pencil" aria-hidden="true"></i>
         </button>
 
+        <button v-if="item.issue_id" @click="$emit('archive-item', item.issue_id)" type="button"
+                class="btn btn-xs btn-second ml-sm-2">
+          <i class="fa fa-archive" aria-hidden="true"></i>
+        </button>
+
         <button v-if="item.issue_id" @click="$emit('delete-item', item.issue_id)" type="button"
-                class="btn btn-xs btn-danger ml-2">
+                class="btn btn-xs btn-danger ml-sm-2">
           <i class="fa fa-trash" aria-hidden="true"></i>
         </button>
         <button v-else @click="$emit('delete-item', item.id)" type="button"
-                class="btn btn-xs btn-danger ml-2">
+                class="btn btn-xs btn-danger ml-sm-2">
           <i class="fa fa-trash" aria-hidden="true"></i>
         </button>
       </td>

@@ -7,11 +7,10 @@
              :disabled="disabled"
              v-model="model" />
       <span class="form-check-sign"></span>
+      <span>
+        <slot></slot>
+      </span>
     </label>
-    <span>
-      <slot></slot>
-    </span>
-
   </div>
 </template>
 <script>

@@ -1,7 +1,6 @@
 <template>
     <div class="wrapper">
         <side-bar>
-            <mobile-menu slot="content"></mobile-menu>
             <sidebar-link to="/overview">
                 <i class="nc-icon nc-palette"></i>
                 <p>Dashboard</p>
@@ -26,6 +25,15 @@
                 <i class="nc-icon nc-paper-2"></i>
                 <p>Schedules</p>
             </sidebar-link>
+            <sidebar-link to="/profile" class="d-block d-lg-none">
+                <i class="nc-icon nc-circle-09"></i>
+                <p>Profile</p>
+            </sidebar-link>
+            <li class="nav-item d-block d-lg-none">
+                <a class="nav-link" href="/logout">
+                    <i class="nc-icon nc-button-power"></i> Log out
+                </a>
+            </li>
         </side-bar>
         <div class="main-panel">
             <top-navbar></top-navbar>
@@ -41,13 +49,11 @@
 import TopNavbar from './TopNavbar.vue'
 import ContentFooter from './ContentFooter.vue'
 import DashboardContent from './Content.vue'
-import MobileMenu from './MobileMenu.vue'
 export default {
     components: {
         TopNavbar,
         ContentFooter,
-        DashboardContent,
-        MobileMenu
+        DashboardContent
     },
     methods: {
         toggleSidebar() {
