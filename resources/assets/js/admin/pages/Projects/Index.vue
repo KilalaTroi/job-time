@@ -95,12 +95,14 @@ export default {
                 let dataProjects = [];
 
                 for (let i = 0; i < data.length; i++) {
+                    let checkArchive = data[i].status === "archive" ? " <i style='color: #FF4A55;'>(Archived)</i>" : "";
                     let obj = {
                         id: data[i].id,
                         department: this.getObjectValue(this.departments, data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, data[i].dept_id).text : '',
-                        project: data[i].p_name,
+                        project: data[i].p_name + checkArchive,
                         issue: data[i].i_name,
                         issue_id: data[i].issue_id,
+                        status: data[i].status,
                         type: this.getObjectValue(this.types, data[i].type_id).slug,
                         value: this.getObjectValue(this.types, data[i].type_id).value,
                         start_date: this.customFormatter(data[i].start_date),
@@ -149,9 +151,10 @@ export default {
                 .then(res => {
                     let addIdItem = Object.assign({}, {
                         id: res.data.id,
-                        issue_id: res.data.issue_id
+                        issue_id: res.data.issue_id,
+                        status: 'publish',
                     }, newItem);
-                    this.projects = [addIdItem, ...this.projects];
+                    if ( !this.showArchive ) this.projects = [addIdItem, ...this.projects];
                     this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
@@ -177,8 +180,9 @@ export default {
                         p_name: res.data.p_name,
                         p_name_vi: res.data.p_name_vi,
                         p_name_ja: res.data.p_name_ja,
+                        status: 'publish',
                     }, newIssue);
-                    this.projects = [addIdItem, ...this.projects];
+                    if ( !this.showArchive ) this.projects = [addIdItem, ...this.projects];
                     this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
@@ -197,17 +201,17 @@ export default {
                 }).catch(err => console.log(err));
             }
         },
-        archiveItem(issue_id) {
-            let uri = '/data/issues/archive/' + issue_id;
+        archiveItem(data) {
+            let uri = '/data/issues/archive/' + data.id + '/' + data.status;
             axios.get(uri).then((response) => {
-                if ( !this.showArchive )
-                    this.projects = this.projects.filter(item => item.issue_id !== issue_id);
+                this.projects = this.projects.filter(item => item.issue_id !== data.id);
             }).catch(err => console.log(err));
         },
         getItem(id, issue_id) {
             let uri = '/data/projects/' + id + '?issue_id=' + issue_id;
             axios.get(uri).then((response) => {
                 this.currentItem = response.data;
+                this.currentItem.no_period = false;
             }).catch(err => console.log(err));
         },
         updateItem(item) {
@@ -221,23 +225,31 @@ export default {
                     this.projects[foundIndex] = item;
                     this.projects = [...this.projects];
                     this.validationSuccess = res.data.message;
+
+                    // Update issue
+                    let uri_issue = '/data/issues/' + item.issue_id;
+                    axios.patch(uri_issue, item).then((res) => {
+                        console.log(res.data.message);
+                    })
+                    .catch(err => {
+                        if (err.response.status == 422) {
+                            this.validationSuccess = '';
+                            err.response.data.name = ["The issue has already been taken."];
+                            this.validationErrors = err.response.data;
+                        }
+                    });
                 })
                 .catch(err => {
-                    console.log(err);
                     if (err.response.status == 422) {
                         this.validationErrors = err.response.data;
                     }
                 });
-
-            let uri_issue = '/data/issues/' + item.issue_id;
-            axios.patch(uri_issue, item).then((res) => {
-                console.log(res.data.message);
-            }).catch(err => console.log(err));
         },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY/MM/DD') : '--';
         },
         resetValidate() {
+            this.getArchiveProjects(this.showArchive);
             this.validationSuccess = '';
             this.validationErrors = '';
         }

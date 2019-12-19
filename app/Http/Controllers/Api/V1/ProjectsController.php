@@ -17,7 +17,7 @@ class ProjectsController extends Controller
      */
     public function index()
     {
-        $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('publish', 'archive') : array('publish');
+        $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
         $projects = DB::table('projects as p')
@@ -28,6 +28,7 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
                 'i.name as i_name',
+                'status',
                 'dept_id',
                 'type_id',
                 'start_date',
@@ -118,6 +119,7 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
                 'i.name as i_name',
+                'status',
                 'dept_id',
                 'type_id',
                 'start_date',
@@ -138,8 +140,10 @@ class ProjectsController extends Controller
      */
     public function update($id, Request $request)
     {
+        $request->merge(['name' => $request->get('p_name')]);
+        
         $this->validate($request, [
-            'p_name' => 'required|max:255',
+            'name' => 'required|max:255|unique:projects,name,' . $id,
             'type_id' => 'required|numeric|min:0|not_in:0',
         ]);
 

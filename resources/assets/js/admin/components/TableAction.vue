@@ -13,7 +13,7 @@
       <slot :row="item">
         <td v-for="(column, index) in columns" :key="index" :class="column.class">
           <span v-if="checkTypeColor(column)" :style="setBackground(itemValue(item, column))" class="type-color"></span>
-          <span v-else>{{itemValue(item, column)}}</span>
+          <span v-else v-html="itemValue(item, column)"></span>
         </td>
       </slot>
       <td class="text-center">
@@ -26,9 +26,9 @@
           <i class="fa fa-pencil" aria-hidden="true"></i>
         </button>
 
-        <button v-if="item.issue_id" @click="$emit('archive-item', item.issue_id)" type="button"
+        <button v-if="item.issue_id" @click="$emit('archive-item', {'id':item.issue_id, 'status':item.status})" type="button"
                 class="btn btn-xs btn-second ml-sm-2">
-          <i class="fa fa-archive" aria-hidden="true"></i>
+          <i :class="archiveClass(item.status)" aria-hidden="true" title="archive"></i>
         </button>
 
         <button v-if="item.issue_id" @click="$emit('delete-item', item.issue_id)" type="button"
@@ -65,6 +65,9 @@
                 return {
                     background: color
                 };
+            },
+            archiveClass(archive) {
+                return archive === "archive" ? "fa fa-unlock" : "fa fa-archive";
             }
         }
     }

@@ -18,6 +18,7 @@
                         <label class="">Departments</label>
                         <div>
                             <select-2 :options="departmentOptions" v-model="dept_id" class="select2">
+                                <option disabled value="0">Select one</option>
                             </select-2>
                         </div>
                     </div>
@@ -125,7 +126,8 @@ export default {
             typeOptions: []
         }
     },
-    mounted() {},
+    mounted() {
+    },
     methods: {
         getDataDepartments(data) {
             if (data.length) {
