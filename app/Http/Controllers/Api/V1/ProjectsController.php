@@ -37,7 +37,8 @@ class ProjectsController extends Controller
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->whereIn('i.status', $status)
             ->orderBy('issue_id', 'desc')
-            ->take(100)->get()->toArray();
+            ->paginate(10);
+            // ->take(100)->get()->toArray();
 
         return response()->json([
             'departments' => $departments,

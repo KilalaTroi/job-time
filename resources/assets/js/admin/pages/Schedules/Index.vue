@@ -207,6 +207,11 @@ export default {
                 };
                 axios.patch(uri, newItem)
                     .then(res => {
+                        let foundIndex = this.schedules.findIndex(x => x.id == id);
+                        this.schedules[foundIndex].start = moment(start).format();
+                        this.schedules[foundIndex].end = moment(end).format();
+                        this.schedules = [...this.schedules];
+                        
                         this.editable = true;
                         this.droppable = true;
                     })
@@ -238,6 +243,11 @@ export default {
                 };
                 axios.patch(uri, newItem)
                     .then(res => {
+                        let foundIndex = this.schedules.findIndex(x => x.id == id);
+                        this.schedules[foundIndex].start = moment(start).format();
+                        this.schedules[foundIndex].end = moment(end).format();
+                        this.schedules = [...this.schedules];
+
                         this.editable = true;
                         this.droppable = true;
                     })

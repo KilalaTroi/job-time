@@ -11,6 +11,9 @@ window.Vue = require('vue');
 import VueRouter from 'vue-router';
 import App from './admin/App.vue'
 
+// component
+Vue.component('pagination', require('laravel-vue-pagination'));
+
 // LightBootstrap plugin
 import LightBootstrap from './admin/light-bootstrap-main'
 

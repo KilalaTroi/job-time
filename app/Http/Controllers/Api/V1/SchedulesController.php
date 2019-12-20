@@ -21,6 +21,9 @@ class SchedulesController extends Controller
         $lastYear = date('Y-m-d', $lastYear);
 
         $types = DB::table('types')->select('id', 'value')->get()->toArray();
+        $typesTR = DB::table('types')->select('id')->where('slug', 'like', '%_tr')->get()->toArray();
+        $typesTR = collect($typesTR)->map(function($x){ return $x->id; })->toArray();
+        
         $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
@@ -33,7 +36,11 @@ class SchedulesController extends Controller
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->where('i.status', '=', 'publish')
-            ->where('is_training', false)
+            ->whereNotIn('type_id', $typesTR)
+            ->where(function ($query) use ($now) {
+                $query->where('start_date', '<=',  $now)
+                      ->orWhere('start_date', '=',  NULL);
+            })
             ->where(function ($query) use ($now) {
                 $query->where('end_date', '>=',  $now)
                       ->orWhere('end_date', '=',  NULL);

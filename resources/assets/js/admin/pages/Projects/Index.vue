@@ -1,5 +1,5 @@
 <template>
-    <div class="content">
+    <div class="content projects">
         <div class="container-fluid">
             <div class="form-group">
                 <div class="row">
@@ -23,16 +23,17 @@
                         <base-checkbox v-model="showArchive" class="align-self-end">View archive</base-checkbox>
                     </div>
                 </template>
-                <div class="table-responsive">
+                <div class="table-responsive" v-if="projects">
                     <action-table class="table-hover table-striped" :columns="columns" :data="projectData" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
                     </action-table>
                 </div>
+                <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
             </card>
             <CreateItem :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
             <EditItem :currentItem="currentItem" :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-item="updateItem" v-on:reset-validation="resetValidate">
             </EditItem>
-            <AddIssue :projects="projects" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
+            <AddIssue :projects="projects.data" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
         </div>
     </div>
@@ -70,12 +71,16 @@ export default {
             columns: [...tableColumns],
             departments: [],
             types: [],
-            projects: [],
+            projects: {},
             projectData: [],
             currentItem: null,
             showArchive: false,
             validationErrors: '',
-            validationSuccess: ''
+            validationSuccess: '',
+            limit: 2,
+            showDisabled: true,
+            align: 'right',
+            size: 'small'
         }
     },
     mounted() {
@@ -90,27 +95,29 @@ export default {
             if (obj.length > 0)
                 return obj[0];
         },
-        getDataProjects(data) {
-            if (data.length) {
+        getDataProjects(projects) {
+            if (projects.data.length) {
                 let dataProjects = [];
 
-                for (let i = 0; i < data.length; i++) {
-                    let checkArchive = data[i].status === "archive" ? " <i style='color: #FF4A55;'>(Archived)</i>" : "";
+                for (let i = 0; i < projects.data.length; i++) {
+                    let checkArchive = projects.data[i].status === "archive" ? " <i style='color: #FF4A55;'>(Archived)</i>" : "";
                     let obj = {
-                        id: data[i].id,
-                        department: this.getObjectValue(this.departments, data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, data[i].dept_id).text : '',
-                        project: data[i].p_name + checkArchive,
-                        issue: data[i].i_name,
-                        issue_id: data[i].issue_id,
-                        status: data[i].status,
-                        type: this.getObjectValue(this.types, data[i].type_id).slug,
-                        value: this.getObjectValue(this.types, data[i].type_id).value,
-                        start_date: this.customFormatter(data[i].start_date),
-                        end_date: this.customFormatter(data[i].end_date)
+                        id: projects.data[i].id,
+                        department: this.getObjectValue(this.departments, projects.data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, projects.data[i].dept_id).text : '',
+                        project: projects.data[i].p_name + checkArchive,
+                        issue: projects.data[i].i_name,
+                        issue_id: projects.data[i].issue_id,
+                        status: projects.data[i].status,
+                        type: this.getObjectValue(this.types, projects.data[i].type_id).slug,
+                        value: this.getObjectValue(this.types, projects.data[i].type_id).value,
+                        start_date: this.customFormatter(projects.data[i].start_date),
+                        end_date: this.customFormatter(projects.data[i].end_date)
                     };
                     dataProjects.push(obj);
                 }
                 this.projectData = dataProjects;
+            } else {
+                this.projectData = [];
             }
         },
         fetchItems() {
@@ -126,20 +133,22 @@ export default {
                     alert("Could not load projects");
                 });
         },
-        getArchiveProjects(archive) {
-            if ( archive ) {
-                let uri = '/data/projects/?archive=' + archive;
-                axios.get(uri)
-                    .then(res => {
-                        this.projects = res.data.projects;
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load projects");
-                    });
-            } else {
-                this.fetchItems();
-            }
+        getResults(page = 1) {
+            axios.get('/data/projects?page=' + page + '&archive=' + this.showArchive)
+                .then(response => {
+                    this.projects = response.data.projects; 
+                });
+        },
+        getProjects(archive) {
+            let uri = '/data/projects/?archive=' + archive;
+            axios.get(uri)
+                .then(res => {
+                    this.projects = res.data.projects;
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load projects");
+                });
         },
         createItem(newItem) {
             // Reset validate
@@ -154,7 +163,7 @@ export default {
                         issue_id: res.data.issue_id,
                         status: 'publish',
                     }, newItem);
-                    if ( !this.showArchive ) this.projects = [addIdItem, ...this.projects];
+                    // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];
                     this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
@@ -182,7 +191,7 @@ export default {
                         p_name_ja: res.data.p_name_ja,
                         status: 'publish',
                     }, newIssue);
-                    if ( !this.showArchive ) this.projects = [addIdItem, ...this.projects];
+                    // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];
                     this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
@@ -196,7 +205,8 @@ export default {
             if (confirm("Are you sure want to delete this record?")) {
                 let uri = '/data/issues/' + issue_id;
                 axios.delete(uri).then((res) => {
-                    this.projects = this.projects.filter(item => item.issue_id !== issue_id);
+                    // this.projects.data = this.projects.data.filter(item => item.issue_id !== issue_id);
+                    this.getProjects(this.showArchive);
                     console.log(res.data.message);
                 }).catch(err => console.log(err));
             }
@@ -204,7 +214,8 @@ export default {
         archiveItem(data) {
             let uri = '/data/issues/archive/' + data.id + '/' + data.status;
             axios.get(uri).then((response) => {
-                this.projects = this.projects.filter(item => item.issue_id !== data.id);
+                // this.projects.data = this.projects.data.filter(item => item.issue_id !== data.id);
+                this.getProjects(this.showArchive);
             }).catch(err => console.log(err));
         },
         getItem(id, issue_id) {
@@ -221,9 +232,9 @@ export default {
 
             let uri = '/data/projects/' + item.id;
             axios.patch(uri, item).then((res) => {
-                    let foundIndex = this.projects.findIndex(x => x.issue_id == item.issue_id);
-                    this.projects[foundIndex] = item;
-                    this.projects = [...this.projects];
+                    let foundIndex = this.projects.data.findIndex(x => x.issue_id == item.issue_id);
+                    this.projects.data[foundIndex] = item;
+                    this.projects.data = [...this.projects.data];
                     this.validationSuccess = res.data.message;
 
                     // Update issue
@@ -249,17 +260,18 @@ export default {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY/MM/DD') : '--';
         },
         resetValidate() {
-            this.getArchiveProjects(this.showArchive);
+            this.getProjects(this.showArchive);
             this.validationSuccess = '';
             this.validationErrors = '';
         }
     },
     watch: {
         projects: [{
-            handler: 'getDataProjects'
+            handler: 'getDataProjects',
+            deep: true
         }],
         showArchive: [{
-            handler: 'getArchiveProjects'
+            handler: 'getProjects'
         }]
     }
 }
@@ -271,7 +283,7 @@ export default {
     display: inline-block;
     vertical-align: middle;
 }
-thead th:last-child {
+.projects thead th:last-child {
     width: 150px;
 }
 </style>

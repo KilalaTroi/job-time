@@ -17,8 +17,10 @@ class JobsController extends Controller
     public function index()
     {
         $now = date("Y-m-d");
-    	$clients = DB::table('clients')->select('id', 'name as text')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+
+        $typesTR = DB::table('types')->select('id')->where('slug', 'like', '%_tr')->get()->toArray();
+        $typesTR = collect($typesTR)->map(function($x){ return $x->id; })->toArray();
 
         $selectDate = $_GET['date'];
         $userID = $_GET['user_id'];
@@ -26,39 +28,34 @@ class JobsController extends Controller
         $jobs = DB::table('issues as i')
             ->select(
                 'i.id as id',
-                'client_id',
                 'dept_id',
                 'p.name as p_name',
                 'i.name as i_name'
             )
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
-            ->where('i.status', '=', 'publish')
-            ->where('s.date', '=',  $selectDate)
-            ->get()->toArray();
-
-        $jobs2 = DB::table('projects as p')
-            ->select(
-                'i.id as id',
-                'client_id',
-                'dept_id',
-                'p.name as p_name',
-                'i.name as i_name'
-            )
-            ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-            ->where('i.status', '=', 'publish')
-            ->where('is_training', true)
+            ->where(function ($query) use ($now) {
+                $query->where('start_date', '<=',  $now)
+                      ->orWhere('start_date', '=',  NULL);
+            })
             ->where(function ($query) use ($now) {
                 $query->where('end_date', '>=',  $now)
-                    ->orWhere('end_date', '=',  NULL);
+                      ->orWhere('end_date', '=',  NULL);
+            })
+            ->where(function ($query) use ($selectDate, $typesT) {
+                $query->where([
+                    ['i.status', '=', 'publish'],
+                    ['s.date', '=', $selectDate]
+                ])->orWhere([
+                    ['i.status', '=', 'publish'],
+                    ['type_id', 'IN', $typesTR]
+                ]);
             })
             ->orderBy('p_name', 'desc')
             ->get()->toArray();
 
-        $totalJobs = array_merge($jobs, $jobs2);
-
         $jobsID = array();
-        foreach ($totalJobs as $value) {
+        foreach ($jobs as $value) {
             $jobsID[] = $value->id;
         }
 
@@ -73,7 +70,6 @@ class JobsController extends Controller
             ->get()->toArray();
 
         return response()->json([
-            'clients' => $clients,
             'departments' => $departments,
             'jobs' => $totalJobs ? $totalJobs : array(),
             'jobsTime' => $jobsTime ? $jobsTime : array()
