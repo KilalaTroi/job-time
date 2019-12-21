@@ -12,7 +12,7 @@ class JobsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response/
      */
     public function index()
     {
@@ -42,7 +42,7 @@ class JobsController extends Controller
                 $query->where('end_date', '>=',  $now)
                       ->orWhere('end_date', '=',  NULL);
             })
-            ->where(function ($query) use ($selectDate, $typesT) {
+            ->where(function ($query) use ($selectDate, $typesTR) {
                 $query->where([
                     ['i.status', '=', 'publish'],
                     ['s.date', '=', $selectDate]
@@ -52,26 +52,22 @@ class JobsController extends Controller
                 ]);
             })
             ->orderBy('p_name', 'desc')
-            ->get()->toArray();
-
-        $jobsID = array();
-        foreach ($jobs as $value) {
-            $jobsID[] = $value->id;
-        }
+            ->paginate(10);
+            // ->get()->toArray();
 
         $jobsTime = DB::table('jobs')
             ->select(
                 'issue_id as id',
-                DB::raw('SUM(TIME_TO_SEC(time)) as total')
+                DB::raw('SUM(TIME_TO_SEC(start_time) + TIME_TO_SEC(end_time)) as total')
             )
             ->where('user_id', '=', $userID)
-            ->whereIn('issue_id', $jobsID)
+            ->where('date', '=', $selectDate)
             ->groupBy('issue_id')
             ->get()->toArray();
 
         return response()->json([
             'departments' => $departments,
-            'jobs' => $totalJobs ? $totalJobs : array(),
+            'jobs' => $jobs ? $jobs : array(),
             'jobsTime' => $jobsTime ? $jobsTime : array()
         ]);
     }
