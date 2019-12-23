@@ -73,7 +73,10 @@ class StatisticsController extends Controller
             ->select('users.id')
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.name', "<>", "admin")
+            ->where([
+                ['roles.name', '<>', 'admin'],
+                ['roles.name', '<>', 'japanese_planner'],
+            ])
             ->count();
 
         $hoursCurrentMonth = DB::table('jobs')
@@ -97,7 +100,10 @@ class StatisticsController extends Controller
             ->select('users.id')
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.name', "<>", "admin")
+            ->where([
+                ['roles.name', '<>', 'admin'],
+                ['roles.name', '<>', 'japanese_planner'],
+            ])
             ->where('users.created_at', "<", $response['startEndYear'][0])
             ->count();
 
@@ -109,7 +115,10 @@ class StatisticsController extends Controller
             )
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.name', "<>", "admin")
+            ->where([
+                ['roles.name', '<>', 'admin'],
+                ['roles.name', '<>', 'japanese_planner'],
+            ])
             ->where('users.created_at', ">=", $response['startEndYear'][0])
             ->where('users.created_at', "<", $response['startEndYear'][1])
             ->orderBy('yearMonth', 'desc')

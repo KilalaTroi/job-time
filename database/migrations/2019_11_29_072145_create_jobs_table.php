@@ -15,9 +15,10 @@ class CreateJobsTable extends Migration
     {
         Schema::create('jobs', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('issue_id');
-            $table->time('time')->nullable();
+            $table->integer('user_id')->unsigned();
+            $table->integer('issue_id')->unsigned();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->date('date')->nullable();
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();

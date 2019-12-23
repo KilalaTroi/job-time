@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Project;
 use App\Issue;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -16,9 +17,12 @@ class IssuesController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge(['name' => $request->get('i_name')]);
+        $project_id = $request->get('project_id');
+
         $this->validate($request, [
-            'i_name' => 'required|max:255',
-            'project_id' => 'required|numeric|min:0|not_in:0'
+            'project_id' => 'required|numeric|min:0|not_in:0',
+            'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $project_id
         ]);
 
         $start_date = $request->get('start_date');
@@ -37,11 +41,9 @@ class IssuesController extends Controller
             $end_date = null;
         }
 
-        $project_id = $request->get('project_id');
-
         $issue = Issue::create([
             'project_id' => $project_id,
-            'name' => $request->get('i_name'),
+            'name' => $request->get('name'),
             'start_date' => $start_date,
             'end_date' => $end_date,
             'status' => 'publish',
@@ -55,7 +57,6 @@ class IssuesController extends Controller
             'p_name' => $project->name,
             'p_name_vi' => $project->name_vi,
             'p_name_ja' => $project->name_ja,
-            'is_training' => $project->is_training,
             'client_id' => $project->client_id,
             'dept_id' => $project->dept_id,
             'type_id' => $project->type_id,
@@ -72,7 +73,20 @@ class IssuesController extends Controller
      */
     public function update($id, Request $request)
     {
+        
+        $request->merge(['name' => $request->get('i_name')]);
         $issue = Issue::findOrFail($id);
+
+        $sameIssue = Issue::where([
+            ['project_id', '=', $issue->project_id],
+            ['name', '=', $request->get('i_name')],
+        ])->count();
+        
+        if ( $sameIssue > 0 && $issue->name !== $request->get('i_name') ) {
+            $this->validate($request, [
+                'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $issue->project_id
+            ]);
+        }
 
         $start_date = $request->get('start_date');
         if ( strpos($start_date, 'T') !== false ) {
@@ -87,10 +101,35 @@ class IssuesController extends Controller
         }
 
         $issue->update([
-            'name' => $request->get('i_name'),
+            'name' => $request->get('name'),
             'start_date' => $start_date,
             'end_date' => $end_date,
         ]);
+
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    /**
+     * Archive the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function archive($id, $status)
+    {
+        $issue = Issue::findOrFail($id);
+
+        if ( $status === 'publish' ) {
+            $issue->update([
+                'status' => 'archive'
+            ]);
+        } else {
+            $issue->update([
+                'status' => 'publish'
+            ]);
+        }
 
         return response()->json(array(
             'message' => 'Successfully.'
@@ -106,9 +145,14 @@ class IssuesController extends Controller
     public function destroy($id)
     {
         $issue = Issue::findOrFail($id);
-        $issue->update([
-            'status' => 'disable'
-        ]);
+        $projectIssue = Issue::where('project_id', $issue->project_id)->count();
+
+        if ( $projectIssue > 1 ) {
+            $issue->delete();
+        } else {
+            $project = Project::findOrFail($issue->project_id);
+            $project->delete();
+        }
 
         return response()->json(array(
             'message' => 'Successfully.'

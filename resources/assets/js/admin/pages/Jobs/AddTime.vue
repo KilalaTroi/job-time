@@ -3,32 +3,21 @@
         <template slot="title">Add Time</template>
         <form v-if="currentJob" @submit="emitAddTime">
             <div class="form-group">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <label class=""><strong>Client:</strong> {{ currentJob.c_name }}</label>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class=""><strong>Dept:</strong> {{ currentJob.d_name }}</label>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <label class=""><strong>Project:</strong> {{ currentJob.p_name }}</label>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class=""><strong>Issue:</strong> {{ currentJob.i_name }}</label>
-                    </div>
-                </div>
+                <h4 class="text-center mb-1"><b>{{ currentJob.p_name }} {{ currentJob.i_name }}</b></h4>
+                <h5 class="text-center mt-1">{{ this.customFormatter(currentJob.date) }}</h5>
             </div>
             <hr>
             <div class="form-group">
-                <label class=""><strong>Date:</strong> {{ this.customFormatter(currentJob.date) }}</label>
-            </div>
-            <div class="form-group">
-                <label class=""><strong>Time:</strong></label>
-                <vue-timepicker v-model="time" :minute-interval="5" required></vue-timepicker>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label class=""><strong>Start Time:</strong></label>
+                        <vue-timepicker v-model="start_time" :minute-interval="10" required></vue-timepicker>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class=""><strong>End Time:</strong></label>
+                        <vue-timepicker v-model="end_time" :minute-interval="10" required></vue-timepicker>
+                    </div>
+                </div>
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
@@ -58,7 +47,8 @@ export default {
     props: ['currentJob', 'errors', 'success'],
     data() {
         return {
-            time: '00:00',
+            start_time: '00:00',
+            end_time: '00:00',
         }
     },
     mounted() {},

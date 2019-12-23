@@ -5,11 +5,11 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Clients</label>
+                        <label class="">Types</label>
                         <div>
-                            <select-2 :options="clientOptions" v-model="currentItem.client_id" class="select2">
+                            <select2-type :options="typeOptions" v-model="currentItem.type_id" class="select2">
                                 <option disabled value="0">Select one</option>
-                            </select-2>
+                            </select2-type>
                         </div>
                     </div>
                 </div>
@@ -21,24 +21,6 @@
                                 <option disabled value="0">Select one</option>
                             </select-2>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">Types</label>
-                        <div>
-                            <select2-type :options="typeOptions" v-model="currentItem.type_id" class="select2">
-                                <option disabled value="0">Select one</option>
-                            </select2-type>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">Is training?</label>
-                        <input v-model="currentItem.is_training" type="checkbox" name="name_ja" class="form-control">
                     </div>
                 </div>
             </div>
@@ -65,20 +47,28 @@
             </div>
             <hr>
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Issue</label>
                         <input v-model="currentItem.i_name" type="text" name="issue" class="form-control">
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">No period</label>
+                        <input v-model="currentItem.no_period" type="checkbox" name="currentItem.no_period" @change="updatePeriod" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="row" v-if="has_period">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Start date</label>
                         <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="currentItem.start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">End date</label>
                         <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="currentItem.end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
@@ -127,28 +117,10 @@ export default {
             en: en,
             ja: ja,
             modalLg: 'modal-lg',
+            has_period: true,
         }
     },
     methods: {
-        getDataClients(data) {
-            if (data.length) {
-                let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                dataOptions.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        text: data[i].text
-                    };
-                    dataOptions.push(obj);
-                }
-                this.clientOptions = dataOptions;
-            }
-        },
         getDataDepartments(data) {
             if (data.length) {
                 let dataOptions = [];
@@ -207,17 +179,34 @@ export default {
                 };
                 return obj;
             }
+        },
+        updatePeriod() {
+            if ( this.currentItem.no_period ) {
+                this.currentItem.start_date = '';
+                this.currentItem.end_date = '';
+                this.has_period = false;
+            } else {
+                this.has_period = true;
+            }
+        },
+        currentPeriod(data) {
+            if ( moment(data.start_date).format('DD-MM-YYYY') === 'Invalid date' && moment(data.end_date).format('DD-MM-YYYY') === 'Invalid date' ) {
+                this.currentItem.no_period = true;
+                this.has_period = false;
+            } else {
+                this.has_period = true;
+            }
         }
     },
     watch: {
-        clients: [{
-            handler: 'getDataClients'
-        }],
         departments: [{
             handler: 'getDataDepartments'
         }],
         types: [{
             handler: 'getDataTypes'
+        }],
+        currentItem: [{
+            handler: 'currentPeriod'
         }]
     }
 }

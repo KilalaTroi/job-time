@@ -7,19 +7,31 @@
                         <template slot="header">
                             <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
                         </template>
-                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true">
+                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true" :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </card>
                 </div>
                 <div class="col">
-                    <h2 class="card-title mt-0">Jobs List</h2>
-
-                    <job-table
-                        class="table-hover table-bordered table-striped"
-                        :columns="columns"
-                        :data="jobs"
-                        v-on:get-job="getJob">
-                    </job-table>
+                    <card>
+                        <template slot="header">
+                            <h4 class="card-title">Jobs List</h4>
+                        </template>
+                        <div class="table-responsive" v-if="jobs">
+                            <job-table
+                                class="table-hover table-striped"
+                                :columns="columns"
+                                :data="jobs"
+                                v-on:get-job="getJob">
+                            </job-table>
+                        </div>
+                        <pagination :data="jobData" :show-disabled="jShowDisabled" :limit="JLimit" :align="jAlign" :size="jSize" @pagination-change-page="getResults"></pagination>
+                    </card>
+                    <card>
+                        <template slot="header">
+                            <h4 class="card-title">Time Record</h4>
+                        </template>
+                        <div class="table-responsive"></div>
+                    </card>
                 </div>
             </div>
 
@@ -36,7 +48,6 @@ import JobTable from '../../components/TableJob'
 import AddTime from './AddTime'
 
 const tableColumns = [
-    { id: 'client', value: 'Client', width: '', class: '' },
     { id: 'department', value: 'Department', width: '', class: '' },
     { id: 'project', value: 'Project', width: '', class: '' },
     { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
@@ -54,7 +65,6 @@ export default {
         return {
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             columns: [...tableColumns],
-            clients: [],
             departments: [],
             jobs: [],
             jobData: [],
@@ -64,7 +74,12 @@ export default {
             start_date: new Date(),
 
             validationErrors: '',
-            validationSuccess: ''
+            validationSuccess: '',
+
+            jLimit: 2,
+            jShowDisabled: true,
+            jAlign: 'right',
+            jSize: 'small'
         }
     },
     mounted() {
@@ -75,7 +90,6 @@ export default {
             let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID;
             axios.get(uri)
                 .then(res => {
-                    this.clients = res.data.clients;
                     this.departments = res.data.departments;
                     this.jobData = res.data.jobs;
                     this.jobsTime = res.data.jobsTime;
@@ -83,6 +97,12 @@ export default {
                 .catch(err => {
                     console.log(err);
                     alert("Could not load projects");
+                });
+        },
+        getResults(page = 1) {
+            axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID)
+                .then(response => {
+                    this.jobData = response.data.jobs; 
                 });
         },
         getObjectValue(data, id) {
@@ -93,18 +113,17 @@ export default {
             if (obj.length > 0)
                 return obj[0];
         },
-        getDataJobs(data) {
-            if (data.length) {
+        getDataJobs(jobData) {
+            if (jobData.data.length) {
                 let dataJobs = [];
 
-                for (let i = 0; i < data.length; i++) {
-                    let time = typeof(this.getObjectValue(this.jobsTime, data[i].id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, data[i].id).total : false;
+                for (let i = 0; i < jobData.data.length; i++) {
+                    let time = typeof(this.getObjectValue(this.jobsTime, jobData.data[i].id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, jobData.data[i].id).total : false;
                     let obj = {
-                        id: data[i].id,
-                        client: this.getObjectValue(this.clients, data[i].client_id).text,
-                        department: typeof(this.getObjectValue(this.departments, data[i].dept_id)) !== 'undefined' ? this.getObjectValue(this.departments, data[i].dept_id).text : '',
-                        project: data[i].p_name,
-                        issue: data[i].i_name,
+                        id: jobData.data[i].id,
+                        department: this.getObjectValue(this.departments, jobData.data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, jobData.data[i].dept_id).text : '',
+                        project: jobData.data[i].p_name,
+                        issue: jobData.data[i].i_name,
                         time: time ? this.hourFormatter(time) : '00:00'
                     };
                     dataJobs.push(obj);
@@ -118,8 +137,6 @@ export default {
             let job = this.getObjectValue(this.jobs, id);
             let obj = {
                 id: job.id,
-                c_name: job.client,
-                d_name: job.department,
                 p_name: job.project,
                 i_name: job.issue,
                 date: this.start_date
@@ -146,6 +163,13 @@ export default {
                         this.validationErrors = err.response.data;
                     }
                 });
+        },
+        disabledEndDates() {
+            let obj = {
+                from: new Date(), // Disable all dates after specific date
+                // days: [0], // Disable Saturday's and Sunday's
+            };
+            return obj;
         },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('DD MMM YYYY') : '';

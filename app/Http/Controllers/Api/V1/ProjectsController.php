@@ -17,8 +17,8 @@ class ProjectsController extends Controller
      */
     public function index()
     {
+        $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
-        $clients = DB::table('clients')->select('id', 'name as text')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
         $projects = DB::table('projects as p')
             ->select(
@@ -28,20 +28,19 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
                 'i.name as i_name',
-                'is_training',
-                'client_id',
+                'status',
                 'dept_id',
                 'type_id',
                 'start_date',
                 'end_date'
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-            ->where('i.status', '=', 'publish')
-            ->orderBy('issue_id', 'asc')
-            ->get()->toArray();
+            ->whereIn('i.status', $status)
+            ->orderBy('issue_id', 'desc')
+            ->paginate(10);
+            // ->take(100)->get()->toArray();
 
         return response()->json([
-            'clients' => $clients,
             'departments' => $departments,
             'types' => $types,
             'projects' => $projects
@@ -56,19 +55,17 @@ class ProjectsController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge(['name' => $request->get('p_name')]);
+        
         $this->validate($request, [
-            'p_name' => 'required|max:255',
-            'client_id' => 'required|numeric|min:0|not_in:0',
-            // 'dept_id' => 'required|numeric|min:0|not_in:0',
-            'type_id' => 'required|numeric|min:0|not_in:0',
+            'name' => 'required|max:255|unique:projects',
+            'type_id' => 'required|numeric|min:0|not_in:0'
         ]);
 
         $project = Project::create([
-            'name' => $request->get('p_name'),
+            'name' => $request->get('name'),
             'name_vi' => $request->get('p_name_vi'),
             'name_ja' => $request->get('p_name_ja'),
-            'is_training' => $request->get('is_training'),
-            'client_id' => $request->get('client_id'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
         ]);
@@ -123,8 +120,7 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
                 'i.name as i_name',
-                'is_training',
-                'client_id',
+                'status',
                 'dept_id',
                 'type_id',
                 'start_date',
@@ -145,10 +141,10 @@ class ProjectsController extends Controller
      */
     public function update($id, Request $request)
     {
+        $request->merge(['name' => $request->get('p_name')]);
+        
         $this->validate($request, [
-            'p_name' => 'required|max:255',
-            'client_id' => 'required|numeric|min:0|not_in:0',
-            // 'dept_id' => 'required|numeric|min:0|not_in:0',
+            'name' => 'required|max:255|unique:projects,name,' . $id,
             'type_id' => 'required|numeric|min:0|not_in:0',
         ]);
 
@@ -157,8 +153,6 @@ class ProjectsController extends Controller
             'name' => $request->get('p_name'),
             'name_vi' => $request->get('p_name_vi'),
             'name_ja' => $request->get('p_name_ja'),
-            'is_training' => $request->get('is_training'),
-            'client_id' => $request->get('client_id'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
         ]);

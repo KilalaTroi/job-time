@@ -15,7 +15,8 @@ class DepartmentsController extends Controller
      */
     public function index()
     {
-        return response()->json(Department::all());
+        $department = Department::where('id','<>', 1)->get();
+        return response()->json($department);
     }
 
     /**

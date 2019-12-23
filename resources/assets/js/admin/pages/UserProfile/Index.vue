@@ -2,22 +2,28 @@
     <div class="content">
         <div class="container-fluid">
             <div class="form-group">
-                <create-button>
-                    <template slot="title">Create new user</template>
-                </create-button>
+                <div class="row">
+                    <div class="col-12 col-sm-auto">
+                        <create-button>
+                            <template slot="title">Create new user</template>
+                        </create-button>
+                    </div>
+                </div>
             </div>
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
                     <h4 class="card-title">Users list</h4>
                 </template>
-                <action-table
-                        class="table-hover table-bordered table-striped"
-                        :columns="columns"
-                        :data="users"
-                        v-on:get-item="getUser"
-                        v-on:delete-item="deleteUser">
-                </action-table>
+                <div class="table-responsive">
+                    <action-table
+                            class="table-hover table-striped"
+                            :columns="columns"
+                            :data="users"
+                            v-on:get-item="getUser"
+                            v-on:delete-item="deleteUser">
+                    </action-table>
+                </div>
             </card>
 
             <create-item

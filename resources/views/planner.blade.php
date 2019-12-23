@@ -35,6 +35,6 @@
 </div>
 
 <!-- Scripts -->
-<script src="{{ asset('js/app-manager.js') }}"></script>
+<script src="{{ asset('js/app-planner.js') }}"></script>
 </body>
 </html>
