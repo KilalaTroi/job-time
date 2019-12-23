@@ -223,5 +223,36 @@ class ReportsController extends Controller
         })->download($file_extension);
     }
 
+    public function exportReportTimeUser($user_id,$start_time, $end_time) {
+        if($user_id == "all") {
+            $user_name = $user_id;
+        } else {
+            $user_name = DB::table('users')->where('id', $user_id)->first()->name;
+        }
+        $data = DB::table('types as t')
+            ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
+            ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
+            ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
+            ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->whereBetween('j.date', [date($start_time), date($end_time)]);
+        $data->when($user_id !="all", function ($q, $query) use($user_id) {
+                return $q->where('j.user_id', $user_id);
+            });
+        $data = $data->select( DB::raw('DATE_FORMAT(j.created_at,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+                        ->orderBy("dateReport")->get();
+
+        $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
+        return Excel::create('Report_'. $user_name. "_" . $start_time . "_" . $end_time, function($excel) use ($data, $start_time, $end_time) {
+            $excel->setTitle('Report Job Time');
+            $excel->setCreator('Kilala Job Time')
+                ->setCompany('Kilala');
+            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time) {
+                $sheet->setCellValue('A1', "Job Time Report ". $start_time . "_" . $end_time);
+                $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                $sheet->fromArray($data, null, 'A4', true);
+            });
+        })->download('xlsx');
+    }
+
 }
 

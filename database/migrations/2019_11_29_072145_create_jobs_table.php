@@ -19,6 +19,8 @@ class CreateJobsTable extends Migration
             $table->integer('issue_id');
             $table->time('time')->nullable();
             $table->date('date')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->timestamps();
         });
     }

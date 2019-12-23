@@ -45,6 +45,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\
 
     Route::get('report/{year}', 'ReportsController@report');
     Route::get('export-report/{year}/{file_extension}', 'ReportsController@exportReport');
+    Route::get('export-report-time-user/{user_id}/{start_time}/{end_time}', 'ReportsController@exportReportTimeUser');
 });
 # End Get Data
 
