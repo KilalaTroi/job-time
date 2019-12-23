@@ -24,18 +24,28 @@
                                 v-on:get-job="getJob">
                             </job-table>
                         </div>
-                        <pagination :data="jobData" :show-disabled="jShowDisabled" :limit="JLimit" :align="jAlign" :size="jSize" @pagination-change-page="getResults"></pagination>
+                        <pagination :data="jobData" :show-disabled="jShowDisabled" :limit="jLimit" :align="jAlign" :size="jSize" @pagination-change-page="getResults"></pagination>
                     </card>
                     <card>
                         <template slot="header">
                             <h4 class="card-title">Time Record</h4>
                         </template>
-                        <div class="table-responsive"></div>
+                        <div class="table-responsive">
+                            <action-table
+                                class="table-hover table-striped"
+                                :columns="logColumns"
+                                :data="logTime"
+                                v-on:get-item="getItem" 
+                                v-on:delete-item="deleteItem">
+                            </action-table>
+                        </div>
                     </card>
                 </div>
             </div>
 
             <AddTime :currentJob="currentJob" :errors="validationErrors" :success="validationSuccess"  v-on:add-time="addTime" v-on:reset-validation="resetValidate"></AddTime> 
+
+            <EditTime :currentTimeLog="currentTimeLog" :errors="validationErrors" :success="validationSuccess"  v-on:update-time="updateTime" v-on:reset-validation="resetValidate"></EditTime> 
         </div>
     </div>
 </template>
@@ -45,7 +55,9 @@ import Datepicker from 'vuejs-datepicker';
 import { en, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 import JobTable from '../../components/TableJob'
+import ActionTable from '../../components/TableAction'
 import AddTime from './AddTime'
+import EditTime from './EditTime'
 
 const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
@@ -54,22 +66,36 @@ const tableColumns = [
     { id: 'time', value: 'Time', width: '110', class: 'text-center' }
 ];
 
+const logTimeColumns = [
+    { id: 'project', value: 'Project', width: '', class: '' },
+    { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
+    { id: 'start_time', value: 'Start Time', width: '110', class: 'text-center' },
+    { id: 'end_time', value: 'End Time', width: '110', class: 'text-center' },
+    { id: 'total', value: 'Time', width: '110', class: 'text-center' }
+];
+
 export default {
     components: {
         Card,
         datepicker: Datepicker,
         JobTable,
-        AddTime
+        ActionTable,
+        AddTime,
+        EditTime
     },
     data() {
         return {
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             columns: [...tableColumns],
+            logColumns: [...logTimeColumns],
             departments: [],
             jobs: [],
-            jobData: [],
+            jobData: {},
+            logTime: [],
+            logTimeData: [],
             jobsTime: [],
             currentJob: null,
+            currentTimeLog: null,
 
             start_date: new Date(),
 
@@ -93,6 +119,7 @@ export default {
                     this.departments = res.data.departments;
                     this.jobData = res.data.jobs;
                     this.jobsTime = res.data.jobsTime;
+                    this.logTimeData = res.data.logTime;
                 })
                 .catch(err => {
                     console.log(err);
@@ -133,6 +160,29 @@ export default {
                 this.jobs = [];
             }
         },
+        getDataLogTime(logTimeData) {
+            if (logTimeData.length) {
+                let dataTimes = [];
+
+                for (let i = 0; i < logTimeData.length; i++) {
+                    let issue = typeof(this.getObjectValue(this.jobData.data, logTimeData[i].issue_id)) !== 'undefined' ? this.getObjectValue(this.jobData.data, logTimeData[i].issue_id) : false;
+                    if ( issue ) {
+                        let obj = {
+                            id: logTimeData[i].id,
+                            project: issue.p_name,
+                            issue: issue.i_name,
+                            start_time: logTimeData[i].start_time,
+                            end_time: logTimeData[i].end_time,
+                            total: logTimeData[i].total ? this.hourFormatter(logTimeData[i].total) : '00:00'
+                        };
+                        dataTimes.push(obj);
+                    }
+                }
+                this.logTime = dataTimes;
+            } else {
+                this.logTime = [];
+            }
+        },
         getJob(id) {
             let job = this.getObjectValue(this.jobs, id);
             let obj = {
@@ -142,6 +192,18 @@ export default {
                 date: this.start_date
             };
             this.currentJob = obj;
+        },
+        getItem(id) {
+            let time = this.getObjectValue(this.logTime, id);
+            let obj = {
+                id: time.id,
+                p_name: time.project,
+                i_name: time.issue,
+                start_time: time.start_time,
+                end_time: time.end_time,
+                date: this.start_date
+            };
+            this.currentTimeLog = obj;
         },
         addTime(newTime) {
             // Reset validate
@@ -163,6 +225,23 @@ export default {
                         this.validationErrors = err.response.data;
                     }
                 });
+        },
+        updateTime(newTime) {
+            // Reset validate
+            this.validationErrors = '';
+            this.validationSuccess = '';
+        },
+        deleteItem(id) {
+            if (confirm("Are you sure want to delete this record?")) {
+                let uri = "/data/jobs/" + id;
+                axios
+                    .delete(uri)
+                    .then(res => {
+                        this.fetchItems();
+                        console.log(res.data);
+                    })
+                    .catch(err => console.log(err));
+            }
         },
         disabledEndDates() {
             let obj = {
@@ -194,6 +273,9 @@ export default {
     watch: {
         jobData: [{
             handler: 'getDataJobs'
+        }],
+        logTimeData: [{
+            handler: 'getDataLogTime'
         }],
         start_date: [{
             handler: 'fetchItems'

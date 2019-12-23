@@ -1,21 +1,21 @@
 <template>
-    <modal id="addTime" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Add Time</template>
-        <form v-if="currentJob" @submit="emitAddTime">
+    <modal id="itemDetail" v-on:reset-validation="$emit('reset-validation')">
+        <template slot="title">Update Time</template>
+        <form v-if="currentTimeLog" @submit="emitUpdateTime">
             <div class="form-group">
-                <h4 class="text-center mb-1"><b>{{ currentJob.p_name }} {{ currentJob.i_name }}</b></h4>
-                <h5 class="text-center mt-1">{{ this.customFormatter(currentJob.date) }}</h5>
+                <h4 class="text-center mb-1"><b>{{ currentTimeLog.p_name }} {{ currentTimeLog.i_name }}</b></h4>
+                <h5 class="text-center mt-1">{{ this.customFormatter(currentTimeLog.date) }}</h5>
             </div>
             <hr>
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-6">
                         <label class=""><strong>Start Time:</strong></label>
-                        <vue-timepicker v-model="start_time" hide-disabled-items :minute-range="startMinuteRange" :hour-range="startHourRange"  input-width="100%" close-on-complete @change="changeStartTime" required></vue-timepicker>
+                        <vue-timepicker v-model="currentTimeLog.start_time" hide-disabled-items :minute-range="startMinuteRange" :hour-range="startHourRange"  input-width="100%" close-on-complete @change="changeStartTime" required></vue-timepicker>
                     </div>
                     <div class="col-sm-6">
                         <label class=""><strong>End Time:</strong></label>
-                        <vue-timepicker v-model="end_time" hide-disabled-items :minute-range="endMinuteRange" :hour-range="endHourRange"  input-width="100%" close-on-complete @change="changeEndTime" required :disabled="endDisabled"></vue-timepicker>
+                        <vue-timepicker v-model="currentTimeLog.end_time" hide-disabled-items :minute-range="endMinuteRange" :hour-range="endHourRange"  input-width="100%" close-on-complete @change="changeEndTime" required :disabled="endDisabled"></vue-timepicker>
                     </div>
                 </div>
             </div>
@@ -23,7 +23,7 @@
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary" :disabled="buttonDisabled">Add</button>
+                <button type="submit" class="btn btn-primary" :disabled="buttonDisabled">Update</button>
                 <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </form>
@@ -37,14 +37,14 @@ import VueTimepicker from 'vue2-timepicker'
 import moment from 'moment'
 
 export default {
-    name: 'AddTime',
+    name: 'EditTime',
     components: {
         ErrorItem,
         SuccessItem,
         Modal,
         VueTimepicker
     },
-    props: ['currentJob', 'errors', 'success'],
+    props: ['currentTimeLog', 'errors', 'success'],
     data() {
         return {
             startHourRange: [[7, 19]],
@@ -54,23 +54,20 @@ export default {
             startHour: '',
             startMinute: '',
             buttonDisabled: true,
-            endDisabled: true,
-            start_time: '',
-            end_time: '',
+            endDisabled: true
         }
     },
     mounted() {},
     methods: {
-        emitAddTime(e) {
+        emitUpdateTime(e) {
             e.preventDefault()
 
             const newTime = {
-                issue_id: this.currentJob.id,
-                start_time: this.start_time,
-                end_time: this.end_time
+                start_time: this.currentTimeLog.start_time,
+                end_time: this.currentTimeLog.end_time
             };
 
-            this.$emit('add-time', newTime);
+            this.$emit('update-time', newTime);
         },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('DD/MMM/YYYY') : '';
@@ -80,12 +77,12 @@ export default {
             this.startHour = this.startMinute === 50 ? eventData.data.H*1 + 1 : eventData.data.H*1;
             this.endHourRange = [[this.startHour, 19]];
             this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
-            this.end_time = '';
+            this.currentTimeLog.end_time = '';
             
-            if ( !this.start_time.includes('HH') && !this.start_time.includes('mm') && this.start_time ) {
+            if ( !this.currentTimeLog.start_time.includes('HH') && !this.currentTimeLog.start_time.includes('mm') && this.currentTimeLog.start_time ) {
                 this.endDisabled = false;
             } else {
-                this.end_time = 'HH:mm';
+                this.currentTimeLog.end_time = 'HH:mm';
                 this.endDisabled = true;
             }
         },
@@ -95,24 +92,12 @@ export default {
             else 
                 this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
 
-            if ( !this.end_time.includes('HH') && !this.end_time.includes('mm') && this.end_time ) {
+            if ( !this.currentTimeLog.end_time.includes('HH') && !this.currentTimeLog.end_time.includes('mm') && this.currentTimeLog.end_time ) {
                 this.buttonDisabled = false;
             } else {
                 this.buttonDisabled = true;
             }
-        },
-        resetData(data) {
-            // Reset
-            if (data.length) {
-                this.start_time = 'HH:mm';
-                this.end_time = 'HH:mm';
-            }
         }
-    },
-    watch: {
-        success: [{
-            handler: 'resetData'
-        }]
     }
 }
 </script>

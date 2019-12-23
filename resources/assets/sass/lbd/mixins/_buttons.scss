@@ -27,7 +27,10 @@
           border-color: $btn-color;
     }
   }
-  
+
+  &:disabled {
+    color: $btn-color;
+  }
 
   &.btn-fill {
     color: $white-color;

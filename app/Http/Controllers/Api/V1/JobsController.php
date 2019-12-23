@@ -25,6 +25,7 @@ class JobsController extends Controller
         $selectDate = $_GET['date'];
         $userID = $_GET['user_id'];
 
+        // DB::enableQueryLog();
         $jobs = DB::table('issues as i')
             ->select(
                 'i.id as id',
@@ -32,8 +33,8 @@ class JobsController extends Controller
                 'p.name as p_name',
                 'i.name as i_name'
             )
-            ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-            ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+            ->join('projects as p', 'p.id', '=', 'i.project_id')
+            ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->where(function ($query) use ($now) {
                 $query->where('start_date', '<=',  $now)
                       ->orWhere('start_date', '=',  NULL);
@@ -42,33 +43,49 @@ class JobsController extends Controller
                 $query->where('end_date', '>=',  $now)
                       ->orWhere('end_date', '=',  NULL);
             })
-            ->where(function ($query) use ($selectDate, $typesTR) {
-                $query->where([
-                    ['i.status', '=', 'publish'],
-                    ['s.date', '=', $selectDate]
-                ])->orWhere([
-                    ['i.status', '=', 'publish'],
-                    ['type_id', 'IN', $typesTR]
-                ]);
+            ->where(function ($query) use ($typesTR) {
+                $query->where('i.status', '=', 'publish')
+                ->orWhere(function ($query) use ($typesTR) {
+                    $query->where('i.status', '=', 'publish')
+                          ->whereIn('type_id', $typesTR);
+                })->orWhere(function ($query) use ($typesTR) {
+                    $query->where('i.status', '=', 'publish')
+                          ->whereIn('type_id', $typesTR);
+                });
             })
+            ->groupBy('i.id')
             ->orderBy('p_name', 'desc')
             ->paginate(10);
             // ->get()->toArray();
+        // dd(DB::getQueryLog());
 
         $jobsTime = DB::table('jobs')
             ->select(
                 'issue_id as id',
-                DB::raw('SUM(TIME_TO_SEC(start_time) + TIME_TO_SEC(end_time)) as total')
+                DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total')
             )
             ->where('user_id', '=', $userID)
             ->where('date', '=', $selectDate)
             ->groupBy('issue_id')
             ->get()->toArray();
 
+        $logTime = DB::table('jobs')
+            ->select(
+                'id',
+                'issue_id',
+                DB::raw('TIME_FORMAT(start_time,"%H:%i") as start_time'),
+                DB::raw('TIME_FORMAT(end_time,"%H:%i") as end_time'),
+                DB::raw('(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total')
+            )
+            ->where('user_id', '=', $userID)
+            ->where('date', '=', $selectDate)
+            ->get()->toArray();
+
         return response()->json([
             'departments' => $departments,
             'jobs' => $jobs ? $jobs : array(),
-            'jobsTime' => $jobsTime ? $jobsTime : array()
+            'jobsTime' => $jobsTime ? $jobsTime : array(),
+            'logTime' => $logTime ? $logTime : array()
         ]);
     }
 
@@ -81,7 +98,8 @@ class JobsController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'time' => 'nullable|required'
+            'start_time' => 'nullable|required',
+            'end_time' => 'nullable|required'
         ]);
 
         $job = Job::create($request->all());
@@ -90,5 +108,19 @@ class JobsController extends Controller
             'job' => $job,
             'message' => 'Successfully.'
         ), 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $job = Job::findOrFail($id);
+        $job->delete();
+
+        return response()->json('Successfully');
     }
 }
