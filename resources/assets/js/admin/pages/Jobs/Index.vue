@@ -2,7 +2,7 @@
     <div class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-auto">
+                <div class="col col-sm-auto">
                     <card>
                         <template slot="header">
                             <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>

@@ -2,7 +2,7 @@
     <div class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-4 col-lg-3 col-xl-2">
+                <div class="col-sm-12 col-lg-3 col-xl-2">
                     <card>
                         <template slot="header">
                             <h4 class="card-title">Project Schedule</h4>
@@ -19,7 +19,7 @@
                         </div>
                     </card>
                 </div>
-                <div class="col-sm-8 col-lg-9 col-xl-10">
+                <div class="col-sm-12 col-lg-9 col-xl-10">
                     <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="deleteEvent" />
                 </div>
             </div>

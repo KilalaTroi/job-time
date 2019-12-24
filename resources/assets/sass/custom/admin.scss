@@ -834,7 +834,7 @@ td button .fa {
 
 // Table 
 table {
-  @media (max-width: 575px){
+  @media (max-width: 575px) {
     .btn,
     .btn-morphing {
       margin: 0 auto 10px;
@@ -844,5 +844,26 @@ table {
         margin-bottom: 0px;
       }
     }
+  }
+}
+
+// Callendar
+@media (max-width: 767px) {
+  .main-panel .fc-toolbar {
+    flex-direction: column;
+
+    h2 {
+      font-size: 1.2em;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+  }
+}
+
+@media (max-width: 575px) {
+  .card-body {
+      .vdp-datepicker__calendar {
+          width: 100%;
+      }
   }
 }
