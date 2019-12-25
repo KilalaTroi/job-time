@@ -224,27 +224,83 @@ class ReportsController extends Controller
     }
 
     public function exportReportTimeUser($user_id,$start_time, $end_time) {
+        $data = $this->getDataTimeUser($user_id,$start_time, $end_time);
         if($user_id == "all") {
             $user_name = $user_id;
         } else {
             $user_name = DB::table('users')->where('id', $user_id)->first()->name;
         }
+        $numberRows = count($data) + 5;
+        return Excel::create('Report_'. $user_name. "_" . $start_time . "_" . $end_time, function($excel) use ($data, $start_time, $end_time, $user_name, $numberRows) {
+            $excel->setTitle('Report Job Time');
+            $excel->setCreator('Kilala Job Time')
+                ->setCompany('Kilala');
+            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $user_name, $numberRows) {
+                $sheet->setCellValue('A1', "Job Time Report from ". $start_time . " to " . $end_time);
+                $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                $sheet->setCellValue('A3', $user_name);
+                $sheet->mergeCells('A1:I1');
+                $sheet->mergeCells('A2:I2');
+                $sheet->mergeCells('A3:I3');
+                $sheet->cell('A1:H3', function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '14',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setValignment('middle');
+                });
+                $sheet->cell('A5:I5', function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setValignment('middle');
+                    $cells->setBackground('#ffd05b');
+                });
+
+
+                $sheet->fromArray($data, null, 'A5', true);
+                //set title table
+                $sheet->setCellValue('A5', "NAME");
+                $sheet->setCellValue('B5', "DAY");
+                $sheet->setCellValue('C5', "STRT");
+                $sheet->setCellValue('D5', "END");
+                $sheet->setCellValue('E5', "TIME");
+                $sheet->setCellValue('F5', "DEPARTMENT");
+                $sheet->setCellValue('G5', "PROJECT");
+                $sheet->setCellValue('H5', "ISSUE");
+                $sheet->setCellValue('I5', "JOB TIME");
+                for ($i=5; $i<=$numberRows; $i++) {
+                    $sheet->cell('A'. $i.':I'.$i, function($cells) {
+                        $cells->setBorder('thin','thin','thin','thin');
+                    });
+                }
+                $sheet->setBorder('A5:I'.$numberRows, 'thin');
+            });
+        })->download('xlsx');
+    }
+    public function getDataTimeUser($user_id,$start_time, $end_time) {
+
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
             ->whereBetween('j.date', [$start_time, $end_time]);
         $data->when($user_id !="all", function ($q, $query) use($user_id) {
-                return $q->where('j.user_id', $user_id);
-            });
-        $data = $data->select( DB::raw('DATE_FORMAT(j.created_at,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-                        ->orderBy("dateReport")->get();
+            return $q->where('j.user_id', $user_id);
+        });
+        $data = $data->select( "u.name" , DB::raw('DATE_FORMAT(j.created_at,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            ->orderBy("j.user_id")->orderBy("dateReport")->get();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
         foreach ($data as $key => $item) {
             $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
             $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
-            $this->array_insert( $data[$key], 2, array ('Time' => $hoursminsandsecs));
+            $this->array_insert( $data[$key], 4, array ('Time' => $hoursminsandsecs));
             foreach ($item as $key1 => $element) {
                 if(empty($element)) {
                     $data[$key][$key1] = "--";
@@ -254,27 +310,7 @@ class ReportsController extends Controller
                 }
             }
         }
-        return Excel::create('Report_'. $user_name. "_" . $start_time . "_" . $end_time, function($excel) use ($data, $start_time, $end_time, $user_name) {
-            $excel->setTitle('Report Job Time');
-            $excel->setCreator('Kilala Job Time')
-                ->setCompany('Kilala');
-            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $user_name) {
-                $sheet->setCellValue('A1', "Job Time Report ". $start_time . "_" . $end_time);
-                $sheet->setCellValue('A2', "Date: ". Carbon::now());
-                $sheet->setCellValue('A3', $user_name);
-
-                $sheet->fromArray($data, null, 'A5', true);
-                //set title table
-                $sheet->setCellValue('A5', "DAY");
-                $sheet->setCellValue('B5', "STRT");
-                $sheet->setCellValue('C5', "END");
-                $sheet->setCellValue('D5', "TIME");
-                $sheet->setCellValue('E5', "DEPARTMENT");
-                $sheet->setCellValue('F5', "PROJECT");
-                $sheet->setCellValue('G5', "ISSUE");
-                $sheet->setCellValue('H5', "JOB TIME");
-            });
-        })->download('xlsx');
+        return $data;
     }
 
     function calcTime($start_time, $end_time) {
