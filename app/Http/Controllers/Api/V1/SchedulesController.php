@@ -56,7 +56,8 @@ class SchedulesController extends Controller
                 'type_id',
                 's.date as date',
                 's.start_time as start_time',
-                's.end_time as end_time'
+                's.end_time as end_time',
+                'memo'
             )
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
@@ -105,10 +106,9 @@ class SchedulesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update($id, Request $request)
-    { 
+    {
         $schedule = Schedule::findOrFail($id);
         $schedule->update($request->all());
-
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
