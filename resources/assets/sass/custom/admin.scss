@@ -831,7 +831,13 @@ simple-text
 td button .fa {
   font-size: 16px;
 }
-
+.project-date {
+  text-align: center;
+}
+.project-title {
+  text-align: center;
+  font-weight: 600;
+}
 // Table 
 table {
   @media (max-width: 575px) {

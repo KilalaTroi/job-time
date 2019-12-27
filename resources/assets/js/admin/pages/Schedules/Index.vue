@@ -20,12 +20,45 @@
                     </card>
                 </div>
                 <div class="col-sm-12 col-lg-9 col-xl-10">
-                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="deleteEvent" />
+                    <FullCalendar data-html="true" defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="actionEvent" />
                 </div>
             </div>
         </div>
+        <div class="modal" id="modalAction">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-light">
+                    <div class="modal-header"><h4 class="modal-title"><strong></strong></h4>
+                        <button type="button" data-dismiss="modal" class="btn btn-xs btn-danger ml-2"><i
+                                aria-hidden="true" class="fa fa-times"></i></button>
+                    </div>
+
+                    <form @submit="saveEvent">
+                        <div class="modal-body pt-0">
+                            <div class="project-date"></div>
+                            <div class="project-title"></div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group"><label>Memo</label>
+                                        <input type="text" name="memo"  v-model="memo" class="form-control project-memo">
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="form-group text-right">
+                                <input type="hidden" name="eventId" id="eventId" value=""/>
+                                <button type="submit"  class="btn btn-primary">Save</button>
+                                <button type="submit"  @click="deleteEvent()" class="btn btn-primary">Deleted</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
+
+
 <script>
 import FullCalendar from '@fullcalendar/vue'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -42,6 +75,7 @@ export default {
     },
     data() {
         return {
+            memo:"",
             types: [],
             projects: [],
             projectData: [],
@@ -118,7 +152,8 @@ export default {
                         issue_id: data[i].issue_id,
                         value: this.getObjectValue(this.types, data[i].type_id).value,
                         start_date: this.customFormatter(data[i].start_date),
-                        end_date: this.customFormatter(data[i].end_date)
+                        end_date: this.customFormatter(data[i].end_date),
+                        memo: data[i].memo
                     };
                     dataProjects.push(obj);
                 }
@@ -132,11 +167,12 @@ export default {
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
                         id: data[i].id,
-                        title: data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name,
+                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo?data[i].memo:''),
                         borderColor: this.getObjectValue(this.types, data[i].type_id).value,
                         backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
                         start: moment(data[i].date + ' ' + data[i].start_time).format(),
-                        end: moment(data[i].date + ' ' + data[i].end_time).format()
+                        end: moment(data[i].date + ' ' + data[i].end_time).format(),
+                        memo: data[i].memo
                     };
                     dataSchedules.push(obj);
                 }
@@ -176,7 +212,7 @@ export default {
         hourFormatter(date) {
             return moment(date).format('HH:mm');
         },
-        deleteEvent(info) {
+        /*deleteEvent(info) {
             if (confirm("Are you sure delete this event?")) {
                 let { id } = info.event;
                 console.log(id);
@@ -188,8 +224,52 @@ export default {
                     console.log(res.data.message);
                 }).catch(err => console.log(err));
             }
+        },*/
+        deleteEvent() {
+            let id = document.getElementById("eventId").value;
+            if (confirm("Are you sure delete this event?")) {
+                let uri = '/data/schedules/' + id;
+                axios.delete(uri).then((res) => {
+                    this.schedules = this.schedules.filter(function(elem) {
+                        if (elem.id != id) return elem;
+                    });
+                    console.log(res.data.message);
+                }).catch(err => console.log(err));
+            }
+        },
+        saveEvent(e) {
+            this.editable = false;
+            this.droppable = false;
+            let id = document.getElementById("eventId").value;
+            let memo = this.memo;
+            let uri = '/data/schedules/' + id;
+            let newItem = {
+                memo: memo
+            };
+            axios.patch(uri, newItem)
+                .catch(err => {
+                    console.log(err);
+                    this.editable = true;
+                    this.droppable = true;
+                });
+
+        }
+        ,
+        actionEvent(info) {
+            let { id } = info.event;
+            console.log(info.event);
+            $('#eventId').val(id);
+            let titleArray=info.event.title.split('\n');
+            let title=titleArray[0];
+            let memo=titleArray[1];
+            $('.project-title').text(title);
+            $('.project-date').text(this.hourFormatter(info.event.start) + " - " + this.hourFormatter(info.event.end));
+            $('.project-memo').val(memo);
+
+            $('#modalAction').modal('show');
         },
         resizeEvent(info) {
+
             this.editable = false;
             this.droppable = false;
 
@@ -211,7 +291,7 @@ export default {
                         this.schedules[foundIndex].start = moment(start).format();
                         this.schedules[foundIndex].end = moment(end).format();
                         this.schedules = [...this.schedules];
-                        
+
                         this.editable = true;
                         this.droppable = true;
                     })
@@ -246,7 +326,7 @@ export default {
                         let foundIndex = this.schedules.findIndex(x => x.id == id);
                         this.schedules[foundIndex].start = moment(start).format();
                         this.schedules[foundIndex].end = moment(end).format();
-                        this.schedules = [...this.schedules];
+                        this.schedules = [this.schedules];
 
                         this.editable = true;
                         this.droppable = true;
@@ -287,6 +367,7 @@ export default {
                     this.droppable = true;
                 });
         }
+
     },
     watch: {
         projectData: [{
