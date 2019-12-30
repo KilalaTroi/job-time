@@ -38,7 +38,7 @@
                             <div class="project-title"></div>
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <div class="form-group"><label>Memo</label>
+                                    <div class="form-group"><label>Process</label>
                                         <input type="text" name="memo"  v-model="memo" class="form-control project-memo">
                                     </div>
                                 </div>
@@ -47,7 +47,7 @@
                             <div class="form-group text-right">
                                 <input type="hidden" name="eventId" id="eventId" value=""/>
                                 <button type="submit"  class="btn btn-primary">Save</button>
-                                <button type="submit"  @click="deleteEvent()" class="btn btn-primary">Deleted</button>
+                                <button type="button"  @click="deleteEvent()" class="btn btn-primary">Delete</button>
                             </div>
                         </div>
                     </form>
@@ -172,10 +172,12 @@ export default {
                         backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
                         start: moment(data[i].date + ' ' + data[i].start_time).format(),
                         end: moment(data[i].date + ' ' + data[i].end_time).format(),
-                        memo: data[i].memo
+                        memo: data[i].memo,
+                        title_not_memo: data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name
                     };
                     dataSchedules.push(obj);
                 }
+                console.log(dataSchedules);
                 this.schedules = dataSchedules;
             }
         },
@@ -225,21 +227,21 @@ export default {
                 }).catch(err => console.log(err));
             }
         },*/
-        deleteEvent() {
+        deleteEvent(e) {
             let id = document.getElementById("eventId").value;
-            if (confirm("Are you sure delete this event?")) {
+            if (confirm("Are you sure you want to delete?")) {
                 let uri = '/data/schedules/' + id;
                 axios.delete(uri).then((res) => {
                     this.schedules = this.schedules.filter(function(elem) {
                         if (elem.id != id) return elem;
                     });
-                    console.log(res.data.message);
+                    $('#modalAction').modal('hide');
                 }).catch(err => console.log(err));
             }
         },
         saveEvent(e) {
-            this.editable = false;
-            this.droppable = false;
+            e.preventDefault();
+
             let id = document.getElementById("eventId").value;
             let memo = this.memo;
             let uri = '/data/schedules/' + id;
@@ -247,17 +249,21 @@ export default {
                 memo: memo
             };
             axios.patch(uri, newItem)
+                .then(res => {
+
+                    let foundIndex = this.schedules.findIndex(x => x.id == id);
+                    this.schedules[foundIndex].title = this.schedules[foundIndex].title_not_memo  + '\n' + memo ;
+                    this.schedules = [...this.schedules];
+                    $('#modalAction').modal('hide');
+                })
                 .catch(err => {
                     console.log(err);
-                    this.editable = true;
-                    this.droppable = true;
                 });
 
         }
         ,
         actionEvent(info) {
             let { id } = info.event;
-            console.log(info.event);
             $('#eventId').val(id);
             let titleArray=info.event.title.split('\n');
             let title=titleArray[0];
@@ -305,6 +311,7 @@ export default {
 
         },
         dropEvent(info) {
+
             this.editable = false;
             this.droppable = false;
 
@@ -326,7 +333,7 @@ export default {
                         let foundIndex = this.schedules.findIndex(x => x.id == id);
                         this.schedules[foundIndex].start = moment(start).format();
                         this.schedules[foundIndex].end = moment(end).format();
-                        this.schedules = [this.schedules];
+                        this.schedules = [...this.schedules];
 
                         this.editable = true;
                         this.droppable = true;
