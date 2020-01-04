@@ -10,9 +10,6 @@
                         <div id='external-events'>
                             <div id='external-events-list'>
                                 <div class="alert alert-success fc-event" v-for="(item, index) in projects" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value" :style="setStyles(item.value)">
-                                    <!-- <button type="button" aria-hidden="true" class="close" data-dismiss="alert">
-                                        <i class="nc-icon nc-simple-remove"></i>
-                                    </button> -->
                                     <span>{{ item.project }} {{ item.issue }}</span>
                                 </div>
                             </div>
@@ -20,41 +17,12 @@
                     </card>
                 </div>
                 <div class="col-sm-12 col-lg-9 col-xl-10">
-                    <FullCalendar data-html="true" defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="actionEvent" />
-                </div>
-            </div>
-        </div>
-        <div class="modal" id="modalAction">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content bg-light">
-                    <div class="modal-header"><h4 class="modal-title"><strong></strong></h4>
-                        <button type="button" data-dismiss="modal" class="btn btn-xs btn-danger ml-2"><i
-                                aria-hidden="true" class="fa fa-times"></i></button>
-                    </div>
-
-                    <form @submit="saveEvent">
-                        <div class="modal-body pt-0">
-                            <div class="project-date"></div>
-                            <div class="project-title"></div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <div class="form-group"><label>Process</label>
-                                        <input type="text" name="memo"  v-model="memo" class="form-control project-memo">
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="form-group text-right">
-                                <input type="hidden" name="eventId" id="eventId" value=""/>
-                                <button type="submit"  class="btn btn-primary">Save</button>
-                                <button type="button"  @click="deleteEvent()" class="btn btn-primary">Delete</button>
-                            </div>
-                        </div>
-                    </form>
+                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="clickEvent" />
                 </div>
             </div>
         </div>
 
+        <EditEvent :currentEvent="currentEvent" :errors="validationErrors" :success="validationSuccess" v-on:update-event="updateEvent" v-on:delete-event="deleteEvent" v-on:reset-validation="resetValidate"></EditEvent>
     </div>
 </template>
 
@@ -66,12 +34,14 @@ import timeGridPlugin from '@fullcalendar/timeGrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import Card from '../../components/Cards/Card'
+import EditEvent from './Edit'
 import moment from 'moment'
 
 export default {
     components: {
         FullCalendar, // make the <FullCalendar> tag available
-        Card
+        Card,
+        EditEvent
     },
     data() {
         return {
@@ -81,6 +51,7 @@ export default {
             projectData: [],
             schedules: [],
             scheduleData: [],
+            currentEvent: {},
 
             scrollTime: '8:00:00',
             calendarPlugins: [dayGridPlugin, listPlugin, interactionPlugin, timeGridPlugin],
@@ -110,13 +81,15 @@ export default {
             maxTime: '17:00:00',
             allDaySlot: false,
             height: 'auto',
-            hiddenDays: [0]
+            hiddenDays: [0],
+
+            validationErrors: '',
+            validationSuccess: ''
         }
     },
     mounted() {
         this.fetchItems();
         this.makeDraggable();
-        // console.log(this.schedules);
     },
     methods: {
         fetchItems() {
@@ -152,8 +125,7 @@ export default {
                         issue_id: data[i].issue_id,
                         value: this.getObjectValue(this.types, data[i].type_id).value,
                         start_date: this.customFormatter(data[i].start_date),
-                        end_date: this.customFormatter(data[i].end_date),
-                        memo: data[i].memo
+                        end_date: this.customFormatter(data[i].end_date)
                     };
                     dataProjects.push(obj);
                 }
@@ -167,7 +139,7 @@ export default {
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
                         id: data[i].id,
-                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo?data[i].memo:''),
+                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo ? data[i].memo : ''),
                         borderColor: this.getObjectValue(this.types, data[i].type_id).value,
                         backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
                         start: moment(data[i].date + ' ' + data[i].start_time).format(),
@@ -177,7 +149,6 @@ export default {
                     };
                     dataSchedules.push(obj);
                 }
-                console.log(dataSchedules);
                 this.schedules = dataSchedules;
             }
         },
@@ -214,68 +185,49 @@ export default {
         hourFormatter(date) {
             return moment(date).format('HH:mm');
         },
-        /*deleteEvent(info) {
-            if (confirm("Are you sure delete this event?")) {
-                let { id } = info.event;
-                console.log(id);
-                let uri = '/data/schedules/' + id;
+        deleteEvent(event) {
+            $('#editEvent').modal('hide');
+
+            if (confirm("Are you sure you want to delete this event?")) {
+                let uri = '/data/schedules/' + event.id;
                 axios.delete(uri).then((res) => {
                     this.schedules = this.schedules.filter(function(elem) {
-                        if (elem.id != id) return elem;
+                        if (elem.id != event.id) return elem;
                     });
-                    console.log(res.data.message);
-                }).catch(err => console.log(err));
-            }
-        },*/
-        deleteEvent(e) {
-            let id = document.getElementById("eventId").value;
-            if (confirm("Are you sure you want to delete?")) {
-                let uri = '/data/schedules/' + id;
-                axios.delete(uri).then((res) => {
-                    this.schedules = this.schedules.filter(function(elem) {
-                        if (elem.id != id) return elem;
-                    });
-                    $('#modalAction').modal('hide');
+                    
                 }).catch(err => console.log(err));
             }
         },
-        saveEvent(e) {
-            e.preventDefault();
+        updateEvent(event) {
+            // Reset validate
+            this.validationErrors = '';
+            this.validationSuccess = '';
 
-            let id = document.getElementById("eventId").value;
-            let memo = this.memo;
-            let uri = '/data/schedules/' + id;
+            let uri = '/data/schedules/' + event.id;
             let newItem = {
-                memo: memo
+                memo: event.memo
             };
             axios.patch(uri, newItem)
                 .then(res => {
-
-                    let foundIndex = this.schedules.findIndex(x => x.id == id);
-                    this.schedules[foundIndex].title = this.schedules[foundIndex].title_not_memo  + '\n' + memo ;
+                    let foundIndex = this.schedules.findIndex(x => x.id == event.id);
+                    this.schedules[foundIndex].title = this.schedules[foundIndex].title_not_memo  + '\n' + event.memo ;
                     this.schedules = [...this.schedules];
-                    $('#modalAction').modal('hide');
+                    this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
-                    console.log(err);
+                    this.validationErrors = '';
+                    this.validationSuccess = err.response.data;
                 });
 
-        }
-        ,
-        actionEvent(info) {
-            let { id } = info.event;
-            $('#eventId').val(id);
-            let titleArray=info.event.title.split('\n');
-            let title=titleArray[0];
-            let memo=titleArray[1];
-            $('.project-title').text(title);
-            $('.project-date').text(this.hourFormatter(info.event.start) + " - " + this.hourFormatter(info.event.end));
-            $('.project-memo').val(memo);
-
-            $('#modalAction').modal('show');
+        },
+        clickEvent(info) {
+            this.currentEvent = info.event;
+            let titleArray = this.currentEvent.title.split('\n');
+            this.currentEvent.title_not_memo = titleArray[0];
+            this.currentEvent.memo = titleArray[1];
+            $('#editEvent').modal('show');
         },
         resizeEvent(info) {
-
             this.editable = false;
             this.droppable = false;
 
@@ -311,7 +263,6 @@ export default {
 
         },
         dropEvent(info) {
-
             this.editable = false;
             this.droppable = false;
 
@@ -373,6 +324,10 @@ export default {
                     this.editable = true;
                     this.droppable = true;
                 });
+        },
+        resetValidate() {
+            this.validationSuccess = '';
+            this.validationErrors = '';
         }
 
     },
@@ -404,11 +359,6 @@ export default {
 .fc-time-grid-event .fc-title {
     color: #ffffff;
 }
-
-// tr:first-child>td>.fc-day-grid-event {
-//     padding: 5px;
-//     color: #ffffff;
-// }
 
 .fc-time-grid .fc-slats td {
     height: 2em;

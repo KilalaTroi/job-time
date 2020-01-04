@@ -34,7 +34,7 @@ class JobsController extends Controller
                 'i.name as i_name'
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
-            ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+            // ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->where(function ($query) use ($now) {
                 $query->where('start_date', '<=',  $now)
                       ->orWhere('start_date', '=',  NULL);
@@ -53,11 +53,21 @@ class JobsController extends Controller
                           ->whereIn('type_id', $typesTR);
                 });
             })
-            ->groupBy('i.id')
+            // ->groupBy('i.id')
             ->orderBy('p_name', 'desc')
             ->paginate(10);
             // ->get()->toArray();
         // dd(DB::getQueryLog());
+        
+        $schedules = DB::table('issues as i')
+            ->select(
+                'i.id as id',
+                'memo'
+            )
+            ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+            ->where('i.status', '=', 'publish')
+            ->where('s.date', '=',  $selectDate)
+            ->get()->toArray();
 
         $jobsTime = DB::table('jobs')
             ->select(
@@ -79,13 +89,15 @@ class JobsController extends Controller
             )
             ->where('user_id', '=', $userID)
             ->where('date', '=', $selectDate)
+            ->orderBy('start_time', 'asc')
             ->get()->toArray();
 
         return response()->json([
             'departments' => $departments,
             'jobs' => $jobs ? $jobs : array(),
             'jobsTime' => $jobsTime ? $jobsTime : array(),
-            'logTime' => $logTime ? $logTime : array()
+            'logTime' => $logTime ? $logTime : array(),
+            'schedules' => $schedules ? $schedules : array()
         ]);
     }
 

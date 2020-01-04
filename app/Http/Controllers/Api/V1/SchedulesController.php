@@ -92,7 +92,8 @@ class SchedulesController extends Controller
                 'borderColor' => $request->get('borderColor'),
                 'backgroundColor' => $request->get('backgroundColor'),
                 'start' => date('Y-m-d\TH:i:s', $start_date),
-                'end' => date('Y-m-d\TH:i:s', $end_date)
+                'end' => date('Y-m-d\TH:i:s', $end_date),
+                'title_not_memo' => $request->get('title')
             ),
             'message' => 'Successfully.'
         ), 200);

@@ -63,6 +63,7 @@ const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
     { id: 'project', value: 'Project', width: '', class: '' },
     { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
+    { id: 'process', value: 'Process', width: '110', class: 'text-center' },
     { id: 'time', value: 'Time', width: '110', class: 'text-center' }
 ];
 
@@ -94,6 +95,7 @@ export default {
             logTime: [],
             logTimeData: [],
             jobsTime: [],
+            schedules: [],
             currentJob: null,
             currentTimeLog: null,
 
@@ -120,6 +122,7 @@ export default {
                     this.jobData = res.data.jobs;
                     this.jobsTime = res.data.jobsTime;
                     this.logTimeData = res.data.logTime;
+                    this.schedules = res.data.schedules;
                 })
                 .catch(err => {
                     console.log(err);
@@ -151,6 +154,7 @@ export default {
                         department: this.getObjectValue(this.departments, jobData.data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, jobData.data[i].dept_id).text : '',
                         project: jobData.data[i].p_name,
                         issue: jobData.data[i].i_name,
+                        process: typeof(this.getObjectValue(this.schedules, jobData.data[i].id)) !== 'undefined' ? this.getObjectValue(this.schedules, jobData.data[i].id).memo : '',
                         time: time ? this.hourFormatter(time) : '00:00'
                     };
                     dataJobs.push(obj);

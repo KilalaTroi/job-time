@@ -127,7 +127,7 @@ export default {
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
                         id: data[i].id,
-                        title: data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name,
+                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo ? data[i].memo : ''),
                         borderColor: this.getObjectValue(this.types, data[i].type_id).value,
                         backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
                         start: moment(data[i].date + ' ' + data[i].start_time).format(),
