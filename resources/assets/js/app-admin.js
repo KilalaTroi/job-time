@@ -36,6 +36,7 @@ import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Profile from './admin/pages/Profile';
+import Totaling from './admin/pages/Totaling';
 
 const routes = [{
         path: '/',
@@ -100,6 +101,11 @@ const routes = [{
                 path: 'profile',
                 name: 'Profile',
                 component: Profile
+            },
+            {
+                path: 'totaling',
+                name: 'Totaling',
+                component: Totaling
             },
             {
                 path: '*',

@@ -5,6 +5,10 @@
                 <i class="nc-icon nc-palette"></i>
                 <p>Dashboard</p>
             </sidebar-link>
+            <sidebar-link to="/totaling">
+                <i class="nc-icon nc-chart-bar-32"></i>
+                <p>Totaling</p>
+            </sidebar-link>
             <sidebar-link to="/user">
                 <i class="nc-icon nc-badge"></i>
                 <p>Users</p>

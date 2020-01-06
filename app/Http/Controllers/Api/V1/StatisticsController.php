@@ -185,4 +185,23 @@ class StatisticsController extends Controller
 
         return $response;
     }
+
+    public function getDataTotaling() {
+        $users = DB::table('role_user as ru')
+            ->select(
+                'user.id as id',
+                'user.name as name'
+            )
+            ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+            ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+            ->where([
+                ['role.name', '<>', 'admin'],
+                ['role.name', '<>', 'japanese_planner'],
+            ])
+            ->get()->toArray();
+
+        return response()->json([
+            'users' => $users
+        ]);
+    }
 }
