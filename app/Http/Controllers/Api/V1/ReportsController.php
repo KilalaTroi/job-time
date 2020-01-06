@@ -45,7 +45,7 @@ class ReportsController extends Controller
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
-            ->select(DB::raw('concat(t.slug, "-" , year(j.date),"-",month(j.date)) as keyType'),DB::raw('concat(year(j.date),"/", month(j.date)) as dateReport'),DB::raw('month(j.date) as monthReport'), 't.slug', 't.slug_ja', "j.start_time", "j.end_time")
+            ->select(DB::raw('concat(t.slug, "-" , year(j.date),"-",month(j.date)) as keyType'),DB::raw('concat(year(j.date),"/", month(j.date)) as dateReport'),DB::raw('month(j.date) as monthReport'), 't.slug', 't.slug_ja', DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total'))
             ->whereBetween('j.date', [date($months[11]), date($months[0])])
             ->groupBy('dateReport')
             ->groupBy('t.id')
@@ -54,14 +54,6 @@ class ReportsController extends Controller
             ->get()->keyBy('keyType')->toArray();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
-        dd($data);
-
-        foreach ($data as $key => $item) {
-            $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
-            //$hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
-            $this->array_insert( $data[$key], 5, array ('total' => $secondTime));
-
-        }
 
         //get date report have data and unique date report
         $listDateReport = array_column($data, 'dateReport');
