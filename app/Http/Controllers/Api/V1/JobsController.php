@@ -16,7 +16,6 @@ class JobsController extends Controller
      */
     public function index()
     {
-        $now = date("Y-m-d");
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
 
         $typesTR = DB::table('types')->select('id')->where('slug', 'like', '%_tr')->get()->toArray();
@@ -35,12 +34,12 @@ class JobsController extends Controller
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
             // ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
-            ->where(function ($query) use ($now) {
-                $query->where('start_date', '<=',  $now)
+            ->where(function ($query) use ($selectDate) {
+                $query->where('start_date', '<=',  $selectDate)
                       ->orWhere('start_date', '=',  NULL);
             })
-            ->where(function ($query) use ($now) {
-                $query->where('end_date', '>=',  $now)
+            ->where(function ($query) use ($selectDate) {
+                $query->where('end_date', '>=',  $selectDate)
                       ->orWhere('end_date', '=',  NULL);
             })
             ->where(function ($query) use ($typesTR) {

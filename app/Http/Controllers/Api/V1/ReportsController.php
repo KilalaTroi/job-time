@@ -54,6 +54,7 @@ class ReportsController extends Controller
             ->get()->keyBy('keyType')->toArray();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
+        dd($data);
 
         foreach ($data as $key => $item) {
             $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
@@ -61,6 +62,7 @@ class ReportsController extends Controller
             $this->array_insert( $data[$key], 5, array ('total' => $secondTime));
 
         }
+
         //get date report have data and unique date report
         $listDateReport = array_column($data, 'dateReport');
         $listDateReport = array_unique($listDateReport);
@@ -72,7 +74,10 @@ class ReportsController extends Controller
             $numberUsers = DB::table('role_user')
                 ->join('roles', 'roles.id', '=', 'role_user.role_id')
                 ->join('users', 'role_user.user_id', '=', 'users.id')
-                ->where('roles.name', "<>", "admin")
+                ->where([
+                    ['roles.name', '<>', 'admin'],
+                    ['roles.name', '<>', 'japanese_planner'],
+                ])
                 ->where('users.created_at', "<=", $dateFormmat)->count();
             $arrayNumberUser[$dateReport]= $numberUsers;
         }
@@ -121,7 +126,7 @@ class ReportsController extends Controller
             //all hours of users must be work in a month and get percent
             $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * ((8 * $numberWorkdays)+8) * 3600 ;
             if($hoursForMonth == 0 && $type['total'] > 0 ) {
-                $percentJob = 0;
+                $percentJob = 0.0;
             } else {
                 $percentJob = round($type['total'] / $hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
             }
@@ -148,7 +153,7 @@ class ReportsController extends Controller
 
         //cal avegare on project
         foreach ($reponse as $key => $value) {
-            if(isset($totalPercentOfType[$key])) {
+            if(isset($totalPercentOfType[$key]) && $totalPercentOfType[$key]) {
                 $reponse[$key]['Total'] = round($totalPercentOfType[$key] / $arrayNumberMonthOfSlug[$key], 1, PHP_ROUND_HALF_UP). "%";
             } else {
                 $reponse[$key]['Total'] = "0.0%";

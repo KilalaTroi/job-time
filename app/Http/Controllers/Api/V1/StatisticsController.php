@@ -29,19 +29,20 @@ class StatisticsController extends Controller
         $dta = Carbon::now()->addMonths(1);
         $dtb = Carbon::now();
         $dtm = Carbon::now();
-        $startYearMonth = $dtb->month < 10 ? ($dtb->year - 1) . '0' . $dtb->month : ($dtb->year - 1) . '' . $dtb->month;
-        $beforeCurrentM = $dtb->month - 1;
-        $isJan = $beforeCurrentM == 0 ? $dtb->year - 1 : $dtb->year;
-        $endYearMonth = $beforeCurrentM < 10 ? $isJan . '0' . $beforeCurrentM : $isJan . '' . $beforeCurrentM;
+        $oldYear = $dtb->month < 12 ? ($dtb->year - 1) : $dtb->year;
+        $startYearMonth = $dta->month < 10 ? $oldYear . '0' . $dta->month : $oldYear . '' . $dta->month;
+        $beforeCurrentM = $dtb->month === 1 ? 12 : $dtb->month - 1;
+        $currentYear = $beforeCurrentM == 12 ? $oldYear : $dtb->year;
+        $endYearMonth = $beforeCurrentM < 10 ? $currentYear . '0' . $beforeCurrentM : $currentYear . '' . $beforeCurrentM;
         $daysOfMonth = array();
         $monthsText = array();
 
-        for ($i = 1; $i <= 12; $i++) {
+        for ($i = 1; $i <= 11; $i++) {
             $endMonth = $dta->subMonths(1)->format('Y-m-01');
             $startMonth = $dtb->subMonths(1)->format('Y-m-01');
             $monthsText[] = $dtm->subMonths(1)->format('M');
 
-             $inYearMonth = $dtb->month < 10 ? $dtb->year . '0' . $dtb->month : $dtb->year . '' . $dtb->month;
+            $inYearMonth = $dtb->month < 10 ? $dtb->year . '0' . $dtb->month : $dtb->year . '' . $dtb->month;
             $daysOfMonth[$inYearMonth] = array(
                  'start' => $startMonth,
                  'end' => $endMonth
@@ -58,11 +59,19 @@ class StatisticsController extends Controller
         );
 
         // Number current jobs
-        $jobs = DB::table('issues as i')
-            ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-            ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+        $now = Carbon::now()->format('Y-m-d');
+        $jobs = DB::table('projects as p')
+            ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->where('i.status', '=', 'publish')
-            ->where('s.date', '=',  Carbon::now()->format('Y-m-d'))
+            // ->whereNotIn('type_id', $typesTR)
+            ->where(function ($query) use ($now) {
+                $query->where('start_date', '<=',  $now)
+                      ->orWhere('start_date', '=',  NULL);
+            })
+            ->where(function ($query) use ($now) {
+                $query->where('end_date', '>=',  $now)
+                      ->orWhere('end_date', '=',  NULL);
+            })
             ->count();
 
         $response['jobs'] = $jobs;
@@ -81,7 +90,7 @@ class StatisticsController extends Controller
 
         $hoursCurrentMonth = DB::table('jobs')
             ->select(
-                DB::raw('SUM(TIME_TO_SEC(jobs.time))/3600 as total')
+                DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
             )
             ->where('jobs.date', ">=", $response['startEndYear'][1])
             ->get();
@@ -92,6 +101,7 @@ class StatisticsController extends Controller
             if ( $day->isWeekday() ) $daysCurrentMonth++;
         }
 
+        $response['currentMonth']['totalUsers'] = $usersCurrent;
         $response['currentMonth']['hours'] = $hoursCurrentMonth;
         $response['currentMonth']['total'] = $usersCurrent * (8 * $daysCurrentMonth + 8);
 
@@ -161,7 +171,7 @@ class StatisticsController extends Controller
             ->select(
                 'projects.type_id as id',
                 DB::raw('concat(year(jobs.date),"", LPAD(month(jobs.date), 2, "0")) as yearMonth'),
-                DB::raw('SUM(TIME_TO_SEC(jobs.time))/3600 as total')
+                DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
             )
             ->join('issues', 'issues.id', '=', 'jobs.issue_id')
             ->join('projects', 'projects.id', '=', 'issues.project_id')

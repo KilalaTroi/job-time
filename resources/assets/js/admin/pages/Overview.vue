@@ -51,7 +51,7 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">New Users</p>
-                            <h4 class="card-title">+{{ totalObject(newUsersPerMonth) }}</h4>
+                            <h4 class="card-title">+{{ totalObject(newUsersPerMonth) }}/{{ currentMonth.totalUsers }}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ getTimeWorked(startEndYear) }}
@@ -207,19 +207,19 @@
             totalObject(obj) {
                 let total = [];
                 Object.entries(obj).forEach(([key, val]) => {
-                    total.push(val)
+                    total.push(val) 
                 });
                 return total.reduce(function(total, num){ return total + num }, 0);
             },
             totalArrayObject(arr) {
                 let total = [];
                 arr.map(function(value, key) {
-                    total.push(Math.round(value.total))
+                    total.push((value.total*1).toFixed(2)*1)
                 });
                 return total.reduce(function(total, num){ return total + num }, 0);
             },
             getCurrentMonth(data) {
-                if (typeof(data.hours) !== 'undefined') return Math.round(data.hours[0].total) + '/' + data.total;
+                if (typeof(data.hours) !== 'undefined') return (data.hours[0].total*1).toFixed(2) + '/' + data.total;
             },
             getSeries(projectTypes, totalHoursPerMonth, hoursPerProject) {
                 let series = [];
@@ -229,7 +229,7 @@
                     let row = [];
                     Object.entries(totalHoursPerMonth).forEach(([key, val]) => {
                         if ( _this.hasObjectValue(hoursPerProject, id, key) ) {
-                            let percents = (Math.round(_this.hasObjectValue(hoursPerProject, id, key).total)/val*100).toFixed(2);
+                            let percents = (_this.hasObjectValue(hoursPerProject, id, key).total*1/val*100).toFixed(2);
                             row.push({
                                 value: percents,
                                 meta: value.slug

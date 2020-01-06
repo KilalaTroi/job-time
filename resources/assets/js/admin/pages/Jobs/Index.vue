@@ -87,6 +87,7 @@ export default {
     data() {
         return {
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
+            userCreatedAt: document.querySelector("meta[name='user-created-at']").getAttribute('content'),
             columns: [...tableColumns],
             logColumns: [...logTimeColumns],
             departments: [],
@@ -249,6 +250,7 @@ export default {
         },
         disabledEndDates() {
             let obj = {
+                to: new Date(this.userCreatedAt),
                 from: new Date(), // Disable all dates after specific date
                 // days: [0], // Disable Saturday's and Sunday's
             };
