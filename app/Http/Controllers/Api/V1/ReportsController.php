@@ -45,7 +45,7 @@ class ReportsController extends Controller
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
-            ->select(DB::raw('concat(t.slug, "-" , year(j.date),"-",month(j.date)) as keyType'),DB::raw('concat(year(j.date),"/", month(j.date)) as dateReport'),DB::raw('month(j.date) as monthReport'), 't.slug', 't.slug_ja', DB::raw('SUM(TIME_TO_SEC(j.time)) as total'))
+            ->select(DB::raw('concat(t.slug, "-" , year(j.date),"-",month(j.date)) as keyType'),DB::raw('concat(year(j.date),"/", month(j.date)) as dateReport'),DB::raw('month(j.date) as monthReport'), 't.slug', 't.slug_ja', "j.start_time", "j.end_time")
             ->whereBetween('j.date', [date($months[11]), date($months[0])])
             ->groupBy('dateReport')
             ->groupBy('t.id')
@@ -54,6 +54,13 @@ class ReportsController extends Controller
             ->get()->keyBy('keyType')->toArray();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
+
+        foreach ($data as $key => $item) {
+            $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
+            //$hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
+            $this->array_insert( $data[$key], 5, array ('total' => $secondTime));
+
+        }
         //get date report have data and unique date report
         $listDateReport = array_column($data, 'dateReport');
         $listDateReport = array_unique($listDateReport);
@@ -113,7 +120,11 @@ class ReportsController extends Controller
 
             //all hours of users must be work in a month and get percent
             $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * ((8 * $numberWorkdays)+8) * 3600 ;
-            $percentJob = round($type['total']/$hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
+            if($hoursForMonth == 0 && $type['total'] > 0 ) {
+                $percentJob = 0;
+            } else {
+                $percentJob = round($type['total'] / $hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
+            }
             $monthName = date('M', mktime(0, 0, 0, $month, 10));
 
             $reponse[$slug][$monthName] = $percentJob . "%";
@@ -130,7 +141,9 @@ class ReportsController extends Controller
             }
             $totalPercentOfMonth[$monthName] += $percentJob;
             $totalPercentOfType[$slug]   += $percentJob;
-            $arrayNumberMonthOfSlug[$slug] += 1;
+            if ($percentJob > 0) {
+                $arrayNumberMonthOfSlug[$slug] += 1;
+            }
         }
 
         //cal avegare on project
