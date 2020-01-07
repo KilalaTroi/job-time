@@ -306,8 +306,8 @@ class ReportsController extends Controller
         $data->when($user_id != "0", function ($q, $query) use($user_id) {
             return $q->where('j.user_id', $user_id);
         });
-        $data = $data->select( "u.name" , DB::raw('unix_timestamp(j.date) as dateReport'), DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("u.name")->orderBy("dateReport")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+        $data = $data->select( "u.name" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
         foreach ($data as $key => $item) {
@@ -319,7 +319,7 @@ class ReportsController extends Controller
                     $data[$key][$key1] = "--";
                 }
                 if($key1 == "dateReport") {
-                    $data[$key][$key1] = date('M d,Y', $element);
+                    $data[$key][$key1] = date('M d,Y', strtotime($element));
                 }
             }
         }
