@@ -306,7 +306,7 @@ class ReportsController extends Controller
         $data->when($user_id != "0", function ($q, $query) use($user_id) {
             return $q->where('j.user_id', $user_id);
         });
-        $data = $data->select( "u.name" , DB::raw('DATE_FORMAT(j.date,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+        $data = $data->select( "u.name" , DB::raw('unix_timestamp(j.date) as dateReport'), DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
             ->orderBy("u.name")->orderBy("dateReport")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
@@ -315,11 +315,11 @@ class ReportsController extends Controller
             $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
             $this->array_insert( $data[$key], 4, array ('Time' => $hoursminsandsecs));
             foreach ($item as $key1 => $element) {
-                if(empty($element)) {
+                if(empty($element) || $element == "All") {
                     $data[$key][$key1] = "--";
                 }
                 if($key1 == "dateReport") {
-                    $data[$key][$key1] = date('M d,Y', strtotime($element));
+                    $data[$key][$key1] = date('M d,Y', $element);
                 }
             }
         }
@@ -341,10 +341,10 @@ class ReportsController extends Controller
         }
         return $timeLog;
     }
-    function timeToSeconds($time='00:00:00')
+    function timeToSeconds($time='00:00')
     {
-        list($hours, $mins, $secs) = explode(':', $time);
-        return ($hours * 3600 ) + ($mins * 60 ) + $secs;
+        list($hours, $mins) = explode(':', $time);
+        return ($hours * 3600 ) + ($mins * 60 );
     }
     function getHoursMinutes($seconds, $format = '%02d:%02d') {
 
