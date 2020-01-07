@@ -293,7 +293,9 @@ class ReportsController extends Controller
         })->download('xlsx');
     }
     public function getDataTimeUser($user_id,$start_time, $end_time) {
-
+        $format = 'Y-m-d';
+        $start_time = Carbon::createFromFormat($format, $start_time);
+        $end_time = Carbon::createFromFormat($format, $end_time);
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
@@ -304,8 +306,8 @@ class ReportsController extends Controller
         $data->when($user_id !="all", function ($q, $query) use($user_id) {
             return $q->where('j.user_id', $user_id);
         });
-        $data = $data->select( "u.name" , DB::raw('DATE_FORMAT(j.created_at,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("j.user_id")->orderBy("dateReport")->get();
+        $data = $data->select( "u.name" , DB::raw('DATE_FORMAT(j.date,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            ->orderBy("j.user_id")->orderBy("dateReport")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
         foreach ($data as $key => $item) {
