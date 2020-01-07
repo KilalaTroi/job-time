@@ -330,7 +330,8 @@ class ReportsController extends Controller
         //12hours = 43200, 13hours = 46800
         $start_time_seconds = $this->timeToSeconds($start_time);
         $end_time_seconds   = $this->timeToSeconds($end_time);
-        if (($start_time_seconds > 46800 && $end_time_seconds > 46800) || $start_time_seconds < 43200 && $end_time_seconds < 43200) {
+        $timeLog = $end_time_seconds - $start_time_seconds;
+        /*if (($start_time_seconds > 46800 && $end_time_seconds > 46800) || $start_time_seconds < 43200 && $end_time_seconds < 43200) {
             $timeLog = $end_time_seconds - $start_time_seconds;
         } else if ($start_time_seconds < 43200 && $end_time_seconds > 46800){
             $timeLog = $end_time_seconds - $start_time_seconds - 3600;
@@ -338,7 +339,7 @@ class ReportsController extends Controller
             $timeLog = 43200 - $start_time_seconds;
         } else if ($start_time_seconds > 43200 && $end_time_seconds > 46800) {
             $timeLog = $end_time_seconds - 46800;
-        }
+        }*/
         return $timeLog;
     }
     function timeToSeconds($time='00:00')
