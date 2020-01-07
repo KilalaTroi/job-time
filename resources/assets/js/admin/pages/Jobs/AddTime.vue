@@ -20,7 +20,7 @@
                 </div>
             </div>
             <div class="form-group" v-if="showLunchBreak">
-                <base-checkbox v-model="includeLunchBreak" class="align-self-end">Including lunch break</base-checkbox>
+                <base-checkbox v-model="exceptLunchBreak" class="align-self-end">Excepting lunch break</base-checkbox>
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
@@ -61,20 +61,20 @@ export default {
             start_time: '',
             end_time: '',
             showLunchBreak: false,
-            includeLunchBreak: true
+            exceptLunchBreak: true
         }
     },
     mounted() {},
     methods: {
         emitAddTime(e) {
-            e.preventDefault()
+            e.preventDefault();
 
             const newTime = {
                 issue_id: this.currentJob.id,
                 start_time: this.start_time,
                 end_time: this.end_time,
                 showLunchBreak: this.showLunchBreak,
-                includeLunchBreak: this.includeLunchBreak,
+                exceptLunchBreak: this.exceptLunchBreak,
             };
 
             this.$emit('add-time', newTime);

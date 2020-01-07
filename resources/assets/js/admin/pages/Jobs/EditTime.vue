@@ -19,6 +19,9 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group" v-if="showLunchBreak">
+                <base-checkbox v-model="exceptLunchBreak" class="align-self-end">Excepting lunch break</base-checkbox>
+            </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
@@ -44,7 +47,7 @@ export default {
         Modal,
         VueTimepicker
     },
-    props: ['currentTimeLog', 'errors', 'success'],
+    props: ['currentTimeLog', 'logTimeData', 'errors', 'success'],
     data() {
         return {
             startHourRange: [[7, 19]],
@@ -54,17 +57,21 @@ export default {
             startHour: '',
             startMinute: '',
             buttonDisabled: true,
-            endDisabled: true
+            endDisabled: false,
+            showLunchBreak: false,
+            exceptLunchBreak: true
         }
     },
     mounted() {},
     methods: {
         emitUpdateTime(e) {
-            e.preventDefault()
+            e.preventDefault();
 
             const newTime = {
                 start_time: this.currentTimeLog.start_time,
-                end_time: this.currentTimeLog.end_time
+                end_time: this.currentTimeLog.end_time,
+                showLunchBreak: this.showLunchBreak,
+                exceptLunchBreak: this.exceptLunchBreak,
             };
 
             this.$emit('update-time', newTime);
@@ -77,13 +84,22 @@ export default {
             this.startHour = this.startMinute === 50 ? eventData.data.H*1 + 1 : eventData.data.H*1;
             this.endHourRange = [[this.startHour, 19]];
             this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
-            this.currentTimeLog.end_time = '';
-            
-            if ( !this.currentTimeLog.start_time.includes('HH') && !this.currentTimeLog.start_time.includes('mm') && this.currentTimeLog.start_time ) {
-                this.endDisabled = false;
+
+            let overlap = false;
+            let start_time = this.currentTimeLog.start_time;
+            let end_time = this.currentTimeLog.end_time;
+            let _this = this;
+            this.logTimeData.map(function(value, key) {
+                if ( _this.currentTimeLog.id !== value.id && _this.checkTimeOverlap(start_time, end_time, value.start_time, value.end_time) )
+                    overlap = true;
+            });
+            if ( overlap ) {
+                this.$emit('overlap-time', { message: ["Overlap time!"] });
+                this.buttonDisabled = true;
             } else {
-                this.currentTimeLog.end_time = 'HH:mm';
-                this.endDisabled = true;
+                this.buttonDisabled = false;
+                this.$emit('overlap-time', "");
+                if ( this.checkTime(this.currentTimeLog.start_time, this.currentTimeLog.end_time) ) this.currentTimeLog.end_time = 'HH:mm';
             }
         },
         changeEndTime(eventData) {
@@ -93,10 +109,59 @@ export default {
                 this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
 
             if ( !this.currentTimeLog.end_time.includes('HH') && !this.currentTimeLog.end_time.includes('mm') && this.currentTimeLog.end_time ) {
-                this.buttonDisabled = false;
+                let overlap = false;
+                let start_time = this.currentTimeLog.start_time;
+                let end_time = this.currentTimeLog.end_time;
+                let _this = this;
+                this.logTimeData.map(function(value, key) {
+                    if ( _this.currentTimeLog.id !== value.id && _this.checkTimeOverlap(start_time, end_time, value.start_time, value.end_time) )
+                        overlap = true;
+                });
+                if ( overlap ) {
+                    this.$emit('overlap-time', { message: ["Overlap time!"] });
+                    this.buttonDisabled = true;
+                } else {
+                    this.buttonDisabled = false;
+                    this.$emit('overlap-time', "");
+                }
             } else {
                 this.buttonDisabled = true;
             }
+
+            // lunch break
+            if ( this.startHour < 12 && eventData.data.H*1 > 13 ) {
+                this.showLunchBreak = true;
+            } else {
+                this.showLunchBreak = false;
+            }
+        },
+        checkTimeOverlap(aStartTime, aEndTime, bStartTime, bEndTime) {
+            let aStartTimeArray = aStartTime.split(':');
+            let aEndTimeArray = aEndTime.split(':');
+            let bStartTimeArray = bStartTime.split(':');
+            let bEndTimeArray = bEndTime.split(':');
+
+            let aStartTimeSecond = aStartTimeArray[0]*1*3600 + aStartTimeArray[1]*1*60;
+            let aEndTimeSecond = aEndTimeArray[0]*1*3600 + aEndTimeArray[1]*1*60;
+            let bStartTimeSecond = bStartTimeArray[0]*1*3600 + bStartTimeArray[1]*1*60;
+            let bEndTimeSecond = bEndTimeArray[0]*1*3600 + bEndTimeArray[1]*1*60;
+
+            if ( (aEndTimeSecond <= bStartTimeSecond) || (aStartTimeSecond >= bEndTimeSecond) )
+                return false;
+
+            return true;
+        },
+        checkTime(aStartTime, aEndTime) {
+            let aStartTimeArray = aStartTime.split(':');
+            let aEndTimeArray = aEndTime.split(':');
+
+            let aStartTimeSecond = aStartTimeArray[0]*1*3600 + aStartTimeArray[1]*1*60;
+            let aEndTimeSecond = aEndTimeArray[0]*1*3600 + aEndTimeArray[1]*1*60;
+
+            if ( aStartTimeSecond < aEndTimeSecond )
+                return false;
+
+            return true;
         }
     }
 }

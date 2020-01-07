@@ -113,10 +113,59 @@ class JobsController extends Controller
             'end_time' => 'nullable|required'
         ]);
 
-        $job = Job::create($request->all());
+        if ( $request->get('showLunchBreak') && $request->get('exceptLunchBreak') ) {
+            $job = Job::create([
+                'issue_id' => $request->get('issue_id'),
+                'user_id' => $request->get('user_id'),
+                'date' => $request->get('date'),
+                'start_time' => $request->get('start_time'),
+                'end_time' => '12:00',
+            ]);
+
+            $job = Job::create([
+                'issue_id' => $request->get('issue_id'),
+                'user_id' => $request->get('user_id'),
+                'date' => $request->get('date'),
+                'start_time' => '13:00',
+                'end_time' => $request->get('end_time'),
+            ]);
+        } else {
+            $job = Job::create($request->all());
+        }
 
         return response()->json(array(
-            'job' => $job,
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id, Request $request)
+    {
+        $job = Job::findOrFail($id);
+
+        if ( $request->get('showLunchBreak') && $request->get('exceptLunchBreak') ) {
+            $job->update([
+                'start_time' => $request->get('start_time'),
+                'end_time' => '12:00',
+            ]);
+
+            $job2 = Job::create([
+                'issue_id' => $job->issue_id,
+                'user_id' => $job->user_id,
+                'date' => $job->date,
+                'start_time' => '13:00',
+                'end_time' => $request->get('end_time'),
+            ]);
+        } else {
+            $job->update($request->all());
+        }
+        return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
     }

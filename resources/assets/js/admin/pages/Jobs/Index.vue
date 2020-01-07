@@ -43,9 +43,8 @@
                 </div>
             </div>
 
-            <AddTime :currentJob="currentJob" :logTimeData="logTimeData" :errors="validationErrors" :success="validationSuccess" v-on:overlap-time="overlapTime"  v-on:add-time="addTime" v-on:reset-validation="resetValidate"></AddTime> 
-
-            <EditTime :currentTimeLog="currentTimeLog" :errors="validationErrors" :success="validationSuccess"  v-on:update-time="updateTime" v-on:reset-validation="resetValidate"></EditTime> 
+            <AddTime :currentJob="currentJob" :logTimeData="logTimeData" :errors="validationErrors" :success="validationSuccess" v-on:overlap-time="overlapTime" v-on:add-time="addTime" v-on:reset-validation="resetValidate"></AddTime>
+            <EditTime :currentTimeLog="currentTimeLog" :logTimeData="logTimeData" :errors="validationErrors" :success="validationSuccess"  v-on:overlap-time="overlapTime" v-on:update-time="updateTime" v-on:reset-validation="resetValidate"></EditTime>
         </div>
     </div>
 </template>
@@ -199,6 +198,9 @@ export default {
             this.currentJob = obj;
         },
         getItem(id) {
+            this.validationErrors = '';
+            this.validationSuccess = '';
+
             let time = this.getObjectValue(this.logTime, id);
             let obj = {
                 id: time.id,
@@ -232,10 +234,10 @@ export default {
                 });
         },
         overlapTime(data) {
+            this.validationSuccess = '';
             if ( data ) {
                 this.validationErrors = data;
             } else {
-                this.validationSuccess = '';
                 this.validationErrors = '';
             }
         },
@@ -243,6 +245,18 @@ export default {
             // Reset validate
             this.validationErrors = '';
             this.validationSuccess = '';
+
+            let uri = '/data/jobs/' + this.currentTimeLog.id;
+            axios.patch(uri, newTime)
+                .then(res => {
+                    this.validationSuccess = res.data.message;
+                    this.fetchItems();
+                    $('#itemDetail button[data-dismiss]').trigger('click');
+                })
+                .catch(err => {
+                    this.validationErrors = err.response.data;
+                    this.validationSuccess = '';
+                });
         },
         deleteItem(id) {
             if (confirm("Are you sure want to delete this record?")) {

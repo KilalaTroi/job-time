@@ -215,8 +215,8 @@ export default {
                     this.validationSuccess = res.data.message;
                 })
                 .catch(err => {
-                    this.validationErrors = '';
-                    this.validationSuccess = err.response.data;
+                    this.validationErrors = err.response.data;
+                    this.validationSuccess = '';
                 });
 
         },
