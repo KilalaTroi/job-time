@@ -29,7 +29,8 @@
             options: function (options) {
                 // update options
                 $(this.$el).empty().select2({ data: options });
-                $('.select2 option[value="0"]').prop('disabled',true);
+                if ( !$('.select2.no-disable-first-value').length )
+                  $('.select2 option[value="0"]').prop('disabled',true);
             }
         },
         destroyed: function () {

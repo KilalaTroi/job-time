@@ -235,8 +235,8 @@ class ReportsController extends Controller
 
     public function exportReportTimeUser($user_id,$start_time, $end_time) {
         $data = $this->getDataTimeUser($user_id,$start_time, $end_time);
-        if($user_id == "all") {
-            $user_name = $user_id;
+        if($user_id == "0") {
+            $user_name = "All Users";
         } else {
             $user_name = DB::table('users')->where('id', $user_id)->first()->name;
         }
@@ -303,11 +303,11 @@ class ReportsController extends Controller
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
             ->whereBetween('j.date', [$start_time, $end_time]);
-        $data->when($user_id !="all", function ($q, $query) use($user_id) {
+        $data->when($user_id != "0", function ($q, $query) use($user_id) {
             return $q->where('j.user_id', $user_id);
         });
         $data = $data->select( "u.name" , DB::raw('DATE_FORMAT(j.date,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("j.user_id")->orderBy("dateReport")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            ->orderBy("u.name")->orderBy("dateReport")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
 
         foreach ($data as $key => $item) {

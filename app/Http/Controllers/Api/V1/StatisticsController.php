@@ -186,7 +186,36 @@ class StatisticsController extends Controller
         return $response;
     }
 
-    public function getDataTotaling() {
+    public function getDataTotaling($user_id, $start_time, $end_time) {
+        $operation = $user_id == 0 ? '<>' : '=';
+
+        // DB::enableQueryLog();
+        $dataLogTime = DB::table('jobs as j')
+            ->select(
+                'u.name as username',
+                'j.date as date',
+                DB::raw('TIME_FORMAT(j.start_time,"%H:%i") as start_time'),
+                DB::raw('TIME_FORMAT(j.end_time,"%H:%i") as end_time'),
+                DB::raw('(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total'),
+                'd.name as department',
+                'p.name as project',
+                'i.name as issue',
+                't.slug as job_type'
+            )
+            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
+            ->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
+            ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+            ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+            ->where('u.id', $operation, $user_id)
+            ->where('j.date', '>=', $start_time)
+            ->where('j.date', '<=', $end_time)
+            ->orderBy('u.name', 'asc')
+            ->orderBy('j.date', 'asc')
+            ->orderBy('j.start_time', 'asc')
+            ->paginate(20);
+        // dd(DB::getQueryLog());
+
         $users = DB::table('role_user as ru')
             ->select(
                 'user.id as id',
@@ -201,7 +230,8 @@ class StatisticsController extends Controller
             ->get()->toArray();
 
         return response()->json([
-            'users' => $users
+            'users' => $users,
+            'dataLogTime' => $dataLogTime,
         ]);
     }
 }
