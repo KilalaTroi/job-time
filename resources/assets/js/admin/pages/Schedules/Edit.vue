@@ -7,7 +7,7 @@
             </div>
             <hr>
             <div class="form-group">
-                <label>Process</label>
+                <label>Phase</label>
                 <input type="text" name="memo"  v-model="currentEvent.memo" class="form-control project-memo">
             </div>
             <error-item :errors="errors"></error-item>

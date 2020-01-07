@@ -2,8 +2,8 @@
     <div class="wrapper">
         <side-bar>
             <sidebar-link to="/overview">
-                <i class="nc-icon nc-palette"></i>
-                <p>Dashboard</p>
+                <i class="nc-icon nc-chart-pie-36"></i>
+                <p>Statistics</p>
             </sidebar-link>
             <sidebar-link to="/totaling">
                 <i class="nc-icon nc-chart-bar-32"></i>
