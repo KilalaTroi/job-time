@@ -282,7 +282,7 @@ class ReportsController extends Controller
                 $sheet->setCellValue('F5', "DEPARTMENT");
                 $sheet->setCellValue('G5', "PROJECT");
                 $sheet->setCellValue('H5', "ISSUE");
-                $sheet->setCellValue('I5', "JOB TIME");
+                $sheet->setCellValue('I5', "JOB TYPE");
                 for ($i=5; $i<=$numberRows; $i++) {
                     $sheet->cell('A'. $i.':I'.$i, function($cells) {
                         $cells->setBorder('thin','thin','thin','thin');
@@ -307,6 +307,7 @@ class ReportsController extends Controller
         $data = $data->select( "u.name" , DB::raw('DATE_FORMAT(j.created_at,\'%d-%m-%Y\') as dateReport'), "j.start_time", "j.end_time","d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
             ->orderBy("j.user_id")->orderBy("dateReport")->get();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
+
         foreach ($data as $key => $item) {
             $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
             $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
@@ -316,7 +317,7 @@ class ReportsController extends Controller
                     $data[$key][$key1] = "--";
                 }
                 if($key1 == "dateReport") {
-                    $data[$key][$key1] = date('M m,Y', strtotime($element));
+                    $data[$key][$key1] = date('M d,Y', strtotime($element));
                 }
             }
         }
