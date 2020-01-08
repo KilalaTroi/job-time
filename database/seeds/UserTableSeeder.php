@@ -19,7 +19,7 @@ class UserTableSeeder extends Seeder
         $role_employee = Role::where('name', 'employee')->first();
 
 	    $admin = new User();
-	    $admin->name = 'Admin Fullname';
+	    $admin->name = 'Trần Tăng Quang';
 	    $admin->username = 'admin';
 	    $admin->email = 'quang.tran@kilala.vn';
 	    $admin->password = bcrypt('cetusvn');
@@ -27,25 +27,25 @@ class UserTableSeeder extends Seeder
 	    $admin->roles()->attach($role_admin);
 
 	    $planner = new User();
-	    $planner->name = 'Planner Fullname';
-	    $planner->username = 'planner';
-	    $planner->email = 'planner@kilala.vn';
+	    $planner->name = 'Masato Furuoya';
+	    $planner->username = 'furuoya';
+	    $planner->email = 'furuoya_masato@kilala.vn';
 	    $planner->password = bcrypt('cetusvn');
 	    $planner->save();
 	    $planner->roles()->attach($role_planner);
 
-	    $jp_planner = new User();
-	    $jp_planner->name = 'Japanese Planner Fullname';
-	    $jp_planner->username = 'japanese_planner';
-	    $jp_planner->email = 'japanese_planner@kilala.vn';
-	    $jp_planner->password = bcrypt('cetusvn');
-	    $jp_planner->save();
-	    $jp_planner->roles()->attach($role_jp_planner);
+	    $planner = new User();
+	    $planner->name = 'Dương Thị Bích Ngọc';
+	    $planner->username = 'ngoc.duong';
+	    $planner->email = 'ngoc.duong@kilala.vn';
+	    $planner->password = bcrypt('cetusvn');
+	    $planner->save();
+	    $planner->roles()->attach($role_planner);
 
 	    $employee = new User();
-	    $employee->name = 'Employee Fullname';
-	    $employee->username = 'employee';
-	    $employee->email = 'employee@kilala.vn';
+	    $employee->name = 'Đinh Thị Hạnh Nguyện';
+	    $employee->username = 'nguyen.dinh';
+	    $employee->email = 'nguyen.dinh@kilala.vn';
 	    $employee->password = bcrypt('cetusvn');
 	    $employee->save();
 	    $employee->roles()->attach($role_employee);
