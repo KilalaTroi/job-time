@@ -20,7 +20,7 @@
                 </div>
             </div>
             <div class="form-group" v-if="showLunchBreak">
-                <base-checkbox v-model="exceptLunchBreak" class="align-self-end">Excepting lunch break</base-checkbox>
+                <base-checkbox v-model="exceptLunchBreak" class="align-self-end">Exclude lunch break</base-checkbox>
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
