@@ -3,10 +3,19 @@
         <div class="container-fluid">
             <router-link :to="{path: '/'}" class="py-1 d-block d-sm-none">
                 <div class="logo-img">
-                    <img width="50" src="/images/logo.png" :alt="title">
+                    <img width="50" src="/images/logo.png" :alt="$ml.with('VueJS').get('siteName')">
                 </div>
             </router-link>
             <p class="navbar-brand d-none d-sm-block"><i class="nc-icon nc-android mr-2 ic-custom"></i>Welcome {{ currentUser.name }}</p>
+            <div class="languages nav-item d-block d-sm-none ml-auto mr-3">
+                <button
+                    v-for="lang in $ml.list"
+                    :key="lang"
+                    @click="$ml.change(lang)"
+                    :class="activeLanguage(lang)"
+                    v-text="lang"
+                />
+            </div>
             <button type="button" class="navbar-toggler navbar-toggler-right" :class="{toggled: $sidebar.showSidebar}" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation" @click="toggleSidebar">
                 <span class="navbar-toggler-bar burger-lines"></span>
                 <span class="navbar-toggler-bar burger-lines"></span>
@@ -14,6 +23,15 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end">
                 <ul class="navbar-nav ml-auto">
+                    <li class="languages nav-item mr-3">
+                        <button
+                            v-for="lang in $ml.list"
+                            :key="lang"
+                            @click="$ml.change(lang)"
+                            :class="activeLanguage(lang)"
+                            v-text="lang"
+                        />
+                    </li>
                     <li class="nav-item">
                         <router-link :to="{path: '/profile'}" class="nav-link">
                             <i class="nc-icon nc-circle-09 mr-2 ic-custom-2"></i> 
@@ -43,8 +61,7 @@ export default {
         return {
             activeNotifications: false,
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
-            currentUser: {},
-            title: 'Job Time',
+            currentUser: {}
         }
     },
     mounted() {
@@ -56,6 +73,11 @@ export default {
             axios.get(uri).then((response) => {
                 this.currentUser = response.data.user;
             });
+        },
+        activeLanguage(language) {
+            if ( this.$ml.current === language )
+                return 'bg-success';
+            return 'bg-secondary';
         },
         capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1)

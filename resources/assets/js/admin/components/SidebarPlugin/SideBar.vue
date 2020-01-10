@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar"
+  <div :class="sidebarClass"
        :style="sidebarStyle"
        :data-color="backgroundColor"
        :data-image="backgroundImage">
@@ -7,9 +7,9 @@
       <div class="logo">
         <router-link :to="{path: '/'}" class="simple-text logo__container">
           <div class="logo-img">
-            <img src="/images/logo.png" :alt="title">
+            <img src="/images/logo.png" :alt="$ml.with('VueJS').get('siteName')">
           </div>
-          {{title}}
+          {{$ml.with('VueJS').get('siteName')}}
         </router-link>
       </div>
 
@@ -41,10 +41,6 @@
       SidebarLink
     },
     props: {
-      title: {
-        type: String,
-        default: 'Job Time'
-      },
       backgroundColor: {
         type: String,
         default: 'black',
@@ -84,6 +80,9 @@
         return {
           backgroundImage: `url(${this.backgroundImage})`
         }
+      },
+      sidebarClass () {
+        return 'sidebar sidebar-' + this.$ml.current;
       }
     }
   }

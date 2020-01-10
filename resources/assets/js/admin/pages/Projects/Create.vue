@@ -64,14 +64,14 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Start date</label>
-                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
+                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">End date</label>
-                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
+                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
@@ -119,8 +119,6 @@ export default {
             i_name: '',
             start_date: '',
             end_date: '',
-            en: en,
-            ja: ja,
             modalLg: 'modal-lg',
             departmentOptions: [],
             typeOptions: []
@@ -142,6 +140,9 @@ export default {
                 }
                 this.departmentOptions = dataOptions;
             }
+        },
+        getLanguage(data) {
+            return data.current === "en" ? en : ja
         },
         getDataTypes(data) {
             if (data.length) {

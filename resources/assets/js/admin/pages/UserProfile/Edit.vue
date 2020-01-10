@@ -15,6 +15,13 @@
                 <input v-model="currentUser.email" type="email" class="form-control">
             </div>
             <div class="form-group">
+                <label class="">Language</label>
+                <select-2 v-model="currentUser.language" class="select2">
+                    <option value="en">English</option>
+                    <option value="ja">Japanese</option>
+                </select-2>
+            </div>
+            <div class="form-group">
                 <label class="">Role</label>
                 <div>
                     <select-2 :options="rolesOption" v-model="currentUser.r_name" class="select2">

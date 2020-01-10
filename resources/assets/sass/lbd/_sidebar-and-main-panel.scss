@@ -61,6 +61,10 @@ body > .navbar-collapse{
             display: flex;
             align-items: center;
 
+            .language-ja & {
+                font-size: $font-size-base;
+            }
+
             .logo-img{
               width: 50px;
               display: inline-flex;

@@ -3,11 +3,11 @@
         <side-bar>
             <sidebar-link to="/overview">
                 <i class="nc-icon nc-chart-pie-36"></i>
-                <p>Statistics</p>
+                <p v-text="$ml.with('VueJS').get('sbStatistics')" />
             </sidebar-link>
             <sidebar-link to="/totaling">
                 <i class="nc-icon nc-chart-bar-32"></i>
-                <p>Totaling</p>
+                <p v-text="$ml.with('VueJS').get('sbTotaling')" />
             </sidebar-link>
             <sidebar-link to="/user">
                 <i class="nc-icon nc-badge"></i>

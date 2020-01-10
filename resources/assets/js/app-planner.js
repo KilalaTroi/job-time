@@ -9,7 +9,8 @@ require('select2');
 
 window.Vue = require('vue');
 import VueRouter from 'vue-router';
-import App from './admin/App.vue'
+import App from './admin/App.vue';
+import './admin/ml';
 
 // component
 Vue.component('pagination', require('laravel-vue-pagination'));

@@ -23,6 +23,15 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-md-12">
+                    <label class="">Language</label>
+                    <select-2 v-model="user.language" class="select2">
+                        <option value="en">English</option>
+                        <option value="ja">Japanese</option>
+                    </select-2>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-md-6">
                     <base-input type="password" label="Password" placeholder="Password" v-model="password">
                     </base-input>
@@ -47,12 +56,14 @@
 import Card from '../../components/Cards/Card.vue'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
+import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 
 export default {
     components: {
         Card,
         ErrorItem,
-        SuccessItem
+        SuccessItem,
+        Select2
     },
     data() {
         return {
