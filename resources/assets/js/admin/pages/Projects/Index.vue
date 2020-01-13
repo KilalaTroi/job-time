@@ -260,9 +260,11 @@ export default {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY/MM/DD') : '--';
         },
         resetValidate() {
-            this.getProjects(this.showArchive);
-            this.validationSuccess = '';
-            this.validationErrors = '';
+            if ( this.validationErrors || this.validationSuccess ) {
+                this.getProjects(this.showArchive);
+                this.validationSuccess = '';
+                this.validationErrors = '';
+            }
         }
     },
     watch: {

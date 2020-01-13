@@ -3,23 +3,24 @@
         <side-bar>
             <sidebar-link to="/projects">
                 <i class="nc-icon nc-bag"></i>
-                <p>Projects</p>
+                <p v-text="$ml.with('VueJS').get('sbProjects')" />
             </sidebar-link>
             <sidebar-link to="/schedules">
                 <i class="nc-icon nc-paper-2"></i>
-                <p>Schedules</p>
+                <p v-text="$ml.with('VueJS').get('sbSchedules')" />
             </sidebar-link>
             <sidebar-link to="/jobs">
                 <i class="nc-icon nc-watch-time"></i>
-                <p>Jobs</p>
+                <p v-text="$ml.with('VueJS').get('sbJobs')" />
             </sidebar-link>
             <sidebar-link to="/profile" class="d-block d-lg-none">
                 <i class="nc-icon nc-circle-09"></i>
-                <p>Profile</p>
+                <p v-text="$ml.with('VueJS').get('mnProfile')" />
             </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">
-                    <i class="nc-icon nc-button-power"></i> Log out
+                    <i class="nc-icon nc-button-power"></i>
+                    <p v-text="$ml.with('VueJS').get('mnLogOut')" />
                 </a>
             </li>
         </side-bar>

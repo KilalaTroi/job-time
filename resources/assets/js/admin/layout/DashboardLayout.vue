@@ -11,31 +11,32 @@
             </sidebar-link>
             <sidebar-link to="/user">
                 <i class="nc-icon nc-badge"></i>
-                <p>Users</p>
+                <p v-text="$ml.with('VueJS').get('sbUsers')" />
             </sidebar-link>
             <sidebar-link to="/departments">
                 <i class="nc-icon nc-bank"></i>
-                <p>Departments</p>
+                <p v-text="$ml.with('VueJS').get('sbDepartments')" />
             </sidebar-link>
             <sidebar-link to="/types">
                 <i class="nc-icon nc-tag-content"></i>
-                <p>Job Types</p>
+                <p v-text="$ml.with('VueJS').get('sbJobTypes')" />
             </sidebar-link>
             <sidebar-link to="/projects">
                 <i class="nc-icon nc-bag"></i>
-                <p>Projects</p>
+                <p v-text="$ml.with('VueJS').get('sbProjects')" />
             </sidebar-link>
             <sidebar-link to="/schedules">
                 <i class="nc-icon nc-paper-2"></i>
-                <p>Schedules</p>
+                <p v-text="$ml.with('VueJS').get('sbSchedules')" />
             </sidebar-link>
             <sidebar-link to="/profile" class="d-block d-lg-none">
                 <i class="nc-icon nc-circle-09"></i>
-                <p>Profile</p>
+                <p v-text="$ml.with('VueJS').get('mnProfile')" />
             </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">
-                    <i class="nc-icon nc-button-power"></i> Log out
+                    <i class="nc-icon nc-button-power"></i> 
+                    <p v-text="$ml.with('VueJS').get('mnLogOut')" />
                 </a>
             </li>
         </side-bar>

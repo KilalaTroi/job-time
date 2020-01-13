@@ -353,11 +353,12 @@ export default {
 
 .fc-event {
     cursor: move;
+    color: rgba(0,0,0,0.8);
 }
 
 .fc-time-grid-event .fc-time,
 .fc-time-grid-event .fc-title {
-    color: #ffffff;
+    color: rgba(0,0,0,0.8);
 }
 
 .fc-time-grid .fc-slats td {

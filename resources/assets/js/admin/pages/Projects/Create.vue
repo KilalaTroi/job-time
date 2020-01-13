@@ -81,7 +81,7 @@
             <hr>
             <div class="form-group text-right">
                 <button type="submit" class="btn btn-primary">Create</button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal" @click="$emit('reset-validation')">Cancel</button>
             </div>
         </form>
     </modal>

@@ -884,3 +884,10 @@ table {
     }
   }
 }
+
+// external-events
+#external-events {
+  max-height: 500px;
+  overflow: hidden;
+  overflow-y: auto;
+}
