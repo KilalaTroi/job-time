@@ -48,7 +48,8 @@ class SchedulesController extends Controller
                 $query->where('end_date', '>=',  $currentMonth)
                       ->orWhere('end_date', '=',  NULL);
             })
-            ->orderBy('p_name', 'desc')
+            ->orderBy('p.name', 'asc')
+            ->orderBy('i.name', 'asc')
             ->get()->toArray();
 
         $schedules = DB::table('issues as i')

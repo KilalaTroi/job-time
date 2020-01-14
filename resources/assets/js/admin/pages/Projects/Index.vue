@@ -1,6 +1,41 @@
 <template>
     <div class="content projects">
         <div class="container-fluid">
+            <card>
+                <template slot="header">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title">Filter</h4>
+                    </div>
+                </template>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="">Keyword</label>
+                            <input v-model="search.keyword" placeholder="Enter keyword" type="text" class="form-control" v-on:keyup="filterItems(search.keyword)" v-on:keyup.enter="searchItems(search)">
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="">Types</label>
+                            <div>
+                                <select2-type :options="typeOptions" v-model="search.type_id" class="select2" v-on:input="searchItems(search)">
+                                    <option disabled value="0">Select one</option>
+                                </select2-type>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="">Departments</label>
+                            <div>
+                                <select-2 :options="departmentOptions" v-model="search.dept_id" class="select2" v-on:input="searchItems(search)">
+                                    <option disabled value="0">Select one</option>
+                                </select-2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </card>
             <div class="form-group">
                 <div class="row">
                     <div class="col-12 col-sm-auto">
@@ -23,8 +58,8 @@
                         <base-checkbox v-model="showArchive" class="align-self-end">View archive</base-checkbox>
                     </div>
                 </template>
-                <div class="table-responsive" v-if="projects">
-                    <action-table class="table-hover table-striped" :columns="columns" :data="projectData" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
+                <div class="table-responsive" v-if="filterResults">
+                    <action-table class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
                     </action-table>
                 </div>
                 <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
@@ -46,6 +81,8 @@ import AddIssue from './AddIssue'
 import CreateButton from '../../components/Buttons/Create'
 import ActionTable from '../../components/TableAction'
 import moment from 'moment'
+import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
 
 const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
@@ -59,6 +96,8 @@ const tableColumns = [
 
 export default {
     components: {
+        Select2,
+        Select2Type,
         Card,
         CreateItem,
         EditItem,
@@ -71,8 +110,11 @@ export default {
             columns: [...tableColumns],
             departments: [],
             types: [],
+            departmentOptions: [],
+            typeOptions: [],
             projects: {},
             projectData: [],
+            filterResults: [],
             currentItem: null,
             showArchive: false,
             validationErrors: '',
@@ -80,7 +122,12 @@ export default {
             limit: 2,
             showDisabled: true,
             align: 'right',
-            size: 'small'
+            size: 'small',
+            search: {
+                keyword: '',
+                type_id: 0,
+                dept_id: 1
+            }
         }
     },
     mounted() {
@@ -94,6 +141,39 @@ export default {
 
             if (obj.length > 0)
                 return obj[0];
+        },
+        getDataDepartments(data) {
+            if (data.length) {
+                let dataOptions = [];
+
+                for (let i = 0; i < data.length; i++) {
+                    let obj = {
+                        id: data[i].id,
+                        text: data[i].text
+                    };
+                    dataOptions.push(obj);
+                }
+                this.departmentOptions = dataOptions;
+            }
+        },
+        getDataTypes(data) {
+            if (data.length) {
+                let dataTypes = [];
+                let obj = {
+                    id: 0,
+                    text: '<div>Select one</div>'
+                };
+                dataTypes.push(obj);
+
+                for (let i = 0; i < data.length; i++) {
+                    let obj = {
+                        id: data[i].id,
+                        text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
+                    };
+                    dataTypes.push(obj);
+                }
+                this.typeOptions = dataTypes;
+            }
         },
         getDataProjects(projects) {
             if (projects.data.length) {
@@ -115,9 +195,9 @@ export default {
                     };
                     dataProjects.push(obj);
                 }
-                this.projectData = dataProjects;
+                this.projectData = this.filterResults = dataProjects;
             } else {
-                this.projectData = [];
+                this.projectData = this.filterResults = [];
             }
         },
         fetchItems() {
@@ -134,13 +214,13 @@ export default {
                 });
         },
         getResults(page = 1) {
-            axios.get('/data/projects?page=' + page + '&archive=' + this.showArchive)
+            axios.get('/data/projects?page=' + page + '&archive=' + this.showArchive + '&search=' + JSON.stringify(this.search))
                 .then(response => {
                     this.projects = response.data.projects; 
                 });
         },
         getProjects(archive) {
-            let uri = '/data/projects/?archive=' + archive;
+            let uri = '/data/projects/?archive=' + archive + '&search=' + JSON.stringify(this.search);
             axios.get(uri)
                 .then(res => {
                     this.projects = res.data.projects;
@@ -256,6 +336,27 @@ export default {
                     }
                 });
         },
+        filterItems(value) {
+            if ( value ) {
+                this.filterResults = this.projectData.filter(item => {
+                    let title = item.project + " " + item.issue;
+                    return title.toLowerCase().includes(value.toLowerCase());
+                });
+            } else {
+                this.filterResults = this.projectData;
+            }
+        },
+        searchItems(value) {
+            let uri = '/data/projects?search=' + JSON.stringify(value) + '&archive=' + this.showArchive;
+            axios.get(uri)
+                .then(res => {
+                    this.projects = res.data.projects;
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load projects");
+                });
+        },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY/MM/DD') : '--';
         },
@@ -268,6 +369,12 @@ export default {
         }
     },
     watch: {
+        departments: [{
+            handler: 'getDataDepartments'
+        }],
+        types: [{
+            handler: 'getDataTypes'
+        }],
         projects: [{
             handler: 'getDataProjects',
             deep: true

@@ -17,6 +17,10 @@ class ProjectsController extends Controller
      */
     public function index()
     {
+        $search = isset($_GET['search']) ? json_decode($_GET['search']) : array();
+        $keyword = isset($search->keyword) && $search->keyword !== '' ? $search->keyword : false;
+        $type_id = isset($search->type_id) && $search->type_id !== '0' ? $search->type_id : false;
+        $dept_id = isset($search->dept_id) && $search->dept_id !== '1' ? $search->dept_id : false;
         $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
@@ -36,8 +40,20 @@ class ProjectsController extends Controller
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->whereIn('i.status', $status)
+            ->when($keyword, function ($query, $keyword) {
+                return $query->where(function ($query) use ($keyword) {
+                    $query->where('p.name', 'like', '%'. $keyword .'%')
+                          ->orWhere('i.name', 'like', '%'. $keyword .'%');
+                });
+            })
+            ->when($type_id, function ($query, $type_id) {
+                return $query->where('type_id', '=', $type_id);
+            })
+            ->when($dept_id, function ($query, $dept_id) {
+                return $query->where('dept_id', '=', $dept_id);
+            })
             ->orderBy('issue_id', 'desc')
-            ->paginate(10);
+            ->paginate(20);
             // ->take(100)->get()->toArray();
 
         return response()->json([

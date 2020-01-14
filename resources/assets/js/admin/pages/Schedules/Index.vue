@@ -7,9 +7,12 @@
                         <template slot="header">
                             <h4 class="card-title">Project Schedule</h4>
                         </template>
+                        <div class="form-group">
+                            <input v-model="search" placeholder="Search..." type="text" class="form-control" v-on:keyup="searchItem">
+                        </div>
                         <div id='external-events'>
                             <div id='external-events-list'>
-                                <div class="alert alert-success fc-event" v-for="(item, index) in projects" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value" :style="setStyles(item.value)">
+                                <div class="alert alert-success fc-event" v-for="(item, index) in searchResults" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value" :style="setStyles(item.value)">
                                     <span>{{ item.project }} {{ item.issue }}</span>
                                 </div>
                             </div>
@@ -84,7 +87,10 @@ export default {
             hiddenDays: [0],
 
             validationErrors: '',
-            validationSuccess: ''
+            validationSuccess: '',
+
+            search: '',
+            searchResults: []
         }
     },
     mounted() {
@@ -129,7 +135,7 @@ export default {
                     };
                     dataProjects.push(obj);
                 }
-                this.projects = dataProjects;
+                this.projects = this.searchResults = dataProjects;
             }
         },
         getDataSchedules(data) {
@@ -259,8 +265,6 @@ export default {
                         this.droppable = true;
                     });
             }
-
-
         },
         dropEvent(info) {
             this.editable = false;
@@ -324,6 +328,17 @@ export default {
                     this.editable = true;
                     this.droppable = true;
                 });
+        },
+        searchItem() {
+            let value = this.search;
+            if ( value ) {
+                this.searchResults = this.projects.filter(item => {
+                    let title = item.project + " " + item.issue;
+                    return title.toLowerCase().includes(value.toLowerCase());
+                });
+            } else {
+                this.searchResults = this.projects;
+            }
         },
         resetValidate() {
             this.validationSuccess = '';
