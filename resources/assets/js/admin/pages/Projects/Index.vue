@@ -165,6 +165,12 @@ export default {
                 };
                 dataTypes.push(obj);
 
+                let objAll = {
+                    id: -1,
+                    text: '<div>All</div>'
+                };
+                dataTypes.push(objAll);
+
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
                         id: data[i].id,

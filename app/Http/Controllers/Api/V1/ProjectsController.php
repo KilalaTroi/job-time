@@ -19,8 +19,8 @@ class ProjectsController extends Controller
     {
         $search = isset($_GET['search']) ? json_decode($_GET['search']) : array();
         $keyword = isset($search->keyword) && $search->keyword !== '' ? $search->keyword : false;
-        $type_id = isset($search->type_id) && $search->type_id !== '0' ? $search->type_id : false;
-        $dept_id = isset($search->dept_id) && $search->dept_id !== '1' ? $search->dept_id : false;
+        $type_id = isset($search->type_id) && $search->type_id !== 0 && $search->type_id != '-1' ? $search->type_id : false;
+        $dept_id = isset($search->dept_id) && $search->dept_id !== 1 ? $search->dept_id : false;
         $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
