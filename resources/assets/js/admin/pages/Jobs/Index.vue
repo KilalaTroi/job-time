@@ -32,12 +32,15 @@
                         </template>
                         <div class="table-responsive">
                             <action-table
-                                class="table-hover table-striped"
+                                class="table-hover table-striped time-record"
                                 :columns="logColumns"
                                 :data="logTime"
                                 v-on:get-item="getItem" 
                                 v-on:delete-item="deleteItem">
                             </action-table>
+                        </div>
+                        <div class="alert alert-danger" v-if="timeTotal > 28800">
+                          <span>You work over 8 hours!!!</span>
                         </div>
                     </card>
                 </div>
@@ -91,9 +94,11 @@ export default {
             logColumns: [...logTimeColumns],
             departments: [],
             jobs: [],
+            allJobs: [],
             jobData: {},
             logTime: [],
             logTimeData: [],
+            timeTotal: 0,
             jobsTime: [],
             schedules: [],
             currentJob: null,
@@ -120,6 +125,7 @@ export default {
                 .then(res => {
                     this.departments = res.data.departments;
                     this.jobData = res.data.jobs;
+                    this.allJobs = res.data.allJobs;
                     this.jobsTime = res.data.jobsTime;
                     this.logTimeData = res.data.logTime;
                     this.schedules = res.data.schedules;
@@ -142,6 +148,9 @@ export default {
 
             if (obj.length > 0)
                 return obj[0];
+        },
+        checkTimeTotal() {
+            return this.timeTotal > 28800 ? true : false;
         },
         getDataJobs(jobData) {
             if (jobData.data.length) {
@@ -169,7 +178,7 @@ export default {
                 let dataTimes = [];
 
                 for (let i = 0; i < logTimeData.length; i++) {
-                    let issue = typeof(this.getObjectValue(this.jobData.data, logTimeData[i].issue_id)) !== 'undefined' ? this.getObjectValue(this.jobData.data, logTimeData[i].issue_id) : false;
+                    let issue = typeof(this.getObjectValue(this.allJobs, logTimeData[i].issue_id)) !== 'undefined' ? this.getObjectValue(this.allJobs, logTimeData[i].issue_id) : false;
                     if ( issue ) {
                         let obj = {
                             id: logTimeData[i].id,
@@ -182,6 +191,20 @@ export default {
                         dataTimes.push(obj);
                     }
                 }
+
+                if ( dataTimes.length ) {
+                    this.timeTotal = this.totalArrayObject(logTimeData);
+                    let total = {
+                        id: '',
+                        project: '',
+                        issue: '',
+                        start_time: '',
+                        end_time: 'Total:',
+                        total: this.timeTotal ? this.hourFormatter(this.timeTotal) : '00:00'
+                    };
+                    dataTimes.push(total);
+                }
+                
                 this.logTime = dataTimes;
             } else {
                 this.logTime = [];
@@ -293,6 +316,13 @@ export default {
 
             return result;
         },
+        totalArrayObject(arr) {
+            let total = [];
+            arr.map(function(value, key) {
+                total.push(value.total)
+            });
+            return total.reduce(function(total, num){ return total + num }, 0);
+        },
         resetValidate() {
             this.validationSuccess = '';
             this.validationErrors = '';
@@ -312,4 +342,7 @@ export default {
 }
 </script>
 <style lang="scss">
+.time-record tr:last-child button {
+    display: none;
+}
 </style>

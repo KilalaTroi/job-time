@@ -18,8 +18,8 @@ class JobsController extends Controller
     {
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
 
-        $typesTR = DB::table('types')->select('id')->where('slug', 'like', '%_tr')->get()->toArray();
-        $typesTR = collect($typesTR)->map(function($x){ return $x->id; })->toArray();
+        // $typesTR = DB::table('types')->select('id')->where('slug', 'like', '%_tr')->get()->toArray();
+        // $typesTR = collect($typesTR)->map(function($x){ return $x->id; })->toArray();
 
         $selectDate = $_GET['date'];
         $userID = $_GET['user_id'];
@@ -42,21 +42,41 @@ class JobsController extends Controller
                 $query->where('end_date', '>=',  $selectDate)
                       ->orWhere('end_date', '=',  NULL);
             })
-            ->where(function ($query) use ($typesTR) {
-                $query->where('i.status', '=', 'publish')
-                ->orWhere(function ($query) use ($typesTR) {
-                    $query->where('i.status', '=', 'publish')
-                          ->whereIn('type_id', $typesTR);
-                })->orWhere(function ($query) use ($typesTR) {
-                    $query->where('i.status', '=', 'publish')
-                          ->whereIn('type_id', $typesTR);
-                });
-            })
+            ->where('i.status', '=', 'publish')
+            // ->where(function ($query) use ($typesTR) {
+            //     $query->where('i.status', '=', 'publish')
+            //     ->orWhere(function ($query) use ($typesTR) {
+            //         $query->where('i.status', '=', 'publish')
+            //               ->whereIn('type_id', $typesTR);
+            //     })->orWhere(function ($query) use ($typesTR) {
+            //         $query->where('i.status', '=', 'publish')
+            //               ->whereIn('type_id', $typesTR);
+            //     });
+            // })
             // ->groupBy('i.id')
             ->orderBy('p_name', 'desc')
-            ->paginate(100);
+            ->paginate(10);
             // ->get()->toArray();
         // dd(DB::getQueryLog());
+        
+        $allJobs = DB::table('issues as i')
+            ->select(
+                'i.id as id',
+                'dept_id',
+                'p.name as p_name',
+                'i.name as i_name'
+            )
+            ->join('projects as p', 'p.id', '=', 'i.project_id')
+            ->where(function ($query) use ($selectDate) {
+                $query->where('start_date', '<=',  $selectDate)
+                      ->orWhere('start_date', '=',  NULL);
+            })
+            ->where(function ($query) use ($selectDate) {
+                $query->where('end_date', '>=',  $selectDate)
+                      ->orWhere('end_date', '=',  NULL);
+            })
+            ->where('i.status', '=', 'publish')
+            ->get()->toArray();
         
         $schedules = DB::table('issues as i')
             ->select(
@@ -96,7 +116,8 @@ class JobsController extends Controller
             'jobs' => $jobs ? $jobs : array(),
             'jobsTime' => $jobsTime ? $jobsTime : array(),
             'logTime' => $logTime ? $logTime : array(),
-            'schedules' => $schedules ? $schedules : array()
+            'schedules' => $schedules ? $schedules : array(),
+            'allJobs' => $allJobs ? $allJobs : array()
         ]);
     }
 
