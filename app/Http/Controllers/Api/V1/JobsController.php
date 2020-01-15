@@ -54,7 +54,7 @@ class JobsController extends Controller
             })
             // ->groupBy('i.id')
             ->orderBy('p_name', 'desc')
-            ->paginate(10);
+            ->paginate(100);
             // ->get()->toArray();
         // dd(DB::getQueryLog());
         

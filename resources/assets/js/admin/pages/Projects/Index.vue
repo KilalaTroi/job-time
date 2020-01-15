@@ -125,7 +125,7 @@ export default {
             size: 'small',
             search: {
                 keyword: '',
-                type_id: 0,
+                type_id: -1,
                 dept_id: 1
             }
         }
@@ -145,6 +145,11 @@ export default {
         getDataDepartments(data) {
             if (data.length) {
                 let dataOptions = [];
+                let obj = {
+                    id: 0,
+                    text: 'Select one'
+                };
+                dataOptions.push(obj);
 
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
