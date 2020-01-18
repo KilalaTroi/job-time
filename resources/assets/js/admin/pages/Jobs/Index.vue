@@ -1,6 +1,6 @@
 <template>
     <div class="content">
-        <div class="container-fluid">
+        <div class="container-fluid max-width-1170">
             <div class="row">
                 <div class="col col-sm-auto">
                     <card>
@@ -14,7 +14,15 @@
                 <div class="col">
                     <card>
                         <template slot="header">
-                            <h4 class="card-title">Jobs List</h4>
+                            <div class="d-flex justify-content-between">
+                                <h4 class="card-title">Jobs List</h4>
+                                <div class="form-group mb-0" style="min-width: 160px;">
+                                    <select-2 v-model="showFilter" class="select2" v-on:input="changeShowFilter">
+                                        <option value="showSchedule">Show by schedule</option>
+                                        <option value="all">Show all</option>
+                                    </select-2>
+                                </div>
+                            </div>
                         </template>
                         <div class="table-responsive" v-if="jobs">
                             <job-table
@@ -60,6 +68,7 @@ import JobTable from '../../components/TableJob'
 import ActionTable from '../../components/TableAction'
 import AddTime from './AddTime'
 import EditTime from './EditTime'
+import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 
 const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
@@ -84,7 +93,8 @@ export default {
         JobTable,
         ActionTable,
         AddTime,
-        EditTime
+        EditTime,
+        Select2
     },
     data() {
         return {
@@ -112,7 +122,9 @@ export default {
             jLimit: 2,
             jShowDisabled: true,
             jAlign: 'right',
-            jSize: 'small'
+            jSize: 'small',
+
+            showFilter: 'showSchedule'
         }
     },
     mounted() {
@@ -120,7 +132,7 @@ export default {
     },
     methods: {
         fetchItems() {
-            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID;
+            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
             axios.get(uri)
                 .then(res => {
                     this.departments = res.data.departments;
@@ -135,8 +147,19 @@ export default {
                     alert("Could not load projects");
                 });
         },
+        changeShowFilter() {
+            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
+            axios.get(uri)
+                .then(res => {
+                    this.jobData = res.data.jobs;
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load projects");
+                });
+        },
         getResults(page = 1) {
-            axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID)
+            axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter)
                 .then(response => {
                     this.jobData = response.data.jobs; 
                 });
