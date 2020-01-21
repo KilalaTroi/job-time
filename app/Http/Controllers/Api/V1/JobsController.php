@@ -36,6 +36,7 @@ class JobsController extends Controller
                 ->where('s.date', '=', $selectDate)
                 ->where('i.status', '=', 'publish')
                 ->orderBy('p_name', 'desc')
+                ->groupBy('i.id')
                 ->paginate(10);
         } else {
             $jobs = DB::table('issues as i')
@@ -56,6 +57,7 @@ class JobsController extends Controller
                 })
                 ->where('i.status', '=', 'publish')
                 ->orderBy('p_name', 'desc')
+                ->groupBy('i.id')
                 ->paginate(10);
         }
         // dd(DB::getQueryLog());
@@ -79,15 +81,15 @@ class JobsController extends Controller
             ->where('i.status', '=', 'publish')
             ->get()->toArray();
         
-        $schedules = DB::table('issues as i')
-            ->select(
-                'i.id as id',
-                'memo'
-            )
-            ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
-            ->where('i.status', '=', 'publish')
-            ->where('s.date', '=',  $selectDate)
-            ->get()->toArray();
+        // $schedules = DB::table('issues as i')
+        //     ->select(
+        //         'i.id as id',
+        //         'memo'
+        //     )
+        //     ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+        //     ->where('i.status', '=', 'publish')
+        //     ->where('s.date', '=',  $selectDate)
+        //     ->get()->toArray();
 
         $jobsTime = DB::table('jobs')
             ->select(
@@ -117,7 +119,7 @@ class JobsController extends Controller
             'jobs' => $jobs ? $jobs : array(),
             'jobsTime' => $jobsTime ? $jobsTime : array(),
             'logTime' => $logTime ? $logTime : array(),
-            'schedules' => $schedules ? $schedules : array(),
+            // 'schedules' => $schedules ? $schedules : array(),
             'allJobs' => $allJobs ? $allJobs : array()
         ]);
     }
