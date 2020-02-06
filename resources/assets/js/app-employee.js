@@ -29,6 +29,7 @@ import NotFound from './admin/pages/NotFoundPage'
 import Schedules from './admin/pages/SchedulesEmployee';
 import Jobs from './admin/pages/Jobs';
 import Profile from './admin/pages/Profile';
+import OffDays from './admin/pages/OffDays';
 
 const routes = [{
         path: '/',
@@ -53,6 +54,11 @@ const routes = [{
                 path: 'profile',
                 name: 'Profile',
                 component: Profile
+            },
+            {
+                path: 'off-days',
+                name: 'OffDays',
+                component: OffDays
             },
             {
                 path: '*',

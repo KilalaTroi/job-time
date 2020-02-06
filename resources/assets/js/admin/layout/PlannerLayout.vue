@@ -13,6 +13,10 @@
                 <i class="nc-icon nc-watch-time"></i>
                 <p v-text="$ml.with('VueJS').get('sbJobs')" />
             </sidebar-link>
+            <sidebar-link to="/off-days"> 
+                <i class="nc-icon nc-spaceship"></i>
+                <p v-text="$ml.with('VueJS').get('sbOffDays')" />
+            </sidebar-link>
             <sidebar-link to="/profile" class="d-block d-lg-none">
                 <i class="nc-icon nc-circle-09"></i>
                 <p v-text="$ml.with('VueJS').get('mnProfile')" />

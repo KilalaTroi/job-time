@@ -38,6 +38,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
     Route::get('issues/archive/{id}/{status}', 'IssuesController@archive');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
+    Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
+    Route::get('all-off-days', 'OffDaysController@allOffDays');
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
 

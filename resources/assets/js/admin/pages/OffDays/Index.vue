@@ -1,17 +1,19 @@
 <template>
     <div class="content">
         <div class="container-fluid max-width-1170">
-            <edit-profile-form>
-            </edit-profile-form>     
+            <off-days></off-days>   
+            <all-off-days></all-off-days>   
         </div>
     </div>
 </template>
 <script>
-import EditProfileForm from './EditProfileForm.vue'
+import OffDays from './OffDays.vue'
+import AllOffDays from './AllOffDays.vue'
 
 export default {
     components: {
-        EditProfileForm
+        OffDays,
+        AllOffDays
     }
 }
 </script>

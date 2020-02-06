@@ -36,6 +36,7 @@ class StatisticsController extends Controller
         $endYearMonth = $beforeCurrentM < 10 ? $currentYear . '0' . $beforeCurrentM : $currentYear . '' . $beforeCurrentM;
         $daysOfMonth = array();
         $monthsText = array();
+        $offDayOfMonth = array();
 
         for ($i = 1; $i <= 11; $i++) {
             $endMonth = $dta->subMonths(1)->format('Y-m-01');
@@ -46,13 +47,28 @@ class StatisticsController extends Controller
             $daysOfMonth[$inYearMonth] = array(
                  'start' => $startMonth,
                  'end' => $endMonth
-             );
+            );
+
+            // Full day off
+            $offDayOfMonth[$inYearMonth]['full'] = DB::table('off_days')
+            ->where('type', '=', 'all_day')
+            ->where('date', '<', $endMonth)
+            ->where('date', '>=',  $startMonth)
+            ->count();
+
+            // Half day off
+            $offDayOfMonth[$inYearMonth]['half'] = DB::table('off_days')
+            ->where('type', '<>', 'all_day')
+            ->where('date', '<', $endMonth)
+            ->where('date', '>=',  $startMonth)
+            ->count();
         }
 
         $monthsText = array_reverse($monthsText);
         $response['monthsText'] = $monthsText;
 
         // $response['months'] = $daysOfMonth;
+        // $response['off_days'] = $offDayOfMonth;
         $response['startEndYear'] = array(
             $daysOfMonth[$startYearMonth]['start'],
             $daysOfMonth[$endYearMonth]['end']
@@ -85,6 +101,8 @@ class StatisticsController extends Controller
             ->where([
                 ['roles.name', '<>', 'admin'],
                 ['roles.name', '<>', 'japanese_planner'],
+                ['users.username', '<>', 'furuoya_vn_planner'],
+                ['users.username', '<>', 'furuoya_employee'],
             ])
             ->count();
 
@@ -113,6 +131,8 @@ class StatisticsController extends Controller
             ->where([
                 ['roles.name', '<>', 'admin'],
                 ['roles.name', '<>', 'japanese_planner'],
+                ['users.username', '<>', 'furuoya_vn_planner'],
+                ['users.username', '<>', 'furuoya_employee'],
             ])
             ->where('users.created_at', "<", $response['startEndYear'][0])
             ->count();
@@ -128,6 +148,8 @@ class StatisticsController extends Controller
             ->where([
                 ['roles.name', '<>', 'admin'],
                 ['roles.name', '<>', 'japanese_planner'],
+                ['users.username', '<>', 'furuoya_vn_planner'],
+                ['users.username', '<>', 'furuoya_employee'],
             ])
             ->where('users.created_at', ">=", $response['startEndYear'][0])
             ->where('users.created_at', "<", $response['startEndYear'][1])
@@ -158,9 +180,9 @@ class StatisticsController extends Controller
 
             if ( isset($convertUserMonth[$key]) ) {
                 $usersOld += $convertUserMonth[$key];
-                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
+                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($offDayOfMonth[$key]['full'] * 8 + $offDayOfMonth[$key]['half'] * 4);
             } else {
-                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8);
+                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($offDayOfMonth[$key]['full'] * 8 + $offDayOfMonth[$key]['half'] * 4);
             }
         }
 
