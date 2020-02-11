@@ -64,7 +64,24 @@
                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id">
                         <template slot="header">
                             <h4 class="card-title">Kilala VN Time allocation</h4>
-                            <p class="card-category">{{ getTimeWorked(startEndYear) }}</p>
+                            <div class="d-flex mt-2 justify-content-between">
+                                <div class="d-flex align-items-center flex-wrap">
+                                    <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()">
+                                    </datepicker>
+                                    <span class="mx-2">-</span>
+                                    <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()">
+                                    </datepicker>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 200px;">
+                                            <select2 :options="userOptions" v-model="user_id" class="select2 form-control no-disable-first-value">
+                                                <option disabled value="0">All</option>
+                                            </select2>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </template>
                         <template slot="footer">
                             <div class="legend">
@@ -81,6 +98,9 @@
                 </div>
             </div>
         </div>
+        <div class="container ml-0">
+            <all-off-days></all-off-days>
+        </div>
     </div>
 </template>
 <script>
@@ -89,13 +109,20 @@
     import LTable from '../components/Table.vue'
     import Chartist from 'chartist'
     import chartistPluginTooltip from 'chartist-plugin-tooltip'
+    import Datepicker from 'vuejs-datepicker';
+    import { en, ja } from 'vuejs-datepicker/dist/locale'
+    import Select2 from '../components/SelectTwo/SelectTwo.vue'
+    import AllOffDays from './OffDays/AllOffDays.vue'
     import moment from 'moment'
 
     export default {
         components: {
             LTable,
             ChartCard,
-            StatsCard
+            datepicker: Datepicker,
+            StatsCard,
+            Select2,
+            AllOffDays
         },
         data() {
             return {
@@ -110,6 +137,13 @@
                 hoursPerProject: [],
                 jobs: 0,
                 currentMonth: {},
+
+                startMonth: new Date(moment().subtract(11, 'months').format('YYYY/MM/DD')),
+                endMonth: new Date(moment().subtract(1, 'months').format('YYYY/MM/DD')),
+
+                users: [],
+                userOptions: [],
+                user_id: 0,
 
                 barChart: {
                     id: 'time-allocation',
@@ -161,15 +195,32 @@
         methods: {
             fetch() {
                 let uri = '/data/statistic/time-allocation';
+
                 axios.get(uri)
                     .then(res => {
                         this.types = res.data.types;
+                        this.users = res.data.users.all;
                         this.startEndYear = res.data.startEndYear;
-                        this.newUsersPerMonth = res.data.newUsersPerMonth;
-                        this.totalHoursPerMonth = res.data.totalHoursPerMonth;
-                        this.hoursPerProject = res.data.hoursPerProject;
+                        this.newUsersPerMonth = res.data.users.newUsersPerMonth;
+                        this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
+                        this.hoursPerProject = res.data.totals.hoursPerProject;
                         this.jobs = res.data.jobs;
                         this.currentMonth = res.data.currentMonth;
+                        this.monthsText = this.barChart.data.labels = res.data.monthsText;
+                        this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        alert("Could not load data");
+                    });
+            },
+            getFilterData() {
+                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatter(this.startMonth) + '&endMonth=' + this.customFormatter(this.endMonth);
+
+                axios.get(uri)
+                    .then(res => {
+                        this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
+                        this.hoursPerProject = res.data.totals.hoursPerProject;
                         this.monthsText = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
                     })
@@ -194,6 +245,9 @@
             customFormatter(date) {
                 return moment(date).format('YYYY/MM/DD');
             },
+            customFormatterM(date) {
+                return moment(date).format('YYYY/MM');
+            },
             yesterday(date) {
                 date = new Date(date);
                 return date.setDate(date.getDate() - 1);
@@ -209,14 +263,14 @@
                 Object.entries(obj).forEach(([key, val]) => {
                     total.push(val) 
                 });
-                return total.reduce(function(total, num){ return total + num }, 0);
+                return total.reduce(function(total, num){ return total + num }, 0).toFixed(2);
             },
             totalArrayObject(arr) {
                 let total = [];
                 arr.map(function(value, key) {
                     total.push((value.total*1).toFixed(2)*1)
                 });
-                return total.reduce(function(total, num){ return total + num }, 0);
+                return total.reduce(function(total, num){ return total + num }, 0).toFixed(2);
             },
             getCurrentMonth(data) {
                 if (typeof(data.hours) !== 'undefined') return (data.hours[0].total*1).toFixed(2) + '/' + data.total;
@@ -244,7 +298,56 @@
                     series.push(row);
                 });
                 this.series = this.barChart.data.series = series;
-            }
+            },
+            dateFormatter(date) {
+                return moment(date).format('YYYY-MM-DD');
+            },
+            disabledEndMonth() {
+                let obj = {
+                    from: this.endMonth,
+                };
+                return obj;
+            }, 
+            disabledStartMonth() {
+                let obj = {
+                    to: this.startMonth,
+                    from: new Date(),
+                };
+                return obj;
+            },
+            getUserOptions(data) {
+                if (data.length) {
+                    let dataUsers = [];
+                    let obj = {
+                        id: 0,
+                        text: 'All'
+                    };
+                    dataUsers.push(obj);
+
+                    for (let i = 0; i < data.length; i++) {
+                        let obj = {
+                            id: data[i].id,
+                            text: data[i].name
+                        };
+                        dataUsers.push(obj);
+                    }
+                    this.userOptions = dataUsers;
+                }
+            },
+        },
+        watch: {
+            users: [{
+                handler: 'getUserOptions'
+            }],
+            user_id: [{
+                handler: 'getFilterData'
+            }],
+            startMonth: [{
+                handler: 'getFilterData'
+            }],
+            endMonth: [{
+                handler: 'getFilterData'
+            }]
         }
     }
 </script>

@@ -29,6 +29,7 @@ import NotFound from './admin/pages/NotFoundPage'
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Profile from './admin/pages/Profile';
+import Overview from './admin/pages/Overview';
 
 const routes = [{
         path: '/',
@@ -53,6 +54,11 @@ const routes = [{
                 path: 'profile',
                 name: 'Profile',
                 component: Profile
+            },
+            {
+                path: 'overview',
+                name: 'Overview',
+                component: Overview
             },
             {
                 path: '*',

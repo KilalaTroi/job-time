@@ -30,6 +30,7 @@ import Schedules from './admin/pages/SchedulesEmployee';
 import Jobs from './admin/pages/Jobs';
 import Profile from './admin/pages/Profile';
 import OffDays from './admin/pages/OffDays';
+import Overview from './admin/pages/Overview';
 
 const routes = [{
         path: '/',
@@ -59,6 +60,11 @@ const routes = [{
                 path: 'off-days',
                 name: 'OffDays',
                 component: OffDays
+            },
+            {
+                path: 'overview',
+                name: 'Overview',
+                component: Overview
             },
             {
                 path: '*',

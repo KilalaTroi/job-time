@@ -17,6 +17,10 @@
                 <i class="nc-icon nc-circle-09"></i>
                 <p v-text="$ml.with('VueJS').get('mnProfile')" />
             </sidebar-link>
+            <sidebar-link to="/overview">
+                <i class="nc-icon nc-chart-pie-36"></i>
+                <p v-text="$ml.with('VueJS').get('sbStatistics')" />
+            </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">
                     <i class="nc-icon nc-button-power"></i>

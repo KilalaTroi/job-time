@@ -14,14 +14,12 @@ import timeGridPlugin from '@fullcalendar/timeGrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import Card from '../../components/Cards/Card'
-import EditEvent from './Edit'
 import moment from 'moment'
 
 export default {
     components: {
         FullCalendar, // make the <FullCalendar> tag available
-        Card,
-        EditEvent
+        Card
     },
     data() {
         return {
