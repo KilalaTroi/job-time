@@ -190,7 +190,7 @@
                 value = $(this).attr('ct:value');
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
             });
-            this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter(this.startMonth) + '&endMonth=' + this.customFormatter(this.endMonth);
+            this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
         },
         methods: {
             fetch() {
@@ -215,9 +215,9 @@
                     });
             },
             getFilterData() {
-                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatter(this.startMonth) + '&endMonth=' + this.customFormatter(this.endMonth);
+                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
 
-                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter(this.startMonth) + '&endMonth=' + this.customFormatter(this.endMonth);
+                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
 
                 axios.get(uri)
                     .then(res => {
@@ -247,6 +247,9 @@
             },
             customFormatter(date) {
                 return moment(date).format('YYYY/MM/DD');
+            },
+            customFormatter01(date) {
+                return moment(date).format('YYYY/MM/01');
             },
             customFormatterM(date) {
                 return moment(date).format('YYYY/MM');
