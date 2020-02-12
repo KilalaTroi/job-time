@@ -126,8 +126,7 @@
         },
         data() {
             return {
-                year: new Date().getFullYear(),
-                exportLink: '/data/export-report/'+ new Date().getFullYear() +'/xlsx',
+                exportLink: '',
                 types: [],
                 monthsText: [],
                 series: [],
@@ -191,6 +190,7 @@
                 value = $(this).attr('ct:value');
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
             });
+            this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter(this.startMonth) + '&endMonth=' + this.customFormatter(this.endMonth);
         },
         methods: {
             fetch() {
@@ -216,6 +216,8 @@
             },
             getFilterData() {
                 let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatter(this.startMonth) + '&endMonth=' + this.customFormatter(this.endMonth);
+
+                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter(this.startMonth) + '&endMonth=' + this.customFormatter(this.endMonth);
 
                 axios.get(uri)
                     .then(res => {

@@ -6,6 +6,7 @@ use App\Type;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Excel;
 
 class StatisticsController extends Controller
 {
@@ -363,5 +364,110 @@ class StatisticsController extends Controller
         $data['hoursPerProject'] = $hoursPerProject;
 
         return $data;
+    }
+
+    public function exportReport($file_extension) {
+        $data = array();
+        $user_id = $_GET['user_id'];
+        $startMonth = Carbon::createFromFormat('Y/m/d', $_GET['startMonth']);
+        $endMonth = Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->addMonths(1);
+        $nextMonth = Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->addMonths(2);
+        $totalMonths = $startMonth->diffInMonths($endMonth);
+
+        // Return project type
+        $types = $this->typeWithClass();
+
+        // Return months, monthsText, startEndYear, off days
+        $data = $this->handleMonthYear($startMonth, $endMonth, $nextMonth, $totalMonths, $user_id);
+
+        // Get users
+        $users = $this->getUsers($data['startEndYear'], $user_id);
+
+        // Return totals
+        $totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $data['off_days'], $data['startEndYear'], $user_id);
+
+        // Return data excel
+        $mainTable = array();
+        foreach ($types as $type) {
+            $index = 0;
+            foreach ($totals['hoursPerMonth'] as $key => $month) {
+                $hours = array_filter($totals['hoursPerProject'], function($obj) use ($type, $key) {
+                    if ( $obj->id == $type->id && $obj->yearMonth == $key ) {
+                        return true;
+                    }
+                    return false;
+                });
+                $hours = array_values($hours);
+                $percent = isset($hours[0]) && $month ? round($hours[0]->total/$month*100, 1) : 0;
+                $mainTable[$type->slug]['slug'] = $type->slug;
+                $mainTable[$type->slug]['slug_ja'] = $type->slug_ja;
+                $mainTable[$type->slug][$data['monthsText'][$index]] = $percent . '%';
+                $index++;
+            }
+        }
+
+        $year = '2020';
+
+        // dd($mainTable);
+
+        $numberRows = count($mainTable) + 4;
+        $curentTimestampe = Carbon::now()->timestamp;
+
+        return Excel::create('Report_'. $year. "_" . $curentTimestampe, function($excel) use ($mainTable, $numberRows, $year) {
+            $excel->setTitle('Report Job Time');
+            $excel->setCreator('Kilala Job Time')
+                ->setCompany('Kilala');
+            $excel->sheet('sheet1', function($sheet) use ($mainTable, $numberRows, $year) {
+                $sheet->setCellValue('A1', "Job Time Report ". $year);
+                $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                $sheet->fromArray($mainTable, null, 'A4', true);
+                $sheet->setCellValue('A4', 'Job type');
+                $sheet->setCellValue('B4', 'Japanese');
+                $sheet->mergeCells('A1:O1');
+                $sheet->mergeCells('A2:O2');
+                $sheet->cell('A1:O1', function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '16',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setValignment('middle');
+                });
+                $sheet->cell('A2:O2', function($cells) {
+                    $cells->setAlignment('center');
+                });
+                $sheet->cell('A4:O4', function($cells) {
+                    // Set black background
+                    $cells->setBackground('#ffd05b');
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '11',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setBorder('thin','thin','thin','thin');
+                });
+                $sheet->cell('C5:O'.$numberRows , function($cells) {
+                    $cells->setAlignment('center');
+                });
+                $sheet->mergeCells('A'.$numberRows.':B'.$numberRows);
+                $sheet->cell('A'. $numberRows.':O'.$numberRows, function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '11',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setBorder('thin','thin','thin','thin');
+                });
+                $sheet->cell('A4:A'.$numberRows , function($cells) {
+                    $cells->setFont([
+                        'bold'       =>  true
+                    ]);
+                });
+                $sheet->setBorder('A4:P'.$numberRows, 'thin');
+            });
+        })->download($file_extension);
     }
 }
