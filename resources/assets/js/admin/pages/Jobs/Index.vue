@@ -165,7 +165,7 @@ export default {
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
             });
 
@@ -177,43 +177,35 @@ export default {
         },
         getDataJobs(jobData) {
             if (jobData.data.length) {
-                let dataJobs = [];
-
-                for (let i = 0; i < jobData.data.length; i++) {
-                    let time = typeof(this.getObjectValue(this.jobsTime, jobData.data[i].id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, jobData.data[i].id).total : false;
-                    let obj = {
-                        id: jobData.data[i].id,
-                        department: this.getObjectValue(this.departments, jobData.data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, jobData.data[i].dept_id).text : '',
-                        project: jobData.data[i].p_name,
-                        issue: jobData.data[i].i_name,
-                        // phase: typeof(this.getObjectValue(this.schedules, jobData.data[i].id)) !== 'undefined' ? this.getObjectValue(this.schedules, jobData.data[i].id).memo : '',
+                this.jobs = jobData.data.map((item, index) => {
+                    let time = typeof(this.getObjectValue(this.jobsTime, item.id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, item.id).total : false;
+                    return {
+                        id: item.id,
+                        department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
+                        project: item.p_name,
+                        issue: item.i_name,
                         time: time ? this.hourFormatter(time) : '00:00'
                     };
-                    dataJobs.push(obj);
-                }
-                this.jobs = dataJobs;
+                });
             } else {
                 this.jobs = [];
             }
         },
         getDataLogTime(logTimeData) {
             if (logTimeData.length) {
-                let dataTimes = [];
-
-                for (let i = 0; i < logTimeData.length; i++) {
-                    let issue = typeof(this.getObjectValue(this.allJobs, logTimeData[i].issue_id)) !== 'undefined' ? this.getObjectValue(this.allJobs, logTimeData[i].issue_id) : false;
-                    if ( issue ) {
-                        let obj = {
-                            id: logTimeData[i].id,
+                let dataTimes = logTimeData.filter((item) => {
+                    return typeof(this.getObjectValue(this.allJobs, item.issue_id)) !== 'undefined';
+                }).map((item, index) => {
+                    let issue = this.getObjectValue(this.allJobs, item.issue_id);
+                    return {
+                            id: item.id,
                             project: issue.p_name,
                             issue: issue.i_name,
-                            start_time: logTimeData[i].start_time,
-                            end_time: logTimeData[i].end_time,
-                            total: logTimeData[i].total ? this.hourFormatter(logTimeData[i].total) : '00:00'
+                            start_time: item.start_time,
+                            end_time: item.end_time,
+                            total: item.total ? this.hourFormatter(item.total) : '00:00'
                         };
-                        dataTimes.push(obj);
-                    }
-                }
+                });
 
                 if ( dataTimes.length ) {
                     this.timeTotal = this.totalArrayObject(logTimeData);
@@ -340,11 +332,7 @@ export default {
             return result;
         },
         totalArrayObject(arr) {
-            let total = [];
-            arr.map(function(value, key) {
-                total.push(value.total)
-            });
-            return total.reduce(function(total, num){ return total + num }, 0);
+            return arr.reduce((total, item) => { return total + item.total }, 0);
         },
         resetValidate() {
             this.validationSuccess = '';

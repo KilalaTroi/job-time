@@ -105,7 +105,7 @@ export default {
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
             });
 
@@ -114,20 +114,16 @@ export default {
         },
         getDataOffDays(data) {
             if (data.length) {
-                let dataOffDays = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        title: this.getObjectValue(this.offDayTypes, data[i].type).name,
-                        borderColor: this.getObjectValue(this.offDayTypes, data[i].type).color,
-                        backgroundColor: this.getObjectValue(this.offDayTypes, data[i].type).color,
-                        start: moment(data[i].date).format(),
-                        end: moment(data[i].date).format()
+                this.offDays = data.map((item, index) => {
+                    return {
+                        id: item.id,
+                        title: this.getObjectValue(this.offDayTypes, item.type).name,
+                        borderColor: this.getObjectValue(this.offDayTypes, item.type).color,
+                        backgroundColor: this.getObjectValue(this.offDayTypes, item.type).color,
+                        start: moment(item.date).format(),
+                        end: moment(item.date).format()
                     };
-                    dataOffDays.push(obj);
-                }
-                this.offDays = dataOffDays;
+                });
             }
         },
         makeDraggable() {
@@ -135,7 +131,7 @@ export default {
 
             new Draggable(draggableEl, {
                 itemSelector: '.fc-event',
-                eventData: function(eventEl) {
+                eventData: (eventEl) => {
                     return {
                         title: eventEl.innerText.trim(),
                         id: eventEl.getAttribute("data-type"),
@@ -159,7 +155,7 @@ export default {
 
             let uri = '/data/offdays/' + event.id;
             axios.delete(uri).then((res) => {
-                this.offDays = this.offDays.filter(function(elem) {
+                this.offDays = this.offDays.filter((elem) => {
                     if (elem.id != event.id) return elem;
                 });
                 
@@ -187,7 +183,7 @@ export default {
             axios.post(uri, newItem)
                 .then(res => {
                     if ( res.data.oldEvent ) {
-                        this.offDays = this.offDays.filter(function(elem) {
+                        this.offDays = this.offDays.filter((elem) => {
                             if ( res.data.oldEvent.indexOf(elem.id) === -1 ) {
                                 return elem;
                             }

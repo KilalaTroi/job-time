@@ -159,7 +159,7 @@
                         },
                         axisY: {
                             offset: 40,
-                            labelInterpolationFnc: function(value) {
+                            labelInterpolationFnc: (value) => {
                                 return value + '%'
                             },
                             scaleMinSpace: 40,
@@ -219,6 +219,7 @@
 
                 axios.get(uri)
                     .then(res => {
+                        this.startEndYear = res.data.startEndYear;
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
                         this.hoursPerProject = res.data.totals.hoursPerProject;
                         this.monthsText = this.barChart.data.labels = res.data.monthsText;
@@ -230,7 +231,7 @@
                     });
             },
             hasObjectValue(data, id, yearMonth) {
-                let obj = data.filter(function(elem) {
+                let obj = data.filter((elem) => {
                     if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem;
                 });
 
@@ -259,43 +260,33 @@
                 return this.customFormatter(date[0]) + ' - ' + this.customFormatter(this.yesterday(date[1]));
             },
             totalObject(obj) {
-                let total = [];
-                Object.entries(obj).forEach(([key, val]) => {
-                    total.push(val) 
-                });
-                return total.reduce(function(total, num){ return total + num }, 0).toFixed(2);
+                return Object.keys(obj).reduce((total, key) => { return total + obj[key] }, 0);
             },
             totalArrayObject(arr) {
-                let total = [];
-                arr.map(function(value, key) {
-                    total.push((value.total*1).toFixed(2)*1)
-                });
-                return total.reduce(function(total, num){ return total + num }, 0).toFixed(2);
+                return arr.reduce((total, item) => { return total + (item.total*1).toFixed(2)*1 }, 0).toFixed(2);
             },
             getCurrentMonth(data) {
                 if (typeof(data.hours) !== 'undefined') return (data.hours[0].total*1).toFixed(2) + '/' + data.total;
             },
             getSeries(projectTypes, totalHoursPerMonth, hoursPerProject) {
-                let series = [];
                 let _this = this;
-                projectTypes.map(function(value, key) {
-                    let id = value.id;
-                    let row = [];
-                    Object.entries(totalHoursPerMonth).forEach(([key, val]) => {
-                        if ( _this.hasObjectValue(hoursPerProject, id, key) ) {
-                            let percents = (_this.hasObjectValue(hoursPerProject, id, key).total*1/val*100).toFixed(2);
-                            row.push({
+                let series = projectTypes.map((item, index) => {
+                    let _item = item;
+                    let row = Object.keys(totalHoursPerMonth).map((key, index) => {
+                        if ( _this.hasObjectValue(hoursPerProject, _item.id, key) ) {
+                            let percents = (_this.hasObjectValue(hoursPerProject, _item.id, key).total*1/totalHoursPerMonth[key]*100).toFixed(2);
+                            return {
                                 value: percents,
-                                meta: value.slug
-                            });
+                                meta: _item.slug
+                            };
                         } else {
-                            row.push({
+                            return {
                                 value: 0,
-                                meta: value.slug
-                            });
+                                meta: _item.slug
+                            };
                         }
-                    });
-                    series.push(row);
+                    })
+                    return row;
                 });
                 this.series = this.barChart.data.series = series;
             },
@@ -317,21 +308,11 @@
             },
             getUserOptions(data) {
                 if (data.length) {
-                    let dataUsers = [];
                     let obj = {
                         id: 0,
                         text: 'All'
                     };
-                    dataUsers.push(obj);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].name
-                        };
-                        dataUsers.push(obj);
-                    }
-                    this.userOptions = dataUsers;
+                    this.userOptions = [obj].concat(data);
                 }
             },
         },

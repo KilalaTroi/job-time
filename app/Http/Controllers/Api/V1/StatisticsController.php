@@ -86,7 +86,7 @@ class StatisticsController extends Controller
         $users = DB::table('role_user as ru')
             ->select(
                 'user.id as id',
-                'user.name as name'
+                'user.name as text'
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
@@ -203,7 +203,7 @@ class StatisticsController extends Controller
         $users['all'] = DB::table('role_user as ru')
             ->select(
                 'user.id as id',
-                'user.name as name'
+                'user.name as text'
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')

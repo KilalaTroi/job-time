@@ -66,26 +66,11 @@ export default {
     methods: {
         getDataProjects(data) {
             if (data.length) {
-                let dataOptions = [];
                 let obj = {
                     id: 0,
                     text: "Select one"
                 };
-                dataOptions.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let objCheck = dataOptions.filter(function(elem) {
-                        if (elem.id == data[i].id) return elem;
-                    });
-                    if (!(objCheck.length > 0)) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].p_name
-                        };
-                        dataOptions.push(obj);
-                    }
-                }
-                this.projectOptions = dataOptions;
+                this.projectOptions = [obj].concat(data);
             }
         },
         getLanguage(data) {

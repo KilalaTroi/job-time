@@ -81,29 +81,25 @@ export default {
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
             });
 
             if (obj.length > 0)
                 return obj[0];
         },
-        getDataOffDays(data) {
+        getDataOffDays(data) { 
             if (data.length) {
-                let dataOffDays = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        title: data[i].name,
-                        borderColor: this.getObjectValue(this.offDayTypes, data[i].type).color,
-                        backgroundColor: this.getObjectValue(this.offDayTypes, data[i].type).color,
-                        start: moment(data[i].date).format(),
-                        end: moment(data[i].date).format()
+                this.offDays = data.map((item, index) => {
+                    return {
+                        id: item.id,
+                        title: item.name,
+                        borderColor: this.getObjectValue(this.offDayTypes, item.type).color,
+                        backgroundColor: this.getObjectValue(this.offDayTypes, item.type).color,
+                        start: moment(item.date).format(),
+                        end: moment(item.date).format()
                     };
-                    dataOffDays.push(obj);
-                }
-                this.offDays = dataOffDays;
+                });
             }
         },
         setStyles(color) {

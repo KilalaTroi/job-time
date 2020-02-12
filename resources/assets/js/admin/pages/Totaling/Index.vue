@@ -137,25 +137,15 @@
             },
             getUserOptions(data) {
                 if (data.length) {
-                    let dataUsers = [];
                     let obj = {
                         id: 0,
                         text: 'All'
                     };
-                    dataUsers.push(obj);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].name
-                        };
-                        dataUsers.push(obj);
-                    }
-                    this.userOptions = dataUsers;
+                    this.userOptions = [obj].concat(data);
                 }
             },
             getObjectValue(data, id) {
-                let obj = data.filter(function(elem) {
+                let obj = data.filter((elem) => {
                     if (elem.id === id) return elem;
                 });
 
@@ -164,23 +154,19 @@
             },
             getDataLogTime(logTimeData) {
                 if (logTimeData.data.length) {
-                    let dataLogTime = [];
-
-                    for (let i = 0; i < logTimeData.data.length; i++) {
-                        let obj = {
-                            username: logTimeData.data[i].username,
-                            date: this.customFormatter2(logTimeData.data[i].date),
-                            start_time: logTimeData.data[i].start_time,
-                            end_time: logTimeData.data[i].end_time,
-                            total: this.hourFormatter(logTimeData.data[i].total),
-                            d_name: logTimeData.data[i].department === "All" ? '' : logTimeData.data[i].department,
-                            p_name: logTimeData.data[i].project,
-                            i_name: logTimeData.data[i].issue,
-                            t_name: logTimeData.data[i].job_type,
+                    this.logTime = logTimeData.data.map((item, index) => {
+                        return {
+                            username: item.username,
+                            date: this.customFormatter2(item.date),
+                            start_time: item.start_time,
+                            end_time: item.end_time,
+                            total: this.hourFormatter(item.total),
+                            d_name: item.department === "All" ? '' : item.department,
+                            p_name: item.project,
+                            i_name: item.issue,
+                            t_name: item.job_type,
                         };
-                        dataLogTime.push(obj);
-                    }
-                    this.logTime = dataLogTime;
+                    });
                 } else {
                     this.logTime = [];
                 }

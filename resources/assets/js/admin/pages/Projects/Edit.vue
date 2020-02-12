@@ -17,7 +17,7 @@
                     <div class="form-group">
                         <label class="">Departments</label>
                         <div>
-                            <select-2 :options="departmentOptions" v-model="currentItem.dept_id" class="select2">
+                            <select-2 :options="departments" v-model="currentItem.dept_id" class="select2">
                                 <option disabled value="0">Select one</option>
                             </select-2>
                         </div>
@@ -122,25 +122,6 @@ export default {
         getLanguage(data) {
             return data.current === "en" ? en : ja
         },
-        getDataDepartments(data) {
-            if (data.length) {
-                let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                dataOptions.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        text: data[i].text
-                    };
-                    dataOptions.push(obj);
-                }
-                this.departmentOptions = dataOptions;
-            }
-        },
         getDataTypes(data) {
             if (data.length) {
                 let dataTypes = [];
@@ -200,9 +181,6 @@ export default {
         }
     },
     watch: {
-        departments: [{
-            handler: 'getDataDepartments'
-        }],
         types: [{
             handler: 'getDataTypes'
         }],

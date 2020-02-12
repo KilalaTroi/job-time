@@ -24,6 +24,11 @@ class ProjectsController extends Controller
         $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+        $projectOptions = DB::table('projects as p')->select('p.id', 'p.name as text')
+        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        ->whereIn('i.status', $status)
+        ->groupBy('p.id')
+        ->get()->toArray();
         $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
@@ -58,6 +63,7 @@ class ProjectsController extends Controller
 
         return response()->json([
             'departments' => $departments,
+            'projectOptions' => $projectOptions,
             'types' => $types,
             'projects' => $projects
         ]);

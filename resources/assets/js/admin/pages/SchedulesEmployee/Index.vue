@@ -94,7 +94,7 @@ export default {
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
             });
 
@@ -103,39 +103,31 @@ export default {
         },
         getDataProjects(data) {
             if (data.length) {
-                let dataProjects = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        project: data[i].p_name,
-                        issue: data[i].i_name,
-                        issue_id: data[i].issue_id,
-                        value: this.getObjectValue(this.types, data[i].type_id).value,
-                        start_date: this.customFormatter(data[i].start_date),
-                        end_date: this.customFormatter(data[i].end_date)
+                this.projects = data.map((item, index) => {
+                    return {
+                        id: item.id,
+                        project: item.p_name,
+                        issue: item.i_name,
+                        issue_id: item.issue_id,
+                        value: this.getObjectValue(this.types, item.type_id).value,
+                        start_date: this.customFormatter(item.start_date),
+                        end_date: this.customFormatter(item.end_date)
                     };
-                    dataProjects.push(obj);
-                }
-                this.projects = dataProjects;
+                });
             }
         },
         getDataSchedules(data) {
             if (data.length) {
-                let dataSchedules = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo ? data[i].memo : ''),
-                        borderColor: this.getObjectValue(this.types, data[i].type_id).value,
-                        backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
-                        start: moment(data[i].date + ' ' + data[i].start_time).format(),
-                        end: moment(data[i].date + ' ' + data[i].end_time).format()
+                this.schedules = data.map((item, index) => {
+                    return {
+                        id: item.id,
+                        title: (item.i_name ? item.p_name + ' ' + item.i_name : item.p_name) + '\n' + (item.memo ? item.memo : ''),
+                        borderColor: this.getObjectValue(this.types, item.type_id).value,
+                        backgroundColor: this.getObjectValue(this.types, item.type_id).value,
+                        start: moment(item.date + ' ' + item.start_time).format(),
+                        end: moment(item.date + ' ' + item.end_time).format()
                     };
-                    dataSchedules.push(obj);
-                }
-                this.schedules = dataSchedules;
+                });
             }
         },
         setStyles(color) {

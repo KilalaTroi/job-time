@@ -64,11 +64,11 @@
                 </div>
                 <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
             </card>
-            <CreateItem :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
+            <CreateItem :departments="departmentOptions" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
-            <EditItem :currentItem="currentItem" :departments="departments" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-item="updateItem" v-on:reset-validation="resetValidate">
+            <EditItem :currentItem="currentItem" :departments="departmentOptions" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-item="updateItem" v-on:reset-validation="resetValidate">
             </EditItem>
-            <AddIssue :projects="projects.data" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
+            <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
         </div>
     </div>
@@ -114,6 +114,7 @@ export default {
             typeOptions: [],
             projects: {},
             projectData: [],
+            projectOptions: [],
             filterResults: [],
             currentItem: null,
             showArchive: false,
@@ -135,7 +136,7 @@ export default {
     },
     methods: {
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id == id) return elem;
             });
 
@@ -144,21 +145,11 @@ export default {
         },
         getDataDepartments(data) {
             if (data.length) {
-                let dataOptions = [];
                 let obj = {
                     id: 0,
                     text: 'Select one'
                 };
-                dataOptions.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        text: data[i].text
-                    };
-                    dataOptions.push(obj);
-                }
-                this.departmentOptions = dataOptions;
+                this.departmentOptions = [obj].concat(data);
             }
         },
         getDataTypes(data) {
@@ -188,24 +179,21 @@ export default {
         },
         getDataProjects(projects) {
             if (projects.data.length) {
-                let dataProjects = [];
-
-                for (let i = 0; i < projects.data.length; i++) {
-                    let checkArchive = projects.data[i].status === "archive" ? " <i style='color: #FF4A55;'>(Archived)</i>" : "";
-                    let obj = {
-                        id: projects.data[i].id,
-                        department: this.getObjectValue(this.departments, projects.data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, projects.data[i].dept_id).text : '',
-                        project: projects.data[i].p_name + checkArchive,
-                        issue: projects.data[i].i_name,
-                        issue_id: projects.data[i].issue_id,
-                        status: projects.data[i].status,
-                        type: this.getObjectValue(this.types, projects.data[i].type_id).slug,
-                        value: this.getObjectValue(this.types, projects.data[i].type_id).value,
-                        start_date: this.customFormatter(projects.data[i].start_date),
-                        end_date: this.customFormatter(projects.data[i].end_date)
+                let dataProjects = projects.data.map((item, index) => {
+                    let checkArchive = item.status === "archive" ? " <i style='color: #FF4A55;'>(Archived)</i>" : "";
+                    return {
+                        id: item.id,
+                        department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
+                        project: item.p_name + checkArchive,
+                        issue: item.i_name,
+                        issue_id: item.issue_id,
+                        status: item.status,
+                        type: this.getObjectValue(this.types, item.type_id).slug,
+                        value: this.getObjectValue(this.types, item.type_id).value,
+                        start_date: this.customFormatter(item.start_date),
+                        end_date: this.customFormatter(item.end_date)
                     };
-                    dataProjects.push(obj);
-                }
+                });
                 this.projectData = this.filterResults = dataProjects;
             } else {
                 this.projectData = this.filterResults = [];
@@ -218,6 +206,7 @@ export default {
                     this.departments = res.data.departments;
                     this.types = res.data.types;
                     this.projects = res.data.projects;
+                    this.projectOptions = res.data.projectOptions;
                 })
                 .catch(err => {
                     console.log(err);
@@ -235,6 +224,7 @@ export default {
             axios.get(uri)
                 .then(res => {
                     this.projects = res.data.projects;
+                    this.projectOptions = res.data.projectOptions;
                 })
                 .catch(err => {
                     console.log(err);
