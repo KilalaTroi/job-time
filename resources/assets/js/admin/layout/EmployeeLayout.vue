@@ -21,6 +21,10 @@
                 <i class="nc-icon nc-chart-pie-36"></i>
                 <p v-text="$ml.with('VueJS').get('sbStatistics')" />
             </sidebar-link>
+            <sidebar-link to="/totaling">
+                <i class="nc-icon nc-chart-bar-32"></i>
+                <p v-text="$ml.with('VueJS').get('sbTotaling')" />
+            </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">
                     <i class="nc-icon nc-button-power"></i>

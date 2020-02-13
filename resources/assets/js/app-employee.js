@@ -31,6 +31,7 @@ import Jobs from './admin/pages/Jobs';
 import Profile from './admin/pages/Profile';
 import OffDays from './admin/pages/OffDays';
 import Overview from './admin/pages/Overview';
+import Totaling from './admin/pages/Totaling';
 
 const routes = [{
         path: '/',
@@ -65,6 +66,11 @@ const routes = [{
                 path: 'overview',
                 name: 'Overview',
                 component: Overview
+            },
+            {
+                path: 'totaling',
+                name: 'Totaling',
+                component: Totaling
             },
             {
                 path: '*',

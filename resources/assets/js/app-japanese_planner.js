@@ -30,6 +30,7 @@ import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Profile from './admin/pages/Profile';
 import Overview from './admin/pages/Overview';
+import Totaling from './admin/pages/Totaling';
 
 const routes = [{
         path: '/',
@@ -59,6 +60,11 @@ const routes = [{
                 path: 'overview',
                 name: 'Overview',
                 component: Overview
+            },
+            {
+                path: 'totaling',
+                name: 'Totaling',
+                component: Totaling
             },
             {
                 path: '*',
