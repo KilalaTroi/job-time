@@ -120,7 +120,8 @@ class ReportsController extends Controller
         foreach ($data as $key => $item) {
             $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
             $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
-            $this->array_insert( $data[$key], 4, array ('Time' => $hoursminsandsecs));
+            $keyNUmber = $user_id != "0" ? 3 : 4;
+            $this->array_insert( $data[$key], $keyNUmber, array ('Time' => $hoursminsandsecs));
             foreach ($item as $key1 => $element) {
                 if(empty($element) || $element == "All") {
                     $data[$key][$key1] = "--";
