@@ -25,7 +25,7 @@
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="form-group">
+                        <div class="form-group"> 
                             <label class="">Departments</label>
                             <div>
                                 <select-2 :options="departmentOptions" v-model="search.dept_id" class="select2" v-on:input="searchItems(search)">
@@ -59,15 +59,17 @@
                     </div>
                 </template>
                 <div class="table-responsive" v-if="filterResults">
-                    <action-table class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
-                    </action-table>
+                    <project-table class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
+                    </project-table>
                 </div>
                 <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
             </card>
             <CreateItem :departments="departmentOptions" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
-            <EditItem :currentItem="currentItem" :departments="departmentOptions" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-item="updateItem" v-on:reset-validation="resetValidate">
-            </EditItem>
+            <EditProject :currentItem="currentItem" :departments="departmentOptions" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-project="updateProject" v-on:reset-validation="resetValidate">
+            </EditProject>
+            <EditIssue :projects="projectOptions" :currentItem="currentItem" :errors="validationErrors" :success="validationSuccess" v-on:update-issue="updateIssue" v-on:reset-validation="resetValidate">
+            </EditIssue>
             <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
         </div>
@@ -76,10 +78,11 @@
 <script>
 import Card from '../../components/Cards/Card'
 import CreateItem from './Create'
-import EditItem from './Edit'
+import EditProject from './EditProject'
+import EditIssue from './EditIssue'
 import AddIssue from './AddIssue'
 import CreateButton from '../../components/Buttons/Create'
-import ActionTable from '../../components/TableAction'
+import ProjectTable from '../../components/TableProject'
 import moment from 'moment'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
@@ -87,7 +90,7 @@ import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
 const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
     { id: 'project', value: 'Project', width: '', class: '' },
-    { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
+    { id: 'issue', value: 'Issue', width: '150', class: 'text-center' },
     { id: 'type', value: 'Type', width: '', class: '' },
     { id: 'value', value: 'Color', width: '110', class: 'text-center' },
     { id: 'start_date', value: 'Start date', width: '', class: '' },
@@ -100,10 +103,11 @@ export default {
         Select2Type,
         Card,
         CreateItem,
-        EditItem,
+        EditProject,
+        EditIssue,
         AddIssue,
         CreateButton,
-        ActionTable
+        ProjectTable
     },
     data() {
         return {
@@ -181,10 +185,11 @@ export default {
             if (projects.data.length) {
                 let dataProjects = projects.data.map((item, index) => {
                     let checkArchive = item.status === "archive" ? " <i style='color: #FF4A55;'>(Archived)</i>" : "";
+                    let checkTR = this.getObjectValue(this.types, item.type_id).slug.includes("_tr") ? " (TR)" : "";
                     return {
                         id: item.id,
                         department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
-                        project: item.p_name + checkArchive,
+                        project: item.p_name + checkTR + checkArchive,
                         issue: item.i_name,
                         issue_id: item.issue_id,
                         status: item.status,
@@ -306,7 +311,7 @@ export default {
                 this.currentItem.no_period = false;
             }).catch(err => console.log(err));
         },
-        updateItem(item) {
+        updateProject(item) {
             // Reset validate
             this.validationErrors = '';
             this.validationSuccess = '';
@@ -317,25 +322,30 @@ export default {
                     this.projects.data[foundIndex] = item;
                     this.projects.data = [...this.projects.data];
                     this.validationSuccess = res.data.message;
-
-                    // Update issue
-                    let uri_issue = '/data/issues/' + item.issue_id;
-                    axios.patch(uri_issue, item).then((res) => {
-                        console.log(res.data.message);
-                    })
-                    .catch(err => {
-                        if (err.response.status == 422) {
-                            this.validationSuccess = '';
-                            err.response.data.name = ["The issue has already been taken."];
-                            this.validationErrors = err.response.data;
-                        }
-                    });
                 })
                 .catch(err => {
                     if (err.response.status == 422) {
                         this.validationErrors = err.response.data;
                     }
                 });
+        },
+        updateIssue(item) {
+            // Reset validate
+            this.validationErrors = '';
+            this.validationSuccess = '';
+
+            // Update issue
+            let uri_issue = '/data/issues/' + item.issue_id;
+            axios.patch(uri_issue, item).then((res) => {
+                this.validationSuccess = res.data.message;
+            })
+            .catch(err => {
+                if (err.response.status == 422) {
+                    this.validationSuccess = '';
+                    err.response.data.name = ["The issue has already been taken."];
+                    this.validationErrors = err.response.data;
+                }
+            });
         },
         filterItems(value) {
             if ( value ) {
@@ -366,6 +376,7 @@ export default {
                 this.getProjects(this.showArchive);
                 this.validationSuccess = '';
                 this.validationErrors = '';
+                this.currentItem = null;
             }
         }
     },

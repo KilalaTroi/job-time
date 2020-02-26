@@ -30,10 +30,6 @@
 </head>
 <body class="language-{{ Auth::user()->language ? Auth::user()->language : 'en' }}">
 <div id="app"></div>
-{{--    <passport-clients></passport-clients>--}}
-{{--    <passport-authorized-clients></passport-authorized-clients>--}}
-{{--    <passport-personal-access-tokens></passport-personal-access-tokens>--}}
-{{--</div>--}}
 
 <!-- Scripts -->
 <script src="{{ asset('js/app-admin.js') }}"></script>

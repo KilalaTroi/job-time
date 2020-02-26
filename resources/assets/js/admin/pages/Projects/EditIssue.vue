@@ -1,59 +1,25 @@
 <template>
-    <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Edit Project</template>
+    <modal id="editIssue" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
+        <template slot="title">Edit Issue</template>
         <div v-if="currentItem">
             <div class="row">
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">Types</label>
-                        <div>
-                            <select2-type :options="typeOptions" v-model="currentItem.type_id" class="select2">
-                                <option disabled value="0">Select one</option>
-                            </select2-type>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">Departments</label>
-                        <div>
-                            <select-2 :options="departments" v-model="currentItem.dept_id" class="select2">
-                                <option disabled value="0">Select one</option>
-                            </select-2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label class="">Name</label>
-                        <input v-model="currentItem.p_name" type="text" name="name" class="form-control" required>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label class="">Name VI</label>
-                        <input v-model="currentItem.p_name_vi" type="text" name="name_vi" class="form-control">
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label class="">Name JA</label>
-                        <input v-model="currentItem.p_name_ja" type="text" name="name_ja" class="form-control">
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-5">
                     <div class="form-group">
                         <label class="">Issue</label>
                         <input v-model="currentItem.i_name" type="text" name="issue" class="form-control">
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <label class="">Project</label>
+                        <div>
+                            <select-2 :options="projectOptions" v-model="currentItem.id" class="select2">
+                                <option disabled value="0">Select one</option>
+                            </select-2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
                     <div class="form-group">
                         <label class="">No period</label>
                         <input v-model="currentItem.no_period" type="checkbox" name="currentItem.no_period" @change="updatePeriod" class="form-control">
@@ -80,17 +46,15 @@
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button @click="$emit('update-item', currentItem)" type="button" class="btn btn-primary">
+                <button @click="$emit('update-issue', currentItem)" type="button" class="btn btn-primary">
                     Update
                 </button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </modal>
 </template>
 <script>
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
-import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
 import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
@@ -99,47 +63,34 @@ import { en, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
-    name: 'EditItem',
+    name: 'EditIssue',
     components: {
         Select2,
-        Select2Type,
         datepicker: Datepicker,
         ErrorItem,
         SuccessItem,
         Modal
     },
-    props: ['currentItem', 'clients', 'departments', 'types', 'errors', 'success'],
+    props: ['projects', 'currentItem', 'errors', 'success'],
     data() {
         return {
-            clientOptions: [],
-            departmentOptions: [],
-            typeOptions: [],
             modalLg: 'modal-lg',
             has_period: true,
+            projectOptions: []
         }
     },
     methods: {
-        getLanguage(data) {
-            return data.current === "en" ? en : ja
-        },
-        getDataTypes(data) {
+        getDataProjects(data) {
             if (data.length) {
-                let dataTypes = [];
                 let obj = {
                     id: 0,
-                    text: '<div>Select one</div>'
+                    text: "Select one"
                 };
-                dataTypes.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
-                    };
-                    dataTypes.push(obj);
-                }
-                this.typeOptions = dataTypes;
+                this.projectOptions = [obj].concat(data);
             }
+        },
+        getLanguage(data) {
+            return data.current === "en" ? en : ja
         },
         customFormatter(date) {
             return moment(date).format('YYYY/MM/DD');
@@ -163,7 +114,7 @@ export default {
             }
         },
         updatePeriod() {
-            if ( this.currentItem.no_period ) {
+            if (this.currentItem.no_period) {
                 this.currentItem.start_date = '';
                 this.currentItem.end_date = '';
                 this.has_period = false;
@@ -172,7 +123,7 @@ export default {
             }
         },
         currentPeriod(data) {
-            if ( moment(data.start_date).format('DD-MM-YYYY') === 'Invalid date' && moment(data.end_date).format('DD-MM-YYYY') === 'Invalid date' ) {
+            if (moment(data.start_date).format('DD-MM-YYYY') === 'Invalid date' && moment(data.end_date).format('DD-MM-YYYY') === 'Invalid date') {
                 this.currentItem.no_period = true;
                 this.has_period = false;
             } else {
@@ -181,8 +132,8 @@ export default {
         }
     },
     watch: {
-        types: [{
-            handler: 'getDataTypes'
+        projects: [{
+            handler: 'getDataProjects'
         }],
         currentItem: [{
             handler: 'currentPeriod'

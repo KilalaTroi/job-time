@@ -29,11 +29,7 @@
     </script>
 </head>
 <body class="language-{{ Auth::user()->language ? Auth::user()->language : 'en' }}">
-<div id="app">
-    <passport-clients></passport-clients>
-    <passport-authorized-clients></passport-authorized-clients>
-    <passport-personal-access-tokens></passport-personal-access-tokens>
-</div>
+<div id="app"></div>
 
 <!-- Scripts -->
 <script src="{{ asset('js/app-japanese_planner.js') }}"></script>

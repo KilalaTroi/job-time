@@ -32,12 +32,14 @@ class SchedulesController extends Controller
                 'p.id as id',
                 'i.id as issue_id',
                 'p.name as p_name',
+                't.slug as type',
                 'i.name as i_name',
                 'type_id',
                 'start_date',
                 'end_date'
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+            ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
             // ->whereNotIn('type_id', $typesTR)
             ->where(function ($query) use ($nextMonth) {
@@ -56,6 +58,7 @@ class SchedulesController extends Controller
             ->select(
                 's.id as id',
                 'p.name as p_name',
+                't.slug as type',
                 'i.name as i_name',
                 'type_id',
                 's.date as date',
@@ -65,6 +68,7 @@ class SchedulesController extends Controller
             )
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+            ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
             ->where('s.date', '>=',  $lastYear)
             ->get()->toArray();

@@ -29,10 +29,12 @@ class JobsController extends Controller
                     'i.id as id',
                     'dept_id',
                     'p.name as p_name',
+                    't.slug as type',
                     'i.name as i_name'
                 )
                 ->join('projects as p', 'p.id', '=', 'i.project_id')
                 ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+                ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where('s.date', '=', $selectDate)
                 ->where('i.status', '=', 'publish')
                 ->orderBy('p_name', 'desc')
@@ -44,9 +46,11 @@ class JobsController extends Controller
                     'i.id as id',
                     'dept_id',
                     'p.name as p_name',
+                    't.slug as type',
                     'i.name as i_name'
                 )
                 ->join('projects as p', 'p.id', '=', 'i.project_id')
+                ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where(function ($query) use ($selectDate) {
                     $query->where('start_date', '<=',  $selectDate)
                           ->orWhere('start_date', '=',  NULL);
@@ -67,9 +71,11 @@ class JobsController extends Controller
                 'i.id as id',
                 'dept_id',
                 'p.name as p_name',
+                't.slug as type',
                 'i.name as i_name'
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
+            ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where(function ($query) use ($selectDate) {
                 $query->where('start_date', '<=',  $selectDate)
                       ->orWhere('start_date', '=',  NULL);

@@ -12,15 +12,15 @@ import StatsCard from './Cards/StatsCard.vue'
 import SidebarPlugin from './SidebarPlugin'
 
 let components = {
-  BaseCheckbox,
-  Radio,
-  BaseInput,
-  Card,
-  ChartCard,
-  StatsCard,
-  Table,
-  BaseDropdown,
-  SidebarPlugin
+    BaseCheckbox,
+    Radio,
+    BaseInput,
+    Card,
+    ChartCard,
+    StatsCard,
+    Table,
+    BaseDropdown,
+    SidebarPlugin
 }
 
 export default components

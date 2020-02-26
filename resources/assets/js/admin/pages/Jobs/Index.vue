@@ -179,10 +179,11 @@ export default {
             if (jobData.data.length) {
                 this.jobs = jobData.data.map((item, index) => {
                     let time = typeof(this.getObjectValue(this.jobsTime, item.id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, item.id).total : false;
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
                     return {
                         id: item.id,
                         department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
-                        project: item.p_name,
+                        project: item.p_name + checkTR,
                         issue: item.i_name,
                         time: time ? this.hourFormatter(time) : '00:00'
                     };
@@ -197,9 +198,10 @@ export default {
                     return typeof(this.getObjectValue(this.allJobs, item.issue_id)) !== 'undefined';
                 }).map((item, index) => {
                     let issue = this.getObjectValue(this.allJobs, item.issue_id);
+                    let checkTR = issue.type.includes("_tr") ? " (TR)" : "";
                     return {
                             id: item.id,
-                            project: issue.p_name,
+                            project: issue.p_name + checkTR,
                             issue: issue.i_name,
                             start_time: item.start_time,
                             end_time: item.end_time,

@@ -28,7 +28,6 @@
                         class="btn btn-primary"
                 >Update
                 </button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </modal>

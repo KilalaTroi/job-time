@@ -104,9 +104,10 @@ export default {
         getDataProjects(data) {
             if (data.length) {
                 this.projects = data.map((item, index) => {
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
                     return {
                         id: item.id,
-                        project: item.p_name,
+                        project: item.p_name + checkTR,
                         issue: item.i_name,
                         issue_id: item.issue_id,
                         value: this.getObjectValue(this.types, item.type_id).value,
@@ -119,9 +120,10 @@ export default {
         getDataSchedules(data) {
             if (data.length) {
                 this.schedules = data.map((item, index) => {
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
                     return {
                         id: item.id,
-                        title: (item.i_name ? item.p_name + ' ' + item.i_name : item.p_name) + '\n' + (item.memo ? item.memo : ''),
+                        title: (item.i_name ? item.p_name + checkTR + ' ' + item.i_name : item.p_name + checkTR) + '\n' + (item.memo ? item.memo : ''),
                         borderColor: this.getObjectValue(this.types, item.type_id).value,
                         backgroundColor: this.getObjectValue(this.types, item.type_id).value,
                         start: moment(item.date + ' ' + item.start_time).format(),

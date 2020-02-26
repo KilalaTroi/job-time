@@ -9,7 +9,6 @@
             <hr>
             <div class="form-group text-right">
                 <button type="button"  @click="$emit('delete-event', currentEvent)" class="btn btn-danger ml-3">Delete</button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </modal>

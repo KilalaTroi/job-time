@@ -75,6 +75,7 @@ export default {
             });
         },
         activeLanguage(language) {
+            $('body').removeClass('language-en language-ja').addClass('language-'+this.$ml.current);
             if ( this.$ml.current === language )
                 return 'bg-success';
             return 'bg-secondary';

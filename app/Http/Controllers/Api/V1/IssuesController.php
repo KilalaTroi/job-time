@@ -78,13 +78,14 @@ class IssuesController extends Controller
         $issue = Issue::findOrFail($id);
 
         $sameIssue = Issue::where([
-            ['project_id', '=', $issue->project_id],
+            ['project_id', '=', $request->get('id')],
             ['name', '=', $request->get('i_name')],
+            ['id', '<>', $issue->id],
         ])->count();
         
-        if ( $sameIssue > 0 && $issue->name !== $request->get('i_name') ) {
+        if ( $sameIssue > 0 ) {
             $this->validate($request, [
-                'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $issue->project_id
+                'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $request->get('id')
             ]);
         }
 
@@ -101,6 +102,7 @@ class IssuesController extends Controller
         }
 
         $issue->update([
+            'project_id' => $request->get('id'),
             'name' => $request->get('name'),
             'start_date' => $start_date,
             'end_date' => $end_date,

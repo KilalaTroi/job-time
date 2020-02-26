@@ -24,11 +24,14 @@ class ProjectsController extends Controller
         $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
-        $projectOptions = DB::table('projects as p')->select('p.id', 'p.name as text')
+
+        $projectOptions = DB::table('projects as p')->select('p.id', DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'))
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->whereIn('i.status', $status)
         ->groupBy('p.id')
         ->get()->toArray();
+
         $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
@@ -80,7 +83,7 @@ class ProjectsController extends Controller
         $request->merge(['name' => $request->get('p_name')]);
         
         $this->validate($request, [
-            'name' => 'required|max:255|unique:projects',
+            'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
             'type_id' => 'required|numeric|min:0|not_in:0'
         ]);
 
@@ -164,13 +167,25 @@ class ProjectsController extends Controller
     public function update($id, Request $request)
     {
         $request->merge(['name' => $request->get('p_name')]);
+
+        $project = Project::findOrFail($id);
+
+        $sameProject = Project::where([
+            ['type_id', '=', $request->get('type_id')],
+            ['name', '=', $request->get('p_name')],
+            ['id', '<>', $project->id],
+        ])->count();
+        
+        if ( $sameProject > 0 ) {
+            $this->validate($request, [
+                'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
+            ]);
+        }
         
         $this->validate($request, [
-            'name' => 'required|max:255|unique:projects,name,' . $id,
             'type_id' => 'required|numeric|min:0|not_in:0',
         ]);
 
-        $project = Project::findOrFail($id);
         $project->update([
             'name' => $request->get('p_name'),
             'name_vi' => $request->get('p_name_vi'),
