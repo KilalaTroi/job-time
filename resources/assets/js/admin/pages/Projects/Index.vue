@@ -90,7 +90,7 @@ import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
 const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
     { id: 'project', value: 'Project', width: '', class: '' },
-    { id: 'issue', value: 'Issue', width: '150', class: 'text-center' },
+    { id: 'issue', value: 'Issue', width: '150', class: '' },
     { id: 'type', value: 'Type', width: '', class: '' },
     { id: 'value', value: 'Color', width: '110', class: 'text-center' },
     { id: 'start_date', value: 'Start date', width: '', class: '' },
@@ -193,6 +193,7 @@ export default {
                         issue: item.i_name,
                         issue_id: item.issue_id,
                         status: item.status,
+                        room_id: item.room_id,
                         type: this.getObjectValue(this.types, item.type_id).slug,
                         value: this.getObjectValue(this.types, item.type_id).value,
                         start_date: this.customFormatter(item.start_date),
@@ -275,6 +276,7 @@ export default {
                         p_name: res.data.p_name,
                         p_name_vi: res.data.p_name_vi,
                         p_name_ja: res.data.p_name_ja,
+                        room_id: res.data.room_id,
                         status: 'publish',
                     }, newIssue);
                     // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];

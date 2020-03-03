@@ -7,7 +7,7 @@ export default new MLCreate({
     initial: document.querySelector("meta[name='user-language']").getAttribute('content'),
     save: process.env.NODE_ENV === 'production',
     languages: [
-        new MLanguage('en').create({
+        new MLanguage('vi').create({
             siteName: 'Job Time',
             sbStatistics: 'Statistics',
             sbTotaling: 'Totaling',

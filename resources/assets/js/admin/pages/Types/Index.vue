@@ -50,12 +50,15 @@
     import EditItem from "./Edit";
     import CreateButton from "../../components/Buttons/Create";
 
+    const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
+
     const tableColumns = [
-        {id: 'slug', value: 'Name', width: '', class: ''},
+        {id: 'slug', value: 'slug', width: '200', class: ''},
         {id: 'value', value: 'Color', width: '110', class: 'text-center'},
-        {id: 'slug_vi', value: 'Name VI', width: '', class: ''},
-        {id: 'slug_ja', value: 'Name JA', width: '', class: ''}
+        {id: 'slug_' + langDefault, value: 'Name', width: '200', class: ''},
+        {id: 'description_' + langDefault, value: 'Description', width: '', class: ''}
     ];
+
     export default {
         components: {
             ActionTable,
@@ -68,13 +71,26 @@
             return {
                 columns: [...tableColumns],
                 types: [],
+                langSlug: langDefault,
                 currentItem: null,
                 validationErrors: "",
                 validationSuccess: ""
             };
         },
         mounted() {
-            this.fetchItems();
+            let _this = this;
+            _this.fetchItems();
+            
+            $(document).on('click', '.languages button', function() {
+                _this.langSlug = _this.$ml.current;
+                _this.columns = [
+                    {id: 'slug', value: 'slug', width: '200', class: ''},
+                    {id: 'value', value: 'Color', width: '110', class: 'text-center'},
+                    {id: 'slug_' + _this.langSlug, value: 'Name', width: '200', class: ''},
+                    {id: 'description_' + _this.langSlug, value: 'Description', width: '', class: ''}
+                ];
+                _this.fetchItems();
+            });
         },
         methods: {
             fetchItems() {

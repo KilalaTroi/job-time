@@ -1,18 +1,38 @@
 <template>
-    <modal id="itemCreate" v-on:reset-validation="$emit('reset-validation')">
+    <modal id="itemCreate" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
         <template slot="title">Create Job Type</template>
         <form @submit="emitCreateItem">
             <div class="form-group">
-                <label class="">Name</label>
+                <label class="">Slug</label>
                 <input v-model="slug" type="text" name="slug" class="form-control" required>
             </div>
-            <div class="form-group">
-                <label class="">Name VI</label>
-                <input v-model="slug_vi" type="text" name="slug_vi" class="form-control">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Name VI</label>
+                        <input v-model="slug_vi" type="text" name="slug_vi" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Name JA</label>
+                        <input v-model="slug_ja" type="text" name="slug_ja" class="form-control">
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="">Name JA</label>
-                <input v-model="slug_ja" type="text" name="slug_ja" class="form-control">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Description VI</label>
+                        <textarea v-model="description_vi" name="description_vi" class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Description JA</label>
+                        <textarea v-model="description_ja" name="description_ja" class="form-control"></textarea>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label class="">Color</label>
@@ -48,7 +68,10 @@
                 slug: '',
                 slug_vi: '',
                 slug_ja: '',
+                description_vi: '',
+                description_ja: '',
                 value: '#000000',
+                modalLg: 'modal-lg',
             }
         },
         methods: {
@@ -58,6 +81,8 @@
                     slug: this.slug,
                     slug_vi: this.slug_vi,
                     slug_ja: this.slug_ja,
+                    description_vi: this.description_vi,
+                    description_ja: this.description_ja,
                     value: this.value
                 };
                 this.$emit('create-item', newItem);
@@ -68,6 +93,8 @@
                     this.slug = '';
                     this.slug_vi = '';
                     this.slug_ja = '';
+                    this.description_vi = '';
+                    this.description_ja = '';
                     this.value = '#000000';
                 }
             }

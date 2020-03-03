@@ -39,6 +39,7 @@ class ProjectsController extends Controller
                 'p.name as p_name',
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
+                'p.room_id as room_id',
                 'i.name as i_name',
                 'status',
                 'dept_id',
@@ -93,6 +94,7 @@ class ProjectsController extends Controller
             'name_ja' => $request->get('p_name_ja'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
+            'room_id' => $request->get('room_id'),
         ]);
 
         $issue = array();
@@ -144,6 +146,7 @@ class ProjectsController extends Controller
                 'p.name as p_name',
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
+                'p.room_id as room_id',
                 'i.name as i_name',
                 'status',
                 'dept_id',
@@ -192,6 +195,7 @@ class ProjectsController extends Controller
             'name_ja' => $request->get('p_name_ja'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
+            'room_id' => $request->get('room_id'),
         ]);
 
         return response()->json(array(

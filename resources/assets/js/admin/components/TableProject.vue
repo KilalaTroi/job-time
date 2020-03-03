@@ -12,15 +12,15 @@
             <tr v-for="(item, index) in data" :key="index">
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
+                        <button v-if="checkProjectColumn(column)" @click="$emit('get-item', item.id, item.issue_id)" type="button" class="btn btn-xs btn-default mr-2" data-toggle="modal" data-target="#editProject" data-backdrop="static" data-keyboard="false">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </button>
+                        <button v-if="checkIssueColumn(column)" @click="$emit('get-item', item.id, item.issue_id)" type="button" class="btn btn-xs btn-default mr-2" data-toggle="modal" data-target="#editIssue" data-backdrop="static" data-keyboard="false">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </button>
+
                         <span v-if="checkTypeColor(column)" :style="setBackground(itemValue(item, column))" class="type-color"></span>
                         <span v-else v-html="itemValue(item, column)"></span>
-
-                        <button v-if="checkProjectColumn(column)" @click="$emit('get-item', item.id, item.issue_id)" type="button" class="btn btn-xs btn-default ml-2" data-toggle="modal" data-target="#editProject" data-backdrop="static" data-keyboard="false">
-                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                        </button>
-                        <button v-if="checkIssueColumn(column)" @click="$emit('get-item', item.id, item.issue_id)" type="button" class="btn btn-xs btn-default ml-2" data-toggle="modal" data-target="#editIssue" data-backdrop="static" data-keyboard="false">
-                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                        </button>
                     </td>
                 </slot>
                 <td class="text-center">

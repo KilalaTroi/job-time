@@ -45,6 +45,14 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="">LINE WORKS Room ID</label>
+                        <input v-model="room_id" type="text" name="room_id" class="form-control">
+                    </div>
+                </div>
+            </div>
             <hr>
             <div class="row">
                 <div class="col-sm-6">
@@ -113,6 +121,7 @@ export default {
             p_name: '',
             p_name_vi: '',
             p_name_ja: '',
+            room_id: '',
             no_period: false,
             has_period: true,
             i_name: '',
@@ -166,6 +175,7 @@ export default {
                 p_name: this.p_name,
                 p_name_vi: this.p_name_vi,
                 p_name_ja: this.p_name_ja,
+                room_id: this.room_id,
                 i_name: this.i_name,
                 start_date: this.start_date,
                 end_date: this.end_date,
@@ -198,6 +208,7 @@ export default {
                 this.p_name = '';
                 this.p_name_vi = '';
                 this.p_name_ja = '';
+                this.room_id = '';
                 this.no_period = false;
                 this.i_name = '';
                 this.start_date = '';
