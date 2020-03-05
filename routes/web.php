@@ -31,7 +31,7 @@ Auth::routes();
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 
 # Get Data
-Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
+Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
     Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
@@ -49,5 +49,9 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\
     Route::get('statistic/totaling/{user_id}/{start_time}/{end_time}', 'StatisticsController@getDataTotaling');
 
     Route::get('export-report-time-user/{user_id}/{start_time}/{end_time}', 'ReportsController@exportReportTimeUser');
+    Route::post('import-projects', 'ProjectsController@importProjects');
 });
 # End Get Data
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
