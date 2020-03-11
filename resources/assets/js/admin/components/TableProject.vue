@@ -24,7 +24,7 @@
                     </td>
                 </slot>
                 <td class="text-center">
-                    <button @click="$emit('archive-item', {'id':item.issue_id, 'status':item.status})" type="button" class="btn btn-xs btn-second ml-sm-2">
+                    <button @click="$emit('archive-item', {'id':item.issue_id, 'status':item.status})" type="button" class="btn btn-xs btn-second">
                         <i :class="archiveClass(item.status)" aria-hidden="true" title="archive"></i>
                     </button>
                     <button @click="$emit('delete-item', item.issue_id)" type="button" class="btn btn-xs btn-danger ml-sm-2">

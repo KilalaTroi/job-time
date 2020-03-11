@@ -7,7 +7,7 @@
                         <template slot="header">
                             <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
                         </template>
-                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true" :disabled-dates="disabledEndDates()">
+                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </card>
                 </div>
@@ -62,7 +62,7 @@
 <script>
 import Card from '../../components/Cards/Card'
 import Datepicker from 'vuejs-datepicker';
-import { en, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 import JobTable from '../../components/TableJob'
 import ActionTable from '../../components/TableAction'
@@ -339,7 +339,10 @@ export default {
         resetValidate() {
             this.validationSuccess = '';
             this.validationErrors = '';
-        }
+        },
+        getLanguage(data) {
+            return data.current === "vi" ? vi : ja
+        },
     },
     watch: {
         jobData: [{

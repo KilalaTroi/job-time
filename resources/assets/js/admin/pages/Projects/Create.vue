@@ -61,7 +61,13 @@
                         <input v-model="i_name" type="text" name="i_name" class="form-control">
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label class="">Page</label>
+                        <input v-model="page" type="number" name="page" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label class="">No period</label>
                         <input v-model="no_period" type="checkbox" name="no_period" class="form-control">
@@ -100,7 +106,7 @@ import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Datepicker from 'vuejs-datepicker';
-import { en, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
@@ -125,6 +131,7 @@ export default {
             no_period: false,
             has_period: true,
             i_name: '',
+            page: '',
             start_date: '',
             end_date: '',
             modalLg: 'modal-lg',
@@ -136,7 +143,7 @@ export default {
     },
     methods: {
         getLanguage(data) {
-            return data.current === "en" ? en : ja
+            return data.current === "vi" ? vi : ja
         },
         getDataTypes(data) {
             if (data.length) {
@@ -177,6 +184,7 @@ export default {
                 p_name_ja: this.p_name_ja,
                 room_id: this.room_id,
                 i_name: this.i_name,
+                page: this.page,
                 start_date: this.start_date,
                 end_date: this.end_date,
             };
@@ -211,6 +219,7 @@ export default {
                 this.room_id = '';
                 this.no_period = false;
                 this.i_name = '';
+                this.page = '';
                 this.start_date = '';
                 this.end_date = '';
             }

@@ -5,7 +5,7 @@
             <div class="form-group">
                 <label class="">Project</label>
                 <div>
-                    <select-2 :options="projectOptions" v-model="project_id" class="select2">
+                    <select-2 :options="projectOptions" v-model="project_id" class="select2" @input="changeProjects">
                         <option disabled value="0">Select one</option>
                     </select-2>
                 </div>
@@ -13,6 +13,10 @@
             <div class="form-group">
                 <label class="">Issue name</label>
                 <input v-model="i_name" type="text" name="i_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="">Page</label>
+                <input v-model="page" type="text" name="page" class="form-control">
             </div>
             <div class="form-group">
                 <label class="">Start date</label>
@@ -36,7 +40,7 @@
 <script>
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Datepicker from 'vuejs-datepicker';
-import { en, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja } from 'vuejs-datepicker/dist/locale'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Modal from '../../components/Modals/Modal'
@@ -58,11 +62,20 @@ export default {
             i_name: '',
             start_date: '',
             end_date: '',
+            page: '',
             projectOptions: []
         }
     },
     mounted() {},
     methods: {
+        getObjectValue(data, id) {
+            let obj = data.filter((elem) => {
+                if (elem.id == id) return elem;
+            });
+
+            if (obj.length > 0)
+                return obj[0];
+        },
         getDataProjects(data) {
             if (data.length) {
                 let obj = {
@@ -73,7 +86,7 @@ export default {
             }
         },
         getLanguage(data) {
-            return data.current === "en" ? en : ja
+            return data.current === "vi" ? vi : ja
         },
         emitAddItem(e) {
             e.preventDefault()
@@ -81,6 +94,7 @@ export default {
             const newIssue = {
                 project_id: this.project_id,
                 i_name: this.i_name,
+                page: this.page,
                 start_date: this.start_date,
                 end_date: this.end_date
             };
@@ -109,9 +123,24 @@ export default {
             if (data.length) {
                 this.project_id = 0;
                 this.i_name = '';
+                this.page = '';
                 this.start_date = '';
                 this.end_date = '';
             }
+        },
+        changeProjects() {
+            let issue_id = this.getObjectValue(this.projectOptions, this.project_id).issue_id;
+
+            let uri = '/data/issues/getpage/' + issue_id;
+            axios.get(uri)
+                .then(res => {
+                    console.log(res);
+                    this.page = res.data.page ? res.data.page : '';
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not found!");
+                });
         }
     },
     watch: {

@@ -2,7 +2,7 @@
     <card>
         <h4 slot="header" class="card-title">Staff off days</h4>
         
-        <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" />
+        <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" :locale="getLanguage(this.$ml)" />
     </card>
 </template>
 
@@ -110,7 +110,10 @@ export default {
         },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY-MM-DD') : '--';
-        }
+        },
+        getLanguage(data) {
+            return data.current
+        },
     },
     watch: {
         offDaysData: [{

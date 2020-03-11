@@ -90,7 +90,8 @@ import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
 const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
     { id: 'project', value: 'Project', width: '', class: '' },
-    { id: 'issue', value: 'Issue', width: '150', class: '' },
+    { id: 'issue', value: 'Issue', width: '110', class: '' },
+    { id: 'page', value: 'Page', width: '60', class: '' },
     { id: 'type', value: 'Type', width: '', class: '' },
     { id: 'value', value: 'Color', width: '110', class: 'text-center' },
     { id: 'start_date', value: 'Start date', width: '', class: '' },
@@ -192,6 +193,7 @@ export default {
                         project: item.p_name + checkTR + checkArchive,
                         issue: item.i_name,
                         issue_id: item.issue_id,
+                        page: item.page,
                         status: item.status,
                         room_id: item.room_id,
                         type: this.getObjectValue(this.types, item.type_id).slug,
@@ -248,6 +250,7 @@ export default {
                     let addIdItem = Object.assign({}, {
                         id: res.data.id,
                         issue_id: res.data.issue_id,
+                        page: res.data.page,
                         status: 'publish',
                     }, newItem);
                     // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];
@@ -271,6 +274,7 @@ export default {
                     let addIdItem = Object.assign({}, {
                         id: res.data.id,
                         issue_id: res.data.issue_id,
+                        page: res.data.page,
                         dept_id: res.data.dept_id,
                         type_id: res.data.type_id,
                         p_name: res.data.p_name,
@@ -405,8 +409,5 @@ export default {
     height: 20px;
     display: inline-block;
     vertical-align: middle;
-}
-.projects thead th:last-child {
-    width: 150px;
 }
 </style>

@@ -36,6 +36,7 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
+    Route::get('issues/getpage/{id}', 'IssuesController@getpage');
     Route::get('issues/archive/{id}/{status}', 'IssuesController@archive');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
@@ -52,6 +53,3 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::post('import-projects', 'ProjectsController@importProjects');
 });
 # End Get Data
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');

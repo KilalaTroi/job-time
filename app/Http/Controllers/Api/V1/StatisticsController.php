@@ -57,6 +57,21 @@ class StatisticsController extends Controller
     public function getDataTotaling($user_id, $start_time, $end_time) {
         $operation = $user_id == 0 ? '<>' : '=';
 
+        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+        $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
+        $projects = DB::table('projects as p')
+        ->select(
+            'p.id', 
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
+            DB::raw('max(i.id) as issue_id')
+        )
+        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+        ->where('i.status', 'publish')
+        ->groupBy('p.id')
+        ->orderBy('p.id', 'desc')
+        ->get()->toArray();
+
         // DB::enableQueryLog();
         $dataLogTime = DB::table('jobs as j')
             ->select(
@@ -102,6 +117,9 @@ class StatisticsController extends Controller
         return response()->json([
             'users' => $users,
             'dataLogTime' => $dataLogTime,
+            'departments' => $departments,
+            'types' => $types,
+            'projects' => $projects,
         ]);
     }
 

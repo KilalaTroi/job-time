@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <card>
                 <div class="row">
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">Users</label>
                             <div>
@@ -13,18 +13,54 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">Start date</label>
-                            <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
+                            <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                             </datepicker>
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">End date</label>
-                            <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
+                            <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
                             </datepicker>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group"> 
+                            <label class="">Departments</label>
+                            <div>
+                                <select-2 multiple :options="departmentOptions" v-model="dept_id" class="select2">
+                                    <option disabled value="0">Select one</option>
+                                </select-2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="">Project</label>
+                            <div>
+                                <select-2 multiple :options="projectOptions" v-model="project_id" class="select2">
+                                    <option disabled value="0">Select one</option>
+                                </select-2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="">Issue</label>
+                            <input v-model="issue" type="text" name="issue" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="">Types</label>
+                            <div>
+                                <select2-type multiple :options="typeOptions" v-model="type_id" class="select2">
+                                    <option disabled value="0">Select one</option>
+                                </select2-type>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -54,8 +90,10 @@
     import NoActionTable from "../../components/TableNoAction";
     import Card from "../../components/Cards/Card";
     import CreateButton from "../../components/Buttons/Create";
+    import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
     import Select2 from '../../components/SelectTwo/SelectTwo.vue';
     import Datepicker from 'vuejs-datepicker';
+    import { vi, ja } from 'vuejs-datepicker/dist/locale'
     import moment from 'moment';
 
     const tableColumns = [
@@ -76,6 +114,7 @@
             Card,
             CreateButton,
             Select2,
+            Select2Type,
             Datepicker
         },
 
@@ -87,6 +126,17 @@
                 userOptions: [],
                 start_date: moment(new Date()).format('YYYY/MM') + '/01',
                 end_date: new Date(),
+                dept_id: 0,
+                type_id: 0,
+                project_id: 0,
+                issue: '',
+
+                departments: [],
+                types: [],
+                departmentOptions: [],
+                typeOptions: [],
+                projects: [],
+                projectOptions: [],
 
                 logTimeData: {},
                 logTime: [],
@@ -110,11 +160,57 @@
                     .then(res => {
                         this.users = res.data.users;
                         this.logTimeData = res.data.dataLogTime;
+                        this.departments = res.data.departments;
+                        this.types = res.data.types;
+                        this.projects = res.data.projects;
                     })
                     .catch(err => {
                         console.log(err);
                         alert("Could not load users");
                     });
+            },
+            getDataDepartments(data) {
+                if (data.length) {
+                    let obj = {
+                        id: 0,
+                        text: 'Select one'
+                    };
+                    this.departmentOptions = [obj].concat(data);
+                }
+            },
+            getDataTypes(data) {
+                if (data.length) {
+                    let dataTypes = [];
+                    let obj = {
+                        id: 0,
+                        text: '<div>Select one</div>'
+                    };
+                    dataTypes.push(obj);
+
+                    let objAll = {
+                        id: -1,
+                        text: '<div>All</div>'
+                    };
+                    dataTypes.push(objAll);
+
+                    for (let i = 0; i < data.length; i++) {
+                        let obj = {
+                            id: data[i].id,
+                            text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
+                        };
+                        dataTypes.push(obj);
+                    }
+                    this.typeOptions = dataTypes;
+                }
+            },
+            getDataProjects(data) {
+                if (data.length) {
+                    let obj = {
+                        id: 0,
+                        text: "Select one"
+                    };
+                    this.projectOptions = [obj].concat(data);
+                }
             },
             fetchDataFilter() {
                 this.exportLink = "/data/export-report-time-user/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
@@ -126,7 +222,7 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        alert("Could not load dât");
+                        alert("Could not load data");
                     });
             },
             getResults(page = 1) {
@@ -207,7 +303,10 @@
             resetValidate() {
                 this.validationSuccess = "";
                 this.validationErrors = "";
-            }
+            },
+            getLanguage(data) {
+                return data.current === "vi" ? vi : ja
+            },
         },
         watch: {
             logTimeData: [{
@@ -224,7 +323,24 @@
             }],
             user_id: [{
                 handler: 'fetchDataFilter'
-            }]
+            }],
+            departments: [{
+                handler: 'getDataDepartments'
+            }],
+            types: [{
+                handler: 'getDataTypes'
+            }],
+            projects: [{
+                handler: 'getDataProjects'
+            }],
         }
     };
 </script>
+<style lang="scss">
+.type-color {
+    width: 60px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+}
+</style>

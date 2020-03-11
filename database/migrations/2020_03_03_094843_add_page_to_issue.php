@@ -14,7 +14,7 @@ class AddPageToIssue extends Migration
     public function up()
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->string('page')->nullable()->after('status');
+            $table->smallInteger('page')->nullable()->after('status');
         });
     }
 

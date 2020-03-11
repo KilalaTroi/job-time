@@ -17,7 +17,7 @@
                 </card>
             </div>
             <div class="col-sm-12 col-lg-9">
-                <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventClick="clickEvent" />
+                <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" />
             </div>
         </div>
 
@@ -195,7 +195,10 @@ export default {
                 .catch(err => {
                     console.log(err);
                 });
-        }
+        },
+        getLanguage(data) {
+            return data.current
+        },
     },
     watch: {
         offDaysData: [{

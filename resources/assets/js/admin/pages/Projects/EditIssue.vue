@@ -3,13 +3,19 @@
         <template slot="title">Edit Issue</template>
         <div v-if="currentItem">
             <div class="row">
-                <div class="col-sm-5">
+                <div class="col-sm-4">
                     <div class="form-group">
                         <label class="">Issue</label>
                         <input v-model="currentItem.i_name" type="text" name="issue" class="form-control">
                     </div>
                 </div>
-                <div class="col-sm-5">
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label class="">Page</label>
+                        <input v-model="currentItem.page" type="number" name="page" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-4">
                     <div class="form-group">
                         <label class="">Project</label>
                         <div>
@@ -22,7 +28,7 @@
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label class="">No period</label>
-                        <input v-model="currentItem.no_period" type="checkbox" name="currentItem.no_period" @change="updatePeriod" class="form-control">
+                        <input v-model="currentItem.no_period" type="checkbox" name="no_period" @change="updatePeriod" class="form-control">
                     </div>
                 </div>
             </div>
@@ -59,7 +65,7 @@ import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Datepicker from 'vuejs-datepicker';
-import { en, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
@@ -90,7 +96,7 @@ export default {
             }
         },
         getLanguage(data) {
-            return data.current === "en" ? en : ja
+            return data.current === "vi" ? vi : ja
         },
         customFormatter(date) {
             return moment(date).format('YYYY/MM/DD');

@@ -124,6 +124,11 @@ body > .navbar-collapse{
                     font-weight: 600;
                     text-transform: uppercase;
                     display: inline-flex;
+
+                    .language-ja & {
+                        font-size: 14px;
+                        font-weight: 400;
+                    }
                 }
 
                 i{

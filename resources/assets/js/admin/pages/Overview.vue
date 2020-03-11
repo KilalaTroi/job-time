@@ -66,10 +66,10 @@
                             <h4 class="card-title">Kilala VN Time allocation</h4>
                             <div class="d-flex mt-2 justify-content-between">
                                 <div class="d-flex align-items-center flex-wrap">
-                                    <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()">
+                                    <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
                                     </datepicker>
                                     <span class="mx-2">-</span>
-                                    <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()">
+                                    <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
                                     </datepicker>
                                 </div>
                                 <div>
@@ -110,7 +110,7 @@
     import Chartist from 'chartist'
     import chartistPluginTooltip from 'chartist-plugin-tooltip'
     import Datepicker from 'vuejs-datepicker';
-    import { en, ja } from 'vuejs-datepicker/dist/locale'
+    import { vi, ja } from 'vuejs-datepicker/dist/locale'
     import Select2 from '../components/SelectTwo/SelectTwo.vue'
     import AllOffDays from './OffDays/AllOffDays.vue'
     import moment from 'moment'
@@ -319,6 +319,9 @@
                     };
                     this.userOptions = [obj].concat(data);
                 }
+            },
+            getLanguage(data) {
+                return data.current === "vi" ? vi : ja
             },
         },
         watch: {

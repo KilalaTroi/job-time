@@ -31,11 +31,17 @@ class ProjectsController extends Controller
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
 
-        $projectOptions = DB::table('projects as p')->select('p.id', DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'))
+        $projectOptions = DB::table('projects as p')
+        ->select(
+            'p.id', 
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
+            DB::raw('max(i.id) as issue_id')
+        )
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->whereIn('i.status', $status)
         ->groupBy('p.id')
+        ->orderBy('p.id', 'desc')
         ->get()->toArray();
 
         $projects = DB::table('projects as p')
@@ -47,6 +53,7 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_ja',
                 'p.room_id as room_id',
                 'i.name as i_name',
+                'i.page as page',
                 'status',
                 'dept_id',
                 'type_id',
@@ -91,7 +98,8 @@ class ProjectsController extends Controller
         
         $this->validate($request, [
             'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
-            'type_id' => 'required|numeric|min:0|not_in:0'
+            'type_id' => 'required|numeric|min:0|not_in:0',
+            'page' => 'numeric|nullable',
         ]);
 
         $project = Project::create([
@@ -123,6 +131,7 @@ class ProjectsController extends Controller
             $issue = Issue::create([
                 'project_id' => $project->id,
                 'name' => $request->get('i_name'),
+                'page' => $request->get('page'),
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'status' => 'publish',
@@ -132,6 +141,7 @@ class ProjectsController extends Controller
         return response()->json(array(
             'id' => $project->id,
             'issue_id' => $issue->id,
+            'page' => $issue->page,
             'message' => 'Successfully.'
         ), 200);
     }
@@ -154,6 +164,7 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_ja',
                 'p.room_id as room_id',
                 'i.name as i_name',
+                'i.page as page',
                 'status',
                 'dept_id',
                 'type_id',
@@ -294,8 +305,7 @@ class ProjectsController extends Controller
             'message' => 'Successfully.'
         ), 200);
     }
-    public function rules(): array
-    {
+    public function rules() {
         return [
             '*.department' => 'required|max:255',
             '*.project' => 'required|max:255',
