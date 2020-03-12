@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Excel;
+use Illuminate\Http\Request;
 
 class StatisticsController extends Controller
 {
@@ -54,7 +55,35 @@ class StatisticsController extends Controller
         return response()->json($data);
     }
 
-    public function getDataTotaling($user_id, $start_time, $end_time) {
+    public function getDataTotaling(Request $request) {
+        $user_id = $request->get('user_id');
+        $start_time = $request->get('start_date');
+        $end_time = $request->get('end_date');
+
+        $deptSelects = $request->get('deptSelects');
+        $deptArr = array();
+        if ( $deptSelects ) {
+            $deptArr = array_map(function($obj) {
+                return $obj['id'];
+            }, $deptSelects);
+        }
+
+        $typeSelects = $request->get('typeSelects');
+        $typeArr = array();
+        if ( $typeSelects ) {
+            $typeArr = array_map(function($obj) {
+                return $obj['id'];
+            }, $typeSelects);
+        }
+
+        $projectSelects = $request->get('projectSelects');
+        $projectArr = array();
+        if ( $projectSelects ) {
+            $projectArr = array_map(function($obj) {
+                return $obj['id'];
+            }, $projectSelects);
+        }
+
         $operation = $user_id == 0 ? '<>' : '=';
 
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
@@ -67,6 +96,15 @@ class StatisticsController extends Controller
         )
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+        ->when($deptArr, function ($query, $deptArr) {
+            return $query->whereIn('p.dept_id', $deptArr);
+        })
+        ->when($typeArr, function ($query, $typeArr) {
+            return $query->whereIn('p.type_id', $typeArr);
+        })
+        ->when($projectArr, function ($query, $projectArr) {
+            return $query->whereIn('p.id', $projectArr);
+        })
         ->where('i.status', 'publish')
         ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
@@ -90,6 +128,15 @@ class StatisticsController extends Controller
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+            ->when($deptArr, function ($query, $deptArr) {
+                return $query->whereIn('p.dept_id', $deptArr);
+            })
+            ->when($typeArr, function ($query, $typeArr) {
+                return $query->whereIn('p.type_id', $typeArr);
+            })
+            ->when($projectArr, function ($query, $projectArr) {
+                return $query->whereIn('p.id', $projectArr);
+            })
             ->where('u.id', $operation, $user_id)
             ->where('j.date', '>=', $start_time)
             ->where('j.date', '<=', $end_time)
@@ -119,7 +166,7 @@ class StatisticsController extends Controller
             'dataLogTime' => $dataLogTime,
             'departments' => $departments,
             'types' => $types,
-            'projects' => $projects,
+            'projects' => $projects
         ]);
     }
 

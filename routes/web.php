@@ -47,7 +47,7 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
     Route::get('statistic/filter-allocation', 'StatisticsController@filterAllocation');
     Route::get('statistic/export-report/{file_extension}', 'StatisticsController@exportReport');
-    Route::get('statistic/totaling/{user_id}/{start_time}/{end_time}', 'StatisticsController@getDataTotaling');
+    Route::post('statistic/totaling', 'StatisticsController@getDataTotaling');
 
     Route::get('export-report-time-user/{user_id}/{start_time}/{end_time}', 'ReportsController@exportReportTimeUser');
     Route::post('import-projects', 'ProjectsController@importProjects');

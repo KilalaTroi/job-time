@@ -31,19 +31,15 @@
                         <div class="form-group"> 
                             <label class="">Departments</label>
                             <div>
-                                <select-2 multiple :options="departmentOptions" v-model="dept_id" class="select2">
-                                    <option disabled value="0">Select one</option>
-                                </select-2>
+                                <multiselect :multiple="true" v-model="deptSelects" :options="departments" :clear-on-select="false" :preserve-search="true" placeholder="Pick some" label="text" track-by="text" :preselect-first="true"></multiselect>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="form-group">
-                            <label class="">Project</label>
+                            <label class="">Projects</label>
                             <div>
-                                <select-2 multiple :options="projectOptions" v-model="project_id" class="select2">
-                                    <option disabled value="0">Select one</option>
-                                </select-2>
+                                <multiselect :multiple="true" v-model="projectSelects" :options="projects" :clear-on-select="false" :preserve-search="true" placeholder="Pick some" label="text" track-by="text" :preselect-first="true"></multiselect>
                             </div>
                         </div>
                     </div>
@@ -57,9 +53,11 @@
                         <div class="form-group">
                             <label class="">Types</label>
                             <div>
-                                <select2-type multiple :options="typeOptions" v-model="type_id" class="select2">
-                                    <option disabled value="0">Select one</option>
-                                </select2-type>
+                                <multiselect :multiple="true" v-model="typeSelects" :options="types" :clear-on-select="false" :preserve-search="true" placeholder="Pick some" label="slug" track-by="slug" :preselect-first="true">
+                                    <template slot="option" slot-scope="props">
+                                      <div><span class="type-color" :style="optionStyle(props.option.value)"></span> {{ props.option.slug }}</div>
+                                    </template>
+                                </multiselect>
                             </div>
                         </div>
                     </div>
@@ -87,14 +85,15 @@
     </div>
 </template>
 <script>
-    import NoActionTable from "../../components/TableNoAction";
-    import Card from "../../components/Cards/Card";
-    import CreateButton from "../../components/Buttons/Create";
+    import NoActionTable from "../../components/TableNoAction"
+    import Card from "../../components/Cards/Card"
+    import CreateButton from "../../components/Buttons/Create"
     import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
-    import Select2 from '../../components/SelectTwo/SelectTwo.vue';
-    import Datepicker from 'vuejs-datepicker';
+    import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+    import Multiselect from 'vue-multiselect'
+    import Datepicker from 'vuejs-datepicker'
     import { vi, ja } from 'vuejs-datepicker/dist/locale'
-    import moment from 'moment';
+    import moment from 'moment'
 
     const tableColumns = [
         { id: "username", value: "Username", width: "", class: "" },
@@ -115,7 +114,8 @@
             CreateButton,
             Select2,
             Select2Type,
-            Datepicker
+            Datepicker,
+            Multiselect
         },
 
         data() {
@@ -126,17 +126,14 @@
                 userOptions: [],
                 start_date: moment(new Date()).format('YYYY/MM') + '/01',
                 end_date: new Date(),
-                dept_id: 0,
-                type_id: 0,
-                project_id: 0,
+                deptSelects: [],
+                typeSelects: [],
+                projectSelects: [],
                 issue: '',
 
                 departments: [],
                 types: [],
-                departmentOptions: [],
-                typeOptions: [],
                 projects: [],
-                projectOptions: [],
 
                 logTimeData: {},
                 logTime: [],
@@ -154,9 +151,16 @@
         methods: {
             fetchData() {
                 this.exportLink = "/data/export-report-time-user/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
-                let uri = "/data/statistic/totaling/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
+                let uri = "/data/statistic/totaling/";
                 axios
-                    .get(uri)
+                    .post(uri, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects
+                    })
                     .then(res => {
                         this.users = res.data.users;
                         this.logTimeData = res.data.dataLogTime;
@@ -169,54 +173,23 @@
                         alert("Could not load users");
                     });
             },
-            getDataDepartments(data) {
-                if (data.length) {
-                    let obj = {
-                        id: 0,
-                        text: 'Select one'
-                    };
-                    this.departmentOptions = [obj].concat(data);
-                }
-            },
-            getDataTypes(data) {
-                if (data.length) {
-                    let dataTypes = [];
-                    let obj = {
-                        id: 0,
-                        text: '<div>Select one</div>'
-                    };
-                    dataTypes.push(obj);
-
-                    let objAll = {
-                        id: -1,
-                        text: '<div>All</div>'
-                    };
-                    dataTypes.push(objAll);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
-                        };
-                        dataTypes.push(obj);
-                    }
-                    this.typeOptions = dataTypes;
-                }
-            },
-            getDataProjects(data) {
-                if (data.length) {
-                    let obj = {
-                        id: 0,
-                        text: "Select one"
-                    };
-                    this.projectOptions = [obj].concat(data);
+            optionStyle(color) {
+                return {
+                    backgroundColor: color
                 }
             },
             fetchDataFilter() {
                 this.exportLink = "/data/export-report-time-user/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
-                let uri = "/data/statistic/totaling/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
+                let uri = "/data/statistic/totaling/";
                 axios
-                    .get(uri)
+                    .post(uri, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects
+                    })
                     .then(res => {
                         this.logTimeData = res.data.dataLogTime;
                     })
@@ -226,7 +199,14 @@
                     });
             },
             getResults(page = 1) {
-                axios.get("/data/statistic/totaling/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date) + "/?page=" + page)
+                axios.post("/data/statistic/totaling?page=" + page, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects
+                    })
                     .then(res => {
                         this.logTimeData = res.data.dataLogTime;
                     });
@@ -324,23 +304,29 @@
             user_id: [{
                 handler: 'fetchDataFilter'
             }],
-            departments: [{
-                handler: 'getDataDepartments'
+            deptSelects: [{
+                handler: 'fetchDataFilter'
             }],
-            types: [{
-                handler: 'getDataTypes'
+            typeSelects: [{
+                handler: 'fetchDataFilter'
             }],
-            projects: [{
-                handler: 'getDataProjects'
+            projectSelects: [{
+                handler: 'fetchDataFilter'
             }],
         }
     };
 </script>
 <style lang="scss">
+@import '~vue-multiselect/dist/vue-multiselect.min.css';
 .type-color {
     width: 60px;
     height: 20px;
+    margin-right: 5px;
     display: inline-block;
     vertical-align: middle;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    display: flex;
+    padding: 0 5px 3px;
 }
 </style>
