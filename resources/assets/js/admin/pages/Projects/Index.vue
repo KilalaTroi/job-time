@@ -44,7 +44,11 @@
                         </create-button>
                     </div>
                     <div class="col-12 col-sm-auto ml-auto">
-                        <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#issueCreate">
+                        <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#issueImport">
+                            <i class="fa fa-plus"></i>
+                            Import new issue
+                        </button>
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#issueCreate">
                             <i class="fa fa-plus"></i>
                             Add new issue
                         </button>
@@ -72,6 +76,7 @@
             </EditIssue>
             <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
+            <ImportIssue v-on:reset-validation="resetValidate"></ImportIssue>
         </div>
     </div>
 </template>
@@ -80,8 +85,9 @@ import Card from '../../components/Cards/Card'
 import CreateItem from './Create'
 import EditProject from './EditProject'
 import EditIssue from './EditIssue'
+import ImportIssue from './ImportIssue'
 import AddIssue from './AddIssue'
-import CreateButton from '../../components/Buttons/Create'
+import CreateButton from '../../components/Buttons/Create' 
 import ProjectTable from '../../components/TableProject'
 import moment from 'moment'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
@@ -108,7 +114,8 @@ export default {
         EditIssue,
         AddIssue,
         CreateButton,
-        ProjectTable
+        ProjectTable,
+        ImportIssue
     },
     data() {
         return {

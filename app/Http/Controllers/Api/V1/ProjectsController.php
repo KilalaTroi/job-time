@@ -238,7 +238,7 @@ class ProjectsController extends Controller
 
     public function importProjects(Request $request) {
         $this->validate($request, [
-            'file' => 'required'
+            'file' => 'required|mimes:xlsx'
         ]);
 
         $path = $request->file('file')->getRealPath();
@@ -314,7 +314,6 @@ class ProjectsController extends Controller
             '*.type' => 'required|max:255',
             '*.start_date' => 'required|date',
             '*.end_date' => 'required|date',
-
         ];
     }
 }
