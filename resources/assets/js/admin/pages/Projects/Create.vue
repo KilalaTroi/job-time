@@ -17,7 +17,7 @@
                     <div class="form-group">
                         <label class="">Departments</label>
                         <div>
-                            <select-2 :options="departmentOptions" v-model="dept_id" class="select2">
+                            <select-2 :options="departments" v-model="dept_id" class="select2">
                                 <option disabled value="0">Select one</option>
                             </select-2>
                         </div>
@@ -45,6 +45,14 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="">LINE WORKS Room ID</label>
+                        <input v-model="room_id" type="text" name="room_id" class="form-control">
+                    </div>
+                </div>
+            </div>
             <hr>
             <div class="row">
                 <div class="col-sm-6">
@@ -53,7 +61,13 @@
                         <input v-model="i_name" type="text" name="i_name" class="form-control">
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label class="">Page</label>
+                        <input v-model="page" type="number" name="page" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label class="">No period</label>
                         <input v-model="no_period" type="checkbox" name="no_period" class="form-control">
@@ -64,14 +78,14 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Start date</label>
-                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
+                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">End date</label>
-                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
+                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
@@ -81,7 +95,6 @@
             <hr>
             <div class="form-group text-right">
                 <button type="submit" class="btn btn-primary">Create</button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </form>
     </modal>
@@ -93,7 +106,7 @@ import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Datepicker from 'vuejs-datepicker';
-import { en, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
@@ -114,13 +127,13 @@ export default {
             p_name: '',
             p_name_vi: '',
             p_name_ja: '',
+            room_id: '',
             no_period: false,
             has_period: true,
             i_name: '',
+            page: '',
             start_date: '',
             end_date: '',
-            en: en,
-            ja: ja,
             modalLg: 'modal-lg',
             departmentOptions: [],
             typeOptions: []
@@ -129,19 +142,8 @@ export default {
     mounted() {
     },
     methods: {
-        getDataDepartments(data) {
-            if (data.length) {
-                let dataOptions = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        text: data[i].text
-                    };
-                    dataOptions.push(obj);
-                }
-                this.departmentOptions = dataOptions;
-            }
+        getLanguage(data) {
+            return data.current === "vi" ? vi : ja
         },
         getDataTypes(data) {
             if (data.length) {
@@ -180,7 +182,9 @@ export default {
                 p_name: this.p_name,
                 p_name_vi: this.p_name_vi,
                 p_name_ja: this.p_name_ja,
+                room_id: this.room_id,
                 i_name: this.i_name,
+                page: this.page,
                 start_date: this.start_date,
                 end_date: this.end_date,
             };
@@ -212,17 +216,16 @@ export default {
                 this.p_name = '';
                 this.p_name_vi = '';
                 this.p_name_ja = '';
+                this.room_id = '';
                 this.no_period = false;
                 this.i_name = '';
+                this.page = '';
                 this.start_date = '';
                 this.end_date = '';
             }
         }
     },
     watch: {
-        departments: [{
-            handler: 'getDataDepartments'
-        }],
         types: [{
             handler: 'getDataTypes'
         }],

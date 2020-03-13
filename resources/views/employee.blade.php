@@ -9,6 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ Auth::user()->id }}">
     <meta name="user-created-at" content="{{ Auth::user()->created_at }}">
+    <meta name="user-language" content="{{ Auth::user()->language ? Auth::user()->language : 'en' }}">
 
     <title>{{ config('app.name', 'Job Time') }}</title>
 
@@ -16,7 +17,6 @@
 
     <!-- Fonts and icons -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
 
     <!-- Styles -->
     <link href="{{ asset('css/app-admin.css') }}" rel="stylesheet">
@@ -28,12 +28,8 @@
             ]) !!};
     </script>
 </head>
-<body>
-<div id="app">
-    <passport-clients></passport-clients>
-    <passport-authorized-clients></passport-authorized-clients>
-    <passport-personal-access-tokens></passport-personal-access-tokens>
-</div>
+<body class="language-{{ Auth::user()->language ? Auth::user()->language : 'en' }}">
+<div id="app"></div>
 
 <!-- Scripts -->
 <script src="{{ asset('js/app-employee.js') }}"></script>

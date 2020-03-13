@@ -9,7 +9,8 @@ require('select2');
 
 window.Vue = require('vue');
 import VueRouter from 'vue-router';
-import App from './admin/App.vue'
+import App from './admin/App.vue';
+import './admin/ml';
 
 // component
 Vue.component('pagination', require('laravel-vue-pagination'));
@@ -29,6 +30,9 @@ import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Jobs from './admin/pages/Jobs';
 import Profile from './admin/pages/Profile';
+import OffDays from './admin/pages/OffDays';
+import Overview from './admin/pages/Overview';
+import Totaling from './admin/pages/Totaling';
 
 const routes = [{
         path: '/',
@@ -58,6 +62,21 @@ const routes = [{
                 path: 'profile',
                 name: 'Profile',
                 component: Profile
+            },
+            {
+                path: 'off-days',
+                name: 'OffDays',
+                component: OffDays
+            },
+            {
+                path: 'overview',
+                name: 'Overview',
+                component: Overview
+            },
+            {
+                path: 'totaling',
+                name: 'Totaling',
+                component: Totaling
             },
             {
                 path: '*',

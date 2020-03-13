@@ -12,7 +12,7 @@ class Issue extends Model
      * @var array
      */
     protected $fillable = [
-        'project_id', 'name', 'start_date', 'end_date', 'status'
+        'project_id', 'name', 'start_date', 'end_date', 'status', 'page'
     ];
 
     public function project() {

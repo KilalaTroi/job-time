@@ -7,9 +7,12 @@
                         <template slot="header">
                             <h4 class="card-title">Project Schedule</h4>
                         </template>
+                        <div class="form-group">
+                            <input v-model="search" placeholder="Search..." type="text" class="form-control" v-on:keyup="searchItem">
+                        </div>
                         <div id='external-events'>
                             <div id='external-events-list'>
-                                <div class="alert alert-success fc-event" v-for="(item, index) in projects" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value" :style="setStyles(item.value)">
+                                <div class="alert alert-success fc-event" v-for="(item, index) in searchResults" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value" :style="setStyles(item.value)">
                                     <span>{{ item.project }} {{ item.issue }}</span>
                                 </div>
                             </div>
@@ -17,7 +20,7 @@
                     </card>
                 </div>
                 <div class="col-sm-12 col-lg-9 col-xl-10">
-                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="clickEvent" />
+                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" />
                 </div>
             </div>
         </div>
@@ -84,7 +87,10 @@ export default {
             hiddenDays: [0],
 
             validationErrors: '',
-            validationSuccess: ''
+            validationSuccess: '',
+
+            search: '',
+            searchResults: []
         }
     },
     mounted() {
@@ -106,7 +112,7 @@ export default {
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
             });
 
@@ -115,41 +121,36 @@ export default {
         },
         getDataProjects(data) {
             if (data.length) {
-                let dataProjects = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        project: data[i].p_name,
-                        issue: data[i].i_name,
-                        issue_id: data[i].issue_id,
-                        value: this.getObjectValue(this.types, data[i].type_id).value,
-                        start_date: this.customFormatter(data[i].start_date),
-                        end_date: this.customFormatter(data[i].end_date)
-                    };
-                    dataProjects.push(obj);
-                }
-                this.projects = dataProjects;
+                let dataProjects = data.map((item, index) => {
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
+                    return {
+                        id: item.id,
+                        project: item.p_name + checkTR,
+                        issue: item.i_name,
+                        issue_id: item.issue_id,
+                        value: this.getObjectValue(this.types, item.type_id).value,
+                        start_date: this.customFormatter(item.start_date),
+                        end_date: this.customFormatter(item.end_date)
+                    }
+                });
+                this.projects = this.searchResults = dataProjects;
             }
         },
         getDataSchedules(data) {
             if (data.length) {
-                let dataSchedules = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo ? data[i].memo : ''),
-                        borderColor: this.getObjectValue(this.types, data[i].type_id).value,
-                        backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
-                        start: moment(data[i].date + ' ' + data[i].start_time).format(),
-                        end: moment(data[i].date + ' ' + data[i].end_time).format(),
-                        memo: data[i].memo,
-                        title_not_memo: data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name
+                this.schedules = data.map((item, index) => {
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
+                    return {
+                        id: item.id,
+                        title: (item.i_name ? item.p_name + checkTR + ' ' + item.i_name : item.p_name + checkTR) + '\n' + (item.memo ? item.memo : ''),
+                        borderColor: this.getObjectValue(this.types, item.type_id).value,
+                        backgroundColor: this.getObjectValue(this.types, item.type_id).value,
+                        start: moment(item.date + ' ' + item.start_time).format(),
+                        end: moment(item.date + ' ' + item.end_time).format(),
+                        memo: item.memo,
+                        title_not_memo: item.i_name ? item.p_name + checkTR + ' ' + item.i_name : item.p_name + checkTR
                     };
-                    dataSchedules.push(obj);
-                }
-                this.schedules = dataSchedules;
+                });
             }
         },
         makeDraggable() {
@@ -157,7 +158,7 @@ export default {
 
             new Draggable(draggableEl, {
                 itemSelector: '.fc-event',
-                eventData: function(eventEl) {
+                eventData: (eventEl) => {
                     return {
                         title: eventEl.innerText.trim(),
                         id: eventEl.getAttribute("data-issue"),
@@ -191,7 +192,7 @@ export default {
             if (confirm("Are you sure you want to delete this event?")) {
                 let uri = '/data/schedules/' + event.id;
                 axios.delete(uri).then((res) => {
-                    this.schedules = this.schedules.filter(function(elem) {
+                    this.schedules = this.schedules.filter((elem) => {
                         if (elem.id != event.id) return elem;
                     });
                     
@@ -259,8 +260,6 @@ export default {
                         this.droppable = true;
                     });
             }
-
-
         },
         dropEvent(info) {
             this.editable = false;
@@ -325,11 +324,24 @@ export default {
                     this.droppable = true;
                 });
         },
+        searchItem() {
+            let value = this.search;
+            if ( value ) {
+                this.searchResults = this.projects.filter(item => {
+                    let title = item.project + " " + item.issue;
+                    return title.toLowerCase().includes(value.toLowerCase());
+                });
+            } else {
+                this.searchResults = this.projects;
+            }
+        },
         resetValidate() {
             this.validationSuccess = '';
             this.validationErrors = '';
-        }
-
+        },
+        getLanguage(data) {
+            return data.current
+        },
     },
     watch: {
         projectData: [{
@@ -353,11 +365,12 @@ export default {
 
 .fc-event {
     cursor: move;
+    color: rgba(0,0,0,0.8);
 }
 
 .fc-time-grid-event .fc-time,
 .fc-time-grid-event .fc-title {
-    color: #ffffff;
+    color: rgba(0,0,0,0.8);
 }
 
 .fc-time-grid .fc-slats td {

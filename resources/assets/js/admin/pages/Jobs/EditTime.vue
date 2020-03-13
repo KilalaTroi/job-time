@@ -27,7 +27,6 @@
             <hr>
             <div class="form-group text-right">
                 <button type="submit" class="btn btn-primary" :disabled="buttonDisabled">Update</button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </form>
     </modal>

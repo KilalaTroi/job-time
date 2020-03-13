@@ -64,7 +64,24 @@
                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id">
                         <template slot="header">
                             <h4 class="card-title">Kilala VN Time allocation</h4>
-                            <p class="card-category">{{ getTimeWorked(startEndYear) }}</p>
+                            <div class="d-flex mt-2 justify-content-between">
+                                <div class="d-flex align-items-center flex-wrap">
+                                    <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
+                                    </datepicker>
+                                    <span class="mx-2">-</span>
+                                    <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
+                                    </datepicker>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 200px;">
+                                            <select2 :options="userOptions" v-model="user_id" class="select2 form-control no-disable-first-value">
+                                                <option disabled value="0">All</option>
+                                            </select2>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </template>
                         <template slot="footer">
                             <div class="legend">
@@ -81,6 +98,9 @@
                 </div>
             </div>
         </div>
+        <div class="container ml-0">
+            <all-off-days></all-off-days>
+        </div>
     </div>
 </template>
 <script>
@@ -89,18 +109,24 @@
     import LTable from '../components/Table.vue'
     import Chartist from 'chartist'
     import chartistPluginTooltip from 'chartist-plugin-tooltip'
+    import Datepicker from 'vuejs-datepicker';
+    import { vi, ja } from 'vuejs-datepicker/dist/locale'
+    import Select2 from '../components/SelectTwo/SelectTwo.vue'
+    import AllOffDays from './OffDays/AllOffDays.vue'
     import moment from 'moment'
 
     export default {
         components: {
             LTable,
             ChartCard,
-            StatsCard
+            datepicker: Datepicker,
+            StatsCard,
+            Select2,
+            AllOffDays
         },
         data() {
             return {
-                year: new Date().getFullYear(),
-                exportLink: '/data/export-report/'+ new Date().getFullYear() +'/xlsx',
+                exportLink: '',
                 types: [],
                 monthsText: [],
                 series: [],
@@ -110,6 +136,13 @@
                 hoursPerProject: [],
                 jobs: 0,
                 currentMonth: {},
+
+                startMonth: new Date(moment().subtract(11, 'months').format('YYYY/MM/DD')),
+                endMonth: new Date(moment().subtract(1, 'months').format('YYYY/MM/DD')),
+
+                users: [],
+                userOptions: [],
+                user_id: 0,
 
                 barChart: {
                     id: 'time-allocation',
@@ -125,7 +158,7 @@
                         },
                         axisY: {
                             offset: 40,
-                            labelInterpolationFnc: function(value) {
+                            labelInterpolationFnc: (value) => {
                                 return value + '%'
                             },
                             scaleMinSpace: 40,
@@ -157,17 +190,20 @@
                 value = $(this).attr('ct:value');
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
             });
+            this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
         },
         methods: {
             fetch() {
                 let uri = '/data/statistic/time-allocation';
+
                 axios.get(uri)
                     .then(res => {
                         this.types = res.data.types;
+                        this.users = res.data.users.all;
                         this.startEndYear = res.data.startEndYear;
-                        this.newUsersPerMonth = res.data.newUsersPerMonth;
-                        this.totalHoursPerMonth = res.data.totalHoursPerMonth;
-                        this.hoursPerProject = res.data.hoursPerProject;
+                        this.newUsersPerMonth = res.data.users.newUsersPerMonth;
+                        this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
+                        this.hoursPerProject = res.data.totals.hoursPerProject;
                         this.jobs = res.data.jobs;
                         this.currentMonth = res.data.currentMonth;
                         this.monthsText = this.barChart.data.labels = res.data.monthsText;
@@ -178,8 +214,26 @@
                         alert("Could not load data");
                     });
             },
+            getFilterData() {
+                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
+
+                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
+
+                axios.get(uri)
+                    .then(res => {
+                        this.startEndYear = res.data.startEndYear;
+                        this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
+                        this.hoursPerProject = res.data.totals.hoursPerProject;
+                        this.monthsText = this.barChart.data.labels = res.data.monthsText;
+                        this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        alert("Could not load data");
+                    });
+            },
             hasObjectValue(data, id, yearMonth) {
-                let obj = data.filter(function(elem) {
+                let obj = data.filter((elem) => {
                     if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem;
                 });
 
@@ -194,6 +248,12 @@
             customFormatter(date) {
                 return moment(date).format('YYYY/MM/DD');
             },
+            customFormatter01(date) {
+                return moment(date).format('YYYY/MM/01');
+            },
+            customFormatterM(date) {
+                return moment(date).format('YYYY/MM');
+            },
             yesterday(date) {
                 date = new Date(date);
                 return date.setDate(date.getDate() - 1);
@@ -205,46 +265,78 @@
                 return this.customFormatter(date[0]) + ' - ' + this.customFormatter(this.yesterday(date[1]));
             },
             totalObject(obj) {
-                let total = [];
-                Object.entries(obj).forEach(([key, val]) => {
-                    total.push(val) 
-                });
-                return total.reduce(function(total, num){ return total + num }, 0);
+                return Object.keys(obj).reduce((total, key) => { return total + obj[key] }, 0);
             },
             totalArrayObject(arr) {
-                let total = [];
-                arr.map(function(value, key) {
-                    total.push((value.total*1).toFixed(2)*1)
-                });
-                return total.reduce(function(total, num){ return total + num }, 0);
+                return arr.reduce((total, item) => { return total + (item.total*1).toFixed(2)*1 }, 0).toFixed(2);
             },
             getCurrentMonth(data) {
                 if (typeof(data.hours) !== 'undefined') return (data.hours[0].total*1).toFixed(2) + '/' + data.total;
             },
             getSeries(projectTypes, totalHoursPerMonth, hoursPerProject) {
-                let series = [];
                 let _this = this;
-                projectTypes.map(function(value, key) {
-                    let id = value.id;
-                    let row = [];
-                    Object.entries(totalHoursPerMonth).forEach(([key, val]) => {
-                        if ( _this.hasObjectValue(hoursPerProject, id, key) ) {
-                            let percents = (_this.hasObjectValue(hoursPerProject, id, key).total*1/val*100).toFixed(2);
-                            row.push({
+                let series = projectTypes.map((item, index) => {
+                    let _item = item;
+                    let row = Object.keys(totalHoursPerMonth).map((key, index) => {
+                        if ( _this.hasObjectValue(hoursPerProject, _item.id, key) ) {
+                            let percents = (_this.hasObjectValue(hoursPerProject, _item.id, key).total*1/totalHoursPerMonth[key]*100).toFixed(2);
+                            return {
                                 value: percents,
-                                meta: value.slug
-                            });
+                                meta: _item.slug
+                            };
                         } else {
-                            row.push({
+                            return {
                                 value: 0,
-                                meta: value.slug
-                            });
+                                meta: _item.slug
+                            };
                         }
-                    });
-                    series.push(row);
+                    })
+                    return row;
                 });
                 this.series = this.barChart.data.series = series;
-            }
+            },
+            dateFormatter(date) {
+                return moment(date).format('YYYY-MM-DD');
+            },
+            disabledEndMonth() {
+                let obj = {
+                    from: this.endMonth,
+                };
+                return obj;
+            }, 
+            disabledStartMonth() {
+                let obj = {
+                    to: this.startMonth,
+                    from: new Date(),
+                };
+                return obj;
+            },
+            getUserOptions(data) {
+                if (data.length) {
+                    let obj = {
+                        id: 0,
+                        text: 'All'
+                    };
+                    this.userOptions = [obj].concat(data);
+                }
+            },
+            getLanguage(data) {
+                return data.current === "vi" ? vi : ja
+            },
+        },
+        watch: {
+            users: [{
+                handler: 'getUserOptions'
+            }],
+            user_id: [{
+                handler: 'getFilterData'
+            }],
+            startMonth: [{
+                handler: 'getFilterData'
+            }],
+            endMonth: [{
+                handler: 'getFilterData'
+            }]
         }
     }
 </script>

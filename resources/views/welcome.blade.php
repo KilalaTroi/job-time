@@ -4,8 +4,7 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                @if (Auth::guest())
-                    <div class="card">
+                <div class="card">
                     <div class="card-header">Login</div>
 
                     <div class="card-body">
@@ -64,9 +63,6 @@
                         </form>
                     </div>
                 </div>
-                @else
-                    <script>window.location = "/dashboard";</script>
-                @endif
             </div>
         </div>
     </div>

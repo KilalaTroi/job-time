@@ -11,6 +11,13 @@
                 <input v-model="username" type="text" class="form-control" required>
             </div>
             <div class="form-group">
+                <label class="">Language</label>
+                <select-2 v-model="language" class="select2">
+                    <option value="en">English</option>
+                    <option value="ja">Japanese</option>
+                </select-2>
+            </div>
+            <div class="form-group">
                 <label class="">Email</label>
                 <input v-model="email" type="email" class="form-control" required>
             </div>
@@ -35,7 +42,6 @@
             <hr>
             <div class="form-group text-right">
                 <button type="submit" class="btn btn-primary">Create</button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </form>
     </modal>
@@ -60,6 +66,7 @@ export default {
             name: '',
             username: '',
             email: '',
+            language: 'en',
             role: 0,
             password: '',
             password_confirmation: '',
@@ -94,6 +101,7 @@ export default {
                 name: this.name,
                 username: this.username,
                 email: this.email,
+                language: this.language,
                 role: this.role,
                 password: this.password,
                 password_confirmation: this.password_confirmation
@@ -125,6 +133,7 @@ export default {
                 this.username = '';
                 this.role = 0;
                 this.email = '';
+                this.language = 'en';
                 this.password = '';
                 this.password_confirmation = '';
             }

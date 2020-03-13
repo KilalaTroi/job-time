@@ -1,18 +1,38 @@
 <template>
-    <modal id="itemDetail" v-on:reset-validation="$emit('reset-validation')">
+    <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
         <template slot="title">Edit Type</template>
         <div v-if="currentItem">
             <div class="form-group">
                 <label class>Slug</label>
                 <input v-model="currentItem.slug" type="text" name="slug" class="form-control" required/>
             </div>
-            <div class="form-group">
-                <label class>Slug VI</label>
-                <input v-model="currentItem.slug_vi" type="text" name="slug_vi" class="form-control"/>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class>Slug VI</label>
+                        <input v-model="currentItem.slug_vi" type="text" name="slug_vi" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class>Slug JA</label>
+                        <input v-model="currentItem.slug_ja" type="text" name="slug_ja" class="form-control"/>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label class>Slug JA</label>
-                <input v-model="currentItem.slug_ja" type="text" name="slug_ja" class="form-control"/>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Description VI</label>
+                        <textarea v-model="currentItem.description_vi" name="description_vi" class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Description JA</label>
+                        <textarea v-model="currentItem.description_ja" name="description_ja" class="form-control"></textarea>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label class>Type Color</label>
@@ -28,7 +48,6 @@
                         class="btn btn-primary"
                 >Update
                 </button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </modal>
@@ -42,6 +61,11 @@
 
     export default {
         name: "edit-item",
+        data() {
+            return {
+                modalLg: 'modal-lg',
+            }
+        },
         components: {
             Modal,
             ErrorItem,

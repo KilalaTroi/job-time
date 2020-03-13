@@ -24,12 +24,12 @@
                 })
         },
         watch: {
-            value: function (value) {
-                // update value
-                $(this.$el)
-                    .val(value)
-                    .trigger('change')
-            },
+            // value: function (value) {
+            //     // update value
+            //     $(this.$el)
+            //         .val(value)
+            //         .trigger('change')
+            // },
             options: function (options) {
                 // update options
                 $(this.$el).empty().select2({

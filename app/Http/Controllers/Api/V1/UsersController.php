@@ -23,6 +23,7 @@ class UsersController extends Controller
                 'user.name as name',
                 'user.username as username',
                 'user.email as email',
+                'user.language as language',
                 'role.name as r_name'
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
@@ -54,6 +55,7 @@ class UsersController extends Controller
         $user = User::create([
             'name' => $request->get('name'),
             'username' => $request->get('username'),
+            'language' => $request->get('language'),
             'email' => $request->get('email'),
             'password' => bcrypt($request->get('password')),
         ]);
@@ -123,6 +125,7 @@ class UsersController extends Controller
         $user->update([
             'name' => $request->get('name'),
             'username' => $request->get('username'),
+            'language' => $request->get('language'),
             'email' => $request->get('email'),
         ]);
 

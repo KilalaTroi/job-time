@@ -17,7 +17,7 @@
                     </card>
                 </div>
                 <div class="col-sm-12 col-lg-9 col-xl-10">
-                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" />
+                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" :locale="getLanguage(this.$ml)" />
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@ export default {
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
             });
 
@@ -103,39 +103,33 @@ export default {
         },
         getDataProjects(data) {
             if (data.length) {
-                let dataProjects = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        project: data[i].p_name,
-                        issue: data[i].i_name,
-                        issue_id: data[i].issue_id,
-                        value: this.getObjectValue(this.types, data[i].type_id).value,
-                        start_date: this.customFormatter(data[i].start_date),
-                        end_date: this.customFormatter(data[i].end_date)
+                this.projects = data.map((item, index) => {
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
+                    return {
+                        id: item.id,
+                        project: item.p_name + checkTR,
+                        issue: item.i_name,
+                        issue_id: item.issue_id,
+                        value: this.getObjectValue(this.types, item.type_id).value,
+                        start_date: this.customFormatter(item.start_date),
+                        end_date: this.customFormatter(item.end_date)
                     };
-                    dataProjects.push(obj);
-                }
-                this.projects = dataProjects;
+                });
             }
         },
         getDataSchedules(data) {
             if (data.length) {
-                let dataSchedules = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo ? data[i].memo : ''),
-                        borderColor: this.getObjectValue(this.types, data[i].type_id).value,
-                        backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
-                        start: moment(data[i].date + ' ' + data[i].start_time).format(),
-                        end: moment(data[i].date + ' ' + data[i].end_time).format()
+                this.schedules = data.map((item, index) => {
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
+                    return {
+                        id: item.id,
+                        title: (item.i_name ? item.p_name + checkTR + ' ' + item.i_name : item.p_name + checkTR) + '\n' + (item.memo ? item.memo : ''),
+                        borderColor: this.getObjectValue(this.types, item.type_id).value,
+                        backgroundColor: this.getObjectValue(this.types, item.type_id).value,
+                        start: moment(item.date + ' ' + item.start_time).format(),
+                        end: moment(item.date + ' ' + item.end_time).format()
                     };
-                    dataSchedules.push(obj);
-                }
-                this.schedules = dataSchedules;
+                });
             }
         },
         setStyles(color) {
@@ -146,7 +140,10 @@ export default {
         },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY-MM-DD') : '--';
-        }
+        },
+        getLanguage(data) {
+            return data.current
+        },
     },
     watch: {
         projectData: [{

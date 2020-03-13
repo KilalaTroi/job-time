@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <card>
                 <div class="row">
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">Users</label>
                             <div>
@@ -13,18 +13,52 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">Start date</label>
-                            <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
+                            <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                             </datepicker>
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">End date</label>
-                            <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
+                            <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
                             </datepicker>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group"> 
+                            <label class="">Departments</label>
+                            <div>
+                                <multiselect :multiple="true" v-model="deptSelects" :options="departments" :clear-on-select="false" :preserve-search="true" placeholder="Pick some" label="text" track-by="text" :preselect-first="true"></multiselect>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="">Projects</label>
+                            <div>
+                                <multiselect :multiple="true" v-model="projectSelects" :options="projects" :clear-on-select="false" :preserve-search="true" placeholder="Pick some" label="text" track-by="text" :preselect-first="true"></multiselect>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="">Issue</label>
+                            <input v-model="issue" type="text" name="issue" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="">Types</label>
+                            <div>
+                                <multiselect :multiple="true" v-model="typeSelects" :options="types" :clear-on-select="false" :preserve-search="true" placeholder="Pick some" label="slug" track-by="slug" :preselect-first="true">
+                                    <template slot="option" slot-scope="props">
+                                      <div><span class="type-color" :style="optionStyle(props.option.value)"></span> {{ props.option.slug }}</div>
+                                    </template>
+                                </multiselect>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -35,7 +69,7 @@
                 <template slot="header">
                     <div class="d-flex justify-content-between">
                         <h4 class="card-title">Time Record</h4>
-                        <div class="align-self-end"><a :href="exportLink" target="_blank"><i class="fa fa-download"></i> Export excel</a></div>
+                        <div class="align-self-end"><button @click="exportExcel" class="btn btn-primary"><i class="fa fa-download"></i> Export excel</button></div>
                     </div>
                 </template>
                 <div class="table-responsive">
@@ -51,12 +85,15 @@
     </div>
 </template>
 <script>
-    import NoActionTable from "../../components/TableNoAction";
-    import Card from "../../components/Cards/Card";
-    import CreateButton from "../../components/Buttons/Create";
-    import Select2 from '../../components/SelectTwo/SelectTwo.vue';
-    import Datepicker from 'vuejs-datepicker';
-    import moment from 'moment';
+    import NoActionTable from "../../components/TableNoAction"
+    import Card from "../../components/Cards/Card"
+    import CreateButton from "../../components/Buttons/Create"
+    import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
+    import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+    import Multiselect from 'vue-multiselect'
+    import Datepicker from 'vuejs-datepicker'
+    import { vi, ja } from 'vuejs-datepicker/dist/locale'
+    import moment from 'moment'
 
     const tableColumns = [
         { id: "username", value: "Username", width: "", class: "" },
@@ -76,7 +113,9 @@
             Card,
             CreateButton,
             Select2,
-            Datepicker
+            Select2Type,
+            Datepicker,
+            Multiselect
         },
 
         data() {
@@ -87,6 +126,14 @@
                 userOptions: [],
                 start_date: moment(new Date()).format('YYYY/MM') + '/01',
                 end_date: new Date(),
+                deptSelects: [],
+                typeSelects: [],
+                projectSelects: [],
+                issue: '',
+
+                departments: [],
+                types: [],
+                projects: [],
 
                 logTimeData: {},
                 logTime: [],
@@ -94,8 +141,6 @@
                 jShowDisabled: true,
                 jAlign: 'right',
                 jSize: 'small',
-
-                exportLink: ''
             };
         },
         mounted() {
@@ -103,59 +148,98 @@
         },
         methods: {
             fetchData() {
-                this.exportLink = "/data/export-report-time-user/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
-                let uri = "/data/statistic/totaling/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
+                let uri = "/data/statistic/totaling/";
                 axios
-                    .get(uri)
+                    .post(uri, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
+                    })
                     .then(res => {
                         this.users = res.data.users;
                         this.logTimeData = res.data.dataLogTime;
+                        this.departments = res.data.departments;
+                        this.types = res.data.types;
+                        this.projects = res.data.projects;
                     })
                     .catch(err => {
                         console.log(err);
                         alert("Could not load users");
                     });
             },
+            optionStyle(color) {
+                return {
+                    backgroundColor: color
+                }
+            },
             fetchDataFilter() {
-                this.exportLink = "/data/export-report-time-user/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
-                let uri = "/data/statistic/totaling/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
+                let uri = "/data/statistic/totaling/";
                 axios
-                    .get(uri)
+                    .post(uri, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
+                    })
                     .then(res => {
                         this.logTimeData = res.data.dataLogTime;
                     })
                     .catch(err => {
                         console.log(err);
-                        alert("Could not load dât");
+                        alert("Could not load data");
                     });
             },
             getResults(page = 1) {
-                axios.get("/data/statistic/totaling/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date) + "/?page=" + page)
+                axios.post("/data/statistic/totaling?page=" + page, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
+                    })
                     .then(res => {
                         this.logTimeData = res.data.dataLogTime;
                     });
             },
+            exportExcel() {
+                let uri = "/data/export-report-time-user/";
+                axios
+                    .post(uri, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
+                    })
+                    .then(res => {
+                        window.open(res.data, "_blank");  
+                    })
+                    .catch(err => {
+                        alert("Error!");
+                    });
+            },
             getUserOptions(data) {
                 if (data.length) {
-                    let dataUsers = [];
                     let obj = {
                         id: 0,
                         text: 'All'
                     };
-                    dataUsers.push(obj);
-
-                    for (let i = 0; i < data.length; i++) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].name
-                        };
-                        dataUsers.push(obj);
-                    }
-                    this.userOptions = dataUsers;
+                    this.userOptions = [obj].concat(data);
                 }
             },
             getObjectValue(data, id) {
-                let obj = data.filter(function(elem) {
+                let obj = data.filter((elem) => {
                     if (elem.id === id) return elem;
                 });
 
@@ -164,23 +248,19 @@
             },
             getDataLogTime(logTimeData) {
                 if (logTimeData.data.length) {
-                    let dataLogTime = [];
-
-                    for (let i = 0; i < logTimeData.data.length; i++) {
-                        let obj = {
-                            username: logTimeData.data[i].username,
-                            date: this.customFormatter2(logTimeData.data[i].date),
-                            start_time: logTimeData.data[i].start_time,
-                            end_time: logTimeData.data[i].end_time,
-                            total: this.hourFormatter(logTimeData.data[i].total),
-                            d_name: logTimeData.data[i].department === "All" ? '' : logTimeData.data[i].department,
-                            p_name: logTimeData.data[i].project,
-                            i_name: logTimeData.data[i].issue,
-                            t_name: logTimeData.data[i].job_type,
+                    this.logTime = logTimeData.data.map((item, index) => {
+                        return {
+                            username: item.username,
+                            date: this.customFormatter2(item.date),
+                            start_time: item.start_time,
+                            end_time: item.end_time,
+                            total: this.hourFormatter(item.total),
+                            d_name: item.department === "All" ? '' : item.department,
+                            p_name: item.project,
+                            i_name: item.issue,
+                            t_name: item.job_type,
                         };
-                        dataLogTime.push(obj);
-                    }
-                    this.logTime = dataLogTime;
+                    });
                 } else {
                     this.logTime = [];
                 }
@@ -221,7 +301,10 @@
             resetValidate() {
                 this.validationSuccess = "";
                 this.validationErrors = "";
-            }
+            },
+            getLanguage(data) {
+                return data.current === "vi" ? vi : ja
+            },
         },
         watch: {
             logTimeData: [{
@@ -238,7 +321,33 @@
             }],
             user_id: [{
                 handler: 'fetchDataFilter'
+            }],
+            deptSelects: [{
+                handler: 'fetchDataFilter'
+            }],
+            typeSelects: [{
+                handler: 'fetchDataFilter'
+            }],
+            projectSelects: [{
+                handler: 'fetchDataFilter'
+            }],
+            issue: [{
+                handler: 'fetchDataFilter'
             }]
         }
     };
 </script>
+<style lang="scss">
+@import '~vue-multiselect/dist/vue-multiselect.min.css';
+.type-color {
+    width: 60px;
+    height: 20px;
+    margin-right: 5px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    display: flex;
+    padding: 0 5px 3px;
+}
+</style>

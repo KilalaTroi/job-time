@@ -1,12 +1,8 @@
 <template>
     <div class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-xl-8">
-                    <edit-profile-form>
-                    </edit-profile-form>
-                </div>
-            </div>
+        <div class="container-fluid max-width-1170">
+            <edit-profile-form>
+            </edit-profile-form>     
         </div>
     </div>
 </template>
