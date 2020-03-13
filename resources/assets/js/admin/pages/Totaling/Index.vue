@@ -69,7 +69,7 @@
                 <template slot="header">
                     <div class="d-flex justify-content-between">
                         <h4 class="card-title">Time Record</h4>
-                        <div class="align-self-end"><a :href="exportLink" target="_blank"><i class="fa fa-download"></i> Export excel</a></div>
+                        <div class="align-self-end"><button @click="exportExcel" class="btn btn-primary"><i class="fa fa-download"></i> Export excel</button></div>
                     </div>
                 </template>
                 <div class="table-responsive">
@@ -141,8 +141,6 @@
                 jShowDisabled: true,
                 jAlign: 'right',
                 jSize: 'small',
-
-                exportLink: ''
             };
         },
         mounted() {
@@ -150,7 +148,6 @@
         },
         methods: {
             fetchData() {
-                this.exportLink = "/data/export-report-time-user/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
                 let uri = "/data/statistic/totaling/";
                 axios
                     .post(uri, {
@@ -159,7 +156,8 @@
                         end_date: this.dateFormatter(this.end_date),
                         deptSelects: this.deptSelects,
                         typeSelects: this.typeSelects,
-                        projectSelects: this.projectSelects
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
                     })
                     .then(res => {
                         this.users = res.data.users;
@@ -179,7 +177,6 @@
                 }
             },
             fetchDataFilter() {
-                this.exportLink = "/data/export-report-time-user/" + this.user_id + "/" + this.dateFormatter(this.start_date) + "/" + this.dateFormatter(this.end_date);
                 let uri = "/data/statistic/totaling/";
                 axios
                     .post(uri, {
@@ -188,7 +185,8 @@
                         end_date: this.dateFormatter(this.end_date),
                         deptSelects: this.deptSelects,
                         typeSelects: this.typeSelects,
-                        projectSelects: this.projectSelects
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
                     })
                     .then(res => {
                         this.logTimeData = res.data.dataLogTime;
@@ -205,10 +203,30 @@
                         end_date: this.dateFormatter(this.end_date),
                         deptSelects: this.deptSelects,
                         typeSelects: this.typeSelects,
-                        projectSelects: this.projectSelects
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
                     })
                     .then(res => {
                         this.logTimeData = res.data.dataLogTime;
+                    });
+            },
+            exportExcel() {
+                let uri = "/data/export-report-time-user/";
+                axios
+                    .post(uri, {
+                        user_id: this.user_id,
+                        start_date: this.dateFormatter(this.start_date),
+                        end_date: this.dateFormatter(this.end_date),
+                        deptSelects: this.deptSelects,
+                        typeSelects: this.typeSelects,
+                        projectSelects: this.projectSelects,
+                        issueFilter: this.issue
+                    })
+                    .then(res => {
+                        window.open(res.data, "_blank");  
+                    })
+                    .catch(err => {
+                        alert("Error!");
                     });
             },
             getUserOptions(data) {
@@ -313,6 +331,9 @@
             projectSelects: [{
                 handler: 'fetchDataFilter'
             }],
+            issue: [{
+                handler: 'fetchDataFilter'
+            }]
         }
     };
 </script>

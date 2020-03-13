@@ -56,9 +56,11 @@ class StatisticsController extends Controller
     }
 
     public function getDataTotaling(Request $request) {
+        // POST data
         $user_id = $request->get('user_id');
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
+        $issueFilter = $request->get('issueFilter');
 
         $deptSelects = $request->get('deptSelects');
         $deptArr = array();
@@ -83,6 +85,7 @@ class StatisticsController extends Controller
                 return $obj['id'];
             }, $projectSelects);
         }
+        // End POST data
 
         $operation = $user_id == 0 ? '<>' : '=';
 
@@ -104,6 +107,9 @@ class StatisticsController extends Controller
         })
         ->when($projectArr, function ($query, $projectArr) {
             return $query->whereIn('p.id', $projectArr);
+        })
+        ->when($issueFilter, function ($query, $issueFilter) {
+            return $query->where('i.name', 'like', '%'.$issueFilter.'%');
         })
         ->where('i.status', 'publish')
         ->groupBy('p.id')
@@ -136,6 +142,9 @@ class StatisticsController extends Controller
             })
             ->when($projectArr, function ($query, $projectArr) {
                 return $query->whereIn('p.id', $projectArr);
+            })
+            ->when($issueFilter, function ($query, $issueFilter) {
+                return $query->where('i.name', 'like', '%'.$issueFilter.'%');
             })
             ->where('u.id', $operation, $user_id)
             ->where('j.date', '>=', $start_time)

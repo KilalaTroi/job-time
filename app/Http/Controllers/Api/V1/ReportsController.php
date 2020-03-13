@@ -16,22 +16,62 @@ class ReportsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function exportReportTimeUser($user_id, $start_time, $end_time) {
-        $data = $this->getDataTimeUser($user_id,$start_time, $end_time);
+    public function exportReportTimeUser(Request $request) {
+        $filenameExcel = array(); 
+        // POST data
+        $user_id = $request->get('user_id');
+        $start_time = $request->get('start_date');
+        $end_time = $request->get('end_date');
+        $issueFilter = $request->get('issueFilter');
+        if ( $issueFilter ) $filenameExcel[] = str_slug($issueFilter, '-');
+
+        $deptSelects = $request->get('deptSelects');
+        $deptArr = array();
+        if ( $deptSelects ) {
+            $deptArr = array_map(function($obj) use (&$filenameExcel) {
+                $filenameExcel[] = str_slug($obj['text'], '-');
+                return $obj['id'];
+            }, $deptSelects);
+        }
+
+        $typeSelects = $request->get('typeSelects');
+        $typeArr = array();
+        if ( $typeSelects ) {
+            $typeArr = array_map(function($obj) use (&$filenameExcel) {
+                $filenameExcel[] = $obj['slug'];
+                return $obj['id'];
+            }, $typeSelects);
+        }
+
+        $projectSelects = $request->get('projectSelects');
+        $projectArr = array();
+        if ( $projectSelects ) {
+            $projectArr = array_map(function($obj) use (&$filenameExcel) {
+                $filenameExcel[] = str_slug($obj['text'], '-');
+                return $obj['id'];
+            }, $projectSelects);
+        }
+        // End POST data
+
+        $data = $this->getDataTimeUser($user_id, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
+
         if($user_id == "0") {
-            $user_name = "All Users";
+            $filenameExcel[] = "all-users";
+            $titleExcel = "All Users";
         } else {
-            $user_name = DB::table('users')->where('id', $user_id)->first()->name;
+            $filenameExcel[] = str_slug(DB::table('users')->where('id', $user_id)->first()->name, '-');
+            $titleExcel = DB::table('users')->where('id', $user_id)->first()->name;
         }
         $numberRows = count($data) + 5;
-        return Excel::create('Report_'. $user_name. "_" . $start_time . "_" . $end_time, function($excel) use ($data, $start_time, $end_time, $user_name, $numberRows, $user_id) {
+        
+        $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $user_id) {
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
-            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $user_name, $numberRows, $user_id) {
+            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $user_id) {
                 $sheet->setCellValue('A1', "Job Time Report from ". $start_time . " to " . $end_time);
                 $sheet->setCellValue('A2', "Date: ". Carbon::now());
-                $sheet->setCellValue('A3', $user_name);
+                $sheet->setCellValue('A3', $titleExcel);
 
                 $columnName = $user_id == "0" ? 'I' : 'H';
                 $columnNameBefore = $user_id == "0" ? 'H' : 'G';
@@ -89,10 +129,12 @@ class ReportsController extends Controller
                 }
                 $sheet->setBorder('A5:'.$columnName.$numberRows, 'thin');
             });
-        })->download('xlsx');
+        })->store('xlsx');
+
+        return url('data/exports/' . $results->filename) . '.' . $results->ext;
     }
 
-    public function getDataTimeUser($user_id,$start_time, $end_time) {
+    public function getDataTimeUser($user_id, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
         $format = 'Y-m-d';
         $start_time = Carbon::createFromFormat($format, $start_time);
         $end_time = Carbon::createFromFormat($format, $end_time);
@@ -102,6 +144,18 @@ class ReportsController extends Controller
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
+            ->when($deptArr, function ($query, $deptArr) {
+                return $query->whereIn('p.dept_id', $deptArr);
+            })
+            ->when($typeArr, function ($query, $typeArr) {
+                return $query->whereIn('p.type_id', $typeArr);
+            })
+            ->when($projectArr, function ($query, $projectArr) {
+                return $query->whereIn('p.id', $projectArr);
+            })
+            ->when($issueFilter, function ($query, $issueFilter) {
+                return $query->where('i.name', 'like', '%'.$issueFilter.'%');
+            })
             ->whereBetween('j.date', [$start_time, $end_time]);
         $data->when($user_id != "0", function ($q, $query) use($user_id) {
             return $q->where('j.user_id', $user_id);

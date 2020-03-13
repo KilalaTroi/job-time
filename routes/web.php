@@ -49,7 +49,22 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::get('statistic/export-report/{file_extension}', 'StatisticsController@exportReport');
     Route::post('statistic/totaling', 'StatisticsController@getDataTotaling');
 
-    Route::get('export-report-time-user/{user_id}/{start_time}/{end_time}', 'ReportsController@exportReportTimeUser');
+    Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');
     Route::post('import-projects', 'ProjectsController@importProjects');
+
+    Route::get('exports/{filename}', function ($filename)
+    {
+        $path = storage_path() . '/exports/' . $filename;
+
+        if(!File::exists($path)) abort(404);
+
+        $file = File::get($path);
+        $type = File::mimeType($path);
+
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+
+        return $response;
+    });
 });
 # End Get Data
