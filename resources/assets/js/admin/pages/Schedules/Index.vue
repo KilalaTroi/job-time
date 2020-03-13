@@ -2,7 +2,7 @@
     <div class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-4 col-lg-3 col-xl-2">
+                <div class="col-sm-12 col-lg-3 col-xl-2">
                     <card>
                         <template slot="header">
                             <h4 class="card-title">Project Schedule</h4>
@@ -10,22 +10,23 @@
                         <div id='external-events'>
                             <div id='external-events-list'>
                                 <div class="alert alert-success fc-event" v-for="(item, index) in projects" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value" :style="setStyles(item.value)">
-                                    <!-- <button type="button" aria-hidden="true" class="close" data-dismiss="alert">
-                                        <i class="nc-icon nc-simple-remove"></i>
-                                    </button> -->
                                     <span>{{ item.project }} {{ item.issue }}</span>
                                 </div>
                             </div>
                         </div>
                     </card>
                 </div>
-                <div class="col-sm-8 col-lg-9 col-xl-10">
-                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="deleteEvent" />
+                <div class="col-sm-12 col-lg-9 col-xl-10">
+                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="clickEvent" />
                 </div>
             </div>
         </div>
+
+        <EditEvent :currentEvent="currentEvent" :errors="validationErrors" :success="validationSuccess" v-on:update-event="updateEvent" v-on:delete-event="deleteEvent" v-on:reset-validation="resetValidate"></EditEvent>
     </div>
 </template>
+
+
 <script>
 import FullCalendar from '@fullcalendar/vue'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -33,20 +34,24 @@ import timeGridPlugin from '@fullcalendar/timeGrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import Card from '../../components/Cards/Card'
+import EditEvent from './Edit'
 import moment from 'moment'
 
 export default {
     components: {
         FullCalendar, // make the <FullCalendar> tag available
-        Card
+        Card,
+        EditEvent
     },
     data() {
         return {
+            memo:"",
             types: [],
             projects: [],
             projectData: [],
             schedules: [],
             scheduleData: [],
+            currentEvent: {},
 
             scrollTime: '8:00:00',
             calendarPlugins: [dayGridPlugin, listPlugin, interactionPlugin, timeGridPlugin],
@@ -76,13 +81,15 @@ export default {
             maxTime: '17:00:00',
             allDaySlot: false,
             height: 'auto',
-            hiddenDays: [0]
+            hiddenDays: [0],
+
+            validationErrors: '',
+            validationSuccess: ''
         }
     },
     mounted() {
         this.fetchItems();
         this.makeDraggable();
-        // console.log(this.schedules);
     },
     methods: {
         fetchItems() {
@@ -132,11 +139,13 @@ export default {
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
                         id: data[i].id,
-                        title: data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name,
+                        title: (data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name) + '\n' + (data[i].memo ? data[i].memo : ''),
                         borderColor: this.getObjectValue(this.types, data[i].type_id).value,
                         backgroundColor: this.getObjectValue(this.types, data[i].type_id).value,
                         start: moment(data[i].date + ' ' + data[i].start_time).format(),
-                        end: moment(data[i].date + ' ' + data[i].end_time).format()
+                        end: moment(data[i].date + ' ' + data[i].end_time).format(),
+                        memo: data[i].memo,
+                        title_not_memo: data[i].i_name ? data[i].p_name + ' ' + data[i].i_name : data[i].p_name
                     };
                     dataSchedules.push(obj);
                 }
@@ -176,18 +185,47 @@ export default {
         hourFormatter(date) {
             return moment(date).format('HH:mm');
         },
-        deleteEvent(info) {
-            if (confirm("Are you sure delete this event?")) {
-                let { id } = info.event;
-                console.log(id);
-                let uri = '/data/schedules/' + id;
+        deleteEvent(event) {
+            $('#editEvent').modal('hide');
+
+            if (confirm("Are you sure you want to delete this event?")) {
+                let uri = '/data/schedules/' + event.id;
                 axios.delete(uri).then((res) => {
                     this.schedules = this.schedules.filter(function(elem) {
-                        if (elem.id != id) return elem;
+                        if (elem.id != event.id) return elem;
                     });
-                    console.log(res.data.message);
+                    
                 }).catch(err => console.log(err));
             }
+        },
+        updateEvent(event) {
+            // Reset validate
+            this.validationErrors = '';
+            this.validationSuccess = '';
+
+            let uri = '/data/schedules/' + event.id;
+            let newItem = {
+                memo: event.memo
+            };
+            axios.patch(uri, newItem)
+                .then(res => {
+                    let foundIndex = this.schedules.findIndex(x => x.id == event.id);
+                    this.schedules[foundIndex].title = this.schedules[foundIndex].title_not_memo  + '\n' + event.memo ;
+                    this.schedules = [...this.schedules];
+                    this.validationSuccess = res.data.message;
+                })
+                .catch(err => {
+                    this.validationErrors = err.response.data;
+                    this.validationSuccess = '';
+                });
+
+        },
+        clickEvent(info) {
+            this.currentEvent = info.event;
+            let titleArray = this.currentEvent.title.split('\n');
+            this.currentEvent.title_not_memo = titleArray[0];
+            this.currentEvent.memo = titleArray[1];
+            $('#editEvent').modal('show');
         },
         resizeEvent(info) {
             this.editable = false;
@@ -207,6 +245,11 @@ export default {
                 };
                 axios.patch(uri, newItem)
                     .then(res => {
+                        let foundIndex = this.schedules.findIndex(x => x.id == id);
+                        this.schedules[foundIndex].start = moment(start).format();
+                        this.schedules[foundIndex].end = moment(end).format();
+                        this.schedules = [...this.schedules];
+
                         this.editable = true;
                         this.droppable = true;
                     })
@@ -238,6 +281,11 @@ export default {
                 };
                 axios.patch(uri, newItem)
                     .then(res => {
+                        let foundIndex = this.schedules.findIndex(x => x.id == id);
+                        this.schedules[foundIndex].start = moment(start).format();
+                        this.schedules[foundIndex].end = moment(end).format();
+                        this.schedules = [...this.schedules];
+
                         this.editable = true;
                         this.droppable = true;
                     })
@@ -276,7 +324,12 @@ export default {
                     this.editable = true;
                     this.droppable = true;
                 });
+        },
+        resetValidate() {
+            this.validationSuccess = '';
+            this.validationErrors = '';
         }
+
     },
     watch: {
         projectData: [{
@@ -306,11 +359,6 @@ export default {
 .fc-time-grid-event .fc-title {
     color: #ffffff;
 }
-
-// tr:first-child>td>.fc-day-grid-event {
-//     padding: 5px;
-//     color: #ffffff;
-// }
 
 .fc-time-grid .fc-slats td {
     height: 2em;

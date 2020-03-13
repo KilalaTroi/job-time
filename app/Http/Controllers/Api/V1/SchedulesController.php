@@ -21,6 +21,9 @@ class SchedulesController extends Controller
         $lastYear = date('Y-m-d', $lastYear);
 
         $types = DB::table('types')->select('id', 'value')->get()->toArray();
+        // $typesTR = DB::table('types')->select('id')->where('slug', 'like', '%_tr')->get()->toArray();
+        // $typesTR = collect($typesTR)->map(function($x){ return $x->id; })->toArray();
+        
         $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
@@ -33,7 +36,11 @@ class SchedulesController extends Controller
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->where('i.status', '=', 'publish')
-            ->where('is_training', false)
+            // ->whereNotIn('type_id', $typesTR)
+            ->where(function ($query) use ($now) {
+                $query->where('start_date', '<=',  $now)
+                      ->orWhere('start_date', '=',  NULL);
+            })
             ->where(function ($query) use ($now) {
                 $query->where('end_date', '>=',  $now)
                       ->orWhere('end_date', '=',  NULL);
@@ -49,7 +56,8 @@ class SchedulesController extends Controller
                 'type_id',
                 's.date as date',
                 's.start_time as start_time',
-                's.end_time as end_time'
+                's.end_time as end_time',
+                'memo'
             )
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
@@ -84,7 +92,8 @@ class SchedulesController extends Controller
                 'borderColor' => $request->get('borderColor'),
                 'backgroundColor' => $request->get('backgroundColor'),
                 'start' => date('Y-m-d\TH:i:s', $start_date),
-                'end' => date('Y-m-d\TH:i:s', $end_date)
+                'end' => date('Y-m-d\TH:i:s', $end_date),
+                'title_not_memo' => $request->get('title')
             ),
             'message' => 'Successfully.'
         ), 200);
@@ -98,10 +107,9 @@ class SchedulesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update($id, Request $request)
-    { 
+    {
         $schedule = Schedule::findOrFail($id);
         $schedule->update($request->all());
-
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);

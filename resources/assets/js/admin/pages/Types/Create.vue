@@ -21,8 +21,8 @@
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Add</button>
+            <div class="form-group text-right">
+                <button type="submit" class="btn btn-primary">Create</button>
                 <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </form>

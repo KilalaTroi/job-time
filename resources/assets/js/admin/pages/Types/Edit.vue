@@ -21,7 +21,7 @@
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr/>
-            <div class="form-group">
+            <div class="form-group text-right">
                 <button
                         @click="$emit('update-item', currentItem)"
                         type="button"

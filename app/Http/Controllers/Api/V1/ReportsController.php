@@ -45,7 +45,7 @@ class ReportsController extends Controller
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
-            ->select(DB::raw('concat(t.slug, "-" , year(j.date),"-",month(j.date)) as keyType'),DB::raw('concat(year(j.date),"/", month(j.date)) as dateReport'),DB::raw('month(j.date) as monthReport'), 't.slug', 't.slug_ja', DB::raw('SUM(TIME_TO_SEC(j.time)) as total'))
+            ->select(DB::raw('concat(t.slug, "-" , year(j.date),"-",month(j.date)) as keyType'),DB::raw('concat(year(j.date),"/", month(j.date)) as dateReport'),DB::raw('month(j.date) as monthReport'), 't.slug', 't.slug_ja', DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total'))
             ->whereBetween('j.date', [date($months[11]), date($months[0])])
             ->groupBy('dateReport')
             ->groupBy('t.id')
@@ -53,6 +53,7 @@ class ReportsController extends Controller
             ->orderBy('monthReport')
             ->get()->keyBy('keyType')->toArray();
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
+
 
         //get date report have data and unique date report
         $listDateReport = array_column($data, 'dateReport');
@@ -65,7 +66,10 @@ class ReportsController extends Controller
             $numberUsers = DB::table('role_user')
                 ->join('roles', 'roles.id', '=', 'role_user.role_id')
                 ->join('users', 'role_user.user_id', '=', 'users.id')
-                ->where('roles.name', "<>", "admin")
+                ->where([
+                    ['roles.name', '<>', 'admin'],
+                    ['roles.name', '<>', 'japanese_planner'],
+                ])
                 ->where('users.created_at', "<=", $dateFormmat)->count();
             $arrayNumberUser[$dateReport]= $numberUsers;
         }
@@ -113,7 +117,11 @@ class ReportsController extends Controller
 
             //all hours of users must be work in a month and get percent
             $hoursForMonth = $arrayNumberUser[$yearOfData."/".$month] * ((8 * $numberWorkdays)+8) * 3600 ;
-            $percentJob = round($type['total']/$hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
+            if($hoursForMonth == 0 && $type['total'] > 0 ) {
+                $percentJob = 0.0;
+            } else {
+                $percentJob = round($type['total'] / $hoursForMonth * 100, 1, PHP_ROUND_HALF_UP);
+            }
             $monthName = date('M', mktime(0, 0, 0, $month, 10));
 
             $reponse[$slug][$monthName] = $percentJob . "%";
@@ -130,12 +138,14 @@ class ReportsController extends Controller
             }
             $totalPercentOfMonth[$monthName] += $percentJob;
             $totalPercentOfType[$slug]   += $percentJob;
-            $arrayNumberMonthOfSlug[$slug] += 1;
+            if ($percentJob > 0) {
+                $arrayNumberMonthOfSlug[$slug] += 1;
+            }
         }
 
         //cal avegare on project
         foreach ($reponse as $key => $value) {
-            if(isset($totalPercentOfType[$key])) {
+            if(isset($totalPercentOfType[$key]) && $totalPercentOfType[$key]) {
                 $reponse[$key]['Total'] = round($totalPercentOfType[$key] / $arrayNumberMonthOfSlug[$key], 1, PHP_ROUND_HALF_UP). "%";
             } else {
                 $reponse[$key]['Total'] = "0.0%";
@@ -223,5 +233,134 @@ class ReportsController extends Controller
         })->download($file_extension);
     }
 
+    public function exportReportTimeUser($user_id,$start_time, $end_time) {
+        $data = $this->getDataTimeUser($user_id,$start_time, $end_time);
+        if($user_id == "0") {
+            $user_name = "All Users";
+        } else {
+            $user_name = DB::table('users')->where('id', $user_id)->first()->name;
+        }
+        $numberRows = count($data) + 5;
+        return Excel::create('Report_'. $user_name. "_" . $start_time . "_" . $end_time, function($excel) use ($data, $start_time, $end_time, $user_name, $numberRows) {
+            $excel->setTitle('Report Job Time');
+            $excel->setCreator('Kilala Job Time')
+                ->setCompany('Kilala');
+            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $user_name, $numberRows) {
+                $sheet->setCellValue('A1', "Job Time Report from ". $start_time . " to " . $end_time);
+                $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                $sheet->setCellValue('A3', $user_name);
+                $sheet->mergeCells('A1:I1');
+                $sheet->mergeCells('A2:I2');
+                $sheet->mergeCells('A3:I3');
+                $sheet->cell('A1:H3', function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '14',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setValignment('middle');
+                });
+                $sheet->cell('A5:I5', function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'bold'       =>  true
+                    ]);
+                    $cells->setAlignment('center');
+                    $cells->setValignment('middle');
+                    $cells->setBackground('#ffd05b');
+                });
+
+
+                $sheet->fromArray($data, null, 'A5', true);
+                //set title table
+                $sheet->setCellValue('A5', "NAME");
+                $sheet->setCellValue('B5', "DAY");
+                $sheet->setCellValue('C5', "STRT");
+                $sheet->setCellValue('D5', "END");
+                $sheet->setCellValue('E5', "TIME");
+                $sheet->setCellValue('F5', "DEPARTMENT");
+                $sheet->setCellValue('G5', "PROJECT");
+                $sheet->setCellValue('H5', "ISSUE");
+                $sheet->setCellValue('I5', "JOB TYPE");
+                for ($i=5; $i<=$numberRows; $i++) {
+                    $sheet->cell('A'. $i.':I'.$i, function($cells) {
+                        $cells->setBorder('thin','thin','thin','thin');
+                    });
+                }
+                $sheet->setBorder('A5:I'.$numberRows, 'thin');
+            });
+        })->download('xlsx');
+    }
+    public function getDataTimeUser($user_id,$start_time, $end_time) {
+        $format = 'Y-m-d';
+        $start_time = Carbon::createFromFormat($format, $start_time);
+        $end_time = Carbon::createFromFormat($format, $end_time);
+        $data = DB::table('types as t')
+            ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
+            ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
+            ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
+            ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
+            ->whereBetween('j.date', [$start_time, $end_time]);
+        $data->when($user_id != "0", function ($q, $query) use($user_id) {
+            return $q->where('j.user_id', $user_id);
+        });
+        $data = $data->select( "u.name" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+        $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
+
+        foreach ($data as $key => $item) {
+            $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
+            $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
+            $this->array_insert( $data[$key], 4, array ('Time' => $hoursminsandsecs));
+            foreach ($item as $key1 => $element) {
+                if(empty($element) || $element == "All") {
+                    $data[$key][$key1] = "--";
+                }
+                if($key1 == "dateReport") {
+                    $data[$key][$key1] = date('M d,Y', strtotime($element));
+                }
+            }
+        }
+        return $data;
+    }
+
+    function calcTime($start_time, $end_time) {
+        //12hours = 43200, 13hours = 46800
+        $start_time_seconds = $this->timeToSeconds($start_time);
+        $end_time_seconds   = $this->timeToSeconds($end_time);
+        $timeLog = $end_time_seconds - $start_time_seconds;
+        /*if (($start_time_seconds > 46800 && $end_time_seconds > 46800) || $start_time_seconds < 43200 && $end_time_seconds < 43200) {
+            $timeLog = $end_time_seconds - $start_time_seconds;
+        } else if ($start_time_seconds < 43200 && $end_time_seconds > 46800){
+            $timeLog = $end_time_seconds - $start_time_seconds - 3600;
+        } else if ($start_time_seconds < 43200 && $end_time_seconds < 46800) {
+            $timeLog = 43200 - $start_time_seconds;
+        } else if ($start_time_seconds > 43200 && $end_time_seconds > 46800) {
+            $timeLog = $end_time_seconds - 46800;
+        }*/
+        return $timeLog;
+    }
+    function timeToSeconds($time='00:00')
+    {
+        list($hours, $mins) = explode(':', $time);
+        return ($hours * 3600 ) + ($mins * 60 );
+    }
+    function getHoursMinutes($seconds, $format = '%02d:%02d') {
+
+        if (empty($seconds) || ! is_numeric($seconds)) {
+            return false;
+        }
+
+        $minutes = round($seconds / 60);
+        $hours = floor($minutes / 60);
+        $remainMinutes = ($minutes % 60);
+        return sprintf($format, $hours, $remainMinutes);
+    }
+    function array_insert (&$array, $position, $insert_array) {
+        $first_array = array_splice ($array, 0, $position);
+        $array = array_merge ($first_array, $insert_array, $array);
+    }
 }
 

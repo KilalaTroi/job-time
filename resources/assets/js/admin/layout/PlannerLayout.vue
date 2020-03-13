@@ -1,13 +1,17 @@
 <template>
     <div class="wrapper">
         <side-bar>
-            <sidebar-link to="/jobs">
-                <i class="nc-icon nc-watch-time"></i>
-                <p>Jobs</p>
+            <sidebar-link to="/projects">
+                <i class="nc-icon nc-bag"></i>
+                <p>Projects</p>
             </sidebar-link>
             <sidebar-link to="/schedules">
                 <i class="nc-icon nc-paper-2"></i>
                 <p>Schedules</p>
+            </sidebar-link>
+            <sidebar-link to="/jobs">
+                <i class="nc-icon nc-watch-time"></i>
+                <p>Jobs</p>
             </sidebar-link>
             <sidebar-link to="/profile" class="d-block d-lg-none">
                 <i class="nc-icon nc-circle-09"></i>

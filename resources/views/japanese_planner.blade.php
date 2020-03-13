@@ -8,7 +8,6 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ Auth::user()->id }}">
-    <meta name="user-created-at" content="{{ Auth::user()->created_at }}">
 
     <title>{{ config('app.name', 'Job Time') }}</title>
 
@@ -36,6 +35,6 @@
 </div>
 
 <!-- Scripts -->
-<script src="{{ asset('js/app-employee.js') }}"></script>
+<script src="{{ asset('js/app-japanese_planner.js') }}"></script>
 </body>
 </html>

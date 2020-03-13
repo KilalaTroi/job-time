@@ -5,11 +5,11 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Clients</label>
+                        <label class="">Types</label>
                         <div>
-                            <select-2 :options="clientOptions" v-model="client_id" class="select2">
+                            <select2-type :options="typeOptions" v-model="type_id" class="select2">
                                 <option disabled value="0">Select one</option>
-                            </select-2>
+                            </select2-type>
                         </div>
                     </div>
                 </div>
@@ -23,24 +23,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">Types</label>
-                        <div>
-                            <select2-type :options="typeOptions" v-model="type_id" class="select2">
-                                <option disabled value="0">Select one</option>
-                            </select2-type>
-                        </div>
-                    </div>
-                </div>
-                <!--<div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">Is training?</label>
-                        <input v-model="is_training" type="checkbox" name="is_training" class="form-control">
-                    </div>
-                </div>-->
             </div>
             <hr>
             <div class="row">
@@ -78,18 +60,18 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" v-if="has_period">
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">Start date</label>
-                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :disabled='isDisabledDate'>
+                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">End date</label>
-                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :disabled='isDisabledDate'>
+                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
                         </datepicker>
                     </div>
                 </div>
@@ -97,8 +79,8 @@
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Add</button>
+            <div class="form-group text-right">
+                <button type="submit" class="btn btn-primary">Create</button>
                 <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </form>
@@ -124,62 +106,32 @@ export default {
         SuccessItem,
         Modal
     },
-    props: ['clients', 'departments', 'types', 'errors', 'success'],
+    props: ['departments', 'types', 'errors', 'success'],
     data() {
         return {
-            client_id: 0,
-            dept_id: 0,
+            dept_id: 1,
             type_id: 0,
             p_name: '',
             p_name_vi: '',
             p_name_ja: '',
-            is_training: false,
             no_period: false,
+            has_period: true,
             i_name: '',
             start_date: '',
             end_date: '',
             en: en,
             ja: ja,
             modalLg: 'modal-lg',
-            clientOptions: [],
             departmentOptions: [],
             typeOptions: []
         }
     },
-    computed: {
-        isDisabledDate: function(){
-            return !this.no_period;
-        }
+    mounted() {
     },
-    mounted() {},
     methods: {
-        getDataClients(data) {
-            if (data.length) {
-                let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                dataOptions.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        text: data[i].text
-                    };
-                    dataOptions.push(obj);
-                }
-                this.clientOptions = dataOptions;
-            }
-        },
         getDataDepartments(data) {
             if (data.length) {
                 let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                dataOptions.push(obj);
 
                 for (let i = 0; i < data.length; i++) {
                     let obj = {
@@ -210,21 +162,27 @@ export default {
                 this.typeOptions = dataTypes;
             }
         },
+        updatePeriod(data) {
+            if ( data ) {
+                this.start_date = '';
+                this.end_date = '';
+                this.has_period = false;
+            } else {
+                this.has_period = true;
+            }
+        },
         emitCreateItem(e) {
             e.preventDefault();
 
             const newItem = {
-                client_id: this.client_id,
                 dept_id: this.dept_id,
                 type_id: this.type_id,
                 p_name: this.p_name,
                 p_name_vi: this.p_name_vi,
                 p_name_ja: this.p_name_ja,
-                is_training: this.is_training,
                 i_name: this.i_name,
                 start_date: this.start_date,
                 end_date: this.end_date,
-                no_period: this.no_period,
             };
 
             this.$emit('create-item', newItem);
@@ -249,13 +207,11 @@ export default {
         resetData(data) {
             // Reset
             if (data.length) {
-                this.client_id = 0;
-                this.dept_id = 0;
+                this.dept_id = 1;
                 this.type_id = 0;
                 this.p_name = '';
                 this.p_name_vi = '';
                 this.p_name_ja = '';
-                this.is_training = false;
                 this.no_period = false;
                 this.i_name = '';
                 this.start_date = '';
@@ -264,14 +220,14 @@ export default {
         }
     },
     watch: {
-        clients: [{
-            handler: 'getDataClients'
-        }],
         departments: [{
             handler: 'getDataDepartments'
         }],
         types: [{
             handler: 'getDataTypes'
+        }],
+        no_period: [{
+            handler: 'updatePeriod'
         }],
         start_date: [{
             handler: 'disabledStartDates'

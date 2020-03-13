@@ -13,7 +13,7 @@
         </div>
 
         <!-- Modal body -->
-        <div class="modal-body">
+        <div class="modal-body pt-0">
           <hr>
           <slot></slot>
         </div>

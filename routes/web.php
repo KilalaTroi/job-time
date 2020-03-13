@@ -32,19 +32,21 @@ Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 
 # Get Data
 Route::group(['middleware' => ['auth'], 'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
-    Route::resource('clients', 'ClientsController', ['except' => ['create', 'edit']]);
     Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
+    Route::get('issues/archive/{id}/{status}', 'IssuesController@archive');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
 
     Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
+    Route::get('statistic/totaling/{user_id}/{start_time}/{end_time}', 'StatisticsController@getDataTotaling');
 
     Route::get('report/{year}', 'ReportsController@report');
     Route::get('export-report/{year}/{file_extension}', 'ReportsController@exportReport');
+    Route::get('export-report-time-user/{user_id}/{start_time}/{end_time}', 'ReportsController@exportReportTimeUser');
 });
 # End Get Data
 

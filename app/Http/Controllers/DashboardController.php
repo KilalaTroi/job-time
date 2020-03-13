@@ -26,12 +26,16 @@ class DashboardController extends Controller
         // redirect view by user
         if ( $request->user()->authorizeRoles('admin') ) { 
             return view('dashboard');
-        } else {
-            if ( $request->user()->authorizeRoles('manager') ) {
-                return view('manager');
-            } else {
-                return view('employee');
-            }
-        }
+        };
+
+        if ( $request->user()->authorizeRoles('planner') ) { 
+            return view('planner');
+        };
+
+        if ( $request->user()->authorizeRoles('japanese_planner') ) { 
+            return view('japanese_planner');
+        };
+
+        return view('employee');
     }
 }

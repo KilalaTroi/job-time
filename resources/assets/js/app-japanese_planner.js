@@ -20,74 +20,25 @@ import LightBootstrap from './admin/light-bootstrap-main'
 window.Vue.use(VueRouter);
 window.Vue.use(LightBootstrap);
 
-import DashboardLayout from './admin/layout/DashboardLayout'
+import DashboardLayout from './admin/layout/JapanesePlannerLayout'
 // GeneralViews
 import NotFound from './admin/pages/NotFoundPage'
 
 // Admin pages
-import Overview from './admin/pages/Overview';
-import UserProfile from './admin/pages/UserProfile/Index.vue';
-import TableList from './admin/pages/TableList';
-import Typography from './admin/pages/Typography';
-import Icons from './admin/pages/Icons';
-import Notifications from './admin/pages/Notifications';
-import Departments from './admin/pages/Departments';
-import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Profile from './admin/pages/Profile';
-import Totaling from './admin/pages/Totaling';
 
 const routes = [{
         path: '/',
         component: DashboardLayout,
-        redirect: '/overview'
+        redirect: '/projects'
     },
     {
         path: '/',
         component: DashboardLayout,
-        redirect: '/overview',
+        redirect: '/projects',
         children: [{
-                path: 'overview',
-                name: 'Overview',
-                component: Overview
-            },
-            {
-                path: 'user',
-                name: 'User',
-                component: UserProfile
-            },
-            {
-                path: 'table-list',
-                name: 'Table List',
-                component: TableList
-            },
-            {
-                path: 'typography',
-                name: 'Typography',
-                component: Typography
-            },
-            {
-                path: 'icons',
-                name: 'Icons',
-                component: Icons
-            },
-            {
-                path: 'notifications',
-                name: 'Notifications',
-                component: Notifications
-            },
-            {
-                path: 'departments',
-                name: 'Departments',
-                component: Departments
-            },
-            {
-                path: 'types',
-                name: 'Types',
-                component: Types
-            },
-            {
                 path: 'projects',
                 name: 'Projects',
                 component: Projects
@@ -101,11 +52,6 @@ const routes = [{
                 path: 'profile',
                 name: 'Profile',
                 component: Profile
-            },
-            {
-                path: 'totaling',
-                name: 'Totaling',
-                component: Totaling
             },
             {
                 path: '*',
