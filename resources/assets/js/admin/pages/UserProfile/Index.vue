@@ -53,33 +53,6 @@
     import EditItem from "./Edit";
     import CreateButton from "../../components/Buttons/Create";
 
-    const tableColumns = [
-        {
-            id: "username",
-            value: "Username",
-            width: "120",
-            class: ""
-        },
-        {
-            id: "r_name",
-            value: "Role",
-            width: "120",
-            class: ""
-        },
-        {
-            id: "name",
-            value: "Name",
-            width: "",
-            class: ""
-        },
-        {
-            id: "email",
-            value: "Email",
-            width: "",
-            class: ""
-        }
-    ];
-
     export default {
         components: {
             ActionTable,
@@ -91,7 +64,12 @@
 
         data() {
             return {
-                columns: [...tableColumns],
+                columns: [
+                    { id: "username", value: this.$ml.with('VueJS').get('lblUsername'), width: "120", class: "" },
+                    { id: "r_name", value: this.$ml.with('VueJS').get('txtRole'), width: "120", class: "" },
+                    { id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "120", class: "" },
+                    { id: "email", value: this.$ml.with('VueJS').get('txtEmail'), width: "120", class: "" }
+                ],
                 users: [],
                 roles: [],
                 currentUser: {},
@@ -101,7 +79,16 @@
             };
         },
         mounted() {
-            this.fetchUsers();
+            let _this = this;
+            _this.fetchUsers();
+            $(document).on('click', '.languages button', function() {
+                _this.columns = [
+                    { id: "username", value: _this.$ml.with('VueJS').get('lblUsername'), width: "120", class: "" },
+                    { id: "r_name", value: _this.$ml.with('VueJS').get('txtRole'), width: "120", class: "" },
+                    { id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "120", class: "" },
+                    { id: "email", value: _this.$ml.with('VueJS').get('txtEmail'), width: "120", class: "" }
+                ];
+            });
         },
         methods: {
             fetchUsers() {

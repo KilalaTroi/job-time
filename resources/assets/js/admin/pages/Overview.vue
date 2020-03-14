@@ -9,7 +9,7 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtWorkedTime')}}</p>
-                            <h4 class="card-title">{{ totalArrayObject(hoursPerProject) }}/{{ totalObject(totalHoursPerMonth) }} hrs</h4>
+                            <h4 class="card-title">{{ totalArrayObject(hoursPerProject) }}/{{ totalObject(totalHoursPerMonth) }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ getTimeWorked(startEndYear) }}
@@ -184,13 +184,20 @@
             }
         },
         mounted() {
-            this.fetch();
+            let _this = this;
+            _this.fetch();
+
             $(document).on('mouseenter', '.ct-bar', function() {
                 var seriesDesc = $(this).attr('ct:meta'),
                 value = $(this).attr('ct:value');
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
             });
-            this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
+
+            _this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + _this.user_id + '&startMonth=' + _this.customFormatter01(_this.startMonth) + '&endMonth=' + _this.customFormatter01(_this.endMonth);
+            
+            $(document).on('click', '.languages button', function() {
+                _this.fetch();
+            });
         },
         methods: {
             fetch() {
@@ -315,7 +322,7 @@
                 if (data.length) {
                     let obj = {
                         id: 0,
-                        text: 'All'
+                        text: this.$ml.with('VueJS').get('txtSelectAll')
                     };
                     this.userOptions = [obj].concat(data);
                 }

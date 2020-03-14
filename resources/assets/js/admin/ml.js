@@ -106,7 +106,7 @@ export default new MLCreate({
             msgOverTime: 'You work over 8 hours!!!',
             txtMyOffDay: 'My off days',
             txtOffDay: 'Off days',
-            staffOffDay: 'Staff off days',
+            txtStaffOffDay: 'Staff off days',
             txtWorkedTime: 'Worked Time',
             txtHour: 'hrs',
             txtWorkingTime: 'Working time',
@@ -118,7 +118,7 @@ export default new MLCreate({
             txtLogOut: 'Log out',
             msgConfirmDelete: 'Are you sure want to delete this record?',
             msgConfirmChange: 'Are you sure about this change?',
-
+            txtPickSome: 'Pick some',
 
         }),
 
@@ -221,7 +221,7 @@ export default new MLCreate({
             msgOverTime: '8時間以上働きました！',
             txtMyOffDay: '私の休みの日',
             txtOffDay: '休みの日',
-            staffOffDay: 'スタッフの休みの日',
+            txtStaffOffDay: 'スタッフの休みの日',
             txtWorkedTime: '稼働した時間',
             txtHour: '時間',
             txtWorkingTime: '稼働中の時間',
@@ -233,6 +233,7 @@ export default new MLCreate({
             txtLogOut: 'ログアウト',
             msgConfirmDelete: 'このレコードを削除してもよろしいですか？',
             msgConfirmUpdate: 'この変化に確かですか？',
+            txtPickSome: 'いくつかを選択',
         })
     ]
 })

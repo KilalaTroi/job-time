@@ -21,7 +21,7 @@
                 <label class="">{{$ml.with('VueJS').get('txtLang')}}
 </label>
                 <select-2 v-model="currentUser.language" class="select2">
-                    <option value="en">English</option>
+                    <option value="vi">Vietnamese</option>
                     <option value="ja">Japanese</option>
                 </select-2>
             </div>
