@@ -1,23 +1,23 @@
 <template>
     <modal id="editIssue" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Edit Issue</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtEditIssue')}}</template>
         <div v-if="currentItem">
             <div class="row">
                 <div class="col-sm-4">
                     <div class="form-group">
-                        <label class="">Issue</label>
+                        <label class="">{{$ml.with('VueJS').get('txtIssue')}}</label>
                         <input v-model="currentItem.i_name" type="text" name="issue" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label class="">Page</label>
+                        <label class="">{{$ml.with('VueJS').get('txtPage')}}</label>
                         <input v-model="currentItem.page" type="number" name="page" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
-                        <label class="">Project</label>
+                        <label class="">{{$ml.with('VueJS').get('txtProject')}}</label>
                         <div>
                             <select-2 :options="projectOptions" v-model="currentItem.id" class="select2">
                                 <option disabled value="0">Select one</option>
@@ -27,7 +27,7 @@
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label class="">No period</label>
+                        <label class="">{{$ml.with('VueJS').get('txtNoPeriod')}}</label>
                         <input v-model="currentItem.no_period" type="checkbox" name="no_period" @change="updatePeriod" class="form-control">
                     </div>
                 </div>
@@ -35,14 +35,14 @@
             <div class="row" v-if="has_period">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Start date</label>
+                        <label class="">{{$ml.with('VueJS').get('txtStartDate')}}</label>
                         <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="currentItem.start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">End date</label>
+                        <label class="">{{$ml.with('VueJS').get('txtEndDate')}}</label>
                         <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="currentItem.end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
@@ -53,7 +53,7 @@
             <hr>
             <div class="form-group text-right">
                 <button @click="$emit('update-issue', currentItem)" type="button" class="btn btn-primary">
-                    Update
+                    {{$ml.with('VueJS').get('txtUpdate')}}
                 </button>
             </div>
         </div>

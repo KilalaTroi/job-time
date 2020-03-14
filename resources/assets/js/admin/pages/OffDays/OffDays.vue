@@ -1,11 +1,11 @@
 <template>
     <card>
-        <h4 slot="header" class="card-title">My off days</h4>
+        <h4 slot="header" class="card-title">{{$ml.with('VueJS').get('txtMyOffDay')}}</h4>
         <div class="row">
             <div class="col-sm-12 col-lg-3">
                 <card>
                     <template slot="header">
-                        <h4 class="card-title">Type</h4>
+                        <h4 class="card-title">{{$ml.with('VueJS').get('txtType')}}</h4>
                     </template>
                     <div id='external-events'>
                         <div id='external-events-list'>

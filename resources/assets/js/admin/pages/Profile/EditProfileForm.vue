@@ -1,30 +1,30 @@
 <template>
     <card>
-        <h4 slot="header" class="card-title">Edit Profile</h4>
+        <h4 slot="header" class="card-title">{{$ml.with('VueJS').get('txtEditProfile')}}</h4>
         <form>
             <div class="row">
                 <div class="col-md-6">
-                    <base-input type="text" label="Name" placeholder="Name" v-model="user.name">
+                    <base-input type="text" :label="this.$ml.with('VueJS').get('txtName')" v-model="user.name">
                     </base-input>
                 </div>
                 <div class="col-md-6">
-                    <base-input type="text" label="Username" placeholder="Username" v-model="user.username">
+                    <base-input type="text" :label="this.$ml.with('VueJS').get('txtUsername')" v-model="user.username">
                     </base-input>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <base-input type="text" label="Email" placeholder="Email" v-model="user.email">
+                    <base-input type="text" :label="this.$ml.with('VueJS').get('txtEmail')" v-model="user.email">
                     </base-input>
                 </div>
                 <div class="col-md-6">
-                    <base-input type="text" label="Role" :disabled="true" placeholder="Role" v-model="role.name">
+                    <base-input type="text" :label="this.$ml.with('VueJS').get('txtRole')" :disabled="true"  v-model="role.name">
                     </base-input>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <label class="">Language</label>
+                    <label class="">{{$ml.with('VueJS').get('txtLang')}}</label>
                     <select-2 v-model="user.language" class="select2">
                         <option value="en">English</option>
                         <option value="ja">Japanese</option>
@@ -33,11 +33,11 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <base-input type="password" label="Password" placeholder="Password" v-model="password">
+                    <base-input type="password" :label="this.$ml.with('VueJS').get('txtPassword')" v-model="password">
                     </base-input>
                 </div>
                 <div class="col-md-6">
-                    <base-input type="password" label="Re-Password" placeholder="Re-Password" v-model="password_confirmation">
+                    <base-input type="password" :label="this.$ml.with('VueJS').get('txtRePassword')" v-model="password_confirmation">
                     </base-input>
                 </div>
             </div>
@@ -45,7 +45,7 @@
             <success-item :success="success"></success-item>
             <div class="text-center">
                 <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="updateProfile">
-                    Update Profile
+                    {{$ml.with('VueJS').get('txtUpdate')}}
                 </button>
             </div>
             <div class="clearfix"></div>

@@ -1,21 +1,21 @@
 <template>
     <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Edit Type</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtEditType')}}</template>
         <div v-if="currentItem">
             <div class="form-group">
-                <label class>Slug</label>
+                <label class>{{$ml.with('VueJS').get('txtSlug')}}</label>
                 <input v-model="currentItem.slug" type="text" name="slug" class="form-control" required/>
             </div>
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class>Slug VI</label>
+                        <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
                         <input v-model="currentItem.slug_vi" type="text" name="slug_vi" class="form-control"/>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class>Slug JA</label>
+                        <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
                         <input v-model="currentItem.slug_ja" type="text" name="slug_ja" class="form-control"/>
                     </div>
                 </div>
@@ -23,19 +23,19 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Description VI</label>
+                        <label class="">{{$ml.with('VueJS').get('txtDescVi')}}</label>
                         <textarea v-model="currentItem.description_vi" name="description_vi" class="form-control"></textarea>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Description JA</label>
+                        <label class="">{{$ml.with('VueJS').get('txtDescJa')}}</label>
                         <textarea v-model="currentItem.description_ja" name="description_ja" class="form-control"></textarea>
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <label class>Type Color</label>
+                <label class>{{$ml.with('VueJS').get('txtColor')}}</label>
                 <color-picker :color="currentItem.value" v-model="currentItem.value"></color-picker>
             </div>
             <error-item :errors="errors"></error-item>
@@ -46,7 +46,7 @@
                         @click="$emit('update-item', currentItem)"
                         type="button"
                         class="btn btn-primary"
-                >Update
+                >{{$ml.with('VueJS').get('txtUpdate')}}
                 </button>
             </div>
         </div>
