@@ -1,11 +1,11 @@
 <template>
     <modal id="itemCreate" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Create Project</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtCreateProject')}}</template>
         <form @submit="emitCreateItem">
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Types</label>
+                        <label class="">{{$ml.with('VueJS').get('txtTypes')}}</label>
                         <div>
                             <select2-type :options="typeOptions" v-model="type_id" class="select2">
                                 <option disabled value="0">Select one</option>
@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Departments</label>
+                        <label class="">{{$ml.with('VueJS').get('txtDepartments')}}</label>
                         <div>
                             <select-2 :options="departments" v-model="dept_id" class="select2">
                                 <option disabled value="0">Select one</option>
@@ -28,19 +28,19 @@
             <div class="row">
                 <div class="col-sm-4">
                     <div class="form-group">
-                        <label class="">Name</label>
+                        <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
                         <input v-model="p_name" type="text" name="p_name" class="form-control" required>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
-                        <label class="">Name VI</label>
+                        <label class="">{{$ml.with('VueJS').get('txtNameVi')}}</label>
                         <input v-model="p_name_vi" type="text" name="p_name_vi" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
-                        <label class="">Name JA</label>
+                        <label class="">{{$ml.with('VueJS').get('txtNameJa')}}</label>
                         <input v-model="p_name_ja" type="text" name="p_name_ja" class="form-control">
                     </div>
                 </div>
@@ -48,7 +48,7 @@
             <div class="row">
                 <div class="col-sm-12">
                     <div class="form-group">
-                        <label class="">LINE WORKS Room ID</label>
+                        <label class="">{{$ml.with('VueJS').get('txtLineRoomId')}}</label>
                         <input v-model="room_id" type="text" name="room_id" class="form-control">
                     </div>
                 </div>
@@ -57,19 +57,19 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Issue</label>
+                        <label class="">{{$ml.with('VueJS').get('txtIssue')}}</label>
                         <input v-model="i_name" type="text" name="i_name" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-3">
                     <div class="form-group">
-                        <label class="">Page</label>
+                        <label class="">{{$ml.with('VueJS').get('txtPage')}}</label>
                         <input v-model="page" type="number" name="page" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-3">
                     <div class="form-group">
-                        <label class="">No period</label>
+                        <label class="">{{$ml.with('VueJS').get('txtNoPeriod')}}</label>
                         <input v-model="no_period" type="checkbox" name="no_period" class="form-control">
                     </div>
                 </div>
@@ -77,14 +77,14 @@
             <div class="row" v-if="has_period">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">Start date</label>
+                        <label class="">{{$ml.with('VueJS').get('txtStartDate')}}</label>
                         <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="">End date</label>
+                        <label class="">{{$ml.with('VueJS').get('txtEndDate')}}</label>
                         <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
@@ -94,7 +94,7 @@
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}</button>
             </div>
         </form>
     </modal>

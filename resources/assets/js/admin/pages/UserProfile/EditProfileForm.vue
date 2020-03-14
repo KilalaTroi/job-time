@@ -1,6 +1,7 @@
 <template>
   <card>
-    <h4 slot="header" class="card-title">Edit Profile</h4>
+    <h4 slot="header" class="card-title">{{$ml.with('VueJS').get('txtEditProfile')}}
+</h4>
     <form>
       <div class="row">
         <div class="col-md-5">
@@ -91,7 +92,7 @@
       </div>
       <div class="text-center">
         <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="updateProfile">
-          Update Profile
+          {{$ml.with('VueJS').get('txtUpdate')}}
         </button>
       </div>
       <div class="clearfix"></div>

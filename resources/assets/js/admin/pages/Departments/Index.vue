@@ -5,7 +5,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-auto">
                         <create-button>
-                            <template slot="title">Create new department</template>
+                            <template slot="title">{{$ml.with('VueJS').get('txtCreateDept')}}</template>
                         </create-button>
                     </div>
                 </div>
@@ -13,7 +13,7 @@
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
-                    <h4 class="card-title">Departments list</h4>
+                    <h4 class="card-title">{{$ml.with('VueJS').get('txtDeptList')}}</h4>
                 </template>
                 <div class="table-responsive">
                     <action-table
@@ -127,7 +127,7 @@
                     });
             },
             deleteItem(id) {
-                if (confirm("Are you sure want to delete this record?")) {
+                if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                     let uri = "/data/departments/" + id;
                     axios
                         .delete(uri)

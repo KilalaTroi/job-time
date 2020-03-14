@@ -4,32 +4,32 @@
             <card>
                 <template slot="header">
                     <div class="d-flex justify-content-between">
-                        <h4 class="card-title">Filter</h4>
+                        <h4 class="card-title">{{$ml.with('VueJS').get('txtFilter')}}</h4>
                     </div>
                 </template>
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="form-group">
-                            <label class="">Keyword</label>
+                            <label class="">{{$ml.with('VueJS').get('txtKeyword')}}</label>
                             <input v-model="search.keyword" placeholder="Enter keyword" type="text" class="form-control" v-on:keyup="filterItems(search.keyword)" v-on:keyup.enter="searchItems(search)">
                         </div>
                     </div>
                     <div class="col-sm-4">
                         <div class="form-group">
-                            <label class="">Types</label>
+                            <label class="">{{$ml.with('VueJS').get('txtTypes')}}</label>
                             <div>
                                 <select2-type :options="typeOptions" v-model="search.type_id" class="select2" v-on:input="searchItems(search)">
-                                    <option disabled value="0">Select one</option>
+                                    <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                                 </select2-type>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-4">
                         <div class="form-group"> 
-                            <label class="">Departments</label>
+                            <label class="">{{$ml.with('VueJS').get('txtDepartments')}}</label>
                             <div>
                                 <select-2 :options="departmentOptions" v-model="search.dept_id" class="select2" v-on:input="searchItems(search)">
-                                    <option disabled value="0">Select one</option>
+                                    <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                                 </select-2>
                             </div>
                         </div>
@@ -40,7 +40,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-auto">
                         <create-button>
-                            <template slot="title">Create new project</template>
+                            <template slot="title">{{$ml.with('VueJS').get('txtCreateProject')}}</template>
                         </create-button>
                     </div>
                     <div class="col-12 col-sm-auto ml-auto">
@@ -50,7 +50,7 @@
                         </button>
                         <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#issueCreate">
                             <i class="fa fa-plus"></i>
-                            Add new issue
+                            {{$ml.with('VueJS').get('txtAddIssue')}}
                         </button>
                     </div>
                 </div>
@@ -58,8 +58,8 @@
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
                     <div class="d-flex justify-content-between">
-                        <h4 class="card-title">Projects list</h4>
-                        <base-checkbox v-model="showArchive" class="align-self-end">View archive</base-checkbox>
+                        <h4 class="card-title">{{$ml.with('VueJS').get('txtProjectsList')}}</h4>
+                        <base-checkbox v-model="showArchive" class="align-self-end">{{$ml.with('VueJS').get('txtViewArchive')}}</base-checkbox>
                     </div>
                 </template>
                 <div class="table-responsive" v-if="filterResults">

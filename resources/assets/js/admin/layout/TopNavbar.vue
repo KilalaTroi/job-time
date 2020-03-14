@@ -6,7 +6,7 @@
                     <img width="50" src="/images/logo.png" :alt="$ml.with('VueJS').get('siteName')">
                 </div>
             </router-link>
-            <p class="navbar-brand d-none d-sm-block"><i class="nc-icon nc-android mr-2 ic-custom"></i>Welcome {{ currentUser.name }}</p>
+            <p class="navbar-brand d-none d-sm-block">{{$ml.with('VueJS').get('txtWelcome')}} {{ currentUser.name }}</p>
             <div class="languages nav-item d-block d-sm-none ml-auto mr-3">
                 <button
                     v-for="lang in $ml.list"
@@ -34,14 +34,13 @@
                     </li>
                     <li class="nav-item">
                         <router-link :to="{path: '/profile'}" class="nav-link">
-                            <i class="nc-icon nc-circle-09 mr-2 ic-custom-2"></i> 
-                            Profile
+                            <i class="nc-icon nc-circle-09 mr-2 ic-custom-2"></i> {{$ml.with('VueJS').get('txtProfile')}}
                         </router-link>
                     </li>
                     <li class="nav-item">
                         <a href="/logout" class="nav-link">
                             <i class="nc-icon nc-button-power mr-2 ic-custom-2"></i> 
-                            Log out
+                            {{$ml.with('VueJS').get('txtLogOut')}}
                         </a>
                     </li>
                 </ul>

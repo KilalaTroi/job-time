@@ -7,15 +7,16 @@
             </div>
             <hr>
             <div class="form-group">
-                <label>Phase</label>
+                <label>{{$ml.with('VueJS').get('txtPhase')}}
+</label>
                 <input type="text" name="memo"  v-model="currentEvent.memo" class="form-control project-memo">
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button @click="$emit('update-event', currentEvent)" type="button" class="btn btn-primary">Save</button>
-                <button type="button"  @click="$emit('delete-event', currentEvent)" class="btn btn-danger ml-3">Delete</button>
+                <button @click="$emit('update-event', currentEvent)" type="button" class="btn btn-primary">{{$ml.with('VueJS').get('txtSave')}}</button>
+                <button type="button"  @click="$emit('delete-event', currentEvent)" class="btn btn-danger ml-3">{{$ml.with('VueJS').get('txtDelete')}}</button>
             </div>
         </div>
     </modal>

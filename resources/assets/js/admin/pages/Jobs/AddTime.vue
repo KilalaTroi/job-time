@@ -1,6 +1,6 @@
 <template>
     <modal id="addTime" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Add Time</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtAddTime')}}</template>
         <form v-if="currentJob" @submit="emitAddTime">
             <div class="form-group">
                 <h4 class="text-center mb-1"><b>{{ currentJob.p_name }} {{ currentJob.i_name }}</b></h4>
@@ -10,23 +10,23 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-6">
-                        <label class=""><strong>Start Time:</strong></label>
+                        <label class=""><strong>{{$ml.with('VueJS').get('txtStartTime')}}</strong></label>
                         <vue-timepicker v-model="start_time" hide-disabled-items :minute-range="startMinuteRange" :hour-range="startHourRange"  input-width="100%" close-on-complete @change="changeStartTime" required></vue-timepicker>
                     </div>
                     <div class="col-sm-6">
-                        <label class=""><strong>End Time:</strong></label>
+                        <label class=""><strong>{{$ml.with('VueJS').get('txtEndTime')}}:</strong></label>
                         <vue-timepicker v-model="end_time" hide-disabled-items :minute-range="endMinuteRange" :hour-range="endHourRange"  input-width="100%" close-on-complete @change="changeEndTime" required :disabled="endDisabled"></vue-timepicker>
                     </div>
                 </div>
             </div>
             <div class="form-group" v-if="showLunchBreak">
-                <base-checkbox v-model="exceptLunchBreak" class="align-self-end">Exclude lunch break</base-checkbox>
+                <base-checkbox v-model="exceptLunchBreak" class="align-self-end">{{$ml.with('VueJS').get('txtExcludeLunchBreak')}}</base-checkbox>
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary" :disabled="buttonDisabled">Add</button>
+                <button type="submit" class="btn btn-primary" :disabled="buttonDisabled">{{$ml.with('VueJS').get('txtAdd')}}</button>
             </div>
         </form>
     </modal>

@@ -5,11 +5,11 @@
                 <div class="col-sm-12 col-lg-3 col-xl-2">
                     <card>
                         <template slot="header">
-                            <h4 class="card-title">Project Schedule</h4>
+                            <h4 class="card-title"> {{$ml.with('VueJS').get('txtScheduleTitle')}}</h4>
                         </template>
                         <div class="form-group">
-                            <input v-model="search" placeholder="Search..." type="text" class="form-control" v-on:keyup="searchItem">
-                        </div>
+                            <input v-model="search" :placeholder="$ml.with('VueJS').get('txtScheduleSearch')" type="text" class="form-control" v-on:keyup="searchItem">
+                        </div> 
                         <div id='external-events'>
                             <div id='external-events-list'>
                                 <div class="alert alert-success fc-event" v-for="(item, index) in searchResults" :data-issue="item.issue_id" :key="index" :start="item.start_date" :end="item.end_date" :color="item.value" :style="setStyles(item.value)">
@@ -91,6 +91,7 @@ export default {
 
             search: '',
             searchResults: []
+
         }
     },
     mounted() {
@@ -189,7 +190,7 @@ export default {
         deleteEvent(event) {
             $('#editEvent').modal('hide');
 
-            if (confirm("Are you sure you want to delete this event?")) {
+            if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                 let uri = '/data/schedules/' + event.id;
                 axios.delete(uri).then((res) => {
                     this.schedules = this.schedules.filter((elem) => {
@@ -232,7 +233,7 @@ export default {
             this.editable = false;
             this.droppable = false;
 
-            if (!confirm("Are you sure about this change?")) {
+            if (!confirm(this.$ml.with('VueJS').get('msgConfirmUpdate'))) {
                 info.revert();
                 this.editable = true;
                 this.droppable = true;
@@ -265,7 +266,7 @@ export default {
             this.editable = false;
             this.droppable = false;
 
-            if (!confirm("Are you sure about this change?")) {
+            if (!confirm(this.$ml.with('VueJS').get('msgConfirmUpdate'))) {
                 info.revert();
                 this.editable = true;
                 this.droppable = true;

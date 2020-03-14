@@ -1,6 +1,6 @@
 <template>
     <card>
-        <h4 slot="header" class="card-title">Staff off days</h4>
+        <h4 slot="header" class="card-title">{{$ml.with('VueJS').get('txtStaffOffDay')}}</h4>
         
         <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" :locale="getLanguage(this.$ml)" />
     </card>

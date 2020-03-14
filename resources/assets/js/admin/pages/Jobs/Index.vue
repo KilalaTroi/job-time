@@ -15,11 +15,11 @@
                     <card>
                         <template slot="header">
                             <div class="d-flex justify-content-between">
-                                <h4 class="card-title">Jobs List</h4>
+                                <h4 class="card-title">{{$ml.with('VueJS').get('txtJobsList')}}</h4>
                                 <div class="form-group mb-0" style="min-width: 160px;">
                                     <select-2 v-model="showFilter" class="select2" v-on:input="changeShowFilter">
-                                        <option value="showSchedule">Show by schedule</option>
-                                        <option value="all">Show all</option>
+                                        <option value="showSchedule">{{$ml.with('VueJS').get('txtShowBySchedule')}}</option>
+                                        <option value="all">{{$ml.with('VueJS').get('txtShowAll')}}</option>
                                     </select-2>
                                 </div>
                             </div>
@@ -36,7 +36,7 @@
                     </card>
                     <card>
                         <template slot="header">
-                            <h4 class="card-title">Time Record</h4>
+                            <h4 class="card-title">{{$ml.with('VueJS').get('txtTimeRecord')}}</h4>
                         </template>
                         <div class="table-responsive">
                             <action-table
@@ -48,7 +48,7 @@
                             </action-table>
                         </div>
                         <div class="alert alert-danger" v-if="timeTotal > 28800">
-                          <span>You work over 8 hours!!!</span>
+                          <span>{{$ml.with('VueJS').get('msgOverTime')}}</span>
                         </div>
                     </card>
                 </div>
@@ -299,7 +299,7 @@ export default {
                 });
         },
         deleteItem(id) {
-            if (confirm("Are you sure want to delete this record?")) {
+            if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                 let uri = "/data/jobs/" + id;
                 axios
                     .delete(uri)

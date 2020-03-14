@@ -8,7 +8,7 @@
                             <i class="nc-icon nc-chart text-warning"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">Time Worked</p>
+                            <p class="card-category">{{$ml.with('VueJS').get('txtWorkedTime')}}</p>
                             <h4 class="card-title">{{ totalArrayObject(hoursPerProject) }}/{{ totalObject(totalHoursPerMonth) }} hrs</h4>
                         </div>
                         <div slot="footer">
@@ -22,8 +22,8 @@
                             <i class="nc-icon nc-light-3 text-success"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">Time Working</p>
-                            <h4 class="card-title"> {{ getCurrentMonth(currentMonth) }} hrs</h4>
+                            <p class="card-category">{{$ml.with('VueJS').get('txtWorkingTime')}}</p>
+                            <h4 class="card-title"> {{ getCurrentMonth(currentMonth) }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ customFormatter(startEndYear[1]) }} - {{ currentFormatterDate() }}
@@ -36,7 +36,7 @@
                             <i class="nc-icon nc-vector text-danger"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">Current Jobs</p>
+                            <p class="card-category">{{$ml.with('VueJS').get('txtCurrentJobs')}}</p>
                             <h4 class="card-title">{{ jobs }}</h4>
                         </div>
                         <div slot="footer">
@@ -50,7 +50,7 @@
                             <i class="nc-icon nc-circle-09 text-primary"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">New Users</p>
+                            <p class="card-category">{{$ml.with('VueJS').get('txtNewUser')}}</p>
                             <h4 class="card-title">+{{ totalObject(newUsersPerMonth) }}/{{ currentMonth.totalUsers }}</h4>
                         </div>
                         <div slot="footer">
@@ -63,7 +63,7 @@
                 <div class="col-md-12">
                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id">
                         <template slot="header">
-                            <h4 class="card-title">Kilala VN Time allocation</h4>
+                            <h4 class="card-title">{{$ml.with('VueJS').get('txtKilalaTimeAllocation')}}</h4>
                             <div class="d-flex mt-2 justify-content-between">
                                 <div class="d-flex align-items-center flex-wrap">
                                     <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
@@ -90,7 +90,7 @@
                             <hr>
                             <div class="row">
                                 <div class="export col-auto ml-auto">
-                                    <a :href="exportLink" target="_blank"><i class="fa fa-download"></i> Export excel</a>
+                                    <a :href="exportLink" target="_blank"><i class="fa fa-download"></i> {{$ml.with('VueJS').get('txtExportExcel')}}</a>
                                 </div>
                             </div>
                         </template>

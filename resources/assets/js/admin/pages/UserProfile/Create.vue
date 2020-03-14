@@ -1,47 +1,55 @@
 <template>
     <modal id="itemCreate" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Create User</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtCreateUser')}}</template>
         <form @submit="emitCreateUser">
             <div class="form-group">
-                <label class="">Name</label>
+                <label class="">{{$ml.with('VueJS').get('txtName')}}
+</label>
                 <input v-model="name" type="text" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="">Username</label>
+                <label class="">{{$ml.with('VueJS').get('txtUsername')}}
+</label>
                 <input v-model="username" type="text" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="">Language</label>
+                <label class="">{{$ml.with('VueJS').get('txtLang')}}
+</label>
                 <select-2 v-model="language" class="select2">
                     <option value="en">English</option>
                     <option value="ja">Japanese</option>
                 </select-2>
             </div>
             <div class="form-group">
-                <label class="">Email</label>
+                <label class="">{{$ml.with('VueJS').get('txtEmail')}}
+</label>
                 <input v-model="email" type="email" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="">Role</label>
+                <label class="">{{$ml.with('VueJS').get('txtRole')}}
+</label>
                 <div>
                     <select-2 :options="rolesOption" v-model="role" class="select2">
-                        <option disabled value="0">Select role</option>
+                        <option disabled value="0">{{$ml.with('VueJS').get('txtSelectRole')}}</option>
                     </select-2>
                 </div>
             </div>
             <div class="form-group">
-                <label class="">Password</label>
+                <label class="">{{$ml.with('VueJS').get('txtPassword')}}
+</label>
                 <input v-model="password" type="password" name="password" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="">Re-Password</label>
+                <label class="">{{$ml.with('VueJS').get('txtRePassword')}}
+</label>
                 <input v-model="password_confirmation" type="password" name="password_confirmation" class="form-control" required>
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}
+</button>
             </div>
         </form>
     </modal>
