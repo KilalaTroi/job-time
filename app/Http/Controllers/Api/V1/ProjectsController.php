@@ -269,11 +269,11 @@ class ProjectsController extends Controller
                             'room_id' => '',
                         ]);
                     }
-                    $issue = Issue::where('name', trim($value->issue))->where('project_id', $project->id)->first();
+                    $issue = Issue::where('name', trim(trim($value->issue),'"'))->where('project_id', $project->id)->first();
                     if (empty($issue)) {
                         $issue = Issue::create([
                             'project_id' => $project->id,
-                            'name' => $value->issue,
+                            'name' => trim(trim($value->issue),'"'),
                             'start_date' => $start_time,
                             'end_date' => $end_time,
                             'status' => 'publish',
@@ -301,10 +301,7 @@ class ProjectsController extends Controller
             '*.project' => 'required|max:255',
             '*.issue' => 'required|max:255',
             '*.page' => 'required|max:255',
-            '*.type' => 'required|max:255',
-            '*.start_date' => 'required|date',
-            '*.end_date' => 'required|date',
-
+            '*.type' => 'required|max:255'
         ];
     }
 }
