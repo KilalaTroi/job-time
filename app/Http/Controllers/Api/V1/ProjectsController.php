@@ -235,7 +235,7 @@ class ProjectsController extends Controller
         if($data->count()){
             $validator = \Illuminate\Support\Facades\Validator::make($data->toArray(), $this->rules());
             if ($validator->fails()) {
-                throw new ValidationHttpException(
+                throw new \Exception(
                     $validator->errors()
                 );
             }
@@ -300,7 +300,7 @@ class ProjectsController extends Controller
             '*.department' => 'required|max:255',
             '*.project' => 'required|max:255',
             '*.issue' => 'required|max:255',
-            '*.page' => 'required|max:255|integer',
+            '*.page' => 'required|max:255',
             '*.type' => 'required|max:255',
             '*.start_date' => 'required|date',
             '*.end_date' => 'required|date',

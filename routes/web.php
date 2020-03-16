@@ -36,6 +36,7 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
+    Route::get('issues/getpage/{id}', 'IssuesController@getpage');
     Route::get('issues/archive/{id}/{status}', 'IssuesController@archive');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
@@ -46,12 +47,24 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
     Route::get('statistic/filter-allocation', 'StatisticsController@filterAllocation');
     Route::get('statistic/export-report/{file_extension}', 'StatisticsController@exportReport');
-    Route::get('statistic/totaling/{user_id}/{start_time}/{end_time}', 'StatisticsController@getDataTotaling');
+    Route::post('statistic/totaling', 'StatisticsController@getDataTotaling');
 
-    Route::get('export-report-time-user/{user_id}/{start_time}/{end_time}', 'ReportsController@exportReportTimeUser');
+    Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');
     Route::post('import-projects', 'ProjectsController@importProjects');
+
+    Route::get('exports/{filename}', function ($filename)
+    {
+        $path = storage_path() . '/exports/' . $filename;
+
+        if(!File::exists($path)) abort(404);
+
+        $file = File::get($path);
+        $type = File::mimeType($path);
+
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+
+        return $response;
+    });
 });
 # End Get Data
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');
