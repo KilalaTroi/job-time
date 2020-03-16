@@ -238,7 +238,7 @@ class ProjectsController extends Controller
 
     public function importProjects(Request $request) {
         $this->validate($request, [
-            'file' => 'required|mimes:xlsx'
+            'file' => 'required'
         ]);
 
         $path = $request->file('file')->getRealPath();
@@ -246,7 +246,7 @@ class ProjectsController extends Controller
         if($data->count()){
             $validator = \Illuminate\Support\Facades\Validator::make($data->toArray(), $this->rules());
             if ($validator->fails()) {
-                throw new ValidationHttpException(
+                throw new \Exception(
                     $validator->errors()
                 );
             }
@@ -280,11 +280,11 @@ class ProjectsController extends Controller
                             'room_id' => '',
                         ]);
                     }
-                    $issue = Issue::where('name', trim($value->issue))->where('project_id', $project->id)->first();
+                    $issue = Issue::where('name', trim(trim($value->issue),'"'))->where('project_id', $project->id)->first();
                     if (empty($issue)) {
                         $issue = Issue::create([
                             'project_id' => $project->id,
-                            'name' => $value->issue,
+                            'name' => trim(trim($value->issue),'"'),
                             'start_date' => $start_time,
                             'end_date' => $end_time,
                             'status' => 'publish',
@@ -305,15 +305,15 @@ class ProjectsController extends Controller
             'message' => 'Successfully.'
         ), 200);
     }
-    public function rules() {
+    
+    public function rules()
+    {
         return [
             '*.department' => 'required|max:255',
             '*.project' => 'required|max:255',
             '*.issue' => 'required|max:255',
             '*.page' => 'required|max:255',
-            '*.type' => 'required|max:255',
-            '*.start_date' => 'required|date',
-            '*.end_date' => 'required|date',
+            '*.type' => 'required|max:255'
         ];
     }
 }
