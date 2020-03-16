@@ -294,13 +294,13 @@ class ProjectsController extends Controller
             'message' => 'Successfully.'
         ), 200);
     }
-    public function rules(): array
+    public function rules()
     {
         return [
             '*.department' => 'required|max:255',
             '*.project' => 'required|max:255',
             '*.issue' => 'required|max:255',
-            '*.page' => 'required|max:255',
+            '*.page' => 'required|max:255|integer',
             '*.type' => 'required|max:255',
             '*.start_date' => 'required|date',
             '*.end_date' => 'required|date',
