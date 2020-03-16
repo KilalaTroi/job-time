@@ -15,7 +15,9 @@
 			<div class="form-group">
 				<label class="">{{$ml.with('VueJS').get('txtLang')}}
 				</label>
-				<select-2 v-model="language" :options="langOptions" class="select2">
+				<select-2 v-model="language" class="select2">
+					<option value="vi">Vietnamese</option>
+                    <option value="ja">Japanese</option>
 				</select-2>
 			</div>
 			<div class="form-group">
@@ -76,13 +78,11 @@ export default {
 			role: 0,
 			password: '',
 			password_confirmation: '',
-			rolesOption: [],
-			langOptions: []
+			rolesOption: []
 		}
 	},
 	mounted() {
 		let _this = this;
-		_this.getLangOptions();
 		$(document).on('click', '.languages button', function() {
 			_this.language = _this.$ml.current
 		});
@@ -122,12 +122,6 @@ export default {
 
 			this.$emit('create-user', newUser);
 		},
-		getLangOptions() {
-			this.langOptions = [
-				{id: 'vi', text: 'Vietnamese'},
-				{id: 'ja', text: 'Japanese'}
-			]
-		},
 		customFormatter(date) {
 			return moment(date).format('DD-MM-YYYY');
 		},
@@ -164,9 +158,6 @@ export default {
 		}],
 		success: [{
 			handler: 'resetData'
-		}],
-		language: [{
-			handler: 'getLangOptions'
 		}]
 	}
 }

@@ -13,8 +13,7 @@
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
-                    <h4 class="card-title">{{$ml.with('VueJS').get('txtUserList')}}
-</h4>
+                    <h4 class="card-title">{{$ml.with('VueJS').get('txtUserList')}}</h4>
                 </template>
                 <div class="table-responsive">
                     <action-table
@@ -172,6 +171,7 @@
             resetValidate() {
                 this.validationSuccess = "";
                 this.validationErrors = "";
+                this.currentUser = {};
             }
         }
     };

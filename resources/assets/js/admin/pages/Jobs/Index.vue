@@ -17,10 +17,7 @@
                             <div class="d-flex justify-content-between">
                                 <h4 class="card-title">{{$ml.with('VueJS').get('txtJobsList')}}</h4>
                                 <div class="form-group mb-0" style="min-width: 160px;">
-                                    <select-2 v-model="showFilter" class="select2" v-on:input="changeShowFilter">
-                                        <option value="showSchedule">{{$ml.with('VueJS').get('txtShowBySchedule')}}</option>
-                                        <option value="all">{{$ml.with('VueJS').get('txtShowAll')}}</option>
-                                    </select-2>
+                                    <select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
                                 </div>
                             </div>
                         </template>
@@ -110,6 +107,7 @@ export default {
             logTimeData: [],
             timeTotal: 0,
             jobsTime: [],
+            optionsFilter: [],
             // schedules: [],
             currentJob: null,
             currentTimeLog: null,
@@ -124,11 +122,18 @@ export default {
             jAlign: 'right',
             jSize: 'small',
 
-            showFilter: 'showSchedule'
+            showFilter: 'showSchedule',
         }
     },
     mounted() {
-        this.fetchItems();
+        let _this = this;
+        _this.fetchItems();
+        _this.getOptions();
+        
+        $(document).on('click', '.languages button', function() {
+            _this.getOptions();
+            _this.showFilter = 'showSchedule';
+        });
     },
     methods: {
         fetchItems() {
@@ -146,6 +151,13 @@ export default {
                     console.log(err);
                     alert("Could not load projects");
                 });
+        },
+        getOptions() {
+            let arr = [
+                {id: 'showSchedule', text: this.$ml.with('VueJS').get('txtShowBySchedule')},
+                {id: 'all', text: this.$ml.with('VueJS').get('txtShowAll')}
+            ];
+            this.optionsFilter = [...arr];
         },
         changeShowFilter() {
             let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
@@ -353,6 +365,9 @@ export default {
         }],
         start_date: [{
             handler: 'fetchItems'
+        }],
+        showFilter: [{
+            handler: 'changeShowFilter'
         }]
     }
 }

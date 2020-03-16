@@ -10,11 +10,11 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-6">
-                        <label class=""><strong>{{$ml.with('VueJS').get('txtStartTime')}}</strong></label>
+                        <label class=""><strong>{{$ml.with('VueJS').get('lblStartTime')}}</strong></label>
                         <vue-timepicker v-model="currentTimeLog.start_time" hide-disabled-items :minute-range="startMinuteRange" :hour-range="startHourRange"  input-width="100%" close-on-complete @change="changeStartTime" required></vue-timepicker>
                     </div>
                     <div class="col-sm-6">
-                        <label class=""><strong>{{$ml.with('VueJS').get('txtEndTime')}}</strong></label>
+                        <label class=""><strong>{{$ml.with('VueJS').get('lblEndTime')}}</strong></label>
                         <vue-timepicker v-model="currentTimeLog.end_time" hide-disabled-items :minute-range="endMinuteRange" :hour-range="endHourRange"  input-width="100%" close-on-complete @change="changeEndTime" required :disabled="endDisabled"></vue-timepicker>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary" :disabled="buttonDisabled">{{$ml.with('VueJS').get('txt')}}{{$ml.with('VueJS').get('txtUpdate')}}</button>
+                <button type="submit" class="btn btn-primary" :disabled="buttonDisabled">{{$ml.with('VueJS').get('txtUpdate')}}</button>
             </div>
         </form>
     </modal>

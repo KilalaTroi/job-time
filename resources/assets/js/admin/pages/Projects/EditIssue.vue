@@ -19,8 +19,8 @@
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtProject')}}</label>
                         <div>
-                            <select-2 :options="projectOptions" v-model="currentItem.id" class="select2">
-                                <option disabled value="0">Select one</option>
+                            <select-2 :options="projects" v-model="currentItem.id" class="select2">
+                                <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                             </select-2>
                         </div>
                     </div>
@@ -82,19 +82,16 @@ export default {
         return {
             modalLg: 'modal-lg',
             has_period: true,
-            projectOptions: []
         }
     },
+    mounted() {
+        let _this = this;
+        
+        $(document).on('click', '.languages button', function() {
+            if(_this.currentItem) _this.currentItem.id = 0;
+        });
+    },
     methods: {
-        getDataProjects(data) {
-            if (data.length) {
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                this.projectOptions = [obj].concat(data);
-            }
-        },
         getLanguage(data) {
             return data.current === "vi" ? vi : ja
         },
@@ -138,9 +135,6 @@ export default {
         }
     },
     watch: {
-        projects: [{
-            handler: 'getDataProjects'
-        }],
         currentItem: [{
             handler: 'currentPeriod'
         }]

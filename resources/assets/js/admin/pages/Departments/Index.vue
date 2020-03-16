@@ -50,27 +50,6 @@
     import EditItem from "./Edit";
     import CreateButton from "../../components/Buttons/Create";
 
-    const tableColumns = [
-        {
-            id: "name",
-            value: "Name",
-            width: "",
-            class: ""
-        },
-        {
-            id: "name_vi",
-            value: "Name VI",
-            width: "",
-            class: ""
-        },
-        {
-            id: "name_ja",
-            value: "Name JA",
-            width: "",
-            class: ""
-        }
-    ];
-
     export default {
         components: {
             ActionTable,
@@ -82,7 +61,11 @@
 
         data() {
             return {
-                columns: [...tableColumns],
+                columns: [
+                    { id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
+                    { id: "name_vi", value: this.$ml.with('VueJS').get('txtNameVi'), width: "", class: "" },
+                    { id: "name_ja", value: this.$ml.with('VueJS').get('txtNameJa'), width: "", class: "" }
+                ],
                 departments: [],
                 currentItem: null,
                 validationErrors: "",
@@ -90,7 +73,15 @@
             };
         },
         mounted() {
-            this.fetchItems();
+            let _this = this;
+            _this.fetchItems();
+            $(document).on('click', '.languages button', function() {
+                _this.columns = [
+                    { id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
+                    { id: "name_vi", value: _this.$ml.with('VueJS').get('txtNameVi'), width: "", class: "" },
+                    { id: "name_ja", value: _this.$ml.with('VueJS').get('txtNameJa'), width: "", class: "" }
+                ];
+            });
         },
         methods: {
             fetchItems() {
