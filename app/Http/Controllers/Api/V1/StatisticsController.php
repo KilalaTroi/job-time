@@ -241,7 +241,7 @@ class StatisticsController extends Controller
                 $index++;
             }
             $mainTable[$type->slug][''] = "  ";
-            $mainTable[$type->slug]['Total'] = $total ? ($total/$numberWork) . '%' : $total . '%';
+            $mainTable[$type->slug]['Total'] = $total ? round($total/$numberWork, 1) . '%' : $total . '%';
         }
 
         $otherTotal = 0;
@@ -262,7 +262,7 @@ class StatisticsController extends Controller
 
         $mainTable['other'] = $other;
         $mainTable['other'][''] = "  ";
-        $mainTable['other']['Total'] = $otherTotal ? ($otherTotal/$numberWork) . '%' : $otherTotal . '%';
+        $mainTable['other']['Total'] = $otherTotal ? round($otherTotal/$numberWork, 1) . '%' : $otherTotal . '%';
 
         $year = $nameFile = $startMonth->format('Y/m') . '-' . Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->format('Y/m');
         if ( $infoUser ) $nameFile .= '-'.$infoUser[0]->text;
