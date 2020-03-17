@@ -21,6 +21,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/clear-cache', function() {
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('config:clear');
+    Artisan::call('view:clear');
+    return "Cache is cleared";
+});
+
 Route::get('/logout', function () {
     Auth::logout();
     return redirect('/login');
@@ -47,7 +55,7 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
     Route::get('statistic/filter-allocation', 'StatisticsController@filterAllocation');
     Route::get('statistic/export-report/{file_extension}', 'StatisticsController@exportReport');
-    Route::post('statistic/totaling', 'StatisticsController@getDataTotaling');
+    Route::post('statistic/datatotaling', 'StatisticsController@getDataTotaling');
 
     Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');
     Route::post('import-projects', 'ProjectsController@importProjects');
