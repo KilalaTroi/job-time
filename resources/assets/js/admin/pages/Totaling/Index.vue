@@ -224,7 +224,7 @@ export default {
 	},
 	methods: {
 		fetchData() {
-			let uri = "/data/statistic/totaling/";
+			let uri = "/data/statistic/datatotaling";
 			axios
 			.post(uri, {
 				user_id: this.user_id,
@@ -253,7 +253,7 @@ export default {
 			};
 		},
 		fetchDataFilter() {
-			let uri = "/data/statistic/totaling/";
+			let uri = "/data/statistic/datatotaling";
 			axios
 			.post(uri, {
 				user_id: this.user_id,
@@ -274,7 +274,7 @@ export default {
 		},
 		getResults(page = 1) {
 			axios
-			.post("/data/statistic/totaling?page=" + page, {
+			.post("/data/statistic/datatotaling?page=" + page, {
 				user_id: this.user_id,
 				start_date: this.dateFormatter(this.start_date),
 				end_date: this.dateFormatter(this.end_date),
@@ -288,7 +288,7 @@ export default {
 			});
 		},
 		exportExcel() {
-			let uri = "/data/export-report-time-user/";
+			let uri = "/data/export-report-time-user";
 			axios
 			.post(uri, {
 				user_id: this.user_id,

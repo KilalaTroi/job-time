@@ -44,7 +44,7 @@ export default {
             let formData = new FormData();
             formData.append('file', this.file);
 
-            let uri = "/data/import-projects/";
+            let uri = "/data/import-projects";
             axios
                 .post(uri, formData,
                 {
