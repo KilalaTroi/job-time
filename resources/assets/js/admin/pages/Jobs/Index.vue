@@ -1,20 +1,25 @@
 <template>
     <div class="content">
-        <div class="container-fluid">
+        <div class="container-fluid max-width-1170">
             <div class="row">
                 <div class="col col-sm-auto">
                     <card>
                         <template slot="header">
                             <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
                         </template>
-                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true" :disabled-dates="disabledEndDates()">
+                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </card>
                 </div>
                 <div class="col">
                     <card>
                         <template slot="header">
-                            <h4 class="card-title">Jobs List</h4>
+                            <div class="d-flex justify-content-between">
+                                <h4 class="card-title">{{$ml.with('VueJS').get('txtJobsList')}}</h4>
+                                <div class="form-group mb-0" style="min-width: 160px;">
+                                    <select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
+                                </div>
+                            </div>
                         </template>
                         <div class="table-responsive" v-if="jobs">
                             <job-table
@@ -28,16 +33,19 @@
                     </card>
                     <card>
                         <template slot="header">
-                            <h4 class="card-title">Time Record</h4>
+                            <h4 class="card-title">{{$ml.with('VueJS').get('txtTimeRecord')}}</h4>
                         </template>
                         <div class="table-responsive">
                             <action-table
-                                class="table-hover table-striped"
+                                class="table-hover table-striped time-record"
                                 :columns="logColumns"
                                 :data="logTime"
                                 v-on:get-item="getItem" 
                                 v-on:delete-item="deleteItem">
                             </action-table>
+                        </div>
+                        <div class="alert alert-danger" v-if="timeTotal > 28800">
+                          <span>{{$ml.with('VueJS').get('msgOverTime')}}</span>
                         </div>
                     </card>
                 </div>
@@ -51,18 +59,19 @@
 <script>
 import Card from '../../components/Cards/Card'
 import Datepicker from 'vuejs-datepicker';
-import { en, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 import JobTable from '../../components/TableJob'
 import ActionTable from '../../components/TableAction'
 import AddTime from './AddTime'
 import EditTime from './EditTime'
+import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 
 const tableColumns = [
     { id: 'department', value: 'Department', width: '', class: '' },
     { id: 'project', value: 'Project', width: '', class: '' },
     { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
-    { id: 'phase', value: 'Phase', width: '110', class: 'text-center' },
+    // { id: 'phase', value: 'Phase', width: '110', class: 'text-center' },
     { id: 'time', value: 'Time', width: '110', class: 'text-center' }
 ];
 
@@ -81,7 +90,8 @@ export default {
         JobTable,
         ActionTable,
         AddTime,
-        EditTime
+        EditTime,
+        Select2
     },
     data() {
         return {
@@ -91,11 +101,14 @@ export default {
             logColumns: [...logTimeColumns],
             departments: [],
             jobs: [],
+            allJobs: [],
             jobData: {},
             logTime: [],
             logTimeData: [],
+            timeTotal: 0,
             jobsTime: [],
-            schedules: [],
+            optionsFilter: [],
+            // schedules: [],
             currentJob: null,
             currentTimeLog: null,
 
@@ -107,22 +120,50 @@ export default {
             jLimit: 2,
             jShowDisabled: true,
             jAlign: 'right',
-            jSize: 'small'
+            jSize: 'small',
+
+            showFilter: 'showSchedule',
         }
     },
     mounted() {
-        this.fetchItems();
+        let _this = this;
+        _this.fetchItems();
+        _this.getOptions();
+        
+        $(document).on('click', '.languages button', function() {
+            _this.getOptions();
+            _this.showFilter = 'showSchedule';
+        });
     },
     methods: {
         fetchItems() {
-            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID;
+            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
             axios.get(uri)
                 .then(res => {
                     this.departments = res.data.departments;
                     this.jobData = res.data.jobs;
+                    this.allJobs = res.data.allJobs;
                     this.jobsTime = res.data.jobsTime;
                     this.logTimeData = res.data.logTime;
-                    this.schedules = res.data.schedules;
+                    // this.schedules = res.data.schedules;
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load projects");
+                });
+        },
+        getOptions() {
+            let arr = [
+                {id: 'showSchedule', text: this.$ml.with('VueJS').get('txtShowBySchedule')},
+                {id: 'all', text: this.$ml.with('VueJS').get('txtShowAll')}
+            ];
+            this.optionsFilter = [...arr];
+        },
+        changeShowFilter() {
+            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
+            axios.get(uri)
+                .then(res => {
+                    this.jobData = res.data.jobs;
                 })
                 .catch(err => {
                     console.log(err);
@@ -130,58 +171,69 @@ export default {
                 });
         },
         getResults(page = 1) {
-            axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID)
+            axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter)
                 .then(response => {
                     this.jobData = response.data.jobs; 
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter(function(elem) {
+            let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
             });
 
             if (obj.length > 0)
                 return obj[0];
         },
+        checkTimeTotal() {
+            return this.timeTotal > 28800 ? true : false;
+        },
         getDataJobs(jobData) {
             if (jobData.data.length) {
-                let dataJobs = [];
-
-                for (let i = 0; i < jobData.data.length; i++) {
-                    let time = typeof(this.getObjectValue(this.jobsTime, jobData.data[i].id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, jobData.data[i].id).total : false;
-                    let obj = {
-                        id: jobData.data[i].id,
-                        department: this.getObjectValue(this.departments, jobData.data[i].dept_id).text != 'All' ? this.getObjectValue(this.departments, jobData.data[i].dept_id).text : '',
-                        project: jobData.data[i].p_name,
-                        issue: jobData.data[i].i_name,
-                        phase: typeof(this.getObjectValue(this.schedules, jobData.data[i].id)) !== 'undefined' ? this.getObjectValue(this.schedules, jobData.data[i].id).memo : '',
+                this.jobs = jobData.data.map((item, index) => {
+                    let time = typeof(this.getObjectValue(this.jobsTime, item.id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, item.id).total : false;
+                    let checkTR = item.type.includes("_tr") ? " (TR)" : "";
+                    return {
+                        id: item.id,
+                        department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
+                        project: item.p_name + checkTR,
+                        issue: item.i_name,
                         time: time ? this.hourFormatter(time) : '00:00'
                     };
-                    dataJobs.push(obj);
-                }
-                this.jobs = dataJobs;
+                });
             } else {
                 this.jobs = [];
             }
         },
         getDataLogTime(logTimeData) {
             if (logTimeData.length) {
-                let dataTimes = [];
-
-                for (let i = 0; i < logTimeData.length; i++) {
-                    let issue = typeof(this.getObjectValue(this.jobData.data, logTimeData[i].issue_id)) !== 'undefined' ? this.getObjectValue(this.jobData.data, logTimeData[i].issue_id) : false;
-                    if ( issue ) {
-                        let obj = {
-                            id: logTimeData[i].id,
-                            project: issue.p_name,
+                let dataTimes = logTimeData.filter((item) => {
+                    return typeof(this.getObjectValue(this.allJobs, item.issue_id)) !== 'undefined';
+                }).map((item, index) => {
+                    let issue = this.getObjectValue(this.allJobs, item.issue_id);
+                    let checkTR = issue.type.includes("_tr") ? " (TR)" : "";
+                    return {
+                            id: item.id,
+                            project: issue.p_name + checkTR,
                             issue: issue.i_name,
-                            start_time: logTimeData[i].start_time,
-                            end_time: logTimeData[i].end_time,
-                            total: logTimeData[i].total ? this.hourFormatter(logTimeData[i].total) : '00:00'
+                            start_time: item.start_time,
+                            end_time: item.end_time,
+                            total: item.total ? this.hourFormatter(item.total) : '00:00'
                         };
-                        dataTimes.push(obj);
-                    }
+                });
+
+                if ( dataTimes.length ) {
+                    this.timeTotal = this.totalArrayObject(logTimeData);
+                    let total = {
+                        id: '',
+                        project: '',
+                        issue: '',
+                        start_time: '',
+                        end_time: 'Total:',
+                        total: this.timeTotal ? this.hourFormatter(this.timeTotal) : '00:00'
+                    };
+                    dataTimes.push(total);
                 }
+                
                 this.logTime = dataTimes;
             } else {
                 this.logTime = [];
@@ -259,7 +311,7 @@ export default {
                 });
         },
         deleteItem(id) {
-            if (confirm("Are you sure want to delete this record?")) {
+            if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                 let uri = "/data/jobs/" + id;
                 axios
                     .delete(uri)
@@ -293,10 +345,16 @@ export default {
 
             return result;
         },
+        totalArrayObject(arr) {
+            return arr.reduce((total, item) => { return total + item.total }, 0);
+        },
         resetValidate() {
             this.validationSuccess = '';
             this.validationErrors = '';
-        }
+        },
+        getLanguage(data) {
+            return data.current === "vi" ? vi : ja
+        },
     },
     watch: {
         jobData: [{
@@ -307,9 +365,15 @@ export default {
         }],
         start_date: [{
             handler: 'fetchItems'
+        }],
+        showFilter: [{
+            handler: 'changeShowFilter'
         }]
     }
 }
 </script>
 <style lang="scss">
+.time-record tr:last-child button {
+    display: none;
+}
 </style>

@@ -5,7 +5,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-auto">
                         <create-button>
-                            <template slot="title">Create new department</template>
+                            <template slot="title">{{$ml.with('VueJS').get('txtCreateDept')}}</template>
                         </create-button>
                     </div>
                 </div>
@@ -13,7 +13,7 @@
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
-                    <h4 class="card-title">Departments list</h4>
+                    <h4 class="card-title">{{$ml.with('VueJS').get('txtDeptList')}}</h4>
                 </template>
                 <div class="table-responsive">
                     <action-table
@@ -50,27 +50,6 @@
     import EditItem from "./Edit";
     import CreateButton from "../../components/Buttons/Create";
 
-    const tableColumns = [
-        {
-            id: "name",
-            value: "Name",
-            width: "",
-            class: ""
-        },
-        {
-            id: "name_vi",
-            value: "Name VI",
-            width: "",
-            class: ""
-        },
-        {
-            id: "name_ja",
-            value: "Name JA",
-            width: "",
-            class: ""
-        }
-    ];
-
     export default {
         components: {
             ActionTable,
@@ -82,7 +61,11 @@
 
         data() {
             return {
-                columns: [...tableColumns],
+                columns: [
+                    { id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
+                    { id: "name_vi", value: this.$ml.with('VueJS').get('txtNameVi'), width: "", class: "" },
+                    { id: "name_ja", value: this.$ml.with('VueJS').get('txtNameJa'), width: "", class: "" }
+                ],
                 departments: [],
                 currentItem: null,
                 validationErrors: "",
@@ -90,7 +73,15 @@
             };
         },
         mounted() {
-            this.fetchItems();
+            let _this = this;
+            _this.fetchItems();
+            $(document).on('click', '.languages button', function() {
+                _this.columns = [
+                    { id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
+                    { id: "name_vi", value: _this.$ml.with('VueJS').get('txtNameVi'), width: "", class: "" },
+                    { id: "name_ja", value: _this.$ml.with('VueJS').get('txtNameJa'), width: "", class: "" }
+                ];
+            });
         },
         methods: {
             fetchItems() {
@@ -127,7 +118,7 @@
                     });
             },
             deleteItem(id) {
-                if (confirm("Are you sure want to delete this record?")) {
+                if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                     let uri = "/data/departments/" + id;
                     axios
                         .delete(uri)

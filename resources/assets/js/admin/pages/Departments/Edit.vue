@@ -1,17 +1,17 @@
 <template>
     <modal id="itemDetail" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Edit Department</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtEditDept')}}</template>
         <div v-if="currentItem">
             <div class="form-group">
-                <label class>Name</label>
+                <label class>{{$ml.with('VueJS').get('txtName')}}</label>
                 <input v-model="currentItem.name" type="text" name="name" class="form-control" required/>
             </div>
             <div class="form-group">
-                <label class>Name VI</label>
+                <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
                 <input v-model="currentItem.name_vi" type="text" name="name_vi" class="form-control"/>
             </div>
             <div class="form-group">
-                <label class>Name JA</label>
+                <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
                 <input v-model="currentItem.name_ja" type="text" name="name_ja" class="form-control"/>
             </div>
             <error-item :errors="errors"></error-item>
@@ -22,9 +22,8 @@
                         @click="$emit('update-item', currentItem)"
                         type="button"
                         class="btn btn-primary"
-                >Update
+                >{{$ml.with('VueJS').get('txtUpdate')}}
                 </button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </modal>

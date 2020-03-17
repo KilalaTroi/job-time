@@ -1,25 +1,24 @@
 <template>
     <modal id="itemCreate" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Create Department</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtCreateDept')}}</template>
         <form @submit="emitCreateItem">
             <div class="form-group">
-                <label class="">Name</label>
+                <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
                 <input v-model="name" type="text" name="name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="">Name VI</label>
+                <label class="">{{$ml.with('VueJS').get('txtNameVi')}}</label>
                 <input v-model="name_vi" type="text" name="name_vi" class="form-control">
             </div>
             <div class="form-group">
-                <label class="">Name JA</label>
+                <label class="">{{$ml.with('VueJS').get('txtNameJa')}}</label>
                 <input v-model="name_ja" type="text" name="name_ja" class="form-control">
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary">Create</button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}</button>
             </div>
         </form>
     </modal>

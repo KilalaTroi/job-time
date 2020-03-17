@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Department;
+use App\Imports\ProjectsImport;
+use App\Type;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Project;
 use App\Issue;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Excel;
+use Illuminate\Validation\Validator;
 
 class ProjectsController extends Controller
 {
@@ -17,9 +23,27 @@ class ProjectsController extends Controller
      */
     public function index()
     {
+        $search = isset($_GET['search']) ? json_decode($_GET['search']) : array();
+        $keyword = isset($search->keyword) && $search->keyword !== '' ? $search->keyword : false;
+        $type_id = isset($search->type_id) && $search->type_id != '-1' ? $search->type_id : false;
+        $dept_id = isset($search->dept_id) && $search->dept_id != '1' ? $search->dept_id : false;
         $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+
+        $projectOptions = DB::table('projects as p')
+        ->select(
+            'p.id', 
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
+            DB::raw('max(i.id) as issue_id')
+        )
+        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+        ->whereIn('i.status', $status)
+        ->groupBy('p.id')
+        ->orderBy('p.id', 'desc')
+        ->get()->toArray();
+
         $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
@@ -27,7 +51,9 @@ class ProjectsController extends Controller
                 'p.name as p_name',
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
+                'p.room_id as room_id',
                 'i.name as i_name',
+                'i.page as page',
                 'status',
                 'dept_id',
                 'type_id',
@@ -36,12 +62,25 @@ class ProjectsController extends Controller
             )
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->whereIn('i.status', $status)
+            ->when($keyword, function ($query, $keyword) {
+                return $query->where(function ($query) use ($keyword) {
+                    $query->where('p.name', 'like', '%'. $keyword .'%')
+                          ->orWhere('i.name', 'like', '%'. $keyword .'%');
+                });
+            })
+            ->when($type_id, function ($query, $type_id) {
+                return $query->where('type_id', '=', $type_id);
+            })
+            ->when($dept_id, function ($query, $dept_id) {
+                return $query->where('dept_id', '=', $dept_id);
+            })
             ->orderBy('issue_id', 'desc')
-            ->paginate(10);
+            ->paginate(20);
             // ->take(100)->get()->toArray();
 
         return response()->json([
             'departments' => $departments,
+            'projectOptions' => $projectOptions,
             'types' => $types,
             'projects' => $projects
         ]);
@@ -58,8 +97,9 @@ class ProjectsController extends Controller
         $request->merge(['name' => $request->get('p_name')]);
         
         $this->validate($request, [
-            'name' => 'required|max:255|unique:projects',
-            'type_id' => 'required|numeric|min:0|not_in:0'
+            'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
+            'type_id' => 'required|numeric|min:0|not_in:0',
+            'page' => 'numeric|nullable',
         ]);
 
         $project = Project::create([
@@ -68,6 +108,7 @@ class ProjectsController extends Controller
             'name_ja' => $request->get('p_name_ja'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
+            'room_id' => $request->get('room_id'),
         ]);
 
         $issue = array();
@@ -90,6 +131,7 @@ class ProjectsController extends Controller
             $issue = Issue::create([
                 'project_id' => $project->id,
                 'name' => $request->get('i_name'),
+                'page' => $request->get('page'),
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'status' => 'publish',
@@ -99,6 +141,7 @@ class ProjectsController extends Controller
         return response()->json(array(
             'id' => $project->id,
             'issue_id' => $issue->id,
+            'page' => $issue->page,
             'message' => 'Successfully.'
         ), 200);
     }
@@ -119,7 +162,9 @@ class ProjectsController extends Controller
                 'p.name as p_name',
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
+                'p.room_id as room_id',
                 'i.name as i_name',
+                'i.page as page',
                 'status',
                 'dept_id',
                 'type_id',
@@ -142,19 +187,32 @@ class ProjectsController extends Controller
     public function update($id, Request $request)
     {
         $request->merge(['name' => $request->get('p_name')]);
+
+        $project = Project::findOrFail($id);
+
+        $sameProject = Project::where([
+            ['type_id', '=', $request->get('type_id')],
+            ['name', '=', $request->get('p_name')],
+            ['id', '<>', $project->id],
+        ])->count();
+        
+        if ( $sameProject > 0 ) {
+            $this->validate($request, [
+                'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
+            ]);
+        }
         
         $this->validate($request, [
-            'name' => 'required|max:255|unique:projects,name,' . $id,
             'type_id' => 'required|numeric|min:0|not_in:0',
         ]);
 
-        $project = Project::findOrFail($id);
         $project->update([
             'name' => $request->get('p_name'),
             'name_vi' => $request->get('p_name_vi'),
             'name_ja' => $request->get('p_name_ja'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
+            'room_id' => $request->get('room_id'),
         ]);
 
         return response()->json(array(
@@ -176,5 +234,93 @@ class ProjectsController extends Controller
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
+    }
+
+    public function importProjects(Request $request) {
+        $this->validate($request, [
+            'file' => 'required'
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $data = Excel::load($path)->get();
+        if($data->count()){
+            $validator = \Illuminate\Support\Facades\Validator::make($data->toArray(), $this->rules());
+            if ($validator->fails()) {
+                throw new \Exception(
+                    $validator->errors()
+                );
+            }
+            $format = 'Y-m-d';
+            $listnote = [];
+            foreach ($data as $key => $value) {
+                $dept = Department::where('name', trim($value->department))->first();
+                $type = Type::where('slug', trim($value->type))->first();
+
+                $start_time =    $value->start_date;
+                $end_time =     $value->end_date;
+                $page = $value->page;
+
+                if(empty($dept)) {
+                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Department '. $value->department;
+                }
+
+                if(empty($type)) {
+                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Type ' . $value->type;
+                }
+
+                $deptId = $dept->id;
+                $typeId = $type->id;
+                if ($deptId && $typeId) {
+                    $project = Project::where('name', trim($value->project))->where('type_id', $typeId)->first();
+                    if (empty($project)) {
+                        $project = Project::create([
+                            'name' => $value->project,
+                            'name_vi' => '',
+                            'name_ja' => '',
+                            'dept_id' => $deptId,
+                            'type_id' => $typeId,
+                            'room_id' => '',
+                        ]);
+                    }
+
+                    $issue = Issue::where('name', trim(trim($value->issue),'"'))->where('project_id', $project->id)->first();
+                    if (empty($issue)) {
+                        $issue = Issue::create([
+                            'project_id' => $project->id,
+                            'name' => trim(trim($value->issue),'"'),
+                            'start_date' => $start_time,
+                            'end_date' => $end_time,
+                            'page' => $page,
+                            'status' => 'publish',
+                        ]);
+                        $listnote['success'][$key][] =  'Row '.($key+2).': is success';
+                    } else if (!empty($issue)){
+                        $listnote['errors'][$key][] = 'Row '.($key+2).': ' . $value->project . ' or ' . $value->issue . ' have exsited in the system';
+                    }
+
+                }
+            }
+
+            if(!empty($listnote['errors'])) {
+                return response()->json($listnote, 403);
+            }
+        }
+
+        return response()->json(array(
+            'message' => array(array('Successfully.'))
+        ), 200);
+    }
+
+    public function rules()
+    {
+        return [
+            '*.department' => 'required|max:255',
+            '*.project' => 'required|max:255',
+            '*.issue' => 'required|max:255',
+            '*.page' => 'numeric|nullable',
+            '*.type' => 'required|max:255',
+            '*.start_date' => 'date|nullable',
+            '*.end_date' => 'date|nullable',
+        ];
     }
 }

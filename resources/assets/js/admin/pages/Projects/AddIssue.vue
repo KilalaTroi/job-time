@@ -1,35 +1,38 @@
 <template>
     <modal id="issueCreate" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Add new issue</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtAddIssue')}}</template>
         <form @submit="emitAddItem">
             <div class="form-group">
-                <label class="">Project</label>
+                <label class="">{{$ml.with('VueJS').get('txtProject')}}</label>
                 <div>
-                    <select-2 :options="projectOptions" v-model="project_id" class="select2">
-                        <option disabled value="0">Select one</option>
+                    <select-2 :options="projects" v-model="project_id" class="select2" @input="changeProjects">
+                        <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                     </select-2>
                 </div>
             </div>
             <div class="form-group">
-                <label class="">Issue name</label>
+                <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
                 <input v-model="i_name" type="text" name="i_name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="">Start date</label>
-                <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()">
+                <label class="">{{$ml.with('VueJS').get('txtPage')}}</label>
+                <input v-model="page" type="text" name="page" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="">{{$ml.with('VueJS').get('txtStartDate')}}</label>
+                <datepicker name="startDate" input-class="form-control" :placeholder="$ml.with('VueJS').get('txtSelectDate')" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                 </datepicker>
             </div>
             <div class="form-group">
-                <label class="">End date</label>
-                <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()">
+                <label class="">{{$ml.with('VueJS').get('txtEndDate')}}</label>
+                <datepicker name="endDate" input-class="form-control" :placeholder="$ml.with('VueJS').get('txtSelectDate')" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
                 </datepicker>
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary">Add</button>
-                <button type="button" class="btn btn-secondary ml-3" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">{{$ml.with('VueJS').get('txtAdd')}}</button>
             </div>
         </form>
     </modal>
@@ -37,7 +40,7 @@
 <script>
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Datepicker from 'vuejs-datepicker';
-import { en, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja } from 'vuejs-datepicker/dist/locale'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Modal from '../../components/Modals/Modal'
@@ -59,36 +62,21 @@ export default {
             i_name: '',
             start_date: '',
             end_date: '',
-            en: en,
-            ja: ja,
-            projectOptions: [],
+            page: ''
         }
     },
     mounted() {},
     methods: {
-        getDataProjects(data) {
-            if (data.length) {
-                let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                dataOptions.push(obj);
+        getObjectValue(data, id) {
+            let obj = data.filter((elem) => {
+                if (elem.id == id) return elem;
+            });
 
-                for (let i = 0; i < data.length; i++) {
-                    let objCheck = dataOptions.filter(function(elem) {
-                        if (elem.id == data[i].id) return elem;
-                    });
-                    if (!(objCheck.length > 0)) {
-                        let obj = {
-                            id: data[i].id,
-                            text: data[i].p_name
-                        };
-                        dataOptions.push(obj);
-                    }
-                }
-                this.projectOptions = dataOptions;
-            }
+            if (obj.length > 0)
+                return obj[0];
+        },
+        getLanguage(data) {
+            return data.current === "vi" ? vi : ja
         },
         emitAddItem(e) {
             e.preventDefault()
@@ -96,6 +84,7 @@ export default {
             const newIssue = {
                 project_id: this.project_id,
                 i_name: this.i_name,
+                page: this.page,
                 start_date: this.start_date,
                 end_date: this.end_date
             };
@@ -124,15 +113,27 @@ export default {
             if (data.length) {
                 this.project_id = 0;
                 this.i_name = '';
+                this.page = '';
                 this.start_date = '';
                 this.end_date = '';
             }
+        },
+        changeProjects() {
+            let issue_id = this.getObjectValue(this.projects, this.project_id).issue_id;
+
+            let uri = '/data/issues/getpage/' + issue_id;
+            axios.get(uri)
+                .then(res => {
+                    console.log(res);
+                    this.page = res.data.page ? res.data.page : '';
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not found!");
+                });
         }
     },
     watch: {
-        projects: [{
-            handler: 'getDataProjects'
-        }],
         start_date: [{
             handler: 'disabledStartDates'
         }],

@@ -5,7 +5,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-auto">
                         <create-button>
-                            <template slot="title">Create new type</template>
+                            <template slot="title">{{$ml.with('VueJS').get('txtCreateType')}}</template>
                         </create-button>
                     </div>
                 </div>
@@ -13,7 +13,7 @@
 
             <card class="strpied-tabled-with-hover">
                 <template slot="header">
-                    <h4 class="card-title">Job types list</h4>
+                    <h4 class="card-title">{{$ml.with('VueJS').get('txtJobTypeList')}}</h4>
                 </template>
                 <div class="table-responsive">
                     <action-table
@@ -50,12 +50,8 @@
     import EditItem from "./Edit";
     import CreateButton from "../../components/Buttons/Create";
 
-    const tableColumns = [
-        {id: 'slug', value: 'Name', width: '', class: ''},
-        {id: 'value', value: 'Color', width: '110', class: 'text-center'},
-        {id: 'slug_vi', value: 'Name VI', width: '', class: ''},
-        {id: 'slug_ja', value: 'Name JA', width: '', class: ''}
-    ];
+    const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
+
     export default {
         components: {
             ActionTable,
@@ -66,15 +62,32 @@
         },
         data() {
             return {
-                columns: [...tableColumns],
+                columns: [
+                    {id: 'slug', value: this.$ml.with('VueJS').get('txtSlug'), width: '200', class: ''},
+                    {id: 'value', value: this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center'},
+                    {id: 'slug_' + langDefault, value: this.$ml.with('VueJS').get('txtName'), width: '200', class: ''},
+                    {id: 'description_' + langDefault, value: this.$ml.with('VueJS').get('txtDesc'), width: '', class: ''}
+                ],
                 types: [],
+                langSlug: langDefault,
                 currentItem: null,
                 validationErrors: "",
                 validationSuccess: ""
             };
         },
         mounted() {
-            this.fetchItems();
+            let _this = this;
+            _this.fetchItems();
+            
+            $(document).on('click', '.languages button', function() {
+                _this.langSlug = _this.$ml.current;
+                _this.columns = [
+                    {id: 'slug', value: _this.$ml.with('VueJS').get('txtSlug'), width: '200', class: ''},
+                    {id: 'value', value: _this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center'},
+                    {id: 'slug_' + _this.langSlug, value: _this.$ml.with('VueJS').get('txtName'), width: '200', class: ''},
+                    {id: 'description_' + _this.langSlug, value: _this.$ml.with('VueJS').get('txtDesc'), width: '', class: ''}
+                ];
+            });
         },
         methods: {
             fetchItems() {
@@ -110,7 +123,7 @@
                     });
             },
             deleteItem(id) {
-                if (confirm("Are you sure want to delete this record?")) {
+                if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                     let uri = "/data/types/" + id;
                     axios
                         .delete(uri)

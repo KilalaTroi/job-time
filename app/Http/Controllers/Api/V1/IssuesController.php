@@ -22,7 +22,8 @@ class IssuesController extends Controller
 
         $this->validate($request, [
             'project_id' => 'required|numeric|min:0|not_in:0',
-            'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $project_id
+            'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $project_id,
+            'page' => 'numeric|nullable',
         ]);
 
         $start_date = $request->get('start_date');
@@ -44,6 +45,7 @@ class IssuesController extends Controller
         $issue = Issue::create([
             'project_id' => $project_id,
             'name' => $request->get('name'),
+            'page' => $request->get('page'),
             'start_date' => $start_date,
             'end_date' => $end_date,
             'status' => 'publish',
@@ -54,9 +56,11 @@ class IssuesController extends Controller
         return response()->json(array(
             'id' => $project->id,
             'issue_id' => $issue->id,
+            'page' => $issue->page,
             'p_name' => $project->name,
             'p_name_vi' => $project->name_vi,
             'p_name_ja' => $project->name_ja,
+            'room_id' => $project->room_id,
             'client_id' => $project->client_id,
             'dept_id' => $project->dept_id,
             'type_id' => $project->type_id,
@@ -77,14 +81,19 @@ class IssuesController extends Controller
         $request->merge(['name' => $request->get('i_name')]);
         $issue = Issue::findOrFail($id);
 
+        $this->validate($request, [
+            'page' => 'numeric|nullable',
+        ]);
+
         $sameIssue = Issue::where([
-            ['project_id', '=', $issue->project_id],
+            ['project_id', '=', $request->get('id')],
             ['name', '=', $request->get('i_name')],
+            ['id', '<>', $issue->id],
         ])->count();
         
-        if ( $sameIssue > 0 && $issue->name !== $request->get('i_name') ) {
+        if ( $sameIssue > 0 ) {
             $this->validate($request, [
-                'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $issue->project_id
+                'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $request->get('id')
             ]);
         }
 
@@ -101,7 +110,9 @@ class IssuesController extends Controller
         }
 
         $issue->update([
+            'project_id' => $request->get('id'),
             'name' => $request->get('name'),
+            'page' => $request->get('page'),
             'start_date' => $start_date,
             'end_date' => $end_date,
         ]);
@@ -133,6 +144,21 @@ class IssuesController extends Controller
 
         return response()->json(array(
             'message' => 'Successfully.'
+        ), 200);
+    }
+
+    /**
+     * Get page the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function getpage($id)
+    {
+        $issue = Issue::findOrFail($id);
+
+        return response()->json(array(
+            'page' => $issue->page
         ), 200);
     }
 
