@@ -57,10 +57,17 @@ class StatisticsController extends Controller
 
     public function getDataTotaling(Request $request) {
         // POST data
-        $user_id = $request->get('user_id');
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
+
+        $user_id = $request->get('user_id');
+        $userArr = array();
+        if ( $user_id ) {
+            $userArr = array_map(function($obj) {
+                return $obj['id'];
+            }, $user_id);
+        }
 
         $deptSelects = $request->get('deptSelects');
         $deptArr = array();
@@ -86,8 +93,6 @@ class StatisticsController extends Controller
             }, $projectSelects);
         }
         // End POST data
-
-        $operation = $user_id == 0 ? '<>' : '=';
 
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
@@ -134,6 +139,9 @@ class StatisticsController extends Controller
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+            ->when($userArr, function ($query, $userArr) {
+                return $query->whereIn('u.id', $userArr);
+            })
             ->when($deptArr, function ($query, $deptArr) {
                 return $query->whereIn('p.dept_id', $deptArr);
             })
@@ -146,7 +154,6 @@ class StatisticsController extends Controller
             ->when($issueFilter, function ($query, $issueFilter) {
                 return $query->where('i.name', 'like', '%'.$issueFilter.'%');
             })
-            ->where('u.id', $operation, $user_id)
             ->where('j.date', '>=', $start_time)
             ->where('j.date', '<=', $end_time)
             ->orderBy('u.name', 'asc')

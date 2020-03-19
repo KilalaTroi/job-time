@@ -7,151 +7,153 @@
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtUsers')}}</label>
 							<div>
-								<select2
-								:options="userOptions"
+								<multiselect
+								:multiple="true"
 								v-model="user_id"
-								class="select2 no-disable-first-value"
+								:options="userOptions"
+								:clear-on-select="false"
+								:preserve-search="true"
+								:placeholder="$ml.with('VueJS').get('txtPickSome')"
+								label="text"
+								track-by="text"
+								:preselect-first="true"
+								></multiselect>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class>{{$ml.with('VueJS').get('txtStartDate')}}</label>
+							<datepicker
+							name="startDate"
+							input-class="form-control"
+							placeholder="Select Date"
+							v-model="start_date"
+							:format="customFormatter"
+							:disabled-dates="disabledEndDates()"
+							:language="getLanguage(this.$ml)"
+							></datepicker>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class>{{$ml.with('VueJS').get('txtEndDate')}}</label>
+							<datepicker
+							name="endDate"
+							input-class="form-control"
+							placeholder="Select Date"
+							v-model="end_date"
+							:format="customFormatter"
+							:disabled-dates="disabledStartDates()"
+							:language="getLanguage(this.$ml)"
+							></datepicker>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
+							<div>
+								<multiselect
+								:multiple="true"
+								v-model="deptSelects"
+								:options="departments"
+								:clear-on-select="false"
+								:preserve-search="true"
+								:placeholder="$ml.with('VueJS').get('txtPickSome')"
+								label="text"
+								track-by="text"
+								:preselect-first="true"
+								></multiselect>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
+							<div>
+								<multiselect
+								:multiple="true"
+								v-model="projectSelects"
+								:options="projects"
+								:clear-on-select="false"
+								:preserve-search="true"
+								:placeholder="$ml.with('VueJS').get('txtPickSome')"
+								label="text"
+								track-by="text"
+								:preselect-first="true"
+								></multiselect>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class>
+								{{$ml.with('VueJS').get('txtIssue')}}
+							</label>
+							<input v-model="issue" type="text" name="issue" class="form-control" />
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class>{{$ml.with('VueJS').get('txtTypes')}}</label>
+							<div>
+								<multiselect
+								:multiple="true"
+								v-model="typeSelects"
+								:options="types"
+								:clear-on-select="false"
+								:preserve-search="true"
+								:placeholder="$ml.with('VueJS').get('txtPickSome')"
+								label="slug"
+								track-by="slug"
+								:preselect-first="true"
 								>
-								<option disabled value="0">{{$ml.with('VueJS').get('txtSelectAll')}}</option>
-							</select2>
+								<template slot="option" slot-scope="props">
+									<div>
+										<span class="type-color" :style="optionStyle(props.option.value)"></span>
+										{{ props.option.slug }}
+									</div>
+								</template>
+							</multiselect>
 						</div>
-					</div>
-				</div>
-				<div class="col-sm-3">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtStartDate')}}</label>
-						<datepicker
-						name="startDate"
-						input-class="form-control"
-						placeholder="Select Date"
-						v-model="start_date"
-						:format="customFormatter"
-						:disabled-dates="disabledEndDates()"
-						:language="getLanguage(this.$ml)"
-						></datepicker>
-					</div>
-				</div>
-				<div class="col-sm-3">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtEndDate')}}</label>
-						<datepicker
-						name="endDate"
-						input-class="form-control"
-						placeholder="Select Date"
-						v-model="end_date"
-						:format="customFormatter"
-						:disabled-dates="disabledStartDates()"
-						:language="getLanguage(this.$ml)"
-						></datepicker>
-					</div>
-				</div>
-				<div class="col-sm-3">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
-						<div>
-							<multiselect
-							:multiple="true"
-							v-model="deptSelects"
-							:options="departments"
-							:clear-on-select="false"
-							:preserve-search="true"
-							:placeholder="$ml.with('VueJS').get('txtPickSome')"
-							label="text"
-							track-by="text"
-							:preselect-first="true"
-							></multiselect>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-3">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
-						<div>
-							<multiselect
-							:multiple="true"
-							v-model="projectSelects"
-							:options="projects"
-							:clear-on-select="false"
-							:preserve-search="true"
-							:placeholder="$ml.with('VueJS').get('txtPickSome')"
-							label="text"
-							track-by="text"
-							:preselect-first="true"
-							></multiselect>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-3">
-					<div class="form-group">
-						<label class>
-							{{$ml.with('VueJS').get('txtIssue')}}
-						</label>
-						<input v-model="issue" type="text" name="issue" class="form-control" />
-					</div>
-				</div>
-				<div class="col-sm-3">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtTypes')}}</label>
-						<div>
-							<multiselect
-							:multiple="true"
-							v-model="typeSelects"
-							:options="types"
-							:clear-on-select="false"
-							:preserve-search="true"
-							:placeholder="$ml.with('VueJS').get('txtPickSome')"
-							label="slug"
-							track-by="slug"
-							:preselect-first="true"
-							>
-							<template slot="option" slot-scope="props">
-								<div>
-									<span class="type-color" :style="optionStyle(props.option.value)"></span>
-									{{ props.option.slug }}
-								</div>
-							</template>
-						</multiselect>
 					</div>
 				</div>
 			</div>
-		</div>
-	</card>
+		</card>
 
-	<card class="strpied-tabled-with-hover">
-		<template slot="header">
-			<div class="d-flex justify-content-between">
-				<h4 class="card-title">
-					{{$ml.with('VueJS').get('txtTimeRecord')}}             
-				</h4>
-				<div class="align-self-end">
-					<button @click="exportExcel" class="btn btn-primary">
-						<i class="fa fa-download"></i>
-						{{$ml.with('VueJS').get('txtExportExcel')}}
-					</button>
+		<card class="strpied-tabled-with-hover">
+			<template slot="header">
+				<div class="d-flex justify-content-between">
+					<h4 class="card-title">
+						{{$ml.with('VueJS').get('txtTimeRecord')}}             
+					</h4>
+					<div class="align-self-end">
+						<button @click="exportExcel" class="btn btn-primary">
+							<i class="fa fa-download"></i>
+							{{$ml.with('VueJS').get('txtExportExcel')}}
+						</button>
+					</div>
 				</div>
+			</template>
+			<div class="table-responsive">
+				<no-action-table class="table-hover table-striped" :columns="columns" :data="logTime"></no-action-table>
 			</div>
-		</template>
-		<div class="table-responsive">
-			<no-action-table class="table-hover table-striped" :columns="columns" :data="logTime"></no-action-table>
-		</div>
-		<pagination
-		:data="logTimeData"
-		:show-disabled="jShowDisabled"
-		:limit="jLimit"
-		:align="jAlign"
-		:size="jSize"
-		@pagination-change-page="getResults"
-		></pagination>
-	</card>
-</div>
+			<pagination
+			:data="logTimeData"
+			:show-disabled="jShowDisabled"
+			:limit="jLimit"
+			:align="jAlign"
+			:size="jSize"
+			@pagination-change-page="getResults"
+			></pagination>
+		</card>
+	</div>
 </div>
 </template>
 <script>
 import NoActionTable from "../../components/TableNoAction";
 import Card from "../../components/Cards/Card";
 import CreateButton from "../../components/Buttons/Create";
-import Select2Type from "../../components/SelectTwo/SelectTwoType.vue";
-import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
 import { vi, ja } from "vuejs-datepicker/dist/locale";
@@ -162,15 +164,13 @@ export default {
 		NoActionTable,
 		Card,
 		CreateButton,
-		Select2,
-		Select2Type,
 		Datepicker,
 		Multiselect
 	},
 
 	data() {
 		return {
-			user_id: 0,
+			user_id: [],
 			columns: [
 				{ id: "username", value: this.$ml.with('VueJS').get('lblUsername'), width: "", class: "" },
 				{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "120", class: "" },
@@ -442,16 +442,10 @@ watch: {
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
 .type-color {
-	width: 60px;
+	width: 30px;
 	height: 20px;
 	margin-right: 5px;
 	display: inline-block;
 	vertical-align: middle;
-}
-.select2-container--default
-	.select2-selection--multiple
-	.select2-selection__choice {
-	display: flex;
-	padding: 0 5px 3px;
 }
 </style>
