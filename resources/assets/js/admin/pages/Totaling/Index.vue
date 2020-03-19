@@ -153,7 +153,6 @@
 <script>
 import NoActionTable from "../../components/TableNoAction";
 import Card from "../../components/Cards/Card";
-import CreateButton from "../../components/Buttons/Create";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
 import { vi, ja } from "vuejs-datepicker/dist/locale";
@@ -163,7 +162,6 @@ export default {
 	components: {
 		NoActionTable,
 		Card,
-		CreateButton,
 		Datepicker,
 		Multiselect
 	},

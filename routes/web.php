@@ -60,6 +60,8 @@ Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api
     Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');
     Route::post('import-projects', 'ProjectsController@importProjects');
 
+    Route::post('upload/data', 'UploadController@getData');
+
     Route::get('exports/{filename}', function ($filename)
     {
         $path = storage_path() . '/exports/' . $filename;
