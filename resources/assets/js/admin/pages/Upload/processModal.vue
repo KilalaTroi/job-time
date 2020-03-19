@@ -4,11 +4,11 @@
         <div v-if="currentProcess">
             <div class="form-group">
                 <label class>{{$ml.with('VueJS').get('txtName')}}</label>
-                <input v-model="currentProcess.t_name" type="text" name="name" class="form-control" required/>
+                <input v-model="currentProcess.job_type" type="text" name="name" class="form-control" required/>
             </div>
             <div class="form-group">
                 <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
-                <input v-model="currentProcess.d_name" type="text" name="name_vi" class="form-control"/>
+                <input v-model="currentProcess.phase" type="text" name="name_vi" class="form-control"/>
             </div>
             <div class="form-group">
                 <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
