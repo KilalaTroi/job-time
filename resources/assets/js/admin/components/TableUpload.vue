@@ -4,8 +4,8 @@
             <slot name="columns">
                 <tr>
                     <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
-                    <th width="110" class="text-center">Process</th>
-                    <th width="110" class="text-center">Finish</th>
+                    <th width="110" class="text-center">{{$ml.with('VueJS').get('txtProcess')}}</th>
+                    <th width="110" class="text-center">{{$ml.with('VueJS').get('txtFinish')}}</th>
                 </tr>
             </slot>
         </thead>
