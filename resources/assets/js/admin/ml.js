@@ -393,7 +393,7 @@ export default new MLCreate({
 		txtProcessList: '案件リスト',
 		txtShow: '詳細',
 		txtShowBy: '表示',
-		txtSend: '送り'
+		txtSend: '送信'
     
 	})
 	]
