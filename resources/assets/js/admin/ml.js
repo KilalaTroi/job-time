@@ -134,7 +134,10 @@ export default new MLCreate({
 		txtProcessList: 'Process List',
 		txtShow: 'Show',
 		txtShowBy: 'Show by',
-		txtSend: 'Send'
+		txtSend: 'Send',		
+		txtRCFullDay: 'Full',
+		txtRCAM: 'AM',
+		txtRCPM: 'PM',
 	}),
 
 	new MLanguage('en').create({
@@ -263,7 +266,10 @@ export default new MLCreate({
 		txtSelect: 'Select',
 		txtProcessList: 'Process List',
 		txtShow: 'Show',
-		txtSend: 'Send'
+		txtSend: 'Send',		
+		txtRCFullDay: 'Full',
+		txtRCAM: 'AM',
+		txtRCPM: 'PM',
 	}),
 
 	new MLanguage('ja').create({
@@ -393,7 +399,10 @@ export default new MLCreate({
 		txtProcessList: '案件リスト',
 		txtShow: '詳細',
 		txtShowBy: '表示',
-		txtSend: '送信'
+		txtSend: '送信',
+		txtRCFullDay: 'Full',
+		txtRCAM: 'AM',
+		txtRCPM: 'PM',
     
 	})
 	]
