@@ -59,7 +59,7 @@ export default {
                 {
                     id: 'all_day',
                     name: 'Full-day (8:00 - 17:00)',
-                    color: '#FF0000'
+                    color: '#F55555'
                 }
             ],
             offDays: [],
