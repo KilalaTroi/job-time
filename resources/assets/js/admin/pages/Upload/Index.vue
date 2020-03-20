@@ -116,7 +116,7 @@ import ProcessModal from './ProcessModal'
 import Card from "../../components/Cards/Card";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
-import { vi, ja } from "vuejs-datepicker/dist/locale";
+import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 
@@ -159,7 +159,12 @@ export default {
 			showFilter: 'showSchedule',
 			optionsFilter: [],
 
-			currentProcess: {}
+			currentProcess: {},
+			dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
 		};
 	},
 	mounted() {
@@ -292,52 +297,52 @@ export default {
 			this.currentProcess = {};
 		},
 		getLanguage(data) {
-			return data.current === "vi" ? vi : ja;
+			return this.dataLang[data.current]
 		}
-		},
-		watch: {
-			dataProjects: [
-			{
-				handler: "getDataProjects"
-			}
-			],
-			txtAll: [
-			{
-				handler: "getUserOptions"
-			}
-			],
-			start_date: [
-			{
-				handler: "fetchDataFilter"
-			}
-			],
-			end_date: [
-			{
-				handler: "fetchDataFilter"
-			}
-			],
-			deptSelects: [
-			{
-				handler: "fetchDataFilter"
-			}
-			],
-			projectSelects: [
-			{
-				handler: "fetchDataFilter"
-			}
-			],
-			issue: [
-			{
-				handler: "fetchDataFilter"
-			}
-			],
-			showFilter: [
-			{
-				handler: "fetchDataFilter"
-			}
-			]
+	},
+	watch: {
+		dataProjects: [
+		{
+			handler: "getDataProjects"
 		}
-	};
+		],
+		txtAll: [
+		{
+			handler: "getUserOptions"
+		}
+		],
+		start_date: [
+		{
+			handler: "fetchDataFilter"
+		}
+		],
+		end_date: [
+		{
+			handler: "fetchDataFilter"
+		}
+		],
+		deptSelects: [
+		{
+			handler: "fetchDataFilter"
+		}
+		],
+		projectSelects: [
+		{
+			handler: "fetchDataFilter"
+		}
+		],
+		issue: [
+		{
+			handler: "fetchDataFilter"
+		}
+		],
+		showFilter: [
+		{
+			handler: "fetchDataFilter"
+		}
+		]
+	}
+};
 </script>
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";

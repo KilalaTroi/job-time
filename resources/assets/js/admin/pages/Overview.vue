@@ -110,7 +110,7 @@
     import Chartist from 'chartist'
     import chartistPluginTooltip from 'chartist-plugin-tooltip'
     import Datepicker from 'vuejs-datepicker';
-    import { vi, ja } from 'vuejs-datepicker/dist/locale'
+    import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
     import Select2 from '../components/SelectTwo/SelectTwo.vue'
     import AllOffDays from './OffDays/AllOffDays.vue'
     import moment from 'moment'
@@ -180,6 +180,11 @@
                             }
                         }]
                     ]
+                },
+                dataLang: {
+                    vi: vi,
+                    ja: ja,
+                    en: en
                 }
             }
         },
@@ -328,7 +333,7 @@
                 }
             },
             getLanguage(data) {
-                return data.current === "vi" ? vi : ja
+                return this.dataLang[data.current]
             },
         },
         watch: {

@@ -40,7 +40,7 @@
 <script>
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Datepicker from 'vuejs-datepicker';
-import { vi, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Modal from '../../components/Modals/Modal'
@@ -62,7 +62,12 @@ export default {
             i_name: '',
             start_date: '',
             end_date: '',
-            page: ''
+            page: '',
+            dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
         }
     },
     mounted() {},
@@ -76,7 +81,7 @@ export default {
                 return obj[0];
         },
         getLanguage(data) {
-            return data.current === "vi" ? vi : ja
+            return this.dataLang[data.current]
         },
         emitAddItem(e) {
             e.preventDefault()

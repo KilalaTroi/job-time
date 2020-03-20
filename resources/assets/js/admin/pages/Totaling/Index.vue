@@ -155,7 +155,7 @@ import NoActionTable from "../../components/TableNoAction";
 import Card from "../../components/Cards/Card";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
-import { vi, ja } from "vuejs-datepicker/dist/locale";
+import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 
 export default {
@@ -199,7 +199,12 @@ export default {
 			jLimit: 2,
 			jShowDisabled: true,
 			jAlign: "right",
-			jSize: "small"
+			jSize: "small",
+			dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
 		};
 	},
 	mounted() {
@@ -380,7 +385,7 @@ resetValidate() {
 	this.validationErrors = "";
 },
 getLanguage(data) {
-	return data.current === "vi" ? vi : ja;
+	return this.dataLang[data.current]
 }
 },
 watch: {

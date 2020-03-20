@@ -59,29 +59,13 @@
 <script>
 import Card from '../../components/Cards/Card'
 import Datepicker from 'vuejs-datepicker';
-import { vi, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 import JobTable from '../../components/TableJob'
 import ActionTable from '../../components/TableAction'
 import AddTime from './AddTime'
 import EditTime from './EditTime'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
-
-const tableColumns = [
-    { id: 'department', value: 'Department', width: '', class: '' },
-    { id: 'project', value: 'Project', width: '', class: '' },
-    { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
-    // { id: 'phase', value: 'Phase', width: '110', class: 'text-center' },
-    { id: 'time', value: 'Time', width: '110', class: 'text-center' }
-];
-
-const logTimeColumns = [
-    { id: 'project', value: 'Project', width: '', class: '' },
-    { id: 'issue', value: 'Issue', width: '60', class: 'text-center' },
-    { id: 'start_time', value: 'Start Time', width: '110', class: 'text-center' },
-    { id: 'end_time', value: 'End Time', width: '110', class: 'text-center' },
-    { id: 'total', value: 'Time', width: '110', class: 'text-center' }
-];
 
 export default {
     components: {
@@ -97,8 +81,19 @@ export default {
         return {
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             userCreatedAt: document.querySelector("meta[name='user-created-at']").getAttribute('content'),
-            columns: [...tableColumns],
-            logColumns: [...logTimeColumns],
+            columns: [
+                { id: 'department', value: this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
+                { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'time', value: this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
+            ],
+            logColumns: [
+                { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue', value: this.$ml.with('VueJS').get('txtProject'), width: '60', class: 'text-center' },
+                { id: 'start_time', value: this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
+                { id: 'end_time', value: this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
+                { id: 'total', value: this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
+            ],
             departments: [],
             jobs: [],
             allJobs: [],
@@ -123,6 +118,11 @@ export default {
             jSize: 'small',
 
             showFilter: 'showSchedule',
+            dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
         }
     },
     mounted() {
@@ -133,6 +133,21 @@ export default {
         $(document).on('click', '.languages button', function() {
             _this.getOptions();
             _this.showFilter = 'showSchedule';
+
+            _this.columns = [
+                { id: 'department', value: _this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
+                { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'time', value: _this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
+            ];
+
+            _this.logColumns = [
+                { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue', value: _this.$ml.with('VueJS').get('txtProject'), width: '60', class: 'text-center' },
+                { id: 'start_time', value: _this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
+                { id: 'end_time', value: _this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
+                { id: 'total', value: _this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
+            ]
         });
     },
     methods: {
@@ -353,7 +368,7 @@ export default {
             this.validationErrors = '';
         },
         getLanguage(data) {
-            return data.current === "vi" ? vi : ja
+            return this.dataLang[data.current]
         },
     },
     watch: {
