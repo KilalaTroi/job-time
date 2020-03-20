@@ -65,7 +65,7 @@ import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Datepicker from 'vuejs-datepicker';
-import { vi, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
@@ -82,6 +82,11 @@ export default {
         return {
             modalLg: 'modal-lg',
             has_period: true,
+            dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
         }
     },
     mounted() {
@@ -93,7 +98,7 @@ export default {
     },
     methods: {
         getLanguage(data) {
-            return data.current === "vi" ? vi : ja
+            return this.dataLang[data.current]
         },
         customFormatter(date) {
             return moment(date).format('YYYY/MM/DD');
