@@ -4,7 +4,8 @@
             <slot name="columns">
                 <tr>
                     <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
-                    <th width="110" class="text-center">{{ $ml.with('VueJS').get('txtAction') }}</th>
+                    <th width="110" class="text-center">Process</th>
+                    <th width="110" class="text-center">Finish</th>
                 </tr>
             </slot>
         </thead>
@@ -12,24 +13,20 @@
             <tr v-for="(item, index) in data" :key="index">
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
-                        <span>{{itemValue(item, column)}}</span>
+                        <span v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
-                <td class="text-center d-flex justify-content-center">
-                    <button type="button" @click="$emit('get-job', item.id)" class="btn btn-xs d-flex btn-primary" data-toggle="modal" data-target="#addTime" data-backdrop="static" data-keyboard="false">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                    <!-- <button type="button" class="btn btn-xs d-flex btn-default ml-2">
-                        <i class="fa fa-history" aria-hidden="true"></i>
-                    </button> -->
+                <td class="text-center">
+                    <i @click="$emit('get-process', item.id)" class="fa fa-plus-circle btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i>  
                 </td>
+                <td class="text-center"><i class="fa fa-flag btn-flag"></i></td>
             </tr>
         </tbody>
     </table>
 </template>
 <script>
 export default {
-    name: 'job-table',
+    name: 'upload-table',
     props: {
         columns: Array,
         data: Array
@@ -44,5 +41,21 @@ export default {
     }
 }
 </script>
-<style>
+<style lang="scss">
+.btn-process, .btn-flag {
+    font-size: 24px;
+    width: 24px;
+    color: #6c757d;
+
+    &.active {
+        color: #dc3545;
+    }
+}
+.btn-process {
+    cursor: pointer;
+
+    &:hover {
+        color: #dc3545;
+    }
+}
 </style>

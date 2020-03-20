@@ -238,7 +238,7 @@ class ProjectsController extends Controller
 
     public function importProjects(Request $request) {
         $this->validate($request, [
-            'file' => 'required|mimes:xlsx'
+            'file' => 'required'
         ]);
 
         $path = $request->file('file')->getRealPath();
@@ -246,30 +246,32 @@ class ProjectsController extends Controller
         if($data->count()){
             $validator = \Illuminate\Support\Facades\Validator::make($data->toArray(), $this->rules());
             if ($validator->fails()) {
-                throw new ValidationHttpException(
+                throw new \Exception(
                     $validator->errors()
                 );
             }
             $format = 'Y-m-d';
             $listnote = [];
             foreach ($data as $key => $value) {
-                //$arr[] = ['dept_name' => $value->department,'project'  =>  $value->project,'issue'  =>  $value->issue,'page'  =>  $value->page,'type'  =>  $value->type,'start_date'  =>  $value->start_date,'end_date'  =>  $value->end_date];
                 $dept = Department::where('name', trim($value->department))->first();
-
                 $type = Type::where('slug', trim($value->type))->first();
 
                 $start_time =    $value->start_date;
                 $end_time =     $value->end_date;
+                $page = $value->page;
+
                 if(empty($dept)) {
-                    $listnote['errors'][$key][] = 'Incorrect Department '. $value->department;
+                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Department '. $value->department;
                 }
+
                 if(empty($type)) {
-                    $listnote['errors'][$key][] = 'Incorrect Type ' . $value->type;
+                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Type ' . $value->type;
                 }
+
                 $deptId = $dept->id;
                 $typeId = $type->id;
                 if ($deptId && $typeId) {
-                    $project = Project::where('name', trim($value->project))->where('dept_id', $deptId)->first();
+                    $project = Project::where('name', trim($value->project))->where('type_id', $typeId)->first();
                     if (empty($project)) {
                         $project = Project::create([
                             'name' => $value->project,
@@ -280,40 +282,45 @@ class ProjectsController extends Controller
                             'room_id' => '',
                         ]);
                     }
-                    $issue = Issue::where('name', trim($value->issue))->where('project_id', $project->id)->first();
+
+                    $issue = Issue::where('name', trim(trim($value->issue),'"'))->where('project_id', $project->id)->first();
                     if (empty($issue)) {
                         $issue = Issue::create([
                             'project_id' => $project->id,
-                            'name' => $value->issue,
+                            'name' => trim(trim($value->issue),'"'),
                             'start_date' => $start_time,
                             'end_date' => $end_time,
+                            'page' => $page,
                             'status' => 'publish',
                         ]);
-                        $listnote['success'][] =  'Record '. $key . ' is success';
+                        $listnote['success'][$key][] =  'Row '.($key+2).': is success';
                     } else if (!empty($issue)){
-                        $listnote['errors'][$key][] = $value->project . ' or ' . $value->issue . ' have exsited in the system';
+                        $listnote['errors'][$key][] = 'Row '.($key+2).': ' . $value->project . ' or ' . $value->issue . ' have exsited in the system';
                     }
 
                 }
             }
+
             if(!empty($listnote['errors'])) {
                 return response()->json($listnote, 403);
             }
-
         }
+
         return response()->json(array(
-            'message' => 'Successfully.'
+            'message' => array(array('Successfully.'))
         ), 200);
     }
-    public function rules() {
+
+    public function rules()
+    {
         return [
             '*.department' => 'required|max:255',
             '*.project' => 'required|max:255',
             '*.issue' => 'required|max:255',
-            '*.page' => 'required|max:255',
+            '*.page' => 'numeric|nullable',
             '*.type' => 'required|max:255',
-            '*.start_date' => 'required|date',
-            '*.end_date' => 'required|date',
+            '*.start_date' => 'date|nullable',
+            '*.end_date' => 'date|nullable',
         ];
     }
 }

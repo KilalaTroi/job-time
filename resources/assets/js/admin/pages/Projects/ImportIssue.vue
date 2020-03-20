@@ -1,13 +1,13 @@
 <template>
-    <modal id="issueImport" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">Import Projects</template>
+    <modal id="issueImport" v-on:reset-validation="resetValidate">
+        <template slot="title">Import Issues</template>
             <div class="form-group">
                 <label class="">File</label>
                 <input ref="fileInput" type="file" name="file" v-on:change="handleFileUpload()" required>
             </div>
             
             <error-item :errors="errors"></error-item>
-            <success-item :success="success"></success-item>
+            <success-list :success="success"></success-list>
             <hr>
             <div class="form-group text-right">
                 <button  v-on:click="importIssue" class="btn btn-primary">Import</button>
@@ -17,14 +17,14 @@
 <script>
 import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
-import SuccessItem from '../../components/Validations/Success'
+import SuccessList from '../../components/Validations/SuccessList'
 
 export default {
     name: 'ImportIssue',
     components: {
         Modal,
         ErrorItem,
-        SuccessItem,
+        SuccessList,
     },
     data() {
         return {
@@ -42,9 +42,9 @@ export default {
             this.success = '';
 
             let formData = new FormData();
-            formData.append('file', this.$refs.fileInput.files[0]);
+            formData.append('file', this.file);
 
-            let uri = "/data/import-projects/";
+            let uri = "/data/import-projects";
             axios
                 .post(uri, formData,
                 {
@@ -53,17 +53,29 @@ export default {
                     }
                 })
                 .then(res => {
-                    console.log(res.data);
                     this.success = res.data.message;
+                    this.$emit('reset-import');
                 })
                 .catch(err => {
                     if (err.response.status == 422) {
                         this.errors = err.response.data;
                     }
+                    if (err.response.status == 403) {
+                        this.errors = err.response.data.errors;
+                        this.success = err.response.data.success;
+                    }
+                    this.$emit('reset-import');
                 });
         },
-        handleFileUpload(){
-            this.file = this.$refs.fileInput.files[0];
+        handleFileUpload() {
+            if ( typeof(this.$refs.fileInput.files[0]) !== 'undefined' )
+                this.file = this.$refs.fileInput.files[0]; 
+        },
+        resetValidate() {
+            this.errors = '';
+            this.success = '';
+            this.file = '';
+            this.$refs.fileInput.value = '';
         }
     }
 }

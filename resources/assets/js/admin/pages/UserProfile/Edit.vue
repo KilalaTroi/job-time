@@ -3,31 +3,26 @@
         <template slot="title">{{$ml.with('VueJS').get('txtEditUser')}}</template>
         <div v-if="currentUser">
             <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtName')}}
-</label>
+                <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
                 <input v-model="currentUser.name" type="text" class="form-control">
             </div>
             <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtUsername')}}
-</label>
+                <label class="">{{$ml.with('VueJS').get('txtUsername')}}</label>
                 <input v-model="currentUser.username" type="text" class="form-control">
             </div>
             <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtEmail')}}
-</label>
+                <label class="">{{$ml.with('VueJS').get('txtEmail')}}</label>
                 <input v-model="currentUser.email" type="email" class="form-control">
             </div>
             <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtLang')}}
-</label>
+                <label class="">{{$ml.with('VueJS').get('txtLang')}}</label>
                 <select-2 v-model="currentUser.language" class="select2">
-                    <option value="en">English</option>
+                    <option value="vi">Vietnamese</option>
                     <option value="ja">Japanese</option>
                 </select-2>
             </div>
             <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtRole')}}
-</label>
+                <label class="">{{$ml.with('VueJS').get('txtRole')}}</label>
                 <div>
                     <select-2 :options="rolesOption" v-model="currentUser.r_name" class="select2">
                         <option disabled value="0">Select role</option>
@@ -35,13 +30,11 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtPassword')}}
-</label>
+                <label class="">{{$ml.with('VueJS').get('txtPassword')}}</label>
                 <input v-model="password" type="password" name="password" class="form-control">
             </div>
             <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtRePassword')}}
-</label>
+                <label class="">{{$ml.with('VueJS').get('txtRePassword')}}</label>
                 <input v-model="password_confirmation" type="password" name="password_confirmation" class="form-control">
             </div>
             <error-item :errors="errors"></error-item>
@@ -50,7 +43,6 @@
             <div class="form-group text-right">
                 <button @click="emitUser" type="button" class="btn btn-primary">
                     {{$ml.with('VueJS').get('txtUpdate')}}
-
                 </button>
             </div>
         </div>

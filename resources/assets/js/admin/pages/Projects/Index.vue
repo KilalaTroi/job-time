@@ -11,14 +11,14 @@
                     <div class="col-sm-4">
                         <div class="form-group">
                             <label class="">{{$ml.with('VueJS').get('txtKeyword')}}</label>
-                            <input v-model="search.keyword" placeholder="Enter keyword" type="text" class="form-control" v-on:keyup="filterItems(search.keyword)" v-on:keyup.enter="searchItems(search)">
+                            <input v-model="search.keyword" :placeholder="$ml.with('VueJS').get('txtKeyword')" type="text" class="form-control" v-on:keyup="filterItems(search.keyword)" v-on:keyup.enter="searchItems(search)">
                         </div>
                     </div>
                     <div class="col-sm-4">
                         <div class="form-group">
                             <label class="">{{$ml.with('VueJS').get('txtTypes')}}</label>
                             <div>
-                                <select2-type :options="typeOptions" v-model="search.type_id" class="select2" v-on:input="searchItems(search)">
+                                <select2-type :options="typeOptions" v-model="search.type_id" class="select2">
                                     <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                                 </select2-type>
                             </div>
@@ -28,7 +28,7 @@
                         <div class="form-group"> 
                             <label class="">{{$ml.with('VueJS').get('txtDepartments')}}</label>
                             <div>
-                                <select-2 :options="departmentOptions" v-model="search.dept_id" class="select2" v-on:input="searchItems(search)">
+                                <select-2 :options="departmentOptions" v-model="search.dept_id" class="select2">
                                     <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                                 </select-2>
                             </div>
@@ -44,11 +44,11 @@
                         </create-button>
                     </div>
                     <div class="col-12 col-sm-auto ml-auto">
-                        <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#issueImport">
+                        <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#issueImport" data-backdrop="static" data-keyboard="false">
                             <i class="fa fa-plus"></i>
-                            Import new issue
+                            {{$ml.with('VueJS').get('txtImportIssue')}}
                         </button>
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#issueCreate">
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#issueCreate" data-backdrop="static" data-keyboard="false">
                             <i class="fa fa-plus"></i>
                             {{$ml.with('VueJS').get('txtAddIssue')}}
                         </button>
@@ -68,7 +68,7 @@
                 </div>
                 <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
             </card>
-            <CreateItem :departments="departmentOptions" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
+            <CreateItem :departments="departmentOptions" :types="typeOptions" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
             <EditProject :currentItem="currentItem" :departments="departmentOptions" :types="types" :errors="validationErrors" :success="validationSuccess" v-on:update-project="updateProject" v-on:reset-validation="resetValidate">
             </EditProject>
@@ -76,7 +76,7 @@
             </EditIssue>
             <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
-            <ImportIssue v-on:reset-validation="resetValidate"></ImportIssue>
+            <ImportIssue v-on:reset-import="resetImport"></ImportIssue>
         </div>
     </div>
 </template>
@@ -93,17 +93,6 @@ import moment from 'moment'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
 
-const tableColumns = [
-    { id: 'department', value: 'Department', width: '', class: '' },
-    { id: 'project', value: 'Project', width: '', class: '' },
-    { id: 'issue', value: 'Issue', width: '110', class: '' },
-    { id: 'page', value: 'Page', width: '60', class: '' },
-    { id: 'type', value: 'Type', width: '', class: '' },
-    { id: 'value', value: 'Color', width: '110', class: 'text-center' },
-    { id: 'start_date', value: 'Start date', width: '', class: '' },
-    { id: 'end_date', value: 'End date', width: '', class: '' }
-];
-
 export default {
     components: {
         Select2,
@@ -119,7 +108,16 @@ export default {
     },
     data() {
         return {
-            columns: [...tableColumns],
+            columns: [
+                { id: 'department', value: this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
+                { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '110', class: '' },
+                { id: 'page', value: this.$ml.with('VueJS').get('txtPage'), width: '60', class: '' },
+                { id: 'type', value: this.$ml.with('VueJS').get('txtType'), width: '', class: '' },
+                { id: 'value', value: this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center' },
+                { id: 'start_date', value: this.$ml.with('VueJS').get('lblStartDate'), width: '', class: '' },
+                { id: 'end_date', value: this.$ml.with('VueJS').get('lblEndDate'), width: '', class: '' }
+            ],
             departments: [],
             types: [],
             departmentOptions: [],
@@ -144,7 +142,27 @@ export default {
         }
     },
     mounted() {
-        this.fetchItems();
+        let _this = this;
+        _this.fetchItems();
+        
+        $(document).on('click', '.languages button', function() {
+            _this.langSlug = _this.$ml.current;
+            _this.getDataTypes(_this.types);
+            _this.getDataDepartments(_this.departments);
+            _this.projectOptions[0].text = _this.$ml.with('VueJS').get('txtSelectOne');
+            _this.projectOptions = [..._this.projectOptions]
+
+            _this.columns = [
+                { id: 'department', value: _this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
+                { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '110', class: '' },
+                { id: 'page', value: _this.$ml.with('VueJS').get('txtPage'), width: '60', class: '' },
+                { id: 'type', value: _this.$ml.with('VueJS').get('txtType'), width: '', class: '' },
+                { id: 'value', value: _this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center' },
+                { id: 'start_date', value: _this.$ml.with('VueJS').get('lblStartDate'), width: '', class: '' },
+                { id: 'end_date', value: _this.$ml.with('VueJS').get('lblEndDate'), width: '', class: '' }
+            ];
+        });
     },
     methods: {
         getObjectValue(data, id) {
@@ -159,7 +177,7 @@ export default {
             if (data.length) {
                 let obj = {
                     id: 0,
-                    text: 'Select one'
+                    text: this.$ml.with('VueJS').get('txtSelectOne')
                 };
                 this.departmentOptions = [obj].concat(data);
             }
@@ -169,7 +187,7 @@ export default {
                 let dataTypes = [];
                 let obj = {
                     id: 0,
-                    text: '<div>Select one</div>'
+                    text: '<div>'+this.$ml.with('VueJS').get('txtSelectOne')+'</div>'
                 };
                 dataTypes.push(obj);
 
@@ -221,7 +239,12 @@ export default {
                     this.departments = res.data.departments;
                     this.types = res.data.types;
                     this.projects = res.data.projects;
-                    this.projectOptions = res.data.projectOptions;
+
+                    let obj = {
+                        id: 0,
+                        text: this.$ml.with('VueJS').get('txtSelectOne')
+                    };
+                    this.projectOptions = [obj].concat(res.data.projectOptions);
                 })
                 .catch(err => {
                     console.log(err);
@@ -239,7 +262,12 @@ export default {
             axios.get(uri)
                 .then(res => {
                     this.projects = res.data.projects;
-                    this.projectOptions = res.data.projectOptions;
+
+                    let obj = {
+                        id: 0,
+                        text: this.$ml.with('VueJS').get('txtSelectOne')
+                    };
+                    this.projectOptions = [obj].concat(res.data.projectOptions);
                 })
                 .catch(err => {
                     console.log(err);
@@ -301,7 +329,7 @@ export default {
                 });
         },
         deleteItem(issue_id) {
-            if (confirm("Are you sure want to delete this record?")) {
+            if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                 let uri = '/data/issues/' + issue_id;
                 axios.delete(uri).then((res) => {
                     // this.projects.data = this.projects.data.filter(item => item.issue_id !== issue_id);
@@ -391,6 +419,10 @@ export default {
                 this.validationErrors = '';
                 this.currentItem = null;
             }
+        },
+        resetImport() {
+            this.getProjects(this.showArchive);
+            this.currentItem = null;
         }
     },
     watch: {
@@ -406,7 +438,11 @@ export default {
         }],
         showArchive: [{
             handler: 'getProjects'
-        }]
+        }],
+        search: [{
+            handler: 'searchItems',
+            deep: true
+        }],
     }
 }
 </script>

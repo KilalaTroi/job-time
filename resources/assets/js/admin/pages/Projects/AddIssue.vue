@@ -5,8 +5,8 @@
             <div class="form-group">
                 <label class="">{{$ml.with('VueJS').get('txtProject')}}</label>
                 <div>
-                    <select-2 :options="projectOptions" v-model="project_id" class="select2" @input="changeProjects">
-                        <option disabled value="0">Select one</option>
+                    <select-2 :options="projects" v-model="project_id" class="select2" @input="changeProjects">
+                        <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                     </select-2>
                 </div>
             </div>
@@ -62,8 +62,7 @@ export default {
             i_name: '',
             start_date: '',
             end_date: '',
-            page: '',
-            projectOptions: []
+            page: ''
         }
     },
     mounted() {},
@@ -75,15 +74,6 @@ export default {
 
             if (obj.length > 0)
                 return obj[0];
-        },
-        getDataProjects(data) {
-            if (data.length) {
-                let obj = {
-                    id: 0,
-                    text: "Select one"
-                };
-                this.projectOptions = [obj].concat(data);
-            }
         },
         getLanguage(data) {
             return data.current === "vi" ? vi : ja
@@ -129,7 +119,7 @@ export default {
             }
         },
         changeProjects() {
-            let issue_id = this.getObjectValue(this.projectOptions, this.project_id).issue_id;
+            let issue_id = this.getObjectValue(this.projects, this.project_id).issue_id;
 
             let uri = '/data/issues/getpage/' + issue_id;
             axios.get(uri)
@@ -144,9 +134,6 @@ export default {
         }
     },
     watch: {
-        projects: [{
-            handler: 'getDataProjects'
-        }],
         start_date: [{
             handler: 'disabledStartDates'
         }],

@@ -7,8 +7,8 @@
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtTypes')}}</label>
                         <div>
-                            <select2-type :options="typeOptions" v-model="type_id" class="select2">
-                                <option disabled value="0">Select one</option>
+                            <select2-type :options="types" v-model="type_id" class="select2">
+                                <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                             </select2-type>
                         </div>
                     </div>
@@ -18,7 +18,7 @@
                         <label class="">{{$ml.with('VueJS').get('txtDepartments')}}</label>
                         <div>
                             <select-2 :options="departments" v-model="dept_id" class="select2">
-                                <option disabled value="0">Select one</option>
+                                <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                             </select-2>
                         </div>
                     </div>
@@ -135,8 +135,6 @@ export default {
             start_date: '',
             end_date: '',
             modalLg: 'modal-lg',
-            departmentOptions: [],
-            typeOptions: []
         }
     },
     mounted() {
@@ -144,25 +142,6 @@ export default {
     methods: {
         getLanguage(data) {
             return data.current === "vi" ? vi : ja
-        },
-        getDataTypes(data) {
-            if (data.length) {
-                let dataTypes = [];
-                let obj = {
-                    id: 0,
-                    text: '<div>Select one</div>'
-                };
-                dataTypes.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].id,
-                        text: '<div><span class="type-color" style="background: ' + data[i].value + '"></span>' + data[i].slug + '</div>'
-                    };
-                    dataTypes.push(obj);
-                }
-                this.typeOptions = dataTypes;
-            }
         },
         updatePeriod(data) {
             if ( data ) {
@@ -226,9 +205,6 @@ export default {
         }
     },
     watch: {
-        types: [{
-            handler: 'getDataTypes'
-        }],
         no_period: [{
             handler: 'updatePeriod'
         }],

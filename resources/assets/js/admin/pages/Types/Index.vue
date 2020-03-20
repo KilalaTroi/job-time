@@ -52,13 +52,6 @@
 
     const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
 
-    const tableColumns = [
-        {id: 'slug', value: 'slug', width: '200', class: ''},
-        {id: 'value', value: 'Color', width: '110', class: 'text-center'},
-        {id: 'slug_' + langDefault, value: 'Name', width: '200', class: ''},
-        {id: 'description_' + langDefault, value: 'Description', width: '', class: ''}
-    ];
-
     export default {
         components: {
             ActionTable,
@@ -69,7 +62,12 @@
         },
         data() {
             return {
-                columns: [...tableColumns],
+                columns: [
+                    {id: 'slug', value: this.$ml.with('VueJS').get('txtSlug'), width: '200', class: ''},
+                    {id: 'value', value: this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center'},
+                    {id: 'slug_' + langDefault, value: this.$ml.with('VueJS').get('txtName'), width: '200', class: ''},
+                    {id: 'description_' + langDefault, value: this.$ml.with('VueJS').get('txtDesc'), width: '', class: ''}
+                ],
                 types: [],
                 langSlug: langDefault,
                 currentItem: null,
@@ -84,12 +82,11 @@
             $(document).on('click', '.languages button', function() {
                 _this.langSlug = _this.$ml.current;
                 _this.columns = [
-                    {id: 'slug', value: 'slug', width: '200', class: ''},
-                    {id: 'value', value: 'Color', width: '110', class: 'text-center'},
-                    {id: 'slug_' + _this.langSlug, value: 'Name', width: '200', class: ''},
-                    {id: 'description_' + _this.langSlug, value: 'Description', width: '', class: ''}
+                    {id: 'slug', value: _this.$ml.with('VueJS').get('txtSlug'), width: '200', class: ''},
+                    {id: 'value', value: _this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center'},
+                    {id: 'slug_' + _this.langSlug, value: _this.$ml.with('VueJS').get('txtName'), width: '200', class: ''},
+                    {id: 'description_' + _this.langSlug, value: _this.$ml.with('VueJS').get('txtDesc'), width: '', class: ''}
                 ];
-                _this.fetchItems();
             });
         },
         methods: {

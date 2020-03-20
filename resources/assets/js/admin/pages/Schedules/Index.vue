@@ -233,7 +233,7 @@ export default {
             this.editable = false;
             this.droppable = false;
 
-            if (!confirm(this.$ml.with('VueJS').get('msgConfirmUpdate'))) {
+            if (!confirm(this.$ml.with('VueJS').get('msgConfirmChange'))) {
                 info.revert();
                 this.editable = true;
                 this.droppable = true;
@@ -266,7 +266,7 @@ export default {
             this.editable = false;
             this.droppable = false;
 
-            if (!confirm(this.$ml.with('VueJS').get('msgConfirmUpdate'))) {
+            if (!confirm(this.$ml.with('VueJS').get('msgConfirmChange'))) {
                 info.revert();
                 this.editable = true;
                 this.droppable = true;

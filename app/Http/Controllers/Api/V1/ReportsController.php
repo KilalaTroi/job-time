@@ -18,12 +18,22 @@ class ReportsController extends Controller
      */
     public function exportReportTimeUser(Request $request) {
         $filenameExcel = array(); 
+        $userConcatName = '';
         // POST data
-        $user_id = $request->get('user_id');
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
         if ( $issueFilter ) $filenameExcel[] = str_slug($issueFilter, '-');
+
+        $user_id = $request->get('user_id');
+        $userArr = array();
+        if ( $user_id ) {
+            $userArr = array_map(function($obj) use (&$filenameExcel, &$userConcatName) {
+                if ( $userConcatName ) $userConcatName .= ', ';
+                $userConcatName .= $obj['text'];
+                return $obj['id'];
+            }, $user_id);
+        }
 
         $deptSelects = $request->get('deptSelects');
         $deptArr = array();
@@ -53,28 +63,28 @@ class ReportsController extends Controller
         }
         // End POST data
 
-        $data = $this->getDataTimeUser($user_id, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
+        $data = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
 
-        if($user_id == "0") {
+        if( empty($userArr) ) {
             $filenameExcel[] = "all-users";
             $titleExcel = "All Users";
         } else {
-            $filenameExcel[] = str_slug(DB::table('users')->where('id', $user_id)->first()->name, '-');
-            $titleExcel = DB::table('users')->where('id', $user_id)->first()->name;
+            $filenameExcel[] = str_slug(str_replace(',', '-', $userConcatName), '-');
+            $titleExcel = $userConcatName;
         }
         $numberRows = count($data) + 5;
         
-        $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $user_id) {
+        $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr) {
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
-            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $user_id) {
+            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr) {
                 $sheet->setCellValue('A1', "Job Time Report from ". $start_time . " to " . $end_time);
                 $sheet->setCellValue('A2', "Date: ". Carbon::now());
                 $sheet->setCellValue('A3', $titleExcel);
 
-                $columnName = $user_id == "0" ? 'I' : 'H';
-                $columnNameBefore = $user_id == "0" ? 'H' : 'G';
+                $columnName = count($userArr) != 1 ? 'I' : 'H';
+                $columnNameBefore = count($userArr) != 1 ? 'H' : 'G';
                 $sheet->mergeCells('A1:'.$columnName.'1');
                 $sheet->mergeCells('A2:'.$columnName.'2');
                 $sheet->mergeCells('A3:'.$columnName.'3');
@@ -101,9 +111,9 @@ class ReportsController extends Controller
                 $sheet->fromArray($data, null, 'A5', true);
 
                 //set title table
-                if ( $user_id == "0" ) {
+                if ( count($userArr) != 1 ) {
                     $sheet->setCellValue('A5', "NAME");
-                    $sheet->setCellValue('B5', "DAY");
+                    $sheet->setCellValue('B5', "DATE");
                     $sheet->setCellValue('C5', "STRT");
                     $sheet->setCellValue('D5', "END");
                     $sheet->setCellValue('E5', "TIME");
@@ -112,7 +122,7 @@ class ReportsController extends Controller
                     $sheet->setCellValue('H5', "ISSUE");
                     $sheet->setCellValue('I5', "JOB TYPE");
                 } else {
-                    $sheet->setCellValue('A5', "DAY");
+                    $sheet->setCellValue('A5', "DATE");
                     $sheet->setCellValue('B5', "STRT");
                     $sheet->setCellValue('C5', "END");
                     $sheet->setCellValue('D5', "TIME");
@@ -134,7 +144,7 @@ class ReportsController extends Controller
         return url('data/exports/' . $results->filename) . '.' . $results->ext;
     }
 
-    public function getDataTimeUser($user_id, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
+    public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
         $format = 'Y-m-d';
         $start_time = Carbon::createFromFormat($format, $start_time);
         $end_time = Carbon::createFromFormat($format, $end_time);
@@ -153,15 +163,15 @@ class ReportsController extends Controller
             ->when($projectArr, function ($query, $projectArr) {
                 return $query->whereIn('p.id', $projectArr);
             })
+            ->when($userArr, function ($query, $userArr) {
+                return $query->whereIn('j.user_id', $userArr);
+            })
             ->when($issueFilter, function ($query, $issueFilter) {
                 return $query->where('i.name', 'like', '%'.$issueFilter.'%');
             })
             ->whereBetween('j.date', [$start_time, $end_time]);
-        $data->when($user_id != "0", function ($q, $query) use($user_id) {
-            return $q->where('j.user_id', $user_id);
-        });
 
-        if ( $user_id != "0" ) {
+        if ( count($userArr) == 1 ) {
             $data = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
             ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         } else {
@@ -174,7 +184,7 @@ class ReportsController extends Controller
         foreach ($data as $key => $item) {
             $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
             $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
-            $keyNUmber = $user_id != "0" ? 3 : 4;
+            $keyNUmber = count($userArr) == 1 ? 3 : 4;
             $this->array_insert( $data[$key], $keyNUmber, array ('Time' => $hoursminsandsecs));
             foreach ($item as $key1 => $element) {
                 if(empty($element) || $element == "All") {
