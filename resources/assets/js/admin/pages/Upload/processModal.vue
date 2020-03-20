@@ -1,52 +1,52 @@
 <template>
-	<modal id="processModal" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
-		<template slot="title">Upload</template>
-		<div v-if="currentProcess">
-			<h5>Project Issue</h5>
-			<div class="table-responsive">
-				<no-action-table class="table-hover table-striped" :columns="columns" :data="dataProcess"></no-action-table>
-			</div>
-			<div class="form-group">
-				<h5>New Message</h5>
-				<textarea v-model="newMessage" class="form-control" rows="2"></textarea>
-			</div>
-			<div id="selectDest" class="d-flex justify-content-between">
-				<div class="form-group border p-3">
-					<h5>
-						Box Destination
-						<label class="dest-box" for="destBox">Select</label>
-						<input type="file" id="destBox" name />
-					</h5>
-					<p>https://yuidea.app.box.com/folder/49217853872</p>
-				</div>
-				<div class="form-group border p-3">
-					<h5>
-						File
-						<label class="dest-file" for="destFile">Select</label>
-						<input type="file" id="destFile" name />
-					</h5>
-					<p>\\192.168.0.233\daichi\tsuchi_kilala\Job\2020_114\1st\indd</p>
-				</div>
-			</div>
-			<div class="form-group d-flex justify-content-between">
-				<base-checkbox v-model="finishProcess">Finish</base-checkbox>
-				<button type="button" class="btn btn-primary">Send</button>
-			</div>
-			<error-item :errors="errors"></error-item>
-			<success-item :success="success"></success-item>
-			<hr />
-			<div class="form-group">
-				<h5>Process List</h5>
-				<div class="table-responsive">
-					<no-action-table
-					class="table-hover table-striped"
-					:columns="columns2"
-					:data="dataProcessList"
-					></no-action-table>
-				</div>
-			</div>
-		</div>
-	</modal>
+  <modal id="processModal" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
+    <template slot="title">{{$ml.with('VueJS').get('txtUpload')}}</template>
+    <div v-if="currentProcess">
+      <h5>{{$ml.with('VueJS').get('txtProjectIssue')}}</h5>
+      <div class="table-responsive">
+        <no-action-table class="table-hover table-striped" :columns="columns" :data="dataProcess"></no-action-table>
+      </div>
+      <div class="form-group">
+        <h5>{{$ml.with('VueJS').get('txtMessage')}}</h5>
+        <textarea v-model="newMessage" class="form-control" rows="2"></textarea>
+      </div>
+      <div id="selectDest" class="d-flex justify-content-between">
+        <div class="form-group border p-3">
+          <h5>
+            {{$ml.with('VueJS').get('txtBoxDestination')}}
+            <label class="dest-box" for="destBox">{{$ml.with('VueJS').get('txtSelect')}}</label>
+            <input type="file" id="destBox" name />
+          </h5>
+          <p>https://yuidea.app.box.com/folder/49217853872</p>
+        </div>
+        <div class="form-group border p-3">
+          <h5>
+            File
+            <label class="dest-file" for="destFile">{{$ml.with('VueJS').get('txtSelect')}}</label>
+            <input type="file" id="destFile" name />
+          </h5>
+          <p>\\192.168.0.233\daichi\tsuchi_kilala\Job\2020_114\1st\indd</p>
+        </div>
+      </div>
+      <div class="form-group d-flex justify-content-between">
+        <base-checkbox v-model="finishProcess">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
+        <button type="button" class="btn btn-primary">{{$ml.with('VueJS').get('txtSend')}}</button>
+      </div>
+      <error-item :errors="errors"></error-item>
+      <success-item :success="success"></success-item>
+      <hr />
+      <div class="form-group">
+        <h5>Process List</h5>
+        <div class="table-responsive">
+          <no-action-table
+            class="table-hover table-striped"
+            :columns="columns2"
+            :data="dataProcessList"
+          ></no-action-table>
+        </div>
+      </div>
+    </div>
+  </modal>
 </template>
 
 <script>

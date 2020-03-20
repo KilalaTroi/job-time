@@ -121,7 +121,20 @@ export default new MLCreate({
 		msgConfirmDelete: 'Are you sure want to delete this record?',
 		msgConfirmChange: 'Are you sure about this change?',
 		txtPickSome: 'Pick some',
-
+		txtProcess: 'Process',    
+		txtFinish: 'Finish', 
+		txtUpload: 'Upload',
+		txtUploadList: 'Upload list',
+		txtNewUpload: 'New upload',
+		txtProjectIssue: 'Project Issue',
+		txtMessage:'Message',
+		txtBoxDestination: 'BOX Destination',
+		txtFile: 'File',
+		txtSelect: 'Select',
+		txtProcessList: 'Process List',
+		txtShow: 'Show',
+		txtShowBy: 'Show by',
+		txtSend: 'Send'
 	}),
 
 	new MLanguage('en').create({
@@ -238,7 +251,19 @@ export default new MLCreate({
 		msgConfirmDelete: 'Are you sure want to delete this record?',
 		msgConfirmChange: 'Are you sure about this change?',
 		txtPickSome: 'Pick some',
-
+		txtProcess: 'Process',    
+		txtFinish: 'Finish', 
+		txtUpload: 'Upload',
+		txtUploadList: 'Upload list',
+		txtNewUpload: 'New upload',
+		txtProjectIssue: 'Project Issue',
+		txtMessage:'Message',
+		txtBoxDestination: 'BOX Destination',
+		txtFile: 'File',
+		txtSelect: 'Select',
+		txtProcessList: 'Process List',
+		txtShow: 'Show',
+		txtSend: 'Send'
 	}),
 
 	new MLanguage('ja').create({
@@ -355,6 +380,21 @@ export default new MLCreate({
 		msgConfirmDelete: 'このレコードを削除してもよろしいですか？',
 		msgConfirmChange: 'この変化に確かですか？',
 		txtPickSome: 'いくつかを選択',
+		txtProcess: '進行',    
+		txtFinish: '終了', 
+		txtUpload: 'アップロード',
+		txtUploadList: 'アップロードリスト',
+		txtNewUpload: '追加アップ',
+		txtProjectIssue: '案件・号',
+		txtMessage:'申し送り',
+		txtBoxDestination: 'BOXのリンク',
+		txtFile: 'ファイル',
+		txtSelect: '選択',
+		txtProcessList: '案件リスト',
+		txtShow: '詳細',
+		txtShowBy: '表示',
+		txtSend: '送信'
+    
 	})
 	]
 })
