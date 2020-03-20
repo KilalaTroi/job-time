@@ -64,6 +64,7 @@ class Uploadcontroller extends Controller
                 'd.name as department',
                 'p.name as project',
                 'i.name as issue',
+                'i.page as page',
                 't.slug as job_type',
                 's.memo as phase'
             )
