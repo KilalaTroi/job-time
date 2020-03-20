@@ -36,7 +36,7 @@
       <success-item :success="success"></success-item>
       <hr />
       <div class="form-group">
-        <h5>Process List</h5>
+        <h5>{{$ml.with('VueJS').get('txtProcessList')}}</h5>
         <div class="table-responsive">
           <no-action-table
             class="table-hover table-striped"
@@ -67,36 +67,16 @@ export default {
 	data() {
 		return {
 			columns: [
-			{
-				id: "p_name",
-				value: this.$ml.with("VueJS").get("txtProject"),
-				width: "",
-				class: ""
-			},
-			{
-				id: "i_name",
-				value: this.$ml.with("VueJS").get("txtIssue"),
-				width: "",
-				class: ""
-			},
-			{
-				id: "phase",
-				value: this.$ml.with("VueJS").get("txtPhase"),
-				width: "",
-				class: ""
-			},
-			{
-				id: "page",
-				value: this.$ml.with("VueJS").get("txtPage"),
-				width: "",
-				class: ""
-			}
+				{ id: "p_name", value: this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
+				{ id: "i_name", value: this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
+				{ id: "phase", value: this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
+				{ id: "page", value: this.$ml.with("VueJS").get("txtPage"), width: "", class: "" }
 			],
 			columns2: [
-			{ id: "date", value: "Date", width: "", class: "" },
-			{ id: "name", value: "Name", width: "", class: "" },
-			{ id: "comment", value: "Comment", width: "", class: "" },
-			{ id: "info", value: "Box", width: "", class: "text-center" }
+				{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
+				{ id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
+				{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
+				{ id: "box", value: 'Box', width: "", class: "text-center" }
 			],
 			dataProcess: [],
 			dataProcessList: [],
@@ -107,7 +87,40 @@ export default {
 			modalLg: "modal-lg"
 		};
 	},
+	mounted() {
+		let _this = this;
+		this.getBoxFolder();
+		$(document).on('click', '.languages button', function() {
+			_this.columns = [
+				{ id: "p_name", value: _this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
+				{ id: "i_name", value: _this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
+				{ id: "phase", value: _this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
+				{ id: "page", value: _this.$ml.with("VueJS").get("txtPage"), width: "", class: "" }
+			];
+
+			_this.columns2 = [
+				{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
+				{ id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
+				{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
+				{ id: "box", value: 'Box', width: "", class: "text-center" }
+			];
+		});
+	},
 	methods: {
+		getBoxFolder() {
+			axios.get('https://api.box.com/2.0/folders/107571331091', {
+				headers: {
+					'As-User': '3475118616',
+			    	'Authorization': 'Bearer JY1DtLyygVaPQVA6A8lTIz934sFIO92T',
+			  	}
+			}).then(res => {
+                    console.log(res);
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load box");
+                });
+		},
 		getDataProcess() {
 			this.dataProcess = [
 			{
@@ -123,14 +136,14 @@ export default {
 			{
 				date: "2020/Jan/14",
 				name: "Lợi",
-				comment: "20, 21, 30 page",
-				info: '<button type="button" class="btn btn-second">Show</button>'
+				message: "20, 21, 30 page",
+				box: '<a type="button" class="btn btn-second" target="_blank" href="#">SHOW</a>'
 			},
 			{
 				date: "2020/Jan/14",
 				name: "Ngọc",
-				comment: "22, 23, 24 page",
-				info: '<button type="button" class="btn btn-second">Show</button>'
+				message: "22, 23, 24 page",
+				box: '<a type="button" class="btn btn-second" target="_blank" href="#">SHOW</a>'
 			}
 			];
 		}

@@ -39,7 +39,7 @@ Auth::routes();
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 
 # Get Data
-Route::group(['middleware' => ['auth'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
+Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
     Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
