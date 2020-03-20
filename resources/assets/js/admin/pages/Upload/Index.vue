@@ -5,7 +5,7 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="form-group">
-							<label class>Show by</label>
+							<label class>{{$ml.with('VueJS').get('txtShowBy')}}</label>
 							<div>
 								<select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
 							</div>
@@ -90,7 +90,7 @@
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
-							Upload List             
+							{{$ml.with('VueJS').get('txtUploadList')}}           
 						</h4>
 					</div>
 				</template>

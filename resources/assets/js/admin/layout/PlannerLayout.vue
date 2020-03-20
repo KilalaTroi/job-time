@@ -31,7 +31,7 @@
             </sidebar-link>
             <sidebar-link to="/upload">
                 <i class="nc-icon nc-cloud-upload-94"></i>
-                <p>Upload</p>
+                <p v-text="$ml.with('VueJS').get('txtUpload')" />
             </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">
