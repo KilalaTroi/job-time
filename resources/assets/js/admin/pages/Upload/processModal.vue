@@ -111,7 +111,7 @@ export default {
 	},
 	methods: {
 		getComments() {
-			if ( this.currentProcess.length ) {
+			if ( Object.keys(this.currentProcess).length != 0 ) {
 				let uri = "/data/get-comments/" + this.currentProcess.issue_id + "/" + this.currentProcess.phase;
 				axios
 				.get(uri)
