@@ -19,7 +19,7 @@
                 <td class="text-center">
                     <i @click="$emit('get-process', item.id)" class="fa fa-plus-circle btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i>  
                 </td>
-                <td class="text-center"><i class="fa fa-flag btn-flag"></i></td>
+                <td class="text-center"><i :class="itemClassActive(item)"></i></td>
             </tr>
         </tbody>
     </table>
@@ -37,6 +37,9 @@ export default {
         },
         itemValue(item, column) {
             return item[column.id.toLowerCase()] ? item[column.id.toLowerCase()] : '--'
+        },
+        itemClassActive(item) {
+            return item.status ? 'fa fa-flag btn-flag active' : 'fa fa-flag btn-flag'
         }
     }
 }

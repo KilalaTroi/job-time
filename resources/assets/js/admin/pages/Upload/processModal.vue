@@ -29,7 +29,7 @@
         </div>
       </div>
       <div class="form-group d-flex justify-content-between">
-        <base-checkbox v-model="finishProcess">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
+        <base-checkbox v-model="currentProcess.status" v-on:input="changeStatus">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
         <button type="button" class="btn btn-primary">{{$ml.with('VueJS').get('txtSend')}}</button>
       </div>
       <error-item :errors="errors"></error-item>
@@ -83,7 +83,6 @@ export default {
 			newMessage: "",
 			errors: "",
 			success: "",
-			finishProcess: false,
 			modalLg: "modal-lg"
 		};
 	},
@@ -108,9 +107,8 @@ export default {
 	},
 	methods: {
 		getBoxFolder() {
-			axios.get('https://api.box.com/2.0/folders/107571331091', {
+			axios.get('https://yuidea.app.box.com/folder/0', {
 				headers: {
-					'As-User': '3475118616',
 			    	'Authorization': 'Bearer JY1DtLyygVaPQVA6A8lTIz934sFIO92T',
 			  	}
 			}).then(res => {
@@ -146,6 +144,19 @@ export default {
 				box: '<a type="button" class="btn btn-second" target="_blank" href="#">SHOW</a>'
 			}
 			];
+		},
+		changeStatus() {
+			let uri = "/data/upload/update-status";
+			axios
+			.post(uri, {
+				currentProcess: this.currentProcess
+			})
+			.then(res => {
+				console.log(res.data.message);
+			})
+			.catch(err => {
+				console.log(err);
+			});
 		}
 	},
 	watch: {

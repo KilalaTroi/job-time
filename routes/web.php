@@ -61,6 +61,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('import-projects', 'ProjectsController@importProjects');
 
     Route::post('upload/data', 'UploadController@getData');
+    Route::post('upload/update-status', 'UploadController@updateStatus');
 
     Route::get('exports/{filename}', function ($filename)
     {

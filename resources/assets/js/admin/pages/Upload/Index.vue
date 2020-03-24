@@ -262,7 +262,8 @@ export default {
 						p_name: item.project,
 						i_name: item.issue,
 						t_name: item.job_type,
-						phase: item.phase
+						phase: item.phase,
+						status: item.status
 					};
 				});
 			} else {
@@ -295,6 +296,7 @@ export default {
 		},
 		resetValidate() {
 			this.currentProcess = {};
+			this.fetchDataFilter();
 		},
 		getLanguage(data) {
 			return this.dataLang[data.current]

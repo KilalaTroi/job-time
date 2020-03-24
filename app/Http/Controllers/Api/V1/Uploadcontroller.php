@@ -66,7 +66,8 @@ class Uploadcontroller extends Controller
                 'i.name as issue',
                 'i.page as page',
                 't.slug as job_type',
-                's.memo as phase'
+                's.memo as phase',
+                's.status as status'
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
@@ -117,5 +118,28 @@ class Uploadcontroller extends Controller
             'departments' => $departments,
             'projectOptions' => $projectOptions,
         ]);
+    }
+
+    public function updateStatus(Request $request) {
+        $currentProcess = $request->get('currentProcess');
+
+        $listProcess = DB::table('schedules')
+            ->where('issue_id', $currentProcess['issue_id'])
+            ->where('memo', $currentProcess['phase'])
+            ->select('id')
+            ->get()->toArray();
+
+        $listArr = array_map(function($value){
+            return $value->id;
+        }, $listProcess);
+        
+
+        DB::table('schedules')
+            ->whereIn('id', $listArr)
+            ->update(['status' => $currentProcess['status']]);
+
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
     }
 }
