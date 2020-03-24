@@ -30,7 +30,7 @@
       </div>
       <div class="form-group d-flex justify-content-between">
         <base-checkbox v-model="currentProcess.status" v-on:input="changeStatus">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
-        <button type="button" class="btn btn-primary">{{$ml.with('VueJS').get('txtSend')}}</button>
+        <button type="button" class="btn btn-primary" @click="uploadProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
       </div>
       <error-item :errors="errors"></error-item>
       <success-item :success="success"></success-item>
@@ -54,6 +54,7 @@ import NoActionTable from "../../components/TableNoAction";
 import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
 import Modal from "../../components/Modals/Modal";
+import moment from 'moment';
 
 export default {
 	name: "process-modal",
@@ -81,9 +82,12 @@ export default {
 			dataProcess: [],
 			dataProcessList: [],
 			newMessage: "",
+			box: "",
 			errors: "",
 			success: "",
-			modalLg: "modal-lg"
+			modalLg: "modal-lg",
+			userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
+			today: moment(new Date()).format('YYYY-MM-DD HH:mm'),
 		};
 	},
 	mounted() {
@@ -106,12 +110,22 @@ export default {
 		});
 	},
 	methods: {
+		getComments() {
+			if ( this.currentProcess.length ) {
+				let uri = "/data/get-comments/" + this.currentProcess.issue_id + "/" + this.currentProcess.phase;
+				axios
+				.get(uri)
+				.then(res => {
+					console.log(res.data.message);
+				})
+				.catch(err => {
+					console.log(err);
+				});
+			}
+		},
 		getBoxFolder() {
-			axios.get('https://yuidea.app.box.com/folder/0', {
-				headers: {
-			    	'Authorization': 'Bearer JY1DtLyygVaPQVA6A8lTIz934sFIO92T',
-			  	}
-			}).then(res => {
+			axios.get('https://account.box.com/api/oauth2/authorize?response_type=code&client_id=r3f3t4gyqu4yp46gs5bbh2nhl4n4i87g')
+			.then(res => {
                     console.log(res);
                 })
                 .catch(err => {
@@ -157,6 +171,30 @@ export default {
 			.catch(err => {
 				console.log(err);
 			});
+		},
+		uploadProcess() {
+			// Reset validate
+            this.errors = "";
+            this.success = "";
+
+            let newItem = {
+            	user_id: this.userID,
+            	issue_id: this.currentProcess.issue_id,
+            	schedule_id: this.currentProcess.id,
+            	date: this.today,
+            	message: this.newMessage,
+            	box: this.box
+            }
+
+            let uri = "/data/comments";
+            axios
+                .post(uri, newItem)
+                .then(res => {
+                    this.success = res.data.message;
+                })
+                .catch(err => {
+                    console.log(err);
+                });
 		}
 	},
 	watch: {
@@ -166,6 +204,9 @@ export default {
 		},
 		{
 			handler: "getDataProcess"
+		},
+		{
+			handler: "getComments"
 		}
 		]
 	}

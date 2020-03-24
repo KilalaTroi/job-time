@@ -63,6 +63,9 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('upload/data', 'UploadController@getData');
     Route::post('upload/update-status', 'UploadController@updateStatus');
 
+    Route::resource('comments', 'CommentsController', ['except' => ['create', 'edit']]);
+    Route::get('get-comments/{issue_id}/{phase}', 'CommentsController@getComments');
+
     Route::get('exports/{filename}', function ($filename)
     {
         $path = storage_path() . '/exports/' . $filename;

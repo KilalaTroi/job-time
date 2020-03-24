@@ -263,7 +263,7 @@ export default {
 						i_name: item.issue,
 						t_name: item.job_type,
 						phase: item.phase,
-						status: item.status
+						status: item.status ? true : false
 					};
 				});
 			} else {
@@ -272,6 +272,7 @@ export default {
 		},
 		getProcess(id) {
 			this.currentProcess = this.getObjectValue(this.dataProjects.data, id);
+			this.currentProcess.status = this.currentProcess.status ? true : false;
 		},
 		customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
