@@ -20,9 +20,15 @@ class CommentsController extends Controller
     }
 
     public function getComments($issue_id, $phase) {
+        $null = $phase === 'null' ? true : false;
         $listProcess = DB::table('schedules')
             ->where('issue_id', $issue_id)
-            ->where('memo', $phase)
+            ->when(!$null, function ($query) use ($phase) {
+                return $query->where('memo', $phase);
+            })
+            ->when($null, function ($query) {
+                return $query->whereNull('memo');
+            })
             ->select('id')
             ->get()->toArray();
 
@@ -30,10 +36,16 @@ class CommentsController extends Controller
             return $value->id;
         }, $listProcess);
 
-        $listComments = DB::table('comments')
+        $listComments = DB::table('comments as c')
+            ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
             ->where('issue_id', $issue_id)
             ->whereIn('schedule_id', $listArr)
-            ->select('*')
+            ->select(
+                'date',
+                'name',
+                'message',
+                'box'
+            )
             ->orderBy('date', 'asc')
             ->get()->toArray();
 
@@ -62,6 +74,12 @@ class CommentsController extends Controller
     public function store(Request $request)
     {
         $comment = Comment::create($request->all());
+        $user = DB::table('users')
+            ->where('id', $comment->user_id)
+            ->select('name')
+            ->get()->toArray();
+
+            $comment['name'] = $user[0]->name;
 
         return response()->json(array(
             'comment' => $comment,
