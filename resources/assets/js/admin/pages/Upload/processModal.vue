@@ -113,6 +113,39 @@ export default {
 		});
 	},
 	methods: {
+		sendMessageLineWork() {
+			axios.post('https://apis.worksmobile.com/r/jp1YSSqsNgFBe/message/v1/bot/763699/message/push', {
+				"roomId": "49446090",
+				"content": {
+					"type": "text",
+					"text": "test send message from web app"
+				}
+			}, {
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Allow-Control-Allow-Methods': '*',
+					'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
+				}
+			})
+			.then(res => {
+				console.log(res);
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not load box");
+			});
+		},
+		connectBox() {
+			var sdk = new BoxSDK({
+				clientID: 'CLIENT_ID',
+				clientSecret: 'CLIENT_SECRET',
+				appAuth: {
+					keyID: 'PUBLIC_KEY_ID',
+					privateKey: 'PRIVATE_KEY',
+					passphrase: 'PRIVATE_KEY_PASSPHRASE'
+				}
+			});
+		},
 		recapName(str) {
 			let words = str.split(" ");
 			let firstName = words[words.length - 1];
@@ -224,6 +257,8 @@ export default {
 			.catch(err => {
 				console.log(err);
 			});
+
+			this.sendMessageLineWork();
 		},
         resetValidate() {
             this.errors = '';
