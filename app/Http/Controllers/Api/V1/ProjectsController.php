@@ -237,14 +237,28 @@ class ProjectsController extends Controller
     }
 
     public function importProjects(Request $request) {
+
         $this->validate($request, [
             'file' => 'required'
         ]);
 
         $path = $request->file('file')->getRealPath();
-        $data = Excel::load($path)->get();
-        if($data->count()){
-            $validator = \Illuminate\Support\Facades\Validator::make($data->toArray(), $this->rules());
+        $data = Excel::selectSheetsByIndex(0)->load($path, function($reader) {
+            $reader->setHeaderRow(3);
+            $dataList = $reader->select(array('department', 'project', 'issue', 'page', 'type', 'start_date', 'end_date'))->get();
+            $dataList = $dataList->toArray();
+            foreach ($dataList as $keyItem =>$item) {
+                foreach ($item as $key => $value) {
+                    if($key != "start_date" || $key != "end_date" || $key != "page") {
+                        if (empty($value)) {
+                            unset($dataList[$keyItem]);
+                            break;
+                        }
+                    }
+                }
+            }
+            if(count($dataList)){
+            $validator = \Illuminate\Support\Facades\Validator::make($dataList, $this->rules());
             if ($validator->fails()) {
                 throw new \Exception(
                     $validator->errors()
@@ -252,29 +266,29 @@ class ProjectsController extends Controller
             }
             $format = 'Y-m-d';
             $listnote = [];
-            foreach ($data as $key => $value) {
-                $dept = Department::where('name', trim($value->department))->first();
-                $type = Type::where('slug', trim($value->type))->first();
+            foreach ($dataList as $key => $value) {
+                $dept = Department::where('name', trim($value['department']))->first();
+                $type = Type::where('slug', trim($value['type']))->first();
 
-                $start_time =    $value->start_date;
-                $end_time =     $value->end_date;
-                $page = $value->page;
+                $start_time =    $value['start_date'];
+                $end_time =     $value['end_date'];
+                $page = $value['page'];
 
                 if(empty($dept)) {
-                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Department '. $value->department;
+                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Department '. $value['department'];
                 }
 
                 if(empty($type)) {
-                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Type ' . $value->type;
+                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Type ' . $value['type'];
                 }
 
                 $deptId = $dept->id;
                 $typeId = $type->id;
                 if ($deptId && $typeId) {
-                    $project = Project::where('name', trim($value->project))->where('type_id', $typeId)->first();
+                    $project = Project::where('name', trim($value['project']))->where('type_id', $typeId)->first();
                     if (empty($project)) {
                         $project = Project::create([
-                            'name' => $value->project,
+                            'name' => $value['project'],
                             'name_vi' => '',
                             'name_ja' => '',
                             'dept_id' => $deptId,
@@ -283,11 +297,11 @@ class ProjectsController extends Controller
                         ]);
                     }
 
-                    $issue = Issue::where('name', trim(trim($value->issue),'"'))->where('project_id', $project->id)->first();
+                    $issue = Issue::where('name', trim(trim($value['issue']),'"'))->where('project_id', $project->id)->first();
                     if (empty($issue)) {
                         $issue = Issue::create([
                             'project_id' => $project->id,
-                            'name' => trim(trim($value->issue),'"'),
+                            'name' => trim(trim($value['issue']),'"'),
                             'start_date' => $start_time,
                             'end_date' => $end_time,
                             'page' => $page,
@@ -295,7 +309,7 @@ class ProjectsController extends Controller
                         ]);
                         $listnote['success'][$key][] =  'Row '.($key+2).': is success';
                     } else if (!empty($issue)){
-                        $listnote['errors'][$key][] = 'Row '.($key+2).': ' . $value->project . ' or ' . $value->issue . ' have exsited in the system';
+                        $listnote['errors'][$key][] = 'Row '.($key+2).': ' . $value['project'] . ' or ' . $value['issue'] . ' have exsited in the system';
                     }
 
                 }
@@ -305,7 +319,7 @@ class ProjectsController extends Controller
                 return response()->json($listnote, 403);
             }
         }
-
+        });
         return response()->json(array(
             'message' => array(array('Successfully.'))
         ), 200);
