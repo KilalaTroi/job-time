@@ -251,7 +251,7 @@ class ProjectsController extends Controller
             $dataList = $data->toArray();
             foreach ($dataList as $keyItem =>$item) {
                 foreach ($item as $key => $value) {
-                    if($key != "start_date" || $key != "end_date" || $key != "page") {
+                    if($key != "start_date" && $key != "end_date" && $key != "page" && $key != "issue") {
                         if (empty($value)) {
                             unset($dataList[$keyItem]);
                             break;
@@ -277,11 +277,11 @@ class ProjectsController extends Controller
                 $page = $value['page'];
 
                 if(empty($dept)) {
-                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Department '. $value['department'];
+                    $listnote['errors'][$key][] = 'Row '.($key+4).': Incorrect Department '. $value['department'];
                 }
 
                 if(empty($type)) {
-                    $listnote['errors'][$key][] = 'Row '.($key+2).': Incorrect Type ' . $value['type'];
+                    $listnote['errors'][$key][] = 'Row '.($key+4).': Incorrect Type ' . $value['type'];
                 }
 
                 $deptId = $dept->id;
@@ -309,10 +309,10 @@ class ProjectsController extends Controller
                             'page' => $page,
                             'status' => 'publish',
                         ]);
-                        $listnote['success'][$key][] =  'Row '.($key+2).': is success';
+                        $listnote['success'][$key][] =  'Row '.($key+4).': is success';
                     } else if (!empty($issue)){
 
-                        $listnote['errors'][$key][] = 'Row '.($key+2).': ' . $value['project'] . ' or ' . $value['issue'] . ' have exsited in the system';
+                        $listnote['errors'][$key][] = 'Row '.($key+4).': ' . $value['project'] . ' or ' . $value['issue'] . ' have exsited in the system';
                     }
 
                 }
@@ -332,7 +332,7 @@ class ProjectsController extends Controller
         return [
             '*.department' => 'required|max:255',
             '*.project' => 'required|max:255',
-            '*.issue' => 'required|max:255',
+            '*.issue' => 'max:255',
             '*.page' => 'numeric|nullable',
             '*.type' => 'required|max:255',
             '*.start_date' => 'date|nullable',
