@@ -12,6 +12,6 @@ class Comment extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'issue_id', 'shcedule_id', 'date', 'message', 'box'
+        'user_id', 'issue_id', 'schedule_id', 'date', 'message', 'box'
     ];
 }
