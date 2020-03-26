@@ -245,8 +245,10 @@ class ProjectsController extends Controller
         $path = $request->file('file')->getRealPath();
         $data = Excel::selectSheetsByIndex(0)->load($path, function($reader) {
             $reader->setHeaderRow(3);
-            $dataList = $reader->select(array('department', 'project', 'issue', 'page', 'type', 'start_date', 'end_date'))->get();
-            $dataList = $dataList->toArray();
+
+        });
+            $dataList = $data->select(array('department', 'project', 'issue', 'page', 'type', 'start_date', 'end_date'))->get();
+            $dataList = $data->toArray();
             foreach ($dataList as $keyItem =>$item) {
                 foreach ($item as $key => $value) {
                     if($key != "start_date" || $key != "end_date" || $key != "page") {
@@ -309,6 +311,7 @@ class ProjectsController extends Controller
                         ]);
                         $listnote['success'][$key][] =  'Row '.($key+2).': is success';
                     } else if (!empty($issue)){
+
                         $listnote['errors'][$key][] = 'Row '.($key+2).': ' . $value['project'] . ' or ' . $value['issue'] . ' have exsited in the system';
                     }
 
@@ -319,7 +322,6 @@ class ProjectsController extends Controller
                 return response()->json($listnote, 403);
             }
         }
-        });
         return response()->json(array(
             'message' => array(array('Successfully.'))
         ), 200);
