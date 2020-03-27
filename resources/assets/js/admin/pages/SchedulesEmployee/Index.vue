@@ -42,6 +42,7 @@
             :height="height"
             :hidden-days="hiddenDays"
             :locale="getLanguage(this.$ml)"
+            @datesRender="handleMonthChange"
           />
         </div>
       </div>
@@ -104,15 +105,15 @@ export default {
       maxTime: "17:00:00",
       allDaySlot: false,
       height: "auto",
-      hiddenDays: [0]
+      hiddenDays: [0],
+
+      currentStart: '',
+      currentEnd: ''
     };
-  },
-  mounted() {
-    this.fetchItems();
   },
   methods: {
     fetchItems() {
-      let uri = "/data/schedules";
+      let uri = '/data/schedules?startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD');
       axios
         .get(uri)
         .then(res => {
@@ -182,6 +183,11 @@ export default {
     },
     getLanguage(data) {
       return data.current;
+    },
+    handleMonthChange(arg) {
+        this.currentStart = arg.view.currentStart;
+        this.currentEnd = arg.view.currentEnd;
+        this.fetchItems();
     }
   },
   watch: {
@@ -208,15 +214,15 @@ export default {
   padding: 5px;
 }
 
-.fc-time-grid-event .fc-time,
-.fc-time-grid-event .fc-title {
-  color: #ffffff;
+.fc-event {
+    cursor: move;
+    color: rgba(0,0,0,0.8);
 }
 
-// tr:first-child>td>.fc-day-grid-event {
-//     padding: 5px;
-//     color: #ffffff;
-// }
+.fc-time-grid-event .fc-time,
+.fc-time-grid-event .fc-title {
+  color: rgba(0,0,0,0.8);
+}
 
 .fc-time-grid .fc-slats td {
   height: 2em;

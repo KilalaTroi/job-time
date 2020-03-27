@@ -98,7 +98,6 @@ export default {
         }
     },
     mounted() {
-        this.fetchItems();
         this.makeDraggable();
     },
     methods: {
