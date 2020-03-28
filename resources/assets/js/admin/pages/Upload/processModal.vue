@@ -114,7 +114,8 @@ export default {
 	},
 	methods: {
 		sendMessageLineWork() {
-			axios.post('https://apis.worksmobile.com/r/jp1YSSqsNgFBe/message/v1/bot/763699/message/push', {
+			axios.post('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
+				"botNo": 763699,
 				"roomId": "49446090",
 				"content": {
 					"type": "text",
@@ -124,7 +125,9 @@ export default {
 				headers: {
 					'Access-Control-Allow-Origin': '*',
 					'Allow-Control-Allow-Methods': '*',
-					'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
+					'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+					'Content-Type': 'application/json; charset=UTF-8',
+    				'consumerKey': 'BJjmv_Yhj_pWANH1szj8',
 				}
 			})
 			.then(res => {

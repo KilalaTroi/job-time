@@ -17,12 +17,9 @@ class OffDaysController extends Controller
      */
     public function index()
     {
+        $startDate = $_GET['startDate'];
+        $endDate = $_GET['endDate'];
     	$userID = $_GET['user_id'];
-        $nextMonth = Carbon::now()->addMonths(2)->format('Y-m-01');
-        $currentMonth = Carbon::now()->format('Y-m-01');
-        $now = date("Y-m-d");
-        $lastYear = strtotime($now . ' -1 year');
-        $lastYear = date('Y-m-d', $lastYear);
 
         $offDays = DB::table('off_days')
             ->select(
@@ -32,7 +29,8 @@ class OffDaysController extends Controller
             )
             ->where('status', '=', 'approved')
             ->where('user_id', '=', $userID)
-            ->where('date', '>=',  $lastYear)
+            ->where('date', '>=',  $startDate)
+            ->where('date', '<=',  $endDate)
             ->get()->toArray();
 
         return response()->json([
