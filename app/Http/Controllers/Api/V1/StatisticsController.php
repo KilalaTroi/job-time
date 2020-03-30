@@ -13,24 +13,26 @@ class StatisticsController extends Controller
 {
     public function timeAllocation() {
         $data = array();
+        $startMonth = $_GET['startMonth'];
+        $endMonth = $_GET['endMonth'];
 
         // Return project type
         $data['types'] = $this->typeWithClass();
 
         // Return months, monthsText, startEndYear, off days
-        $data = array_merge($data, $this->handleMonthYear());
+        $data = array_merge($data, $this->handleMonthYear($startMonth, $endMonth));
 
         // Number current jobs
         $data['jobs'] = $this->currentJobs();
 
         // Get users
-        $data['users'] = $this->getUsers($data['startEndYear']);
+        $data['users'] = $this->getUsers($startMonth, $endMonth);
 
         // info current month
-        $data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $data['startEndYear']);
+        $data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $endMonth);
 
         // Return totals
-        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['off_days'], $data['startEndYear']);
+        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['off_days'], $startMonth, $endMonth);
 
         return response()->json($data);
     }
@@ -38,19 +40,17 @@ class StatisticsController extends Controller
     public function filterAllocation() {
         $data = array();
         $user_id = $_GET['user_id'];
-        $startMonth = Carbon::createFromFormat('Y/m/d', $_GET['startMonth']);
-        $endMonth = Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->addMonths(1);
-        $nextMonth = Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->addMonths(2);
-        $totalMonths = $startMonth->diffInMonths($endMonth);
+        $startMonth = $_GET['startMonth'];
+        $endMonth = $_GET['endMonth'];
 
         // Return months, monthsText, startEndYear, off days
-        $data = $this->handleMonthYear($startMonth, $endMonth, $nextMonth, $totalMonths, $user_id);
+        $data = $this->handleMonthYear($startMonth, $endMonth, $user_id);
 
         // Get users
-        $data['users'] = $this->getUsers($data['startEndYear'], $user_id);
+        $data['users'] = $this->getUsers($startMonth, $endMonth, $user_id);
 
         // Return totals
-        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['off_days'], $data['startEndYear'], $user_id);
+        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['off_days'], $startMonth, $endMonth, $user_id);
 
         return response()->json($data);
     }
@@ -189,25 +189,20 @@ class StatisticsController extends Controller
     public function exportReport($file_extension) {
         $data = array();
         $user_id = $_GET['user_id'];
-        $startMonth = Carbon::createFromFormat('Y/m/d', $_GET['startMonth']);
-        $endMonth = Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->addMonths(1);
-        $nextMonth = Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->addMonths(2);
-        $totalMonths = $startMonth->diffInMonths($endMonth);
-
-        // Check month
-        if ( $totalMonths > 12 ) dd('The total number of months to export <= 12 months. Please enter again. Thank you.');
+        $startMonth = $_GET['startMonth'];
+        $endMonth = $_GET['endMonth'];
 
         // Return project type
         $types = $this->typeWithClass();
 
         // Return months, monthsText, startEndYear, off days
-        $data = $this->handleMonthYear($startMonth, $endMonth, $nextMonth, $totalMonths, $user_id);
+        $data = $this->handleMonthYear($startMonth, $endMonth, $user_id, true);
 
         // Get users
-        $users = $this->getUsers($data['startEndYear'], $user_id);
+        $users = $this->getUsers($startMonth, $endMonth, $user_id);
 
         // Return totals
-        $totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $data['off_days'], $data['startEndYear'], $user_id);
+        $totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $data['off_days'], $startMonth, $endMonth, $user_id);
 
         // infoUser
         $infoUser = false;
@@ -271,7 +266,7 @@ class StatisticsController extends Controller
         $mainTable['other'][''] = "  ";
         $mainTable['other']['Total'] = $otherTotal ? round($otherTotal/$numberWork, 1) . '%' : $otherTotal . '%';
 
-        $year = $nameFile = $startMonth->format('Y/m') . '-' . Carbon::createFromFormat('Y/m/d', $_GET['endMonth'])->format('Y/m');
+        $year = $nameFile = $startMonth . '-' . $endMonth;
         if ( $infoUser ) $nameFile .= '-'.$infoUser[0]->text;
 
         // Excel
@@ -358,46 +353,35 @@ class StatisticsController extends Controller
         return $type_work;
     }
 
-    function handleMonthYear($startMonth = null, $endMonth = null, $nextMonth = null, $totalMonths = 11, $user_id = 0) {
+    function handleMonthYear($startMonth = null, $endMonth = null, $user_id = 0, $export = false) {
         $data = array();
-        if ( $startMonth && $endMonth && $totalMonths ) {
-            $currentMonth = $endMonth;
-            $startYearMonth = $startMonth->month < 10 ? $startMonth->year . '0' . $startMonth->month : $startMonth->year . '' . $startMonth->month;
-            $beforeCurrentM = $currentMonth->month === 1 ? 12 : $currentMonth->month - 1;
-            $currentYear = $beforeCurrentM == 12 ? $startMonth->year : $currentMonth->year;
-            $endYearMonth = $beforeCurrentM < 10 ? $currentYear . '0' . $beforeCurrentM : $currentYear . '' . $beforeCurrentM;
-        } else {
-            $nextMonth = Carbon::now()->addMonths(1);
-            $currentMonth = Carbon::now();
-            $oldYear = $currentMonth->month < 12 ? ($currentMonth->year - 1) : $currentMonth->year;
-            $startYearMonth = $nextMonth->month < 10 ? $oldYear . '0' . $nextMonth->month : $oldYear . '' . $nextMonth->month;
-            $beforeCurrentM = $currentMonth->month === 1 ? 12 : $currentMonth->month - 1;
-            $currentYear = $beforeCurrentM == 12 ? $oldYear : $currentMonth->year;
-            $endYearMonth = $beforeCurrentM < 10 ? $currentYear . '0' . $beforeCurrentM : $currentYear . '' . $beforeCurrentM;
-        }
-        
-
-
         $daysOfMonth = array();
         $monthsText = array();
+        $startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
+        $endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
+        $totalMonths = $startMonth->diffInMonths($endMonth) + 1;
 
-        for ($i = 1; $i <= $totalMonths; $i++) {
-            $endMonth = $nextMonth->subMonths(1)->format('Y-m-01');
-            $month = $currentMonth->subMonths(1);
-            $startMonth = $month->format('Y-m-01');
-            $monthsText[] = $month->format('M');
+        if ( $export ) {
+            if ( $totalMonths > 12 ) dd('The total number of months to export <= 12 months. Please enter again. Thank you.');
+        }
 
-            $inYearMonth = $currentMonth->month < 10 ? $currentMonth->year . '0' . $currentMonth->month : $currentMonth->year . '' . $currentMonth->month;
+        for ($i = 0; $i < $totalMonths; $i++) {
+            $getM = $startMonth->copy()->addMonths($i);
+            $startM = $getM->startOfMonth()->format('Y-m-d');
+            $endM = $getM->endOfMonth()->format('Y-m-d');
+            $inYearMonth = $getM->year . $getM->format('m');
+
+            $monthsText[] = $getM->format('M');
             $daysOfMonth[$inYearMonth] = array(
-                 'start' => $startMonth,
-                 'end' => $endMonth
+                 'start' => $startM,
+                 'end' => $endM
             );
 
             // Full day off
             $data['off_days'][$inYearMonth]['full'] = DB::table('off_days')
             ->where('type', '=', 'all_day')
-            ->where('date', '<', $endMonth)
-            ->where('date', '>=',  $startMonth)
+            ->where('date', '<=', $endM)
+            ->where('date', '>=',  $startM)
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
@@ -406,23 +390,19 @@ class StatisticsController extends Controller
             // Half day off
             $data['off_days'][$inYearMonth]['half'] = DB::table('off_days')
             ->where('type', '<>', 'all_day')
-            ->where('date', '<', $endMonth)
-            ->where('date', '>=',  $startMonth)
+            ->where('date', '<=', $endM)
+            ->where('date', '>=',  $startM)
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
             ->count();
         }
 
-        $monthsText = array_reverse($monthsText);
+        // $monthsText = array_reverse($monthsText);
         ksort($daysOfMonth);
 
         $data['monthsText'] = $monthsText;
         $data['days_of_month'] = $daysOfMonth;
-        $data['startEndYear'] = array(
-            $daysOfMonth[$startYearMonth]['start'],
-            $daysOfMonth[$endYearMonth]['end']
-        );
 
         return $data;
     }
@@ -444,7 +424,7 @@ class StatisticsController extends Controller
             ->count();
     }
 
-    function getUsers($startEndYear, $user_id = 0) {
+    function getUsers($startMonth, $endMonth, $user_id = 0) {
         $users['all'] = DB::table('role_user as ru')
             ->select(
                 'user.id as id',
@@ -460,58 +440,44 @@ class StatisticsController extends Controller
             ])
             ->get()->toArray();
 
-        if ( $user_id ) {
-            $users['old'] = DB::table('users')
-                ->where('users.id', '=', $user_id)
-                ->where('users.created_at', "<", $startEndYear[0])
-                ->count();
+        $users['old'] = DB::table('role_user')
+            ->select('users.id')
+            ->join('users', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->when($user_id, function ($query, $user_id) {
+                return $query->where('users.id', $user_id);
+            })
+            ->where([
+                ['roles.name', '<>', 'admin'],
+                ['roles.name', '<>', 'japanese_planner'],
+                ['users.username', '<>', 'furuoya_vn_planner'],
+                ['users.username', '<>', 'furuoya_employee'],
+            ])
+            ->where('users.created_at', "<", str_replace('/', '-', $startMonth))
+            ->count();
 
-            // Return newUsersInMonth
-            $newUsersPerMonth = DB::table('users')
-                ->select(
-                    DB::raw('concat(year(users.created_at),"", LPAD(month(users.created_at), 2, "0")) as yearMonth'),
-                    DB::raw('COUNT(users.id) as number')
-                )
-                ->where('id', '=', $user_id)
-                ->where('created_at', ">=", $startEndYear[0])
-                ->where('created_at', "<", $startEndYear[1])
-                ->orderBy('yearMonth', 'desc')
-                ->groupBy('yearMonth')
-                ->get()->toArray();
-        } else {
-            $users['old'] = DB::table('role_user')
-                ->select('users.id')
-                ->join('users', 'users.id', '=', 'role_user.user_id')
-                ->join('roles', 'roles.id', '=', 'role_user.role_id')
-                ->where([
-                    ['roles.name', '<>', 'admin'],
-                    ['roles.name', '<>', 'japanese_planner'],
-                    ['users.username', '<>', 'furuoya_vn_planner'],
-                    ['users.username', '<>', 'furuoya_employee'],
-                ])
-                ->where('users.created_at', "<", $startEndYear[0])
-                ->count();
-
-            // Return newUsersInMonth
-            $newUsersPerMonth = DB::table('role_user')
-                ->select(
-                    DB::raw('concat(year(users.created_at),"", LPAD(month(users.created_at), 2, "0")) as yearMonth'),
-                    DB::raw('COUNT(users.id) as number')
-                )
-                ->join('users', 'users.id', '=', 'role_user.user_id')
-                ->join('roles', 'roles.id', '=', 'role_user.role_id')
-                ->where([
-                    ['roles.name', '<>', 'admin'],
-                    ['roles.name', '<>', 'japanese_planner'],
-                    ['users.username', '<>', 'furuoya_vn_planner'],
-                    ['users.username', '<>', 'furuoya_employee'],
-                ])
-                ->where('users.created_at', ">=", $startEndYear[0])
-                ->where('users.created_at', "<", $startEndYear[1])
-                ->orderBy('yearMonth', 'desc')
-                ->groupBy('yearMonth')
-                ->get()->toArray();
-        }
+        // Return newUsersInMonth
+        $newUsersPerMonth = DB::table('role_user')
+            ->select(
+                DB::raw('concat(year(users.created_at),"", LPAD(month(users.created_at), 2, "0")) as yearMonth'),
+                DB::raw('COUNT(users.id) as number')
+            )
+            ->join('users', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->when($user_id, function ($query, $user_id) {
+                return $query->where('users.id', $user_id);
+            })
+            ->where([
+                ['roles.name', '<>', 'admin'],
+                ['roles.name', '<>', 'japanese_planner'],
+                ['users.username', '<>', 'furuoya_vn_planner'],
+                ['users.username', '<>', 'furuoya_employee'],
+            ])
+            ->where('users.created_at', ">=", str_replace('/', '-', $startMonth))
+            ->where('users.created_at', "<=", str_replace('/', '-', $endMonth))
+            ->orderBy('yearMonth', 'desc')
+            ->groupBy('yearMonth')
+            ->get()->toArray();
         
         $convertUserMonth = array();
 
@@ -524,14 +490,14 @@ class StatisticsController extends Controller
         return $users;
     }
 
-    function currentMonth($usersTotal, $startEndYear) {
+    function currentMonth($usersTotal, $endMonth) {
         $currentDate = Carbon::now();
 
         $hoursCurrentMonth = DB::table('jobs')
             ->select(
                 DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
             )
-            ->where('jobs.date', ">=", $startEndYear[1])
+            ->where('jobs.date', ">", str_replace('/', '-', $endMonth))
             ->get();
 
         $daysCurrentMonth = 0;
@@ -540,20 +506,20 @@ class StatisticsController extends Controller
             if ( $day->isWeekday() ) $daysCurrentMonth++;
         }
 
-        $startDate = $currentDate->format('Y-m-01');
-        $endDate = $currentDate->addMonths(1)->format('Y-m-01');
+        $startDate = $currentDate->startOfMonth()->format('Y-m-d');
+        $endDate = $currentDate->endOfMonth()->format('Y-m-d');
 
         // Full day off
         $off_days['full'] = DB::table('off_days')
         ->where('type', '=', 'all_day')
-        ->where('date', '<', $endDate)
+        ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
         ->count();
 
         // Half day off
         $off_days['half'] = DB::table('off_days')
         ->where('type', '<>', 'all_day')
-        ->where('date', '<', $endDate)
+        ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
         ->count();
 
@@ -565,13 +531,13 @@ class StatisticsController extends Controller
         return $data;
     }
 
-    function getTotals($days_of_month, $usersOld, $newUsersPerMonth, $off_days, $startEndYear, $user_id = 0) {
+    function getTotals($days_of_month, $usersOld, $newUsersPerMonth, $off_days, $startMonth, $endMonth, $user_id = 0) {
         $totalHoursPerMonth = array();
 
         foreach ($days_of_month as $key => $value) {
             $daysInMonth = 0;
             $arrayStart = explode('-', $value['start']);
-            $monthYear = Carbon::createFromDate($arrayStart[0],$arrayStart[1]*1);
+            $monthYear = Carbon::createFromFormat('Y-m-d', $value['start']);
             for ($d=1; $d <= $monthYear->daysInMonth ; $d++) {
                 $day = Carbon::createFromDate($arrayStart[0],$arrayStart[1]*1,$d);
                 if ( $day->isWeekday() ) $daysInMonth++;
@@ -596,8 +562,8 @@ class StatisticsController extends Controller
             )
             ->join('issues', 'issues.id', '=', 'jobs.issue_id')
             ->join('projects', 'projects.id', '=', 'issues.project_id')
-            ->where('jobs.date', ">=", $startEndYear[0])
-            ->where('jobs.date', "<", $startEndYear[1])
+            ->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
+            ->where('jobs.date', "<", str_replace('/', '-', $endMonth))
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('jobs.user_id', $user_id);
             })

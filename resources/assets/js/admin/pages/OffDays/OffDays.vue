@@ -17,7 +17,7 @@
                 </card>
             </div>
             <div class="col-sm-12 col-lg-9">
-                <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" @datesRender="handleMonthChange" />
+                <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" :datesRender="handleMonthChange" />
             </div>
         </div>
 

@@ -12,7 +12,7 @@
                             <h4 class="card-title">{{ totalArrayObject(hoursPerProject) }}/{{ totalObject(totalHoursPerMonth) }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ getTimeWorked(startEndYear) }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
                         </div>
                     </stats-card>
                 </div>
@@ -26,7 +26,7 @@
                             <h4 class="card-title"> {{ getCurrentMonth(currentMonth) }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ customFormatter(startEndYear[1]) }} - {{ currentFormatterDate() }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonth.startDate }} - {{ currentMonth.currentDate }}
                         </div>
                     </stats-card>
                 </div>
@@ -40,7 +40,7 @@
                             <h4 class="card-title">{{ jobs }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ currentFormatterDate() }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonth.currentDate }}
                         </div>
                     </stats-card>
                 </div>
@@ -54,7 +54,7 @@
                             <h4 class="card-title">+{{ totalObject(newUsersPerMonth) }}/{{ currentMonth.totalUsers }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ getTimeWorked(startEndYear) }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
                         </div>
                     </stats-card>
                 </div>
@@ -130,15 +130,17 @@
                 types: [],
                 monthsText: [],
                 series: [],
-                startEndYear: [],
                 newUsersPerMonth: {},
                 totalHoursPerMonth: {},
                 hoursPerProject: [],
                 jobs: 0,
-                currentMonth: {},
 
-                startMonth: new Date(moment().subtract(11, 'months').format('YYYY/MM/DD')),
-                endMonth: new Date(moment().subtract(1, 'months').format('YYYY/MM/DD')),
+                startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
+                endMonth: new Date(moment().subtract(1, 'months').endOf('month').format('YYYY/MM/DD')),
+                currentMonth: {
+                    startDate: moment().startOf('month').format('YYYY/MM/DD'),
+                    currentDate: moment().format('YYYY/MM/DD'),
+                }, 
 
                 users: [],
                 userOptions: [],
@@ -181,6 +183,7 @@
                         }]
                     ]
                 },
+
                 dataLang: {
                     vi: vi,
                     ja: ja,
@@ -198,7 +201,7 @@
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
             });
 
-            _this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + _this.user_id + '&startMonth=' + _this.customFormatter01(_this.startMonth) + '&endMonth=' + _this.customFormatter01(_this.endMonth);
+            _this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + _this.user_id + '&startMonth=' + _this.customFormatterStr(_this.startMonth) + '&endMonth=' + _this.customFormatterEnd(_this.endMonth);
             
             $(document).on('click', '.languages button', function() {
                 _this.fetch();
@@ -206,13 +209,12 @@
         },
         methods: {
             fetch() {
-                let uri = '/data/statistic/time-allocation';
+                let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth);
 
                 axios.get(uri)
                     .then(res => {
                         this.types = res.data.types;
                         this.users = res.data.users.all;
-                        this.startEndYear = res.data.startEndYear;
                         this.newUsersPerMonth = res.data.users.newUsersPerMonth;
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
                         this.hoursPerProject = res.data.totals.hoursPerProject;
@@ -227,13 +229,12 @@
                     });
             },
             getFilterData() {
-                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
+                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth);
 
-                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatter01(this.startMonth) + '&endMonth=' + this.customFormatter01(this.endMonth);
+                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth);
 
                 axios.get(uri)
                     .then(res => {
-                        this.startEndYear = res.data.startEndYear;
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
                         this.hoursPerProject = res.data.totals.hoursPerProject;
                         this.monthsText = this.barChart.data.labels = res.data.monthsText;
@@ -254,27 +255,17 @@
 
                 return false;
             },
-            currentFormatterDate() {
-                return moment().format('YYYY/MM/DD');
+            customFormatterEnd(date) {
+                return moment(date).endOf('month').format('YYYY/MM/DD');
             },
-            customFormatter(date) {
-                return moment(date).format('YYYY/MM/DD');
-            },
-            customFormatter01(date) {
-                return moment(date).format('YYYY/MM/01');
+            customFormatterStr(date) {
+                return moment(date).startOf('month').format('YYYY/MM/DD');
             },
             customFormatterM(date) {
                 return moment(date).format('YYYY/MM');
             },
-            yesterday(date) {
-                date = new Date(date);
-                return date.setDate(date.getDate() - 1);
-            },
             circleClass(cl) {
                 return cl + ' text-uppercase ml-3';
-            },
-            getTimeWorked(date) {
-                return this.customFormatter(date[0]) + ' - ' + this.customFormatter(this.yesterday(date[1]));
             },
             totalObject(obj) {
                 return Object.keys(obj).reduce((total, key) => { return total + obj[key] }, 0);

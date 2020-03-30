@@ -152,7 +152,7 @@ export default {
     },
     methods: {
         fetchItems() {
-            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
+            let uri = '/data/jobs?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
             axios.get(uri)
                 .then(res => {
                     this.departments = res.data.departments;
@@ -175,7 +175,7 @@ export default {
             this.optionsFilter = [...arr];
         },
         changeShowFilter() {
-            let uri = '/data/jobs/?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
+            let uri = '/data/jobs?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
             axios.get(uri)
                 .then(res => {
                     this.jobData = res.data.jobs;

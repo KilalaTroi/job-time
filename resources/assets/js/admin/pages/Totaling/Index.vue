@@ -182,7 +182,7 @@ export default {
 			],
 			users: [],
 			userOptions: [],
-			start_date: moment(new Date()).format("YYYY/MM") + "/01",
+			start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
 			end_date: new Date(),
 			deptSelects: [],
 			typeSelects: [],

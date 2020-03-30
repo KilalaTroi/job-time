@@ -36,7 +36,7 @@ class SchedulesController extends Controller
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
             ->where(function ($query) use ($endDate) {
-                $query->where('start_date', '<=', $endDate)
+                $query->where('start_date', '<', $endDate)
                       ->orWhere('start_date', '=',  NULL);
             })
             ->where(function ($query) use ($startDate) {
@@ -64,7 +64,7 @@ class SchedulesController extends Controller
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
             ->where('s.date', '>=',  $startDate)
-            ->where('s.date', '<=',  $endDate)
+            ->where('s.date', '<',  $endDate)
             ->get()->toArray();
 
         return response()->json([
