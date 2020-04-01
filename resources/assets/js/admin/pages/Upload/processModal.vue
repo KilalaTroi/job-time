@@ -57,6 +57,8 @@ import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
 import Modal from "../../components/Modals/Modal";
 import moment from 'moment';
+// const BoxSDK = require('box-node-sdk');
+import boxConfig from './config.json';
 
 export default {
 	name: "process-modal",
@@ -95,7 +97,6 @@ export default {
 	},
 	mounted() {
 		let _this = this;
-		this.getBoxFolder();
 		$(document).on('click', '.languages button', function() {
 			_this.columns = [
 			{ id: "p_name", value: _this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
@@ -139,14 +140,22 @@ export default {
 			});
 		},
 		connectBox() {
-			var sdk = new BoxSDK({
-				clientID: 'CLIENT_ID',
-				clientSecret: 'CLIENT_SECRET',
-				appAuth: {
-					keyID: 'PUBLIC_KEY_ID',
-					privateKey: 'PRIVATE_KEY',
-					passphrase: 'PRIVATE_KEY_PASSPHRASE'
+			axios.post('https://api.box.com/oauth2/token', {
+				headers: {
+    				'Content-Type': "application/x-www-form-urlencoded",
+				},
+				data: {
+					'client_id': boxConfig.boxAppSettings.clientID,
+ 					'client_secret': boxConfig.boxAppSettings.clientSecret,
+ 					'grant_type': 'authorization_code'
 				}
+			})
+			.then(res => {
+				console.log(res);
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not load box");
 			});
 		},
 		recapName(str) {
@@ -176,7 +185,7 @@ export default {
 			}
 		},
 		getBoxFolder() {
-			axios.get('https://account.box.com/api/oauth2/authorize?response_type=code&client_id=r3f3t4gyqu4yp46gs5bbh2nhl4n4i87g')
+			axios.get('https://account.box.com/api/oauth2/authorize?client_id=nrv5q4dpeod2x2b1duev34prwvw77yxj&response_type=code')
 			.then(res => {
 				console.log(res);
 			})

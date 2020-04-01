@@ -137,10 +137,7 @@
 
                 startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
                 endMonth: new Date(moment().subtract(1, 'months').endOf('month').format('YYYY/MM/DD')),
-                currentMonth: {
-                    startDate: moment().startOf('month').format('YYYY/MM/DD'),
-                    currentDate: moment().format('YYYY/MM/DD'),
-                }, 
+                currentMonth: {}, 
 
                 users: [],
                 userOptions: [],
@@ -220,6 +217,8 @@
                         this.hoursPerProject = res.data.totals.hoursPerProject;
                         this.jobs = res.data.jobs;
                         this.currentMonth = res.data.currentMonth;
+                        this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
+                        this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
                     })
