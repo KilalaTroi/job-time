@@ -115,29 +115,47 @@ export default {
 	},
 	methods: {
 		sendMessageLineWork() {
-			axios.post('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
+			let formData = new FormData();
+			formData.append('headers', {
 				"botNo": 763699,
-				"roomId": "49446090",
+				"roomId": "27956161",
 				"content": {
 					"type": "text",
-					"text": "test send message from web app"
+					"text": "Troi Kilala test send message from web app"
 				}
-			}, {
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Allow-Control-Allow-Methods': '*',
-					'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-					'Content-Type': 'application/json; charset=UTF-8',
-    				'consumerKey': 'BJjmv_Yhj_pWANH1szj8',
-				}
-			})
-			.then(res => {
+			});
+            formData.append('json', {
+				'Content-Type': 'application/json',
+				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
+    				'Authorization': 'Bearer AAAA957lYDkk4DKCbPPHrraasg0tRk5MCNLqtsDxtDh5iGVc9q0CJvi4CfTWc+YiPISaox51dKCXPVgkc3FMd3BYTfQEr8xAadrjDlqinV0chr9A0gXq+oZnpFdBTx/KKhRxR2tl1GXjscGcc2c1NBimH9mCkxzSDQso0V08uC+/X2vrTtBj4pIimuIW6rZ5NhU2p20Dn1eGOfNEvl8WrF4bYj+x/GDpnyqX9LkVOgxvJbAmefYNYam4N1RedNZPqZJe/quo72JAfljdMttePyHM3aHPShCkYndQqSMwlL/zypZqmRj5h80an21GxjlKiyFka+t5Big/8hWe+nTL47DjeGw='
+			});
+			httpService.httpReq('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', formData).then(res => {
 				console.log(res);
 			})
-			.catch(err => {
-				console.log(err);
-				alert("Could not load box");
-			});
+			// axios.post('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
+			// 		"botNo": 763699,
+			// 		"roomId": "27956161",
+			// 		"content": {
+			// 			"type": "text",
+			// 			"text": "Troi Kilala test send message from web app"
+			// 		}
+			// 	}, {
+			// 	headers: {
+			// 		'Content-Type': 'application/json',
+			// 		'Access-Control-Allow-Origin': '*',
+			// 		'Allow-Control-Allow-Methods': '*',
+			// 		'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+   //  				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
+   //  				'Authorization': 'Bearer AAAA957lYDkk4DKCbPPHrraasg0tRk5MCNLqtsDxtDh5iGVc9q0CJvi4CfTWc+YiPISaox51dKCXPVgkc3FMd3BYTfQEr8xAadrjDlqinV0chr9A0gXq+oZnpFdBTx/KKhRxR2tl1GXjscGcc2c1NBimH9mCkxzSDQso0V08uC+/X2vrTtBj4pIimuIW6rZ5NhU2p20Dn1eGOfNEvl8WrF4bYj+x/GDpnyqX9LkVOgxvJbAmefYNYam4N1RedNZPqZJe/quo72JAfljdMttePyHM3aHPShCkYndQqSMwlL/zypZqmRj5h80an21GxjlKiyFka+t5Big/8hWe+nTL47DjeGw='
+			// 	}
+			// })
+			// .then(res => {
+			// 	console.log(res);
+			// })
+			// .catch(err => {
+			// 	console.log(err);
+			// 	alert("Could not load box");
+			// });
 		},
 		connectBox() {
 			axios.post('https://api.box.com/oauth2/token', {
