@@ -115,57 +115,19 @@ export default {
 	},
 	methods: {
 		sendMessageLineWork() {
-			let formData = new FormData();
-			formData.append('headers', {
-				"botNo": 763699,
-				"roomId": "27956161",
-				"content": {
-					"type": "text",
-					"text": "Troi Kilala test send message from web app"
-				}
-			});
-            formData.append('json', {
-				'Content-Type': 'application/json',
-				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
-    				'Authorization': 'Bearer AAAA957lYDkk4DKCbPPHrraasg0tRk5MCNLqtsDxtDh5iGVc9q0CJvi4CfTWc+YiPISaox51dKCXPVgkc3FMd3BYTfQEr8xAadrjDlqinV0chr9A0gXq+oZnpFdBTx/KKhRxR2tl1GXjscGcc2c1NBimH9mCkxzSDQso0V08uC+/X2vrTtBj4pIimuIW6rZ5NhU2p20Dn1eGOfNEvl8WrF4bYj+x/GDpnyqX9LkVOgxvJbAmefYNYam4N1RedNZPqZJe/quo72JAfljdMttePyHM3aHPShCkYndQqSMwlL/zypZqmRj5h80an21GxjlKiyFka+t5Big/8hWe+nTL47DjeGw='
-			});
-			httpService.httpReq('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', formData).then(res => {
-				console.log(res);
-			})
-			// axios.post('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
-			// 		"botNo": 763699,
-			// 		"roomId": "27956161",
-			// 		"content": {
-			// 			"type": "text",
-			// 			"text": "Troi Kilala test send message from web app"
-			// 		}
-			// 	}, {
-			// 	headers: {
-			// 		'Content-Type': 'application/json',
-			// 		'Access-Control-Allow-Origin': '*',
-			// 		'Allow-Control-Allow-Methods': '*',
-			// 		'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-   //  				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
-   //  				'Authorization': 'Bearer AAAA957lYDkk4DKCbPPHrraasg0tRk5MCNLqtsDxtDh5iGVc9q0CJvi4CfTWc+YiPISaox51dKCXPVgkc3FMd3BYTfQEr8xAadrjDlqinV0chr9A0gXq+oZnpFdBTx/KKhRxR2tl1GXjscGcc2c1NBimH9mCkxzSDQso0V08uC+/X2vrTtBj4pIimuIW6rZ5NhU2p20Dn1eGOfNEvl8WrF4bYj+x/GDpnyqX9LkVOgxvJbAmefYNYam4N1RedNZPqZJe/quo72JAfljdMttePyHM3aHPShCkYndQqSMwlL/zypZqmRj5h80an21GxjlKiyFka+t5Big/8hWe+nTL47DjeGw='
-			// 	}
-			// })
-			// .then(res => {
-			// 	console.log(res);
-			// })
-			// .catch(err => {
-			// 	console.log(err);
-			// 	alert("Could not load box");
-			// });
-		},
-		connectBox() {
-			axios.post('https://api.box.com/oauth2/token', {
+			axios.post('https://cors-anywhere.herokuapp.com/https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
+					"botNo": 763699,
+					"roomId": "27956161",
+					"content": {
+						"type": "text",
+						"text": this.newMessage
+					}
+				}, {
 				headers: {
-    				'Content-Type': "application/x-www-form-urlencoded",
-				},
-				data: {
-					'client_id': boxConfig.boxAppSettings.clientID,
- 					'client_secret': boxConfig.boxAppSettings.clientSecret,
- 					'grant_type': 'authorization_code'
+					'Access-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json',
+    				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
+    				'Authorization': 'Bearer AAAA+ORRLyUp2fmvNLT6LEfbU9D6ZtBOuPIs6B1WdPu9m4meKf38uz3wm1N8De0KsisHGaMULdu0S/VbODus9njxTrirJPSImVEFLoCS7Utu9+v7hJPWmVJICM9HUEtIaSzF85txqsZ7O5VTacvzLeCJBmVmDD3lIcZ1TqeC3O+DSULXVRJxzsazKmOyL0alCvKopN0n4pjsEe/ZBQmFKgFPxi1jEBS3Q58GG+7Zn9He00WL4GL8wI5Ki1aBnyG9mp4H44SUT0C/igjBsO351qKuqvccI+B117leYfQhYzRNe4v71vJ/7R1RztLpjKEWQLZwGQMUjrk5ysgshWYdaBZT670='
 				}
 			})
 			.then(res => {
@@ -201,16 +163,6 @@ export default {
 					console.log(err);
 				});
 			}
-		},
-		getBoxFolder() {
-			axios.get('https://account.box.com/api/oauth2/authorize?client_id=nrv5q4dpeod2x2b1duev34prwvw77yxj&response_type=code')
-			.then(res => {
-				console.log(res);
-			})
-			.catch(err => {
-				console.log(err);
-				alert("Could not load box");
-			});
 		},
 		getDataProcess() {
 			this.dataProcess = [
