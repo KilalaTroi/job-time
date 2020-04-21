@@ -63,6 +63,8 @@ class Uploadcontroller extends Controller
                 's.id as id',
                 'd.name as department',
                 'p.name as project',
+                'p.room_id as room_id',
+                'p.box_url as box_url',
                 'i.name as issue',
                 'i.page as page',
                 't.slug as job_type',
@@ -70,7 +72,7 @@ class Uploadcontroller extends Controller
                 's.status as status'
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
-            ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+            ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->when($deptArr, function ($query, $deptArr) {
@@ -106,6 +108,7 @@ class Uploadcontroller extends Controller
                           ->orWhere('end_date', '=',  NULL);
                 });
             })
+            ->where('s.id', '<>', NULL)
             ->where('i.status', '=', 'publish')
             ->orderBy('p.name', 'desc')
             ->orderBy('i.name', 'desc')

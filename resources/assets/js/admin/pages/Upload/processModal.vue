@@ -13,19 +13,14 @@
 			<div id="selectDest" class="d-flex justify-content-between">
 				<div class="form-group border p-3">
 					<h5>
-						{{$ml.with('VueJS').get('txtBoxDestination')}}
-						<label class="dest-box" for="destBox">{{$ml.with('VueJS').get('txtSelect')}}</label>
-						<input type="file" id="destBox" name />
+						{{$ml.with('VueJS').get('txtBoxUrl')}}
+						<label class="dest-box"><a :href="currentProcess.box_url" target="_blank">Open</a></label>
 					</h5>
-					<p>https://yuidea.app.box.com/folder/49217853872</p>
+					<p>{{ currentProcess.box_url }}</p>
 				</div>
 				<div class="form-group border p-3">
-					<h5>
-						File
-						<label class="dest-file" for="destFile">{{$ml.with('VueJS').get('txtSelect')}}</label>
-						<input type="file" id="destFile" name />
-					</h5>
-					<p>\\192.168.0.233\daichi\tsuchi_kilala\Job\2020_114\1st\indd</p>
+					<h5>{{$ml.with('VueJS').get('txtBoxDestination')}}</h5>
+					<input v-model="box" type="text" name="box" class="form-control">
 				</div>
 			</div>
 			<div class="form-group d-flex justify-content-between">
@@ -57,8 +52,6 @@ import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
 import Modal from "../../components/Modals/Modal";
 import moment from 'moment';
-// const BoxSDK = require('box-node-sdk');
-import boxConfig from './config.json';
 
 export default {
 	name: "process-modal",
@@ -85,8 +78,7 @@ export default {
 			],
 			dataProcess: [],
 			newMessage: "",
-			box: "test",
-			file: "test",
+			box: "",
 			errors: "",
 			success: "",
 			modalLg: "modal-lg",
@@ -117,7 +109,7 @@ export default {
 		sendMessageLineWork() {
 			axios.post('https://cors-anywhere.herokuapp.com/https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
 					"botNo": 763699,
-					"roomId": "27956161",
+					"roomId": this.currentProcess.room_id,
 					"content": {
 						"type": "text",
 						"text": this.newMessage
@@ -154,7 +146,7 @@ export default {
 							date: moment(item.date).format('DD/MMM/YYYY HH:mm'),
 							name: this.recapName(item.name),
 							message: item.message,
-							box: item.box
+							box: '<a href="' + item.box + '" target="_blank" class="btn btn-secondary">Open</a>',
 						}
 					});
 					console.log(res.data.message);
@@ -202,13 +194,6 @@ export default {
 			if( !this.box ) {
 				this.errors = [
 					['Box is requried']
-				];
-				return false;
-			}
-
-			if( !this.file ) {
-				this.errors = [
-					['File is requried']
 				];
 				return false;
 			}
@@ -285,11 +270,6 @@ p {
 .form-group {
 	background: #ffffff;
 	width: calc(50% - 7.5px);
-	input {
-	opacity: 0;
-	position: absolute;
-	z-index: -1;
-}
 label {
 	cursor: pointer;
 	font-size: 14px;

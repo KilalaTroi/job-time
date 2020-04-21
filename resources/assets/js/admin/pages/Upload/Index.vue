@@ -98,6 +98,7 @@
 					<upload-table class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess"></upload-table>
 				</div>
 				<process-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></process-modal>
+				<comments-modal :currentProcess="currentProcess"></comments-modal>
 				<pagination
 				:data="dataProjects"
 				:show-disabled="jShowDisabled"
@@ -112,7 +113,8 @@
 </template>
 <script>
 import UploadTable from "../../components/TableUpload";
-import ProcessModal from './ProcessModal'
+import ProcessModal from './ProcessModal';
+import CommentsModal from './CommentsModal';
 import Card from "../../components/Cards/Card";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
@@ -127,7 +129,8 @@ export default {
 		Datepicker,
 		Multiselect,
 		Select2,
-		ProcessModal
+		ProcessModal,
+		CommentsModal
 	},
 
 	data() {
@@ -262,6 +265,8 @@ export default {
 						p_name: item.project,
 						i_name: item.issue,
 						t_name: item.job_type,
+						room_id: item.room_id,
+						box_url: item.box_url,
 						phase: item.phase,
 						status: item.status ? true : false
 					};

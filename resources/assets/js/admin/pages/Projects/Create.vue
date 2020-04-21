@@ -46,10 +46,16 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtLineRoomId')}}</label>
                         <input v-model="room_id" type="text" name="room_id" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtBoxUrl')}}</label>
+                        <input v-model="box_url" type="text" name="box_url" class="form-control">
                     </div>
                 </div>
             </div>
@@ -128,6 +134,7 @@ export default {
             p_name_vi: '',
             p_name_ja: '',
             room_id: '',
+            box_url: '',
             no_period: false,
             has_period: true,
             i_name: '',
@@ -167,6 +174,7 @@ export default {
                 p_name_vi: this.p_name_vi,
                 p_name_ja: this.p_name_ja,
                 room_id: this.room_id,
+                box_url: this.box_url,
                 i_name: this.i_name,
                 page: this.page,
                 start_date: this.start_date,
@@ -201,6 +209,7 @@ export default {
                 this.p_name_vi = '';
                 this.p_name_ja = '';
                 this.room_id = '';
+                this.box_url = '';
                 this.no_period = false;
                 this.i_name = '';
                 this.page = '';

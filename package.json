@@ -25,7 +25,6 @@
     "@fullcalendar/timegrid": "^4.3.0",
     "@fullcalendar/vue": "^4.3.1",
     "bootstrap": "^4.3.1",
-    "box-node-sdk": "^1.31.0",
     "chartist": "^0.11.4",
     "chartist-plugin-tooltip": "^0.0.11",
     "laravel-vue-pagination": "^2.3.1",

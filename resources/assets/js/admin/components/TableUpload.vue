@@ -18,6 +18,7 @@
                 </slot>
                 <td class="text-center">
                     <i @click="$emit('get-process', item.id)" class="fa fa-plus-circle btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i>  
+                    <i @click="$emit('get-process', item.id)" class="ml-1 fa fa-eye btn-process" data-toggle="modal" data-target="#commentsModal" data-backdrop="static" data-keyboard="false"></i>  
                 </td>
                 <td class="text-center"><i :class="itemClassActive(item)"></i></td>
             </tr>

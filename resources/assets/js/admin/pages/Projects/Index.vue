@@ -221,6 +221,7 @@ export default {
                         page: item.page,
                         status: item.status,
                         room_id: item.room_id,
+                        box_url: item.box_url,
                         type: this.getObjectValue(this.types, item.type_id).slug,
                         value: this.getObjectValue(this.types, item.type_id).value,
                         start_date: this.customFormatter(item.start_date),
@@ -316,6 +317,7 @@ export default {
                         p_name_vi: res.data.p_name_vi,
                         p_name_ja: res.data.p_name_ja,
                         room_id: res.data.room_id,
+                        box_url: res.data.box_url,
                         status: 'publish',
                     }, newIssue);
                     // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];

@@ -52,6 +52,7 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
                 'p.room_id as room_id',
+                'p.box_url as box_url',
                 'i.name as i_name',
                 'i.page as page',
                 'status',
@@ -109,6 +110,7 @@ class ProjectsController extends Controller
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
             'room_id' => $request->get('room_id'),
+            'box_url' => $request->get('box_url'),
         ]);
 
         $issue = array();
@@ -163,6 +165,7 @@ class ProjectsController extends Controller
                 'p.name_vi as p_name_vi',
                 'p.name_vi as p_name_ja',
                 'p.room_id as room_id',
+                'p.box_url as box_url',
                 'i.name as i_name',
                 'i.page as page',
                 'status',
@@ -213,6 +216,7 @@ class ProjectsController extends Controller
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
             'room_id' => $request->get('room_id'),
+            'box_url' => $request->get('box_url'),
         ]);
 
         return response()->json(array(
@@ -296,6 +300,7 @@ class ProjectsController extends Controller
                             'dept_id' => $deptId,
                             'type_id' => $typeId,
                             'room_id' => '',
+                            'box_url' => '',
                         ]);
                     }
 
