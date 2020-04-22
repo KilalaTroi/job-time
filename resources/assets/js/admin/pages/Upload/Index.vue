@@ -95,10 +95,10 @@
 					</div>
 				</template>
 				<div class="table-responsive">
-					<upload-table class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess"></upload-table>
+					<upload-table class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></upload-table>
 				</div>
 				<process-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></process-modal>
-				<comments-modal :currentProcess="currentProcess"></comments-modal>
+				<comments-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></comments-modal>
 				<pagination
 				:data="dataProjects"
 				:show-disabled="jShowDisabled"
@@ -279,6 +279,23 @@ export default {
 			this.currentProcess = this.getObjectValue(this.dataProjects.data, id);
 			this.currentProcess.status = this.currentProcess.status ? true : false;
 		},
+		changeStatusProcess(id) {
+			let foundIndex = this.dataProjects.data.findIndex(x => x.id == id);
+			this.dataProjects.data[foundIndex].status = this.dataProjects.data[foundIndex].status ? 0 : 1;
+			
+			let uri = "/data/upload/update-status";
+			axios.post(uri, {
+					currentProcess: this.dataProjects.data[foundIndex]
+				})
+				.then(res => {
+					console.log(res.data.message);
+					this.dataProjects.data = [...this.dataProjects.data];
+				})
+				.catch(err => {
+					console.log(err);
+				});
+            
+		},
 		customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
 		},
@@ -311,7 +328,8 @@ export default {
 	watch: {
 		dataProjects: [
 		{
-			handler: "getDataProjects"
+			handler: "getDataProjects",
+            deep: true
 		}
 		],
 		txtAll: [

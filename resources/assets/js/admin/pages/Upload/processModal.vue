@@ -24,7 +24,7 @@
 				</div>
 			</div>
 			<div class="form-group d-flex justify-content-between">
-				<base-checkbox v-model="currentProcess.status" v-on:input="changeStatus">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
+				<div></div>
 				<button type="button" class="btn btn-primary" @click="uploadProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
 			</div>
 			<error-item :errors="errors"></error-item>
@@ -77,7 +77,7 @@ export default {
 			{ id: "box", value: 'Box', width: "", class: "text-center" }
 			],
 			dataProcess: [],
-			newMessage: "",
+			newMessage: "以下のページをアップロードしました\n",
 			box: "",
 			errors: "",
 			success: "",
@@ -166,19 +166,6 @@ export default {
 			}
 			];
 		},
-		changeStatus() {
-			let uri = "/data/upload/update-status";
-			axios
-			.post(uri, {
-				currentProcess: this.currentProcess
-			})
-			.then(res => {
-				console.log(res.data.message);
-			})
-			.catch(err => {
-				console.log(err);
-			});
-		},
 		uploadProcess() {
 			// Reset validate
 			this.errors = "";
@@ -216,12 +203,12 @@ export default {
 					date: moment(res.data.comment.date).format('DD/MMM/YYYY HH:mm'),
 					name: this.recapName(res.data.comment.name),
 					message: res.data.comment.message,
-					box: res.data.comment.box
+					box: '<a href="' + res.data.comment.box + '" target="_blank" class="btn btn-secondary">Open</a>'
 				}
 
 				this.listComments = [...this.listComments, newComment];
 
-				this.newMessage = '';
+				this.newMessage = '以下のページをアップロードしました\n';
 				this.box = '';
 			})
 			.catch(err => {
@@ -233,7 +220,7 @@ export default {
         resetValidate() {
             this.errors = '';
             this.success = '';
-            this.newMessage = '';
+            this.newMessage = '以下のページをアップロードしました\n';
             this.$emit('reset-validation')
         }
 	},

@@ -1,17 +1,24 @@
 <template>
-	<modal id="commentsModal" :sizeClasses="modalLg">
-		<template slot="title">{{$ml.with('VueJS').get('txtProcessList')}}</template>
-		<div v-if="currentProcess">
-			<div v-if="listComments.length">
-				<div class="table-responsive">
-					<no-action-table
-					class="table-hover table-striped"
-					:columns="columns2"
-					:data="listComments"
-					></no-action-table>
+	<modal id="commentsModal" :sizeClasses="modalLg" v-on:reset-validation="resetValidate">
+		<card class="strpied-tabled-with-hover">
+            <template slot="header">
+                <div class="d-flex justify-content-between">
+		            <h4 class="card-title">{{$ml.with('VueJS').get('txtProcessList')}}</h4>
+					<base-checkbox v-model="currentProcess.status" v-on:input="changeStatus">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
 				</div>
+            </template>
+            <div v-if="currentProcess">
+				<div v-if="listComments.length">
+					<div class="table-responsive">
+						<no-action-table
+						class="table-hover table-striped"
+						:columns="columns2"
+						:data="listComments"
+						></no-action-table>
+					</div>
+				</div> 
 			</div>
-		</div>
+        </card>
 	</modal>
 </template>
 
@@ -77,6 +84,22 @@ export default {
 				});
 			}
 		},
+		changeStatus() {
+			let uri = "/data/upload/update-status";
+			axios
+			.post(uri, {
+				currentProcess: this.currentProcess
+			})
+			.then(res => {
+				console.log(res.data.message);
+			})
+			.catch(err => {
+				console.log(err);
+			});
+		},
+        resetValidate() {
+            this.$emit('reset-validation')
+        }
 	},
 	watch: {
 		currentProcess: [
