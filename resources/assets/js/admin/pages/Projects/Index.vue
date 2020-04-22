@@ -419,12 +419,12 @@ export default {
                 this.getProjects(this.showArchive);
                 this.validationSuccess = '';
                 this.validationErrors = '';
-                this.currentItem = null;
+                this.currentItem = false;
             }
         },
         resetImport() {
             this.getProjects(this.showArchive);
-            this.currentItem = null;
+            this.currentItem = false;
         }
     },
     watch: {

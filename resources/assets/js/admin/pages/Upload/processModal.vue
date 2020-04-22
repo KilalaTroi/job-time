@@ -220,6 +220,9 @@ export default {
 				}
 
 				this.listComments = [...this.listComments, newComment];
+
+				this.newMessage = '';
+				this.box = '';
 			})
 			.catch(err => {
 				console.log(err);
