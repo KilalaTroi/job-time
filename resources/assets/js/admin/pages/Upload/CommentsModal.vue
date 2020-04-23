@@ -127,7 +127,7 @@ export default {
 		},
 		getBoxButtons(data) {
 			let boxButtons = '';
-			let boxArr =  data.split(",");
+			let boxArr =  data.split(", ");
 			boxArr.map((item, index) => {
 				boxButtons += '<a href="' + item + '" target="_blank" class="btn btn-secondary m-1">Box ' + (index + 1) + ' <i class="fa fa-external-link"></i></a>';
 			});
