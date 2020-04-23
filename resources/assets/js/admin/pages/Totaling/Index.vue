@@ -310,14 +310,15 @@ export default {
 			});
 		},
 		getUserOptions() {
-			let data = this.users;
-			if (data.length) {
-				let obj = {
-					id: 0,
-					text: this.txtAll
-				};
-				this.userOptions = [obj].concat(data);
-			}
+			// let data = this.users;
+			// if (data.length) {
+			// 	let obj = {
+			// 		id: 0,
+			// 		text: this.txtAll
+			// 	};
+			// 	this.userOptions = [obj].concat(data);
+			// }
+			this.userOptions = this.users;
 		},
 		getObjectValue(data, id) {
 			let obj = data.filter(elem => {

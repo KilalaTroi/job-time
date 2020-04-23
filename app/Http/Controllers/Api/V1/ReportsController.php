@@ -63,7 +63,9 @@ class ReportsController extends Controller
         }
         // End POST data
 
-        $data = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
+        $dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
+        $data = $dataTimeUser['data'];
+        $totalTime = $dataTimeUser['totalTime'];
 
         if( empty($userArr) ) {
             $filenameExcel[] = "all-users";
@@ -74,16 +76,18 @@ class ReportsController extends Controller
         }
         $numberRows = count($data) + 5;
         
-        $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr) {
+        $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr, $totalTime) {
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
-            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr) {
+            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr, $totalTime) {
                 $sheet->setCellValue('A1', "Job Time Report from ". $start_time . " to " . $end_time);
                 $sheet->setCellValue('A2', "Date: ". Carbon::now());
                 $sheet->setCellValue('A3', $titleExcel);
 
                 $columnName = count($userArr) != 1 ? 'I' : 'H';
+                $columnTotal = count($userArr) != 1 ? 'E' : 'D';
+                $columnTotalText = count($userArr) != 1 ? 'D' : 'C';
                 $columnNameBefore = count($userArr) != 1 ? 'H' : 'G';
                 $sheet->mergeCells('A1:'.$columnName.'1');
                 $sheet->mergeCells('A2:'.$columnName.'2');
@@ -138,6 +142,18 @@ class ReportsController extends Controller
                     });
                 }
                 $sheet->setBorder('A5:'.$columnName.$numberRows, 'thin');
+
+                $sheet->setCellValue($columnTotalText . ($numberRows + 1), 'Total');
+                $sheet->setCellValue($columnTotal . ($numberRows + 1), $totalTime);
+                $sheet->cell($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), function($cells) {
+                    // Set font
+                    $cells->setFont([
+                        'size'       => '12',
+                        'bold'       =>  true
+                    ]);
+                    $cells->setBorder('thin','thin','thin','thin');
+                });
+                $sheet->setBorder($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), 'thin');
             });
         })->store('xlsx');
 
@@ -145,9 +161,6 @@ class ReportsController extends Controller
     }
 
     public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
-        $format = 'Y-m-d';
-        $start_time = Carbon::createFromFormat($format, $start_time);
-        $end_time = Carbon::createFromFormat($format, $end_time);
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
@@ -169,7 +182,8 @@ class ReportsController extends Controller
             ->when($issueFilter, function ($query, $issueFilter) {
                 return $query->where('i.name', 'like', '%'.$issueFilter.'%');
             })
-            ->whereBetween('j.date', [$start_time, $end_time]);
+            ->where('j.date', '>=', $start_time)
+            ->where('j.date', '<=', $end_time);
 
         if ( count($userArr) == 1 ) {
             $data = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
@@ -180,9 +194,11 @@ class ReportsController extends Controller
         }
         
         $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
+        $totalTime = 0;
 
         foreach ($data as $key => $item) {
             $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
+            $totalTime += $secondTime;
             $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
             $keyNUmber = count($userArr) == 1 ? 3 : 4;
             $this->array_insert( $data[$key], $keyNUmber, array ('Time' => $hoursminsandsecs));
@@ -195,7 +211,7 @@ class ReportsController extends Controller
                 }
             }
         }
-        return $data;
+        return ['data' => $data, 'totalTime' => $this->getHoursMinutes($totalTime, '%02dh %02dm')];
     }
 
     function calcTime($start_time, $end_time) {

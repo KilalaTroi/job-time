@@ -132,7 +132,7 @@ export default {
 						'Access-Control-Allow-Origin': '*',
 						'Content-Type': 'application/json',
 	    				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
-	    				'Authorization': 'Bearer AAAA+ORRLyUp2fmvNLT6LEfbU9D6ZtBOuPIs6B1WdPu9m4meKf38uz3wm1N8De0KsisHGaMULdu0S/VbODus9njxTrirJPSImVEFLoCS7Utu9+v7hJPWmVJICM9HUEtIaSzF85txqsZ7O5VTacvzLeCJBmVmDD3lIcZ1TqeC3O+DSULXVRJxzsazKmOyL0alCvKopN0n4pjsEe/ZBQmFKgFPxi1jEBS3Q58GG+7Zn9He00WL4GL8wI5Ki1aBnyG9mp4H44SUT0C/igjBsO351qKuqvccI+B117leYfQhYzRNe4v71vJ/7R1RztLpjKEWQLZwGQMUjrk5ysgshWYdaBZT670='
+	    				'Authorization': 'Bearer AAAA+LjW8atYMyNvpaKKAflj2AryOfezGnm7Q4vgXhs/B9/60nRXxhm2sct3NUYguMtgxYKNh1FAlKbZ0cj/o54hQBi8AWVsGXZJXzU6JjxtsJaQ5gjCoDU8859Q+/XlP/1hzwlTe5I9GznVHfuObYB0zw8EjfjOj/D8tV+pDVh+nV4mPcg4yeAKvt8OfDzxa1jyThE7hYEYTVdPchBWAh/4y/Ji6qxmZ7YkQNM8RkkP0il9JMPf95lALKxWuSic2GfL3dBQguJlb408HEebnRrMHM5GnmrrKij85zPgzx0NslvUEO5l9YXultEpkcq48xy5XLD3ZVr+juZFKtEdhv6TL80='
 					}
 				})
 				.then(res => {
@@ -195,6 +195,13 @@ export default {
 			if( !this.box ) {
 				this.errors = [
 					['Box is requried']
+				];
+				return false;
+			}
+
+			if( this.boxItem ) {
+				this.errors = [
+					['Please add or clear the Box URL']
 				];
 				return false;
 			}
