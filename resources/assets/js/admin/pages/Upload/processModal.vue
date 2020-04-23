@@ -247,7 +247,7 @@ export default {
 			}
 
 			if ( this.box ) {
-				this.box += ',' + this.boxItem;
+				this.box += ', ' + this.boxItem;
 			} else {
 				this.box = this.boxItem;
 			};
@@ -256,14 +256,14 @@ export default {
 		},
 		getBoxArr(data) {
 			if ( data ) {
-				this.boxArr =  data.split(",");
+				this.boxArr =  data.split(", ");
 			} else {
 				this.boxArr =  [];
 			}
 		},
 		getBoxButtons(data) {
 			let boxButtons = '';
-			let boxArr =  data.split(",");
+			let boxArr =  data.split(", ");
 			boxArr.map((item, index) => {
 				boxButtons += '<a href="' + item + '" target="_blank" class="btn btn-secondary m-1">Box ' + (index + 1) + ' <i class="fa fa-external-link"></i></a>';
 			});
