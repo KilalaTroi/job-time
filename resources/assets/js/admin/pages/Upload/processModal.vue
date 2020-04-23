@@ -125,7 +125,7 @@ export default {
 						"roomId": this.currentProcess.room_id,
 						"content": {
 							"type": "text",
-							"text": this.newMessage
+							"text": this.newMessage + ' (' + this.box + ')',
 						}
 					}, {
 					headers: {
