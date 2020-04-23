@@ -3,11 +3,15 @@
 		<card class="strpied-tabled-with-hover">
             <template slot="header">
                 <div class="d-flex justify-content-between">
-		            <h4 class="card-title">{{$ml.with('VueJS').get('txtProcessList')}}</h4>
+		            <h4 class="card-title">{{$ml.with('VueJS').get('txtProjectIssue')}}</h4>
 					<base-checkbox v-model="currentProcess.status" v-on:input="changeStatus">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
 				</div>
             </template>
             <div v-if="currentProcess">
+				<div class="table-responsive">
+					<no-action-table class="table-hover table-striped" :columns="columns" :data="dataProcess"></no-action-table>
+				</div>
+				<h4>{{$ml.with('VueJS').get('txtProcessList')}}</h4>
 				<div v-if="listComments.length">
 					<div class="table-responsive">
 						<no-action-table
@@ -36,24 +40,38 @@ export default {
 	props: ["currentProcess"],
 	data() {
 		return {
+			columns: [
+			{ id: "p_name", value: this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
+			{ id: "i_name", value: this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
+			{ id: "phase", value: this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
+			{ id: "page", value: this.$ml.with("VueJS").get("txtPage"), width: "", class: "" }
+			],
 			columns2: [
 			{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
 			{ id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
 			{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
-			{ id: "box", value: 'Box', width: "", class: "text-center" }
+			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			],
 			modalLg: "modal-lg",
+			dataProcess: [],
 			listComments: []
 		};
 	},
 	mounted() {
 		let _this = this;
 		$(document).on('click', '.languages button', function() {
+			_this.columns = [
+			{ id: "p_name", value: _this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
+			{ id: "i_name", value: _this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
+			{ id: "phase", value: _this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
+			{ id: "page", value: _this.$ml.with("VueJS").get("txtPage"), width: "", class: "" }
+			];
+
 			_this.columns2 = [
 			{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
 			{ id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "50", class: "" },
 			{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
-			{ id: "box", value: 'Box', width: "", class: "text-center" }
+			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			];
 		});
 	},
@@ -62,6 +80,16 @@ export default {
 			let words = str.split(" ");
 			let firstName = words[words.length - 1];
 			return firstName;
+		},
+		getDataProcess() {
+			this.dataProcess = [
+			{
+				p_name: this.currentProcess.project,
+				i_name: this.currentProcess.issue,
+				phase: this.currentProcess.phase,
+				page: this.currentProcess.page
+			}
+			];
 		},
 		getComments() {
 			if ( Object.keys(this.currentProcess).length != 0 ) {
@@ -74,7 +102,7 @@ export default {
 							date: moment(item.date).format('DD/MMM/YYYY HH:mm'),
 							name: this.recapName(item.name),
 							message: item.message,
-							box: '<a href="' + item.box + '" target="_blank" class="btn btn-secondary">Open</a>',
+							box: this.getBoxButtons(item.box),
 						}
 					});
 					console.log(res.data.message);
@@ -97,6 +125,14 @@ export default {
 				console.log(err);
 			});
 		},
+		getBoxButtons(data) {
+			let boxButtons = '';
+			let boxArr =  data.split(",");
+			boxArr.map((item, index) => {
+				boxButtons += '<a href="' + item + '" target="_blank" class="btn btn-secondary m-1">Box ' + (index + 1) + ' <i class="fa fa-external-link"></i></a>';
+			});
+			return boxButtons;
+		},
         resetValidate() {
             this.$emit('reset-validation')
         }
@@ -105,6 +141,9 @@ export default {
 		currentProcess: [
 		{
 			handler: "getComments"
+		},
+		{
+			handler: "getDataProcess"
 		}
 		]
 	}
@@ -118,40 +157,6 @@ export default {
 	h5 {
 	font-weight: 600;
 	margin-bottom: 10px;
-}
-.form-control {
-	border-radius: 0;
-}
-#selectDest {
-	h5 {
-	position: relative;
-	text-transform: uppercase;
-}
-p {
-	margin: 0;
-	font-size: 14px;
-}
-.form-group {
-	background: #ffffff;
-	width: calc(50% - 7.5px);
-label {
-	cursor: pointer;
-	font-size: 14px;
-	font-weight: 600;
-	position: absolute;
-	right: 0;
-	opacity: 0.8;
-	&.dest-box {
-	color: #005fdd;
-}
-&.dest-file {
-	color: #f83f86;
-}
-&:hover {
-	opacity: 1;
-}
-}
-}
 }
 .table-responsive {
 	td {

@@ -10,7 +10,7 @@
 				<h5>{{$ml.with('VueJS').get('txtMessage')}}</h5>
 				<textarea v-model="newMessage" class="form-control" rows="2"></textarea>
 			</div>
-			<div id="selectDest" class="d-flex justify-content-between">
+			<div id="selectDest" class="">
 				<div class="form-group border p-3">
 					<h5>
 						{{$ml.with('VueJS').get('txtBoxUrl')}}
@@ -20,7 +20,17 @@
 				</div>
 				<div class="form-group border p-3">
 					<h5>{{$ml.with('VueJS').get('txtBoxDestination')}}</h5>
-					<input v-model="box" type="text" name="box" class="form-control">
+					<div v-if="boxArr.length">
+						<ul class="pl-4">
+							<li v-for="(item, index) in boxArr" :key="index">
+								Box {{ index + 1 }}: {{ item }} <a :href="item" target="_blank"><i class="fa fa-external-link"></i></a>
+							</li>
+						</ul>
+					</div>
+					<div class="d-flex justify-content-between align-items-center">
+						<input v-model="boxItem" type="text" name="boxItem" class="form-control">
+						<button type="button" class="btn btn-primary" @click="addBox">Add</button>
+					</div>
 				</div>
 			</div>
 			<div class="form-group d-flex justify-content-between">
@@ -74,11 +84,13 @@ export default {
 			{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
 			{ id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
 			{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
-			{ id: "box", value: 'Box', width: "", class: "text-center" }
+			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			],
 			dataProcess: [],
 			newMessage: "以下のページをアップロードしました\n",
+			boxArr: [],
 			box: "",
+			boxItem: "",
 			errors: "",
 			success: "",
 			modalLg: "modal-lg",
@@ -101,34 +113,36 @@ export default {
 			{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
 			{ id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "50", class: "" },
 			{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
-			{ id: "box", value: 'Box', width: "", class: "text-center" }
+			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			];
 		});
 	},
 	methods: {
 		sendMessageLineWork() {
-			axios.post('https://cors-anywhere.herokuapp.com/https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
-					"botNo": 763699,
-					"roomId": this.currentProcess.room_id,
-					"content": {
-						"type": "text",
-						"text": this.newMessage
+			if ( this.currentProcess.room_id ) {
+				axios.post('https://cors-anywhere.herokuapp.com/https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
+						"botNo": 763699,
+						"roomId": this.currentProcess.room_id,
+						"content": {
+							"type": "text",
+							"text": this.newMessage
+						}
+					}, {
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json',
+	    				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
+	    				'Authorization': 'Bearer AAAA+ORRLyUp2fmvNLT6LEfbU9D6ZtBOuPIs6B1WdPu9m4meKf38uz3wm1N8De0KsisHGaMULdu0S/VbODus9njxTrirJPSImVEFLoCS7Utu9+v7hJPWmVJICM9HUEtIaSzF85txqsZ7O5VTacvzLeCJBmVmDD3lIcZ1TqeC3O+DSULXVRJxzsazKmOyL0alCvKopN0n4pjsEe/ZBQmFKgFPxi1jEBS3Q58GG+7Zn9He00WL4GL8wI5Ki1aBnyG9mp4H44SUT0C/igjBsO351qKuqvccI+B117leYfQhYzRNe4v71vJ/7R1RztLpjKEWQLZwGQMUjrk5ysgshWYdaBZT670='
 					}
-				}, {
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json',
-    				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
-    				'Authorization': 'Bearer AAAA+ORRLyUp2fmvNLT6LEfbU9D6ZtBOuPIs6B1WdPu9m4meKf38uz3wm1N8De0KsisHGaMULdu0S/VbODus9njxTrirJPSImVEFLoCS7Utu9+v7hJPWmVJICM9HUEtIaSzF85txqsZ7O5VTacvzLeCJBmVmDD3lIcZ1TqeC3O+DSULXVRJxzsazKmOyL0alCvKopN0n4pjsEe/ZBQmFKgFPxi1jEBS3Q58GG+7Zn9He00WL4GL8wI5Ki1aBnyG9mp4H44SUT0C/igjBsO351qKuqvccI+B117leYfQhYzRNe4v71vJ/7R1RztLpjKEWQLZwGQMUjrk5ysgshWYdaBZT670='
-				}
-			})
-			.then(res => {
-				console.log(res);
-			})
-			.catch(err => {
-				console.log(err);
-				alert("Could not load box");
-			});
+				})
+				.then(res => {
+					console.log(res);
+				})
+				.catch(err => {
+					console.log(err);
+					alert("Could not load box");
+				});
+			}	
 		},
 		recapName(str) {
 			let words = str.split(" ");
@@ -146,7 +160,7 @@ export default {
 							date: moment(item.date).format('DD/MMM/YYYY HH:mm'),
 							name: this.recapName(item.name),
 							message: item.message,
-							box: '<a href="' + item.box + '" target="_blank" class="btn btn-secondary">Open</a>',
+							box: this.getBoxButtons(item.box),
 						}
 					});
 					console.log(res.data.message);
@@ -171,7 +185,7 @@ export default {
 			this.errors = "";
 			this.success = "";
 
-			if( !this.newMessage ) {
+			if( this.newMessage == "以下のページをアップロードしました\n" ) {
 				this.errors = [
 					['Message is requried']
 				];
@@ -203,7 +217,7 @@ export default {
 					date: moment(res.data.comment.date).format('DD/MMM/YYYY HH:mm'),
 					name: this.recapName(res.data.comment.name),
 					message: res.data.comment.message,
-					box: '<a href="' + res.data.comment.box + '" target="_blank" class="btn btn-secondary">Open</a>'
+					box: this.getBoxButtons(res.data.comment.box)
 				}
 
 				this.listComments = [...this.listComments, newComment];
@@ -217,10 +231,53 @@ export default {
 
 			this.sendMessageLineWork();
 		},
+		addBox() {
+			if ( !this.boxItem ) {
+				this.errors = [
+					['Please type Box URL']
+				];
+				return false;
+			}
+
+			if ( !this.validateUrl(this.boxItem) ) {
+				this.errors = [
+					['Box URL invalidate']
+				];
+				return false;
+			}
+
+			if ( this.box ) {
+				this.box += ',' + this.boxItem;
+			} else {
+				this.box = this.boxItem;
+			};
+
+			this.boxItem = "";
+		},
+		getBoxArr(data) {
+			if ( data ) {
+				this.boxArr =  data.split(",");
+			} else {
+				this.boxArr =  [];
+			}
+		},
+		getBoxButtons(data) {
+			let boxButtons = '';
+			let boxArr =  data.split(",");
+			boxArr.map((item, index) => {
+				boxButtons += '<a href="' + item + '" target="_blank" class="btn btn-secondary m-1">Box ' + (index + 1) + ' <i class="fa fa-external-link"></i></a>';
+			});
+			return boxButtons;
+		},
+		validateUrl(url) {
+		    let regex = /^(http|https)/;
+		    return url.match(regex);
+		},
         resetValidate() {
             this.errors = '';
             this.success = '';
             this.newMessage = '以下のページをアップロードしました\n';
+            this.box = "";
             this.$emit('reset-validation')
         }
 	},
@@ -232,7 +289,10 @@ export default {
 		{
 			handler: "getComments"
 		}
-		]
+		],
+		box: [{
+			handler: "getBoxArr"
+		}]
 	}
 };
 </script>
@@ -259,7 +319,6 @@ p {
 }
 .form-group {
 	background: #ffffff;
-	width: calc(50% - 7.5px);
 label {
 	cursor: pointer;
 	font-size: 14px;
