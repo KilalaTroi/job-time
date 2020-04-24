@@ -64,8 +64,6 @@ class ReportsController extends Controller
         // End POST data
 
         $dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
-        $data = $dataTimeUser['data'];
-        $totalTime = $dataTimeUser['totalTime'];
 
         if( empty($userArr) ) {
             $filenameExcel[] = "all-users";
@@ -74,13 +72,13 @@ class ReportsController extends Controller
             $filenameExcel[] = str_slug(str_replace(',', '-', $userConcatName), '-');
             $titleExcel = $userConcatName;
         }
-        $numberRows = count($data) + 5;
+        $numberRows = count($dataTimeUser['data']) + 5;
         
-        $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr, $totalTime) {
+        $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($dataTimeUser, $start_time, $end_time, $titleExcel, $numberRows, $userArr) {
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
-            $excel->sheet('sheet1', function($sheet) use ($data, $start_time, $end_time, $titleExcel, $numberRows, $userArr, $totalTime) {
+            $excel->sheet('Report Detail', function($sheet) use ($dataTimeUser, $start_time, $end_time, $titleExcel, $numberRows, $userArr) {
                 $sheet->setCellValue('A1', "Job Time Report from ". $start_time . " to " . $end_time);
                 $sheet->setCellValue('A2', "Date: ". Carbon::now());
                 $sheet->setCellValue('A3', $titleExcel);
@@ -112,7 +110,7 @@ class ReportsController extends Controller
                 });
 
 
-                $sheet->fromArray($data, null, 'A5', true);
+                $sheet->fromArray($dataTimeUser['data'], null, 'A5', true);
 
                 //set title table
                 if ( count($userArr) != 1 ) {
@@ -144,7 +142,7 @@ class ReportsController extends Controller
                 $sheet->setBorder('A5:'.$columnName.$numberRows, 'thin');
 
                 $sheet->setCellValue($columnTotalText . ($numberRows + 1), 'Total');
-                $sheet->setCellValue($columnTotal . ($numberRows + 1), $totalTime);
+                $sheet->setCellValue($columnTotal . ($numberRows + 1), $dataTimeUser['totalTime']);
                 $sheet->cell($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), function($cells) {
                     // Set font
                     $cells->setFont([
@@ -155,12 +153,84 @@ class ReportsController extends Controller
                 });
                 $sheet->setBorder($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), 'thin');
             });
+
+            if ( $dataTimeUser['dataTotal'] ) {
+
+                $numberRows = count($dataTimeUser['dataTotal']) + 5;
+
+                $excel->sheet('Report Total', function($sheet) use ($dataTimeUser, $titleExcel, $numberRows, $userArr) {
+                    $sheet->setCellValue('A1', "Job Time Report Total");
+                    $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                    $sheet->setCellValue('A3', $titleExcel);
+
+                    $columnName = 'B';
+                    $columnTotal = 'B';
+                    $columnTotalText = 'A';
+                    $columnNameBefore = 'A';
+                    $sheet->mergeCells('A1:'.$columnName.'1');
+                    $sheet->mergeCells('A2:'.$columnName.'2');
+                    $sheet->mergeCells('A3:'.$columnName.'3');
+                    $sheet->cell('A1:'.$columnNameBefore.'3', function($cells) {
+                        // Set font
+                        $cells->setFont([
+                            'size'       => '14',
+                            'bold'       =>  true
+                        ]);
+                        $cells->setAlignment('center');
+                        $cells->setValignment('middle');
+                    });
+                    $sheet->cell('A5:'.$columnName.'5', function($cells) {
+                        // Set font
+                        $cells->setFont([
+                            'bold'       =>  true
+                        ]);
+                        $cells->setAlignment('center');
+                        $cells->setValignment('middle');
+                        $cells->setBackground('#ffd05b');
+                    });
+
+                    $sheet->cell('B6:B'.$numberRows, function($cells) {
+                        $cells->setAlignment('right');
+                        $cells->setValignment('middle');
+                    });
+
+
+                    $sheet->fromArray($dataTimeUser['dataTotal'], null, 'A5', true);
+
+                    //set title table
+                    $sheet->setCellValue('A5', "NAME");
+                    $sheet->setCellValue('B5', "TOTAL");
+                    
+                    for ($i=5; $i<=$numberRows; $i++) {
+                        $sheet->cell('A'. $i.':'.$columnName.$i, function($cells) {
+                            $cells->setBorder('thin','thin','thin','thin');
+                        });
+                    }
+                    $sheet->setBorder('A5:'.$columnName.$numberRows, 'thin');
+
+                    $sheet->setCellValue($columnTotalText . ($numberRows + 1), 'Total');
+                    $sheet->setCellValue($columnTotal . ($numberRows + 1), $dataTimeUser['totalTime']);
+                    $sheet->cell($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), function($cells) {
+                        // Set font
+                        $cells->setFont([
+                            'size'       => '12',
+                            'bold'       =>  true
+                        ]);
+                        $cells->setBorder('thin','thin','thin','thin');
+                        $cells->setAlignment('right');
+                        $cells->setValignment('middle');
+                    });
+                    $sheet->setBorder($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), 'thin');
+                }); 
+            }
         })->store('xlsx');
 
         return url('data/exports/' . $results->filename) . '.' . $results->ext;
     }
 
     public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
+        $dataDetail = '';
+        $dataTotal = '';
         $data = DB::table('types as t')
             ->leftJoin('projects as p', 'p.type_id', '=', 't.id')
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
@@ -186,32 +256,43 @@ class ReportsController extends Controller
             ->where('j.date', '<=', $end_time);
 
         if ( count($userArr) == 1 ) {
-            $data = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            $dataDetail = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
             ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         } else {
-            $data = $data->select( "u.name" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            $dataDetail = $data->select( "u.name" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
             ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+
+            $dataTotal = $data->select( "u.name" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->groupBy('u.id')->get();
         }
         
-        $data = collect($data)->map(function($x){ return (array) $x; })->toArray();
+        $dataDetail = collect($dataDetail)->map(function($x){ return (array) $x; })->toArray();
         $totalTime = 0;
 
-        foreach ($data as $key => $item) {
+        if ( $dataTotal ) {
+            $dataTotal = collect($dataTotal)->map(function($x){ return (array) $x; })->toArray();
+
+            foreach ($dataTotal as $key => $item) {
+                $hoursminsandsecs = $this->getHoursMinutes($item['total']*1, '%02dh %02dm');
+                $dataTotal[$key]['total'] = $hoursminsandsecs;
+            }
+        };
+
+        foreach ($dataDetail as $key => $item) {
             $secondTime = $this->calcTime($item['start_time'], $item['end_time']);
             $totalTime += $secondTime;
             $hoursminsandsecs = $this->getHoursMinutes($secondTime, '%02dh %02dm');
             $keyNUmber = count($userArr) == 1 ? 3 : 4;
-            $this->array_insert( $data[$key], $keyNUmber, array ('Time' => $hoursminsandsecs));
+            $this->array_insert( $dataDetail[$key], $keyNUmber, array ('Time' => $hoursminsandsecs));
             foreach ($item as $key1 => $element) {
                 if(empty($element) || $element == "All") {
-                    $data[$key][$key1] = "--";
+                    $dataDetail[$key][$key1] = "--";
                 }
                 if($key1 == "dateReport") {
-                    $data[$key][$key1] = date('M d,Y', strtotime($element));
+                    $dataDetail[$key][$key1] = date('M d,Y', strtotime($element));
                 }
             }
         }
-        return ['data' => $data, 'totalTime' => $this->getHoursMinutes($totalTime, '%02dh %02dm')];
+        return ['data' => $dataDetail, 'dataTotal' => $dataTotal, 'totalTime' => $this->getHoursMinutes($totalTime, '%02dh %02dm')];
     }
 
     function calcTime($start_time, $end_time) {
