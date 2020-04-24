@@ -16,13 +16,14 @@
                     <h4 class="card-title">{{$ml.with('VueJS').get('txtUserList')}}</h4>
                 </template>
                 <div class="table-responsive">
-                    <action-table
+                    <user-table
                             class="table-hover table-striped"
                             :columns="columns"
                             :data="users"
                             v-on:get-item="getUser"
+                            v-on:archive-user="archiveUser"
                             v-on:delete-item="deleteUser">
-                    </action-table>
+                    </user-table>
                 </div>
             </card>
 
@@ -46,15 +47,16 @@
     </div>
 </template>
 <script>
-    import ActionTable from "../../components/TableAction";
+    import UserTable from "../../components/TableUser";
     import Card from "../../components/Cards/Card";
     import CreateItem from "./Create";
     import EditItem from "./Edit";
     import CreateButton from "../../components/Buttons/Create";
+    import moment from 'moment';
 
     export default {
         components: {
-            ActionTable,
+            UserTable,
             Card,
             CreateItem,
             EditItem,
@@ -167,6 +169,12 @@
                             this.validationErrors = err.response.data;
                         }
                     });
+            },
+            archiveUser(item) {
+                let today = !item.disable_date ? moment().format('YYYY-MM-DD') : null;
+                let foundIndex = this.users.findIndex(x => x.id == item.id);
+                this.users[foundIndex].disable_date = today;
+                this.users = [...this.users];
             },
             resetValidate() {
                 this.validationSuccess = "";

@@ -24,6 +24,7 @@ class UsersController extends Controller
                 'user.username as username',
                 'user.email as email',
                 'user.language as language',
+                'user.disable_date as disable_date',
                 'role.name as r_name'
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
