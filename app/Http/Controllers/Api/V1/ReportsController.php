@@ -262,13 +262,17 @@ class ReportsController extends Controller
             $dataDetail = $data->select( "u.name" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
             ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
 
-            $dataTotal = $data->select( "u.name" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->groupBy('u.id')->get();
+            $dataTotal = $data->select( "u.name" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('u.id')->get();
         }
         
         $dataDetail = collect($dataDetail)->map(function($x){ return (array) $x; })->toArray();
         $totalTime = 0;
 
         if ( $dataTotal ) {
+            $dataTotal = $dataTotal->sortByDesc(function ($item, $key) {
+                return $item->total*1;
+            });
+            
             $dataTotal = collect($dataTotal)->map(function($x){ return (array) $x; })->toArray();
 
             foreach ($dataTotal as $key => $item) {

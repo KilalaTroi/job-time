@@ -169,12 +169,8 @@ class StatisticsController extends Controller
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
-            ->where([
-                ['role.name', '<>', 'admin'],
-                ['role.name', '<>', 'japanese_planner'],
-                ['user.username', '<>', 'furuoya_vn_planner'],
-                ['user.username', '<>', 'furuoya_employee'],
-            ])
+            ->whereNotIn('role.name', ['admin','japanese_planner'])
+            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
             ->get()->toArray();
 
         return response()->json([
@@ -432,12 +428,8 @@ class StatisticsController extends Controller
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
-            ->where([
-                ['role.name', '<>', 'admin'],
-                ['role.name', '<>', 'japanese_planner'],
-                ['user.username', '<>', 'furuoya_vn_planner'],
-                ['user.username', '<>', 'furuoya_employee'],
-            ])
+            ->whereNotIn('role.name', ['admin','japanese_planner'])
+            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
             ->get()->toArray();
 
         $users['old'] = DB::table('role_user')
@@ -447,12 +439,8 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('users.id', $user_id);
             })
-            ->where([
-                ['roles.name', '<>', 'admin'],
-                ['roles.name', '<>', 'japanese_planner'],
-                ['users.username', '<>', 'furuoya_vn_planner'],
-                ['users.username', '<>', 'furuoya_employee'],
-            ])
+            ->whereNotIn('roles.name', ['admin','japanese_planner'])
+            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
             ->where('users.created_at', "<", str_replace('/', '-', $startMonth))
             ->count();
 
@@ -467,12 +455,8 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('users.id', $user_id);
             })
-            ->where([
-                ['roles.name', '<>', 'admin'],
-                ['roles.name', '<>', 'japanese_planner'],
-                ['users.username', '<>', 'furuoya_vn_planner'],
-                ['users.username', '<>', 'furuoya_employee'],
-            ])
+            ->whereNotIn('roles.name', ['admin','japanese_planner'])
+            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
             ->where('users.created_at', ">=", str_replace('/', '-', $startMonth))
             ->where('users.created_at', "<=", str_replace('/', '-', $endMonth))
             ->orderBy('yearMonth', 'desc')

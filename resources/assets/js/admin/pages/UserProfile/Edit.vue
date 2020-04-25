@@ -30,6 +30,11 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="">Disable date</label>
+                <datepicker name="disable_date" input-class="form-control" placeholder="Select Date" v-model="currentUser.disable_date" :format="customFormatter" :language="getLanguage(this.$ml)">
+                </datepicker>
+            </div>
+            <div class="form-group">
                 <label class="">{{$ml.with('VueJS').get('txtPassword')}}</label>
                 <input v-model="password" type="password" name="password" class="form-control">
             </div>
@@ -53,6 +58,9 @@ import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
+import Datepicker from 'vuejs-datepicker'
+import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
+import moment from 'moment'
 
 export default {
     name: 'EditItem',
@@ -60,17 +68,26 @@ export default {
         Select2,
         ErrorItem,
         SuccessItem,
-        Modal
+        Modal,
+        Datepicker
     },
     props: ['currentUser', 'roles', 'errors', 'success'],
     data() {
         return {
             password: '',
             password_confirmation: '',
-            rolesOption: []
+            rolesOption: [],
+            dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
         }
     },
     methods: {
+        getLanguage(data) {
+            return this.dataLang[data.current]
+        },
         getDataRoles(data) {
             if (data.length) {
                 let dataOptions = [];
@@ -97,7 +114,10 @@ export default {
             }, this.currentUser);
 
             this.$emit('update-user', user);
-        }
+        },
+        customFormatter(date) {
+            return moment(date).format('YYYY/MM/DD');
+        },
     },
     watch: {
         roles: [{

@@ -171,10 +171,14 @@
                     });
             },
             archiveUser(item) {
-                let today = !item.disable_date ? moment().format('YYYY-MM-DD') : null;
-                let foundIndex = this.users.findIndex(x => x.id == item.id);
-                this.users[foundIndex].disable_date = today;
-                this.users = [...this.users];
+                let disable_date = !item.disable_date ? moment().format('YYYY-MM-DD') : null;
+                let uri = '/data/users/archive/' + item.id + '/' + disable_date;
+
+                axios.get(uri).then((response) => {
+                    let foundIndex = this.users.findIndex(x => x.id == item.id);
+                    this.users[foundIndex].disable_date = disable_date;
+                    this.users = [...this.users];
+                }).catch(err => console.log(err));
             },
             resetValidate() {
                 this.validationSuccess = "";
