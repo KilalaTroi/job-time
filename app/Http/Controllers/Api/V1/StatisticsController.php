@@ -602,7 +602,7 @@ class StatisticsController extends Controller
                 $ckHoursDisableUser = $hoursDisableUser[$key];
             } 
 
-            $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + $ckHoursDisableUser;
+            $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + round($ckHoursDisableUser);
         }
 
         $data['hoursPerMonth'] = $totalHoursPerMonth;
