@@ -32,7 +32,7 @@ class StatisticsController extends Controller
         $data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $endMonth);
 
         // Return totals
-        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['off_days'], $startMonth, $endMonth);
+        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['users']['disableUsersInMonth'], $data['users']['hoursOfDisableUser'], $data['off_days'], $startMonth, $endMonth);
 
         return response()->json($data);
     }
@@ -50,7 +50,7 @@ class StatisticsController extends Controller
         $data['users'] = $this->getUsers($startMonth, $endMonth, $user_id);
 
         // Return totals
-        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['off_days'], $startMonth, $endMonth, $user_id);
+        $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['users']['disableUsersInMonth'], $data['users']['hoursOfDisableUser'], $data['off_days'], $startMonth, $endMonth, $user_id);
 
         return response()->json($data);
     }
@@ -198,7 +198,7 @@ class StatisticsController extends Controller
         $users = $this->getUsers($startMonth, $endMonth, $user_id);
 
         // Return totals
-        $totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $data['off_days'], $startMonth, $endMonth, $user_id);
+        $totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $users['disableUsersInMonth'], $users['hoursOfDisableUser'], $data['off_days'], $startMonth, $endMonth, $user_id);
 
         // infoUser
         $infoUser = false;
@@ -439,6 +439,10 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('users.id', $user_id);
             })
+            ->where(function ($query) use ($startMonth) {
+                $query->where('disable_date', '=',  NULL)
+                      ->orWhere('disable_date', '>=', str_replace('/', '-', $startMonth));
+            })
             ->whereNotIn('roles.name', ['admin','japanese_planner'])
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
             ->where('users.created_at', "<", str_replace('/', '-', $startMonth))
@@ -470,6 +474,52 @@ class StatisticsController extends Controller
         }
 
         $users['newUsersPerMonth'] = $convertUserMonth;
+
+        // Return disableUsersInMonth
+        $disableUsersInMonth = !$user_id ? DB::table('role_user')
+            ->select(
+                DB::raw('concat(year(users.disable_date),"", LPAD(month(users.disable_date), 2, "0")) as yearMonth'),
+                DB::raw('COUNT(users.id) as number')
+            )
+            ->join('users', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->when($user_id, function ($query, $user_id) {
+                return $query->where('users.id', $user_id);
+            })
+            ->whereNotIn('roles.name', ['admin','japanese_planner'])
+            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where('users.disable_date', ">=", str_replace('/', '-', $startMonth))
+            ->where('users.disable_date', "<=", str_replace('/', '-', $endMonth))
+            ->orderBy('yearMonth', 'desc')
+            ->groupBy('yearMonth')
+            ->get()->toArray() : [];
+        
+        $convertUserMonth = array();
+
+        foreach ($disableUsersInMonth as $key => $value) {
+            $convertUserMonth[$value->yearMonth] = $value->number;
+        }
+
+        $users['disableUsersInMonth'] = $convertUserMonth;
+
+        // Return total hours of disable user in month
+        $users['hoursOfDisableUser'] = !$user_id ? DB::table('jobs')
+            ->select(
+                DB::raw('concat(year(jobs.date),"", LPAD(month(jobs.date), 2, "0")) as yearMonth'),
+                DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
+            )
+            ->join('issues', 'issues.id', '=', 'jobs.issue_id')
+            ->join('users', 'users.id', '=', 'jobs.user_id')
+            ->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
+            ->where('jobs.date', "<", str_replace('/', '-', $endMonth))
+            ->where('users.disable_date', ">=", str_replace('/', '-', $startMonth))
+            ->where('users.disable_date', "<=", str_replace('/', '-', $endMonth))
+            ->when($user_id, function ($query, $user_id) {
+                return $query->where('jobs.user_id', $user_id);
+            })
+            ->orderBy('yearMonth', 'asc')
+            ->groupBy('yearMonth')
+            ->get()->toArray() : [];
 
         return $users;
     }
@@ -507,19 +557,31 @@ class StatisticsController extends Controller
         ->where('date', '>=',  $startDate)
         ->count();
 
-        $data['totalUsers'] = $usersTotal;
+        // Return disableUsersInMonth
+        $disableUsersInMonth = DB::table('role_user')
+            ->select('users.id')
+            ->join('users', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->whereNotIn('roles.name', ['admin','japanese_planner'])
+            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where('users.disable_date', "<>", NULL)
+            ->count();
+
+        $data['totalUsers'] = $usersTotal - $disableUsersInMonth;
         $data['off_days'] = $off_days;
         $data['hours'] = $hoursCurrentMonth;
-        $data['total'] = $usersTotal * (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
+        $data['total'] = ($usersTotal - $disableUsersInMonth) * (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
 
         return $data;
     }
 
-    function getTotals($days_of_month, $usersOld, $newUsersPerMonth, $off_days, $startMonth, $endMonth, $user_id = 0) {
+    function getTotals($days_of_month, $usersOld, $newUsersPerMonth, $disableUsersInMonth, $hoursOfDisableUser, $off_days, $startMonth, $endMonth, $user_id = 0) {
         $totalHoursPerMonth = array();
 
         foreach ($days_of_month as $key => $value) {
             $daysInMonth = 0;
+            $hoursDisableUser = [];
+            $ckHoursDisableUser = 0;
             $arrayStart = explode('-', $value['start']);
             $monthYear = Carbon::createFromFormat('Y-m-d', $value['start']);
             for ($d=1; $d <= $monthYear->daysInMonth ; $d++) {
@@ -529,10 +591,18 @@ class StatisticsController extends Controller
 
             if ( isset($newUsersPerMonth[$key]) ) {
                 $usersOld += $newUsersPerMonth[$key];
-                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4);
-            } else {
-                $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4);
-            }
+            } 
+
+            array_map(function ($obj) use (&$hoursDisableUser) {
+                $hoursDisableUser[$obj->yearMonth] = $obj->total*1;
+            }, $hoursOfDisableUser);
+
+            if ( isset($disableUsersInMonth[$key]) ) {
+                $usersOld -= $disableUsersInMonth[$key];
+                $ckHoursDisableUser = $hoursDisableUser[$key];
+            } 
+
+            $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + $ckHoursDisableUser;
         }
 
         $data['hoursPerMonth'] = $totalHoursPerMonth;
