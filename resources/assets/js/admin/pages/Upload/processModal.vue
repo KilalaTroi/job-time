@@ -14,7 +14,7 @@
 				<div class="form-group border p-3">
 					<h5>
 						{{$ml.with('VueJS').get('txtBoxUrl')}}
-						<label class="dest-box"><a :href="currentProcess.box_url" target="_blank">Open</a></label>
+						<label v-if="currentProcess.box_url" class="dest-box"><a :href="currentProcess.box_url" target="_blank">Open</a></label>
 					</h5>
 					<p>{{ currentProcess.box_url }}</p>
 				</div>
