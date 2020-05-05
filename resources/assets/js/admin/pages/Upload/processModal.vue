@@ -12,18 +12,15 @@
 			</div>
 			<div id="selectDest" class="">
 				<div class="form-group border p-3">
-					<h5>
-						{{$ml.with('VueJS').get('txtBoxUrl')}}
-						<label v-if="currentProcess.box_url" class="dest-box"><a :href="currentProcess.box_url" target="_blank">Open</a></label>
-					</h5>
-					<p>{{ currentProcess.box_url }}</p>
+					<h5>{{$ml.with('VueJS').get('txtBoxUrl')}}</h5>
+					<p>{{ currentProcess.box_url }} <a v-if="currentProcess.box_url" :href="currentProcess.box_url" target="_blank"><i class="fa fa-external-link"></i></a></p>
 				</div>
 				<div class="form-group border p-3">
 					<h5>{{$ml.with('VueJS').get('txtBoxDestination')}}</h5>
 					<div v-if="boxArr.length">
 						<ul class="pl-4">
 							<li v-for="(item, index) in boxArr" :key="index">
-								Box {{ index + 1 }}: {{ item }} <a :href="item" target="_blank"><i class="fa fa-external-link"></i></a>
+								Box {{ index + 1 }}: {{ item }} <i class="fa fa-trash text-danger ml-3 btn-link" @click="delBox(index)"></i> <a class="ml-1" :href="item" target="_blank"><i class="fa fa-external-link"></i></a>
 							</li>
 						</ul>
 					</div>
@@ -261,6 +258,20 @@ export default {
 
 			this.boxItem = "";
 		},
+		delBox(pt) {
+			this.boxArr = this.boxArr.filter((item, index) => index !== pt);
+			let box = "";
+			if ( this.boxArr ) {
+				this.boxArr.map((item, index) => {
+					if ( box ) {
+						box += ', ' + item;
+					} else {
+						box = item;;
+					};
+				});
+			}
+			this.box = box;
+		},
 		getBoxArr(data) {
 			if ( data ) {
 				this.boxArr =  data.split(", ");
@@ -304,6 +315,9 @@ export default {
 };
 </script>
 <style lang="scss">
+.btn-link {
+	cursor: pointer;
+}
 #processModal {
 	.modal-dialog {
 	.modal-content {
@@ -326,7 +340,7 @@ p {
 }
 .form-group {
 	background: #ffffff;
-label {
+	label {
 	cursor: pointer;
 	font-size: 14px;
 	font-weight: 600;

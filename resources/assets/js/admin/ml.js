@@ -334,7 +334,7 @@ export default new MLCreate({
 		txtDelete: '削除する',
 		txtUpdate: '更新',
 		txtSelectDate: '日付を選択',
-		txtLineRoomId: 'LINE WORKSルームID',
+		txtLineRoomId: 'LINE WORKS:ルームID',
 		txtBoxUrl: 'Boxプロジェクトフォルダ',
 		txtUpdateTime: '時間を編集', 
 		txtEditIssue: '問題を修正',
