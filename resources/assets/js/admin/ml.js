@@ -68,6 +68,7 @@ export default new MLCreate({
 		txtUpdate: 'Update',
 		txtSelectDate: 'Select date',
 		txtLineRoomId: 'LINE WORKS Room ID',
+		txtLineRoomName: 'LINE WORKS Room Name',
 		txtBoxUrl: 'Box Base Destination',
 		txtUpdateTime: 'Edit Time',
 		txtEditIssue: 'Edit issue',
@@ -202,6 +203,7 @@ export default new MLCreate({
 		txtUpdate: 'Update',
 		txtSelectDate: 'Select date',
 		txtLineRoomId: 'LINE WORKS Room ID',
+		txtLineRoomName: 'LINE WORKS Room Name',
 		txtBoxUrl: 'Box Base Destination',
 		txtUpdateTime: 'Edit Time',
 		txtEditIssue: 'Edit issue',
@@ -272,6 +274,7 @@ export default new MLCreate({
 		txtRCFullDay: 'Full',
 		txtRCAM: 'AM',
 		txtRCPM: 'PM',
+		txtShowBy: 'Show by',
 	}),
 
 	new MLanguage('ja').create({
@@ -335,6 +338,7 @@ export default new MLCreate({
 		txtUpdate: '更新',
 		txtSelectDate: '日付を選択',
 		txtLineRoomId: 'LINE WORKS:ルームID',
+		txtLineRoomName: 'LINE WORKS:ルーム名',
 		txtBoxUrl: 'Boxプロジェクトフォルダ',
 		txtUpdateTime: '時間を編集', 
 		txtEditIssue: '問題を修正',

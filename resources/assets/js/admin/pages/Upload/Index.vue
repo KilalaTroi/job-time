@@ -266,6 +266,7 @@ export default {
 						i_name: item.issue,
 						t_name: item.job_type,
 						room_id: item.room_id,
+						room_name: item.room_name,
 						box_url: item.box_url,
 						phase: item.phase,
 						status: item.status ? true : false

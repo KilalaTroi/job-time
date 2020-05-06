@@ -12,6 +12,10 @@
 			</div>
 			<div id="selectDest" class="">
 				<div class="form-group border p-3">
+					<h5>{{$ml.with('VueJS').get('txtLineRoomName')}}</h5>
+					<p v-if="currentProcess.room_name">{{ currentProcess.room_name }}</p>
+				</div>
+				<div class="form-group border p-3">
 					<h5>{{$ml.with('VueJS').get('txtBoxUrl')}}</h5>
 					<p>{{ currentProcess.box_url }} <a v-if="currentProcess.box_url" :href="currentProcess.box_url" target="_blank"><i class="fa fa-external-link"></i></a></p>
 				</div>
@@ -317,6 +321,16 @@ export default {
 <style lang="scss">
 .btn-link {
 	cursor: pointer;
+}
+#commentsModal {
+	.form-check-sign {
+		&:after, &:before {
+			font-size: 26px;
+			width: 25px;
+			height: 25px;
+			margin-left: -29px;
+		}
+	}
 }
 #processModal {
 	.modal-dialog {

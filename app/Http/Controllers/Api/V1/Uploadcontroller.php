@@ -64,6 +64,7 @@ class Uploadcontroller extends Controller
                 'd.name as department',
                 'p.name as project',
                 'p.room_id as room_id',
+                'p.room_name as room_name',
                 'p.box_url as box_url',
                 'i.name as issue',
                 'i.page as page',

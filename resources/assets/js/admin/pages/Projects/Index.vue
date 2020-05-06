@@ -221,6 +221,7 @@ export default {
                         page: item.page,
                         status: item.status,
                         room_id: item.room_id,
+                        room_name: item.room_name,
                         box_url: item.box_url,
                         type: this.getObjectValue(this.types, item.type_id).slug,
                         value: this.getObjectValue(this.types, item.type_id).value,
@@ -317,6 +318,7 @@ export default {
                         p_name_vi: res.data.p_name_vi,
                         p_name_ja: res.data.p_name_ja,
                         room_id: res.data.room_id,
+                        room_name: res.data.room_name,
                         box_url: res.data.box_url,
                         status: 'publish',
                     }, newIssue);

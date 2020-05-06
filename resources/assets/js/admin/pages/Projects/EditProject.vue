@@ -56,12 +56,20 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-sm-12">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class>{{$ml.with('VueJS').get('txtLineRoomName')}}</label>
+						<input v-model="currentItem.room_name" type="text" name="room_name" class="form-control" />
+					</div>
+				</div>
+				<div class="col-sm-6">
 					<div class="form-group">
 						<label class>{{$ml.with('VueJS').get('txtLineRoomId')}}</label>
 						<input v-model="currentItem.room_id" type="number" name="room_id" class="form-control" />
 					</div>
 				</div>
+			</div>
+			<div class="row">
 				<div class="col-sm-12">
 					<div class="form-group">
 						<label class>{{$ml.with('VueJS').get('txtBoxUrl')}}</label>
