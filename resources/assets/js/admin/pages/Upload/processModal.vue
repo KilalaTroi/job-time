@@ -22,9 +22,11 @@
 				<div class="form-group border p-3">
 					<h5>{{$ml.with('VueJS').get('txtBoxDestination')}}</h5>
 					<div v-if="boxArr.length">
-						<ul class="pl-4">
-							<li v-for="(item, index) in boxArr" :key="index">
-								Box {{ index + 1 }}: {{ item }} <i class="fa fa-trash text-danger ml-3 btn-link" @click="delBox(index)"></i> <a class="ml-1" :href="item" target="_blank"><i class="fa fa-external-link"></i></a>
+						<ul id="boxList" class="pl-0">
+							<li v-for="(item, index) in boxArr" :key="index" class="d-flex align-items-center mt-2">
+								<span style="white-space: nowrap;" class="mr-2">Box {{ index + 1 }}: </span>
+								<input type="text" :value="item" v-on:keyup="updateValue(index)" class="form-control">
+								<i class="fa fa-trash text-danger ml-3 btn-link" @click="delBox(index)"></i> <a class="ml-2" :href="item" target="_blank"><i class="fa fa-external-link"></i></a>
 							</li>
 						</ul>
 					</div>
@@ -276,6 +278,23 @@ export default {
 			}
 			this.box = box;
 		},
+		updateValue(index) {
+			let val = $('#boxList').find('li:nth-child(' + (index + 1) + ')').find('input').val();
+			this.boxArr[index] = val;
+			this.boxArr = [...this.boxArr];
+
+			let box = "";
+			if ( this.boxArr ) {
+				this.boxArr.map((item, index) => {
+					if ( box ) {
+						box += ', ' + item;
+					} else {
+						box = item;;
+					};
+				});
+			}
+			this.box = box;
+		},
 		getBoxArr(data) {
 			if ( data ) {
 				this.boxArr =  data.split(", ");
@@ -319,6 +338,9 @@ export default {
 };
 </script>
 <style lang="scss">
+.btn {
+	min-width: 80px;
+}
 .btn-link {
 	cursor: pointer;
 }
