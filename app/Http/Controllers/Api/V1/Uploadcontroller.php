@@ -166,6 +166,7 @@ class Uploadcontroller extends Controller
 
     public function sendMessage($url, $data){
         $curl = curl_init();
+        // curl_setopt ($curl, CURLOPT_CAINFO, "D:/Project/_Working/jobtime/www/cacert.pem"); // on server.
         curl_setopt($curl, CURLOPT_POST, 1);
         if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         // OPTIONS:
@@ -180,6 +181,7 @@ class Uploadcontroller extends Controller
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         // EXECUTE:
         $result = curl_exec($curl);
+        dd($curl);
         if(!$result){die("Connection Failure");}
         curl_close($curl);
         return $result;
