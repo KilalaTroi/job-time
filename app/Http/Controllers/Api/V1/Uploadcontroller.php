@@ -180,7 +180,6 @@ class Uploadcontroller extends Controller
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         // EXECUTE:
         $result = curl_exec($curl);
-        dd($curl);
         if(!$result){die("Connection Failure");}
         curl_close($curl);
         return $result;
