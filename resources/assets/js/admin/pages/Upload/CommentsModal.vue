@@ -49,7 +49,7 @@ export default {
 			columns2: [
 			{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "170", class: "" },
 			{ id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
-			{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
+			{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "message-content" },
 			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			],
 			modalLg: "modal-lg",
@@ -70,7 +70,7 @@ export default {
 			_this.columns2 = [
 			{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "170", class: "" },
 			{ id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "50", class: "" },
-			{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
+			{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "message-content" },
 			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			];
 		});
@@ -101,7 +101,7 @@ export default {
 						return {
 							date: moment(item.date).format('DD/MMM/YYYY HH:mm'),
 							name: this.recapName(item.name),
-							message: item.message,
+							message: item.message.replace(/\n/g, '<br>') + '<button class="show-more">Show <span class="more">more</span> <span class="less">less</span></button>',
 							box: this.getBoxButtons(item.box),
 						}
 					});

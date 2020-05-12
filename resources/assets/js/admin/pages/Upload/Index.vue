@@ -186,6 +186,9 @@ export default {
 			_this.getOptions();
             _this.showFilter = 'showSchedule';
 		});
+		$(document).on('click', '.show-more', function() {
+			$(this).closest('.message-content').toggleClass('active');
+		});
 	},
 	methods: {
 		fetchData() {
@@ -379,5 +382,18 @@ export default {
 	margin-right: 5px;
 	display: inline-block;
 	vertical-align: middle;
+}
+.message-content {
+>span {display: block; height: 38px; position: relative; overflow: hidden;}
+button {position: absolute; right: 0; top: 0; width: 110px;
+.less{display:none;}
+}
+&.active {
+>span {height: auto;}
+button {
+.less{display:inline;}	
+.more{display:none;}	
+}
+}
 }
 </style>

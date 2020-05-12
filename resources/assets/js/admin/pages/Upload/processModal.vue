@@ -1,62 +1,68 @@
 <template>
-	<modal id="processModal" :sizeClasses="modalLg" v-on:reset-validation="resetValidate">
-		<template slot="title">{{$ml.with('VueJS').get('txtUpload')}}</template>
-		<div v-if="currentProcess">
-			<h5>{{$ml.with('VueJS').get('txtProjectIssue')}}</h5>
-			<div class="table-responsive">
-				<no-action-table class="table-hover table-striped" :columns="columns" :data="dataProcess"></no-action-table>
-			</div>
-			<div class="form-group">
-				<h5>{{$ml.with('VueJS').get('txtMessage')}}</h5>
-				<textarea v-model="newMessage" class="form-control" rows="2"></textarea>
-			</div>
-			<div id="selectDest" class="">
-				<div class="form-group border p-3">
-					<h5>{{$ml.with('VueJS').get('txtLineRoomName')}}</h5>
-					<p v-if="currentProcess.room_name">{{ currentProcess.room_name }}</p>
+	<div>
+		<modal id="processModal" :sizeClasses="modalLg" v-on:reset-validation="resetValidate">
+			<template slot="title">{{$ml.with('VueJS').get('txtUpload')}}</template>
+			<div v-if="currentProcess">
+				<h5>{{$ml.with('VueJS').get('txtProjectIssue')}}</h5>
+				<div class="table-responsive">
+					<no-action-table class="table-hover table-striped" :columns="columns" :data="dataProcess"></no-action-table>
 				</div>
-				<div class="form-group border p-3">
-					<h5>{{$ml.with('VueJS').get('txtBoxUrl')}}</h5>
-					<p>{{ currentProcess.box_url }} <a v-if="currentProcess.box_url" :href="currentProcess.box_url" target="_blank"><i class="fa fa-external-link"></i></a></p>
+				<div v-if="!sendSuccess" class="form-group">
+					<h5>{{$ml.with('VueJS').get('txtMessage')}}</h5>
+					<textarea v-model="newMessage" class="form-control" rows="5"></textarea>
 				</div>
-				<div class="form-group border p-3">
-					<h5>{{$ml.with('VueJS').get('txtBoxDestination')}}</h5>
-					<div v-if="boxArr.length">
-						<ul id="boxList" class="pl-0">
-							<li v-for="(item, index) in boxArr" :key="index" class="d-flex align-items-center mt-2">
-								<span style="white-space: nowrap;" class="mr-2">Box {{ index + 1 }}: </span>
-								<input type="text" :value="item" v-on:keyup="updateValue(index)" class="form-control">
-								<i class="fa fa-trash text-danger ml-3 btn-link" @click="delBox(index)"></i> <a class="ml-2" :href="item" target="_blank"><i class="fa fa-external-link"></i></a>
-							</li>
-						</ul>
+				<div v-if="!sendSuccess" id="selectDest" class="">
+					<div class="form-group border p-3">
+						<h5>{{$ml.with('VueJS').get('txtLineRoomName')}}</h5>
+						<p v-if="currentProcess.room_name">{{ currentProcess.room_name }}</p>
 					</div>
-					<div class="d-flex justify-content-between align-items-center">
-						<input v-model="boxItem" type="text" name="boxItem" class="form-control">
-						<button type="button" class="btn btn-primary" @click="addBox">Add</button>
+					<div class="form-group border p-3">
+						<h5>{{$ml.with('VueJS').get('txtBoxUrl')}}</h5>
+						<p>{{ currentProcess.box_url }} <a v-if="currentProcess.box_url" :href="currentProcess.box_url" target="_blank"><i class="fa fa-external-link"></i></a></p>
 					</div>
-				</div>
-			</div>
-			<div class="form-group d-flex justify-content-between">
-				<div></div>
-				<button type="button" class="btn btn-primary" @click="uploadProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
-			</div>
-			<error-item :errors="errors"></error-item>
-			<success-item :success="success"></success-item>
-			<div v-if="listComments.length">
-				<hr />
-				<div class="form-group">
-					<h5>{{$ml.with('VueJS').get('txtProcessList')}}</h5>
-					<div class="table-responsive">
-						<no-action-table
-						class="table-hover table-striped"
-						:columns="columns2"
-						:data="listComments"
-						></no-action-table>
+					<div class="form-group border p-3">
+						<h5>{{$ml.with('VueJS').get('txtBoxDestination')}}</h5>
+						<div v-if="boxArr.length">
+							<ul id="boxList" class="pl-0">
+								<li v-for="(item, index) in boxArr" :key="index" class="d-flex align-items-center mt-2">
+									<span style="white-space: nowrap;" class="mr-2">Box {{ index + 1 }}: </span>
+									<input type="text" :value="item" v-on:keyup="updateValue(index)" class="form-control">
+									<i class="fa fa-trash text-danger ml-3 btn-link" @click="delBox(index)"></i> <a class="ml-2" :href="item" target="_blank"><i class="fa fa-external-link"></i></a>
+								</li>
+							</ul>
+						</div>
+						<div class="d-flex justify-content-between align-items-center">
+							<input v-model="boxItem" type="text" name="boxItem" class="form-control">
+							<button type="button" class="btn btn-primary btn-sm" @click="addBox">Add</button>
+						</div>
 					</div>
 				</div>
+				<div v-if="!sendSuccess" class="form-group d-flex justify-content-between">
+					<div></div>
+					<button type="button" class="btn btn-primary" @click="uploadProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
+				</div>
+				<error-item :errors="errors"></error-item>
+				<success-item :success="success"></success-item>
+				<div v-if="listComments.length">
+					<hr />
+					<div class="form-group">
+						<h5>{{$ml.with('VueJS').get('txtProcessList')}}</h5>
+						<div class="table-responsive">
+							<no-action-table
+							class="table-hover table-striped"
+							:columns="columns2"
+							:data="listComments"
+							></no-action-table>
+						</div>
+					</div>
+				</div>
+				<div v-if="sendSuccess" class="form-group d-flex justify-content-center">
+					<button type="button" class="btn btn-primary" @click="resetValidate">Close</button>
+				</div>
 			</div>
-		</div>
-	</modal>
+		</modal>
+		<loading :active.sync="isLoading" :is-full-page="true" :can-cancel="true" :on-cancel="onCancel"></loading>
+	</div>
 </template>
 
 <script>
@@ -65,6 +71,8 @@ import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
 import Modal from "../../components/Modals/Modal";
 import moment from 'moment';
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 export default {
 	name: "process-modal",
@@ -72,7 +80,8 @@ export default {
 		Modal,
 		ErrorItem,
 		SuccessItem,
-		NoActionTable
+		NoActionTable,
+		Loading
 	},
 	props: ["currentProcess"],
 	data() {
@@ -86,24 +95,28 @@ export default {
 			columns2: [
 			{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "170", class: "" },
 			{ id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
-			{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
+			{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "message-content" },
 			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			],
 			dataProcess: [],
-			newMessage: "以下のページをアップロードしました\n",
+			newMessage: "@%name%\n-----------------------------------------------\n案件名：%project%　%issue%\n担当：%userName%\n-----------------------------------------------\n【】\n出来上がったファイルをアップいたしました。\nご確認お願いいたします。\n%url%",
 			boxArr: [],
 			box: "",
 			boxItem: "",
 			errors: "",
 			success: "",
+			sendSuccess: false,
 			modalLg: "modal-lg",
 			userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
+            currentUser: {},
 			today: moment(new Date()).format('YYYY-MM-DD HH:mm'),
-			listComments: []
+			listComments: [],
+			isLoading: false
 		};
 	},
 	mounted() {
 		let _this = this;
+		_this.getUser();
 		$(document).on('click', '.languages button', function() {
 			_this.columns = [
 			{ id: "p_name", value: _this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
@@ -115,36 +128,35 @@ export default {
 			_this.columns2 = [
 			{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "170", class: "" },
 			{ id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "50", class: "" },
-			{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "" },
+			{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "message-content" },
 			{ id: "box", value: 'Box', width: "200", class: "text-center" }
 			];
 		});
 	},
 	methods: {
-		sendMessageLineWork() {
+		getUser() {
+            let uri = '/data/users/' + this.userID;
+            axios.get(uri).then((response) => {
+                this.currentUser = response.data.user;
+            });
+        },
+		sendMessageLineWork(content) {
 			if ( this.currentProcess.room_id ) {
-				axios.post('https://cors-anywhere.herokuapp.com/https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', {
-						"botNo": 763699,
-						"roomId": this.currentProcess.room_id,
-						"content": {
-							"type": "text",
-							"text": this.newMessage + ' (' + this.box + ')',
+				let uri = "/data/upload/submit-message";
+				axios.post(uri, {
+						roomId: this.currentProcess.room_id,
+						content: content,
+					})
+					.then(res => {
+						if ( typeof(res.data.data.code) !== 'undefined' && res.data.data.code != 200 ) {
+							setTimeout(function () { this.sendMessageLineWork() }.bind(this), 30000);
+						} else {
+							this.isLoading = false;
 						}
-					}, {
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Content-Type': 'application/json',
-	    				'consumerKey': 'dcn0NgAygjFgGVL584hJ',
-	    				'Authorization': 'Bearer AAAA+LjW8atYMyNvpaKKAflj2AryOfezGnm7Q4vgXhs/B9/60nRXxhm2sct3NUYguMtgxYKNh1FAlKbZ0cj/o54hQBi8AWVsGXZJXzU6JjxtsJaQ5gjCoDU8859Q+/XlP/1hzwlTe5I9GznVHfuObYB0zw8EjfjOj/D8tV+pDVh+nV4mPcg4yeAKvt8OfDzxa1jyThE7hYEYTVdPchBWAh/4y/Ji6qxmZ7YkQNM8RkkP0il9JMPf95lALKxWuSic2GfL3dBQguJlb408HEebnRrMHM5GnmrrKij85zPgzx0NslvUEO5l9YXultEpkcq48xy5XLD3ZVr+juZFKtEdhv6TL80='
-					}
-				})
-				.then(res => {
-					console.log(res);
-				})
-				.catch(err => {
-					console.log(err);
-					alert("Could not load box");
-				});
+					})
+					.catch(err => {
+						console.log(err);
+					});
 			}	
 		},
 		recapName(str) {
@@ -162,7 +174,7 @@ export default {
 						return {
 							date: moment(item.date).format('DD/MMM/YYYY HH:mm'),
 							name: this.recapName(item.name),
-							message: item.message,
+							message: item.message.replace(/\n/g, '<br>') + '<button class="show-more">Show <span class="more">more</span> <span class="less">less</span></button>',
 							box: this.getBoxButtons(item.box),
 						}
 					});
@@ -187,18 +199,13 @@ export default {
 			// Reset validate
 			this.errors = "";
 			this.success = "";
-
-			if( this.newMessage == "以下のページをアップロードしました\n" ) {
-				this.errors = [
-					['Message is requried']
-				];
-				return false;
-			}
+			this.isLoading = true;
 
 			if( !this.box ) {
 				this.errors = [
 					['Box is requried']
 				];
+				this.isLoading = false;
 				return false;
 			}
 
@@ -206,15 +213,25 @@ export default {
 				this.errors = [
 					['Please add or clear the Box URL']
 				];
+				this.isLoading = false;
 				return false;
 			}
+
+			let boxUrl = this.box.replace(/, /g, '\n');
+
+			console.log(boxUrl);
+
+			let content = this.newMessage.replace("%project%", this.currentProcess.project);   
+				content = content.replace("%issue%", this.currentProcess.issue);
+				content = content.replace("%userName%", this.recapName(this.currentUser.name));
+				content = content.replace("%url%", boxUrl);
 
 			let newItem = {
 				user_id: this.userID,
 				issue_id: this.currentProcess.issue_id,
 				schedule_id: this.currentProcess.id,
 				date: this.today,
-				message: this.newMessage,
+				message: content,
 				box: this.box
 			}
 
@@ -226,20 +243,22 @@ export default {
 				let newComment = {
 					date: moment(res.data.comment.date).format('DD/MMM/YYYY HH:mm'),
 					name: this.recapName(res.data.comment.name),
-					message: res.data.comment.message,
+					message: content.replace(/\n/g, '<br>') + '<button class="show-more">Show <span class="more">more</span> <span class="less">less</span></button>',
 					box: this.getBoxButtons(res.data.comment.box)
 				}
 
 				this.listComments = [...this.listComments, newComment];
 
-				this.newMessage = '以下のページをアップロードしました\n';
+				this.newMessage = "@%name%\n-----------------------------------------------\n案件名：%project%　%issue%\n担当：%userName%\n-----------------------------------------------\n【】\n出来上がったファイルをアップいたしました。\nご確認お願いいたします。\n%url%";
 				this.box = '';
+				this.sendSuccess = true;
 			})
 			.catch(err => {
+				this.isLoading = false;
 				console.log(err);
 			});
 
-			this.sendMessageLineWork();
+			this.sendMessageLineWork(content);
 		},
 		addBox() {
 			if ( !this.boxItem ) {
@@ -315,11 +334,16 @@ export default {
 		    return url.match(regex);
 		},
         resetValidate() {
+        	$('#processModal').modal('hide');
             this.errors = '';
             this.success = '';
-            this.newMessage = '以下のページをアップロードしました\n';
+            this.newMessage = "@%name%\n-----------------------------------------------\n案件名：%project%　%issue%\n担当：%userName%\n-----------------------------------------------\n【】\n出来上がったファイルをアップいたしました。\nご確認お願いいたします。\n%url%";
             this.box = "";
+            this.sendSuccess = false;
             this.$emit('reset-validation')
+        },
+        onCancel() {
+        	window.location.reload();
         }
 	},
 	watch: {
@@ -338,78 +362,76 @@ export default {
 };
 </script>
 <style lang="scss">
-.btn {
-	min-width: 80px;
-}
 .btn-link {
-	cursor: pointer;
+cursor: pointer;
 }
 #commentsModal {
-	.form-check-sign {
-		&:after, &:before {
-			font-size: 26px;
-			width: 25px;
-			height: 25px;
-			margin-left: -29px;
-		}
-	}
+.form-check-sign {
+&:after, &:before {
+font-size: 26px;
+width: 25px;
+height: 25px;
+margin-left: -29px;
+}
+}
 }
 #processModal {
-	.modal-dialog {
-	.modal-content {
-	.modal-body {
-	h5 {
-	font-weight: 600;
-	margin-bottom: 10px;
+#selectDest .form-control {font-size: 14px;padding: 5px 12px;line-height: 20px;height: 30px;}
+.modal-dialog {
+.modal-content {
+.modal-body {
+h5 {
+font-weight: 600;
+margin-bottom: 10px;
 }
 .form-control {
-	border-radius: 0;
+border-radius: 0;
 }
 #selectDest {
-	h5 {
-	position: relative;
-	text-transform: uppercase;
+h5 {
+position: relative;
+text-transform: uppercase;
 }
 p {
-	margin: 0;
-	font-size: 14px;
+margin: 0;
+font-size: 14px;
 }
 .form-group {
-	background: #ffffff;
-	label {
-	cursor: pointer;
-	font-size: 14px;
-	font-weight: 600;
-	position: absolute;
-	right: 0;
-	opacity: 0.8;
-	&.dest-box {
-	color: #005fdd;
+background: #ffffff;
+label {
+cursor: pointer;
+font-size: 14px;
+font-weight: 600;
+position: absolute;
+right: 0;
+opacity: 0.8;
+&.dest-box {
+color: #005fdd;
 }
 &.dest-file {
-	color: #f83f86;
+color: #f83f86;
 }
 &:hover {
-	opacity: 1;
+opacity: 1;
 }
 }
 }
 }
 .table-responsive {
-	td {
-	padding: 5px 8px;
+td {
+padding: 5px 8px;
 }
 }
 .form-check {
-	.form-check-sign {
-	&:before,
-	&:after {
-	top: 2px;
+.form-check-sign {
+&:before,
+&:after {
+top: 2px;
 }
 }
 span {
-	color: #333333;
-	font-size: 16px;
+color: #333333;
+font-size: 16px;
 }
 }
 }

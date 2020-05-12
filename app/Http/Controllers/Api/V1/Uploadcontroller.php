@@ -146,4 +146,43 @@ class Uploadcontroller extends Controller
             'message' => 'Successfully.'
         ), 200);
     }
+
+    public function submitMessage(Request $request) {
+        $data_array =  array(
+            "botNo" => 763699,
+            "roomId" => $request->get('roomId'),
+            "content" => array(
+                "type" => "text",
+                "text" => $request->get('content')
+            ),
+        );
+        $make_call = $this->sendMessage('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', json_encode($data_array));
+        $response = json_decode($make_call, true);
+
+        return response()->json(array(
+            'data' => $response,
+        ), 200);
+    }
+
+    public function sendMessage($url, $data){
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_POST, 1);
+        if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        // OPTIONS:
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Access-Control-Allow-Origin: *',
+            'Content-Type: application/json',
+            'consumerKey: dcn0NgAygjFgGVL584hJ',
+            'Authorization: Bearer AAAA8oj1wfzTSB7JyPRT5wDk7eTZa3aiVjKiqzaASDr1zZSkXDBKO9wBMxCnYa0JTU3vrEuvStuXCghcIpUyOoHAH5K7i4Aer0qXkZVx61gGiH29LUI7VGAXwoh4M2kon1HeQp1oyxuYN9NgCGetA+35gEmQwhkTogGfhd66ct1La4qSjnpDNvKlUdiKPPYIvpcqgaEallHTntXPNOrKfaOLNUCGvd/mmcbpMCZQq/ThRq3vtRFQB4TqAtvWPj1LuD08nbvXZDDlwChstCEE9N/WocfggtvHlzzkmQc7181h7zHFPXT+ybomHJl3pZqpFbsXMcqrFHpkotLEXniyyzjgz6Y=',
+        ));
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        // EXECUTE:
+        $result = curl_exec($curl);
+        dd($curl);
+        if(!$result){die("Connection Failure");}
+        curl_close($curl);
+        return $result;
+    }
 }

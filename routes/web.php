@@ -63,6 +63,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
 
     Route::post('upload/data', 'UploadController@getData');
     Route::post('upload/update-status', 'UploadController@updateStatus');
+    Route::post('upload/submit-message', 'UploadController@submitMessage');
 
     Route::resource('comments', 'CommentsController', ['except' => ['create', 'edit']]);
     Route::get('get-comments/{issue_id}/{phase}', 'CommentsController@getComments');
