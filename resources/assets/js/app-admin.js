@@ -38,7 +38,7 @@ import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
-import Upload from './admin/pages/Upload';
+// import Upload from './admin/pages/Upload';
 
 const routes = [{
         path: '/',
@@ -109,11 +109,11 @@ const routes = [{
                 name: 'Totaling',
                 component: Totaling
             },
-            {
-                path: 'upload',
-                name: 'Upload',
-                component: Upload
-            },
+            // {
+            //     path: 'upload',
+            //     name: 'Upload',
+            //     component: Upload
+            // },
             {
                 path: '*',
                 component: NotFound

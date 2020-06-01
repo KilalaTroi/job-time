@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="copyright text-center">
         &copy; Copyright by
-        <a href="https://kilala.com.vn" target="_blank">kilala.com.vn 2019</a>
+        <a href="https://kilala.com.vn" target="_blank">kilala.com.vn {{ new Date().getFullYear() }}</a>
         <!-- Designed by <a href="https://www.creative-tim.com/?ref=pdf-vuejs" target="_blank">Creative Tim</a>. -->
       </div>
     </div>

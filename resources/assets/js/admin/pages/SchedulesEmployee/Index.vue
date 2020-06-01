@@ -5,7 +5,7 @@
         <div class="col-sm-12 col-lg-3 col-xl-2">
           <card>
             <template slot="header">
-              <h4 class="card-title">{{$ml.with('VueJS').get('txtProjectSchedule')}}</h4>
+              <h4 class="card-title">{{$ml.with('VueJS').get('txtScheduleTitle')}}</h4>
             </template>
             <div id="external-events">
               <div id="external-events-list">
