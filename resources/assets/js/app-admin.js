@@ -15,6 +15,9 @@ import './admin/ml';
 // component
 Vue.component('pagination', require('laravel-vue-pagination'));
 
+import CKEditor from '@ckeditor/ckeditor5-vue';
+window.Vue.use( CKEditor );
+
 // LightBootstrap plugin
 import LightBootstrap from './admin/light-bootstrap-main'
 
@@ -38,6 +41,7 @@ import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
 import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
+import Ckeditor from './admin/pages/Ckeditor';
 // import Upload from './admin/pages/Upload';
 
 const routes = [{
@@ -108,6 +112,11 @@ const routes = [{
                 path: 'totaling',
                 name: 'Totaling',
                 component: Totaling
+            },
+            {
+                path: 'ckeditor',
+                name: 'Ckeditor',
+                component: Ckeditor
             },
             // {
             //     path: 'upload',
