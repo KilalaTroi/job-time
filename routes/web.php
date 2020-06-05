@@ -61,9 +61,11 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');
     Route::post('import-projects', 'ProjectsController@importProjects');
 
-    Route::post('upload/data', 'UploadController@getData');
-    Route::post('upload/update-status', 'UploadController@updateStatus');
-    Route::post('upload/submit-message', 'UploadController@submitMessage');
+    // Route::post('upload/data', 'UploadController@getData');
+    // Route::post('upload/update-status', 'UploadController@updateStatus');
+    // Route::post('upload/submit-message', 'UploadController@submitMessage');
+
+    Route::post('upload/report', 'UserUploadController@updateReport');
 
     Route::resource('comments', 'CommentsController', ['except' => ['create', 'edit']]);
     Route::get('get-comments/{issue_id}/{phase}', 'CommentsController@getComments');
@@ -71,6 +73,21 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::get('exports/{filename}', function ($filename)
     {
         $path = storage_path() . '/exports/' . $filename;
+
+        if(!File::exists($path)) abort(404);
+
+        $file = File::get($path);
+        $type = File::mimeType($path);
+
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+
+        return $response;
+    });
+
+    Route::get('reports/{filename}', function ($filename)
+    {
+        $path = storage_path() . '/app/reports/' . $filename;
 
         if(!File::exists($path)) abort(404);
 

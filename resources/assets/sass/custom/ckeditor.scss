@@ -1,0 +1,26 @@
+#toolbar-container {
+    background-color: #eee;
+}
+
+#ck-editor {
+    padding: 5rem 0;
+    max-height: 700px;
+    overflow-y: auto;
+    border: 1px solid rgba(0,0,0,.15);
+    border-top: none;
+    background-color: #eee;
+
+    .ck-content.ck-editor__editable {
+        width: 21cm;
+        min-height: 29.7cm;
+        margin: 0 auto;
+        padding: 2cm 1.2cm;
+        border: 1px #d3d3d3 solid;
+        background-color: #fff;
+        box-shadow: 0 0 5px rgba(0,0,0,.1);
+
+        >*:first-child {
+            margin-top: 0;
+        }
+    }
+}
