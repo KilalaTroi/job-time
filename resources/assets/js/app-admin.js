@@ -42,6 +42,7 @@ import Schedules from './admin/pages/Schedules';
 import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
 import Ckeditor from './admin/pages/Ckeditor';
+import Reports from './admin/pages/Reports';
 // import Upload from './admin/pages/Upload';
 
 const routes = [{
@@ -117,6 +118,11 @@ const routes = [{
                 path: 'ckeditor',
                 name: 'Ckeditor',
                 component: Ckeditor
+            },
+            {
+                path: 'reports',
+                name: 'Reports',
+                component: Reports
             },
             // {
             //     path: 'upload',

@@ -25,6 +25,7 @@ class CreateReportsTable extends Migration
             $table->integer('translate_id')->unsigned();
             $table->string('type');
             $table->longText('content');
+            $table->string('seen');
             $table->timestamps();
         });
     }

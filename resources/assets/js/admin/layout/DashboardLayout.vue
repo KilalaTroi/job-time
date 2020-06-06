@@ -29,6 +29,10 @@
                 <i class="nc-icon nc-paper-2"></i>
                 <p v-text="$ml.with('VueJS').get('sbSchedules')" />
             </sidebar-link>
+            <sidebar-link to="/reports">
+                <i class="nc-icon nc-single-copy-04"></i>
+                <p v-text="$ml.with('VueJS').get('sbReports')" />
+            </sidebar-link>
             <!-- <sidebar-link to="/upload">
                 <i class="nc-icon nc-cloud-upload-94"></i>
                 <p v-text="$ml.with('VueJS').get('txtUpload')" />
