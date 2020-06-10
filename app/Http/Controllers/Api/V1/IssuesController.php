@@ -60,7 +60,6 @@ class IssuesController extends Controller
             'p_name' => $project->name,
             'p_name_vi' => $project->name_vi,
             'p_name_ja' => $project->name_ja,
-            'room_id' => $project->room_id,
             'client_id' => $project->client_id,
             'dept_id' => $project->dept_id,
             'type_id' => $project->type_id,
