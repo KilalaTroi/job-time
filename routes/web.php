@@ -59,6 +59,8 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('statistic/datatotaling', 'StatisticsController@getDataTotaling');
 
     Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');
+    Route::post('reports', 'ReportsController@getData');
+    Route::resource('reports-action', 'ReportsController', ['except' => ['create', 'edit']]);
     Route::post('import-projects', 'ProjectsController@importProjects');
 
     // Route::post('upload/data', 'UploadController@getData');

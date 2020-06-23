@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Type;
+use App\Report;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,22 @@ use Excel;
 
 class ReportsController extends Controller
 {
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $report = Report::create($request->all());
+
+        return response()->json(array(
+            'id' => $report->id,
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -328,5 +345,70 @@ class ReportsController extends Controller
     function array_insert (&$array, $position, $insert_array) {
         $first_array = array_splice ($array, 0, $position);
         $array = array_merge ($first_array, $insert_array, $array);
+    }
+
+    function getData(Request $request) {
+        $issueFilter = $request->get('issueFilter');
+
+        $user_id = $request->get('user_id');
+        $userArr = array();
+        if ( $user_id ) {
+            $userArr = array_map(function($obj) {
+                return $obj['id'];
+            }, $user_id);
+        }
+
+        $deptSelects = $request->get('deptSelects');
+        $deptArr = array();
+        if ( $deptSelects ) {
+            $deptArr = array_map(function($obj) {
+                return $obj['id'];
+            }, $deptSelects);
+        }
+
+        $projectSelects = $request->get('projectSelects');
+        $projectArr = array();
+        if ( $projectSelects ) {
+            $projectArr = array_map(function($obj) {
+                return $obj['id'];
+            }, $projectSelects);
+        }
+
+        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+        $projects = DB::table('projects as p')
+        ->select(
+            'p.id', 
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
+            DB::raw('max(i.id) as issue_id')
+        )
+        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+        ->when($deptArr, function ($query, $deptArr) {
+            return $query->whereIn('p.dept_id', $deptArr);
+        })
+        ->when($issueFilter, function ($query, $issueFilter) {
+            return $query->where('i.name', 'like', '%'.$issueFilter.'%');
+        })
+        ->where('i.status', 'publish')
+        ->groupBy('p.id')
+        ->orderBy('p.id', 'desc')
+        ->get()->toArray();
+
+        $users = DB::table('role_user as ru')
+            ->select(
+                'user.id as id',
+                'user.name as text'
+            )
+            ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+            ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+            ->whereNotIn('role.name', ['admin','japanese_planner'])
+            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->get()->toArray();
+
+        return response()->json([
+            'users' => $users,
+            'departments' => $departments,
+            'projects' => $projects
+        ]);
     }
 }

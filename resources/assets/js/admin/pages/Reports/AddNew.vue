@@ -1,10 +1,14 @@
 <template>
-    <div>
+    <card>
+        <div class="form-group d-flex justify-content-between align-items-center">
+            <h3>Create New Report</h3>
+            <button @click="$emit('finish-new-report')" class="btn btn-primary">Back</button>
+        </div>
         <div class="form-group">
             <label class="">Title</label>
             <input v-model="title" type="text" class="form-control">
         </div>
-        <div class="row">
+        <div class="row form-group">
             <div class="col-sm-3">
                 <div class="form-group">
                     <label>Date</label>
@@ -19,6 +23,7 @@
                     ></datepicker>
                 </div>
             </div>
+
             <div class="col-sm-9">
                 <div class="form-group">
                     <label class>{{$ml.with('VueJS').get('txtUsers')}}</label>
@@ -37,18 +42,200 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
+                    <div>
+                        <multiselect
+                        :multiple="true"
+                        v-model="deptSelects"
+                        :options="departments"
+                        :clear-on-select="false"
+                        :preserve-search="true"
+                        :placeholder="$ml.with('VueJS').get('txtSelectOne')"
+                        label="text"
+                        track-by="text"
+                        :preselect-first="true"
+                        ></multiselect>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
+                    <div>
+                        <multiselect
+                        :multiple="true"
+                        v-model="projectSelects"
+                        :options="projects"
+                        :clear-on-select="false"
+                        :preserve-search="true"
+                        :placeholder="$ml.with('VueJS').get('txtSelectOne')"
+                        label="text"
+                        track-by="text"
+                        :preselect-first="true"
+                        ></multiselect>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class>
+                        {{$ml.with('VueJS').get('txtIssue')}}
+                    </label>
+                    <input v-model="issue" type="text" name="issue" class="form-control" />
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class="">{{$ml.with('VueJS').get('txtLang')}}
+                    </label>
+                    <select-2 v-model="language" class="select2">
+                        <option value="vi">Vietnamese</option>
+                        <option value="ja">Japanese</option>
+                    </select-2>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <div class="form-group">
+            <div id="toolbar-container"></div>
+            <div id="ck-editor">
+                <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onReady"></ckeditor>
+            </div>
+        </div>
+
+        <error-item :errors="errors"></error-item>
+
+        <div class="form-group text-right">
+            <button @click="emitCreateReport" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}</button>
+        </div>
+    </card>
 </template>
 <script>
 import Datepicker from "vuejs-datepicker";
+import Multiselect from "vue-multiselect";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
+import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
+import Card from "../../components/Cards/Card";
+import Select2 from '../../components/SelectTwo/SelectTwo.vue';
+import ErrorItem from "../../components/Validations/Error";
+
+class MyUploadAdapter {
+    constructor( loader ) {
+        // The file loader instance to use during the upload.
+        this.loader = loader;
+    }
+
+    // Starts the upload process.
+    upload() {
+        return this.loader.file
+            .then( file => new Promise( ( resolve, reject ) => {
+                this._initRequest();
+                this._initListeners( resolve, reject, file );
+                this._sendRequest( file );
+            } ) );
+    }
+
+    // Aborts the upload process.
+    abort() {
+        if ( this.xhr ) {
+            this.xhr.abort();
+        }
+    }
+
+    // Initializes the XMLHttpRequest object using the URL passed to the constructor.
+    _initRequest() {
+        const xhr = this.xhr = new XMLHttpRequest();
+
+        // Note that your request may look different. It is up to you and your editor
+        // integration to choose the right communication channel. This example uses
+        // a POST request with JSON as a data structure but your configuration
+        // could be different.
+        xhr.open( 'POST', '/data/upload/report', true );
+        xhr.responseType = 'json';
+        xhr.setRequestHeader('X-CSRF-TOKEN', document.head.querySelector('meta[name="csrf-token"]').content);
+    }
+
+    // Initializes XMLHttpRequest listeners.
+    _initListeners( resolve, reject, file ) {
+        const xhr = this.xhr;
+        const loader = this.loader;
+        const genericErrorText = `Couldn't upload file: ${ file.name }.`;
+
+        xhr.addEventListener( 'error', () => reject( genericErrorText ) );
+        xhr.addEventListener( 'abort', () => reject() );
+        xhr.addEventListener( 'load', () => {
+            const response = xhr.response;
+
+            // This example assumes the XHR server's "response" object will come with
+            // an "error" which has its own "message" that can be passed to reject()
+            // in the upload promise.
+            //
+            // Your integration may handle upload errors in a different way so make sure
+            // it is done properly. The reject() function must be called when the upload fails.
+            if ( !response || response.error ) {
+                return reject( response && response.error ? response.error.message : genericErrorText );
+            }
+
+            // If the upload is successful, resolve the upload promise with an object containing
+            // at least the "default" URL, pointing to the image on the server.
+            // This URL will be used to display the image in the content. Learn more in the
+            // UploadAdapter#upload documentation.
+            resolve( {
+                default: response.url
+            } );
+        } );
+
+        // Upload progress when it is supported. The file loader has the #uploadTotal and #uploaded
+        // properties which are used e.g. to display the upload progress bar in the editor
+        // user interface.
+        if ( xhr.upload ) {
+            xhr.upload.addEventListener( 'progress', evt => {
+                if ( evt.lengthComputable ) {
+                    loader.uploadTotal = evt.total;
+                    loader.uploaded = evt.loaded;
+                }
+            } );
+        }
+    }
+
+    // Prepares the data and sends the request.
+    _sendRequest( file ) {
+        // Prepare the form data.
+        const data = new FormData();
+
+        data.append( 'upload', file );
+
+        // Important note: This is the right place to implement security mechanisms
+        // like authentication and CSRF protection. For instance, you can use
+        // XMLHttpRequest.setRequestHeader() to set the request headers containing
+        // the CSRF token generated earlier by your application.
+
+        // Send the request.
+        this.xhr.send( data );
+    }
+}
+
+// ...
+
+function MyCustomUploadAdapterPlugin( editor ) {
+    editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
+        // Configure the URL to the upload script in your back-end here!
+        return new MyUploadAdapter( loader );
+    };
+}
 
 export default {
     name: 'add-new',
     components: {
-        Datepicker
+        Select2,
+        Datepicker,
+        Multiselect,
+        Card,
+        ErrorItem
     },
     data() {
         return {
@@ -58,10 +245,85 @@ export default {
                 vi: vi,
                 ja: ja,
                 en: en
-            }
+            }, 
+            userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
+            user_id: [],
+            userOptions: [],
+            deptSelects: [],
+			projectSelects: [],
+			issue: "",
+			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
+			departments: [],
+            projects: [],
+            
+            isEditing: false,
+            editor: DecoupledEditor,
+            editorData: '',
+            editorConfig: {
+                // The configuration of the editor.
+                // language: 'ja'
+                extraPlugins: [ MyCustomUploadAdapterPlugin ],
+            },
+
+            language: this.$ml.current,
+            errors: []
         }
     },
+    mounted() {
+		let _this = this;
+		_this.fetchData();
+    },
+    beforeMount() {
+        window.addEventListener("beforeunload", this.preventNav)
+        this.$once("hook:beforeDestroy", () => {
+            window.removeEventListener("beforeunload", this.preventNav);
+        })
+    },
+    beforeRouteLeave(to, from, next) {
+        if (this.isEditing) {
+            if (!window.confirm("Leave without saving?")) {
+                return;
+            }
+        }
+        next();
+    },
     methods: {
+        fetchData() {
+			let uri = "/data/reports";
+			axios
+			.post(uri, {
+				user_id: this.user_id,
+				deptSelects: this.deptSelects,
+				projectSelects: this.projectSelects,
+				issueFilter: this.issue
+			})
+			.then(res => {
+                this.userOptions = res.data.users;
+				this.departments = res.data.departments;
+				this.projects = res.data.projects;
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not load data");
+			});
+        },
+        fetchDataFilter() {
+			let uri = "/data/reports";
+			axios
+			.post(uri, {
+				user_id: this.user_id,
+				deptSelects: this.deptSelects,
+				projectSelects: this.projectSelects,
+				issueFilter: this.issue
+			})
+			.then(res => {
+				this.projects = res.data.projects;
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not load data");
+			});
+		},
         getLanguage(data) {
             return this.dataLang[data.current]
         },
@@ -74,7 +336,102 @@ export default {
         },
         customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
-		},
+        },
+        onReady( editor )  {
+            // Insert the toolbar before the editable area.
+            // editor.ui.getEditableElement().parentElement.insertBefore(
+            //     editor.ui.view.toolbar.element,
+            //     editor.ui.getEditableElement()
+            // );
+
+            const toolbarContainer = document.querySelector( '#toolbar-container' );
+            toolbarContainer.appendChild( editor.ui.view.toolbar.element );
+        },
+        preventNav(event) {
+            if (!this.isEditing) return
+            event.preventDefault()
+            event.returnValue = ""
+        },
+        contentChange() {
+            this.isEditing = true;
+        },
+        emitCreateReport() {
+            this.errors = [];
+
+            if ( !this.title ) {
+                this.errors = [['Please typing the title'], ...this.errors];
+            } 
+
+            if ( !this.date ) {
+                this.errors = [['Please choosing the date'], ...this.errors];
+            } 
+
+            if ( !this.user_id.length ) {
+                this.errors = [['Please choosing the user'], ...this.errors];
+            } 
+
+            if ( !this.deptSelects.length ) {
+                this.errors = [['Please choosing the department'], ...this.errors];
+            } 
+
+            if ( !this.issue ) {
+                this.errors = [['Please typing the issue'], ...this.errors];
+            } 
+
+            if ( !this.projectSelects.length ) {
+                this.errors = [['Please choosing the project'], ...this.errors];
+            } 
+
+            if ( !this.editorData ) {
+                this.errors = [['Please typing the content'], ...this.errors];
+            } 
+
+            if ( !this.errors.length ) {
+                let uri = '/data/reports-action';
+                let newItem = {
+                    title: this.title,
+                    date_time: this.date,
+                    issue: this.issue,
+                    language: this.language,
+                    translate_id: 0,
+                    type: this.userID,
+                    content: this.editorData,
+                    seen: this.userID,
+                    author: this.userID,
+                };
+                axios.post(uri, newItem)
+                    .then(res => {
+                        console.log(res.data.message);
+                        this.title = '';
+                        this.date = '';
+                        this.user_id = [];
+                        this.deptSelects = [];
+                        this.projectSelects = [];
+                        this.issue = "";
+                        this.editorData = '';
+                        this.errors = [];
+                        this.$emit('finish-new-report');
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        if (err.response.status == 422) {
+                            this.validationErrors = err.response.data;
+                        }
+                    });
+            }
+        }
     },
+    watch: {
+        editorData: [{
+            handler: 'contentChange'
+        }],
+        deptSelects: [{
+            handler: "fetchDataFilter"
+        }]
+    }
 }
 </script>
+
+<style lang="scss">
+@import "~vue-multiselect/dist/vue-multiselect.min.css";
+</style>

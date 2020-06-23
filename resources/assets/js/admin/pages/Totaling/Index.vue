@@ -247,7 +247,7 @@ export default {
 			})
 			.catch(err => {
 				console.log(err);
-				alert("Could not load users");
+				alert("Could not load data");
 			});
 		},
 		optionStyle(color) {
@@ -269,6 +269,7 @@ export default {
 			})
 			.then(res => {
 				this.logTimeData = res.data.dataLogTime;
+				this.projects = res.data.projects;
 			})
 			.catch(err => {
 				console.log(err);

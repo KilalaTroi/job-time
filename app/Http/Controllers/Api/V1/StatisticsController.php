@@ -110,9 +110,9 @@ class StatisticsController extends Controller
         ->when($typeArr, function ($query, $typeArr) {
             return $query->whereIn('p.type_id', $typeArr);
         })
-        ->when($projectArr, function ($query, $projectArr) {
-            return $query->whereIn('p.id', $projectArr);
-        })
+        // ->when($projectArr, function ($query, $projectArr) {
+        //     return $query->whereIn('p.id', $projectArr);
+        // })
         ->when($issueFilter, function ($query, $issueFilter) {
             return $query->where('i.name', 'like', '%'.$issueFilter.'%');
         })
