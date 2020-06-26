@@ -27,7 +27,7 @@
 </template>
 <script>
 export default {
-    name: 'table-upload',
+    name: 'table-report',
     props: {
         columns: Array,
         data: Array

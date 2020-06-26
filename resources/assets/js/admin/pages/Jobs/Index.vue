@@ -22,12 +22,12 @@
                             </div>
                         </template>
                         <div class="table-responsive" v-if="jobs">
-                            <job-table
+                            <table-job
                                 class="table-hover table-striped"
                                 :columns="columns"
                                 :data="jobs"
                                 v-on:get-job="getJob">
-                            </job-table>
+                            </table-job>
                         </div>
                         <pagination :data="jobData" :show-disabled="jShowDisabled" :limit="jLimit" :align="jAlign" :size="jSize" @pagination-change-page="getResults"></pagination>
                     </card>
@@ -36,13 +36,13 @@
                             <h4 class="card-title">{{$ml.with('VueJS').get('txtTimeRecord')}}</h4>
                         </template>
                         <div class="table-responsive">
-                            <action-table
+                            <table-action
                                 class="table-hover table-striped time-record"
                                 :columns="logColumns"
                                 :data="logTime"
                                 v-on:get-item="getItem" 
                                 v-on:delete-item="deleteItem">
-                            </action-table>
+                            </table-action>
                         </div>
                         <div class="alert alert-danger" v-if="timeTotal > 28800">
                           <span>{{$ml.with('VueJS').get('msgOverTime')}}</span>
@@ -61,8 +61,8 @@ import Card from '../../components/Cards/Card'
 import Datepicker from 'vuejs-datepicker';
 import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
-import JobTable from '../../components/TableJob'
-import ActionTable from '../../components/TableAction'
+import TableJob from '../../components/TableJob'
+import TableAction from '../../components/TableAction'
 import AddTime from './AddTime'
 import EditTime from './EditTime'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
@@ -71,8 +71,8 @@ export default {
     components: {
         Card,
         datepicker: Datepicker,
-        JobTable,
-        ActionTable,
+        TableJob,
+        TableAction,
         AddTime,
         EditTime,
         Select2

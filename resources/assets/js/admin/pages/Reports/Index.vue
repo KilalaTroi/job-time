@@ -2,6 +2,13 @@
     <div class="content">
         <div class="container">
             <card v-show="!actionNewReport">
+				<template slot="header">
+					<div class="d-flex justify-content-between">
+						<h4 class="card-title">
+							Filter Report          
+						</h4>
+					</div>
+				</template>
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="form-group">
@@ -91,6 +98,26 @@
                 <button @click="addNewReport" class="btn btn-primary">Create New Report</button>
             </div>
             <add-new v-show="actionNewReport" v-on:finish-new-report="finishNewReport"></add-new>
+			<card class="strpied-tabled-with-hover">
+				<template slot="header">
+					<div class="d-flex justify-content-between">
+						<h4 class="card-title">
+							Report List           
+						</h4>
+					</div>
+				</template>
+				<div class="table-responsive">
+					<table-upload class="table-hover table-striped" :columns="columns" :data="projects"></table-upload>
+				</div>
+				<pagination
+				:data="dataProjects"
+				:show-disabled="jShowDisabled"
+				:limit="jLimit"
+				:align="jAlign"
+				:size="jSize"
+				@pagination-change-page="getResults"
+				></pagination>
+			</card>
         </div>
     </div>
 </template>
@@ -102,6 +129,7 @@ import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 import Select2 from '../../components/SelectTwo/SelectTwo.vue';
+import TableReport from "../../components/TableReport";
 
 export default {
     components: {
@@ -109,7 +137,8 @@ export default {
         Card,
 		Datepicker,
         Multiselect,
-        Select2
+		Select2,
+		TableReport
     },
     data() {
         return {
@@ -129,7 +158,11 @@ export default {
                 en: en
             },
 
-            actionNewReport: false
+			actionNewReport: false,
+			jLimit: 2,
+			jShowDisabled: true,
+			jAlign: "right",
+			jSize: "small",
         }
     },
     mounted() {

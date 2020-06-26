@@ -39,9 +39,9 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-12 col-sm-auto">
-                        <create-button>
+                        <button-create>
                             <template slot="title">{{$ml.with('VueJS').get('txtCreateProject')}}</template>
-                        </create-button>
+                        </button-create>
                     </div>
                     <div class="col-12 col-sm-auto ml-auto">
                         <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#issueImport" data-backdrop="static" data-keyboard="false">
@@ -63,8 +63,8 @@
                     </div>
                 </template>
                 <div class="table-responsive" v-if="filterResults">
-                    <project-table class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
-                    </project-table>
+                    <table-project class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
+                    </table-project>
                 </div>
                 <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
             </card>
@@ -88,7 +88,7 @@ import EditIssue from './EditIssue'
 import ImportIssue from './ImportIssue'
 import AddIssue from './AddIssue'
 import CreateButton from '../../components/Buttons/Create' 
-import ProjectTable from '../../components/TableProject'
+import TableProject from '../../components/TableProject'
 import moment from 'moment'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
@@ -103,7 +103,7 @@ export default {
         EditIssue,
         AddIssue,
         CreateButton,
-        ProjectTable,
+        TableProject,
         ImportIssue
     },
     data() {

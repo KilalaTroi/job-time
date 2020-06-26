@@ -95,7 +95,7 @@
 					</div>
 				</template>
 				<div class="table-responsive">
-					<upload-table class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></upload-table>
+					<table-upload class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></table-upload>
 				</div>
 				<process-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></process-modal>
 				<comments-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></comments-modal>
@@ -112,7 +112,7 @@
 	</div>
 </template>
 <script>
-import UploadTable from "../../components/TableUpload";
+import TableUpload from "../../components/TableUpload";
 import ProcessModal from './ProcessModal';
 import CommentsModal from './CommentsModal';
 import Card from "../../components/Cards/Card";
@@ -124,7 +124,7 @@ import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 
 export default {
 	components: {
-		UploadTable,
+		TableUpload,
 		Card,
 		Datepicker,
 		Multiselect,

@@ -5,7 +5,7 @@
 			<div v-if="currentProcess">
 				<h5>{{$ml.with('VueJS').get('txtProjectIssue')}}</h5>
 				<div class="table-responsive">
-					<no-action-table class="table-hover table-striped" :columns="columns" :data="dataProcess"></no-action-table>
+					<table-no-action class="table-hover table-striped" :columns="columns" :data="dataProcess"></table-no-action>
 				</div>
 				<div v-if="!sendSuccess" class="form-group">
 					<h5>{{$ml.with('VueJS').get('txtMessage')}}</h5>
@@ -48,11 +48,11 @@
 					<div class="form-group">
 						<h5>{{$ml.with('VueJS').get('txtProcessList')}}</h5>
 						<div class="table-responsive">
-							<no-action-table
+							<table-no-action
 							class="table-hover table-striped"
 							:columns="columns2"
 							:data="listComments"
-							></no-action-table>
+							></table-no-action>
 						</div>
 					</div>
 				</div>
@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import NoActionTable from "../../components/TableNoAction";
+import TableNoAction from "../../components/TableNoAction";
 import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
 import Modal from "../../components/Modals/Modal";
@@ -80,7 +80,7 @@ export default {
 		Modal,
 		ErrorItem,
 		SuccessItem,
-		NoActionTable,
+		TableNoAction,
 		Loading
 	},
 	props: ["currentProcess"],

@@ -29,7 +29,7 @@
 </template>
 <script>
 export default {
-    name: 'job-table',
+    name: 'table-job',
     props: {
         columns: Array,
         data: Array

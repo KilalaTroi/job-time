@@ -4,9 +4,9 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-12 col-sm-auto">
-                        <create-button>
+                        <button-create>
                             <template slot="title">{{$ml.with('VueJS').get('txtCreateUser')}}</template>
-                        </create-button>
+                        </button-create>
                     </div>
                 </div>
             </div>
@@ -16,14 +16,14 @@
                     <h4 class="card-title">{{$ml.with('VueJS').get('txtUserList')}}</h4>
                 </template>
                 <div class="table-responsive">
-                    <user-table
+                    <table-user
                             class="table-hover table-striped"
                             :columns="columns"
                             :data="users"
                             v-on:get-item="getUser"
                             v-on:archive-user="archiveUser"
                             v-on:delete-item="deleteUser">
-                    </user-table>
+                    </table-user>
                 </div>
             </card>
 
@@ -47,7 +47,7 @@
     </div>
 </template>
 <script>
-    import UserTable from "../../components/TableUser";
+    import TableUser from "../../components/TableUser";
     import Card from "../../components/Cards/Card";
     import CreateItem from "./Create";
     import EditItem from "./Edit";
@@ -56,7 +56,7 @@
 
     export default {
         components: {
-            UserTable,
+            TableUser,
             Card,
             CreateItem,
             EditItem,

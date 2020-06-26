@@ -108,50 +108,50 @@
 								track-by="slug"
 								:preselect-first="true"
 								>
-								<template slot="option" slot-scope="props">
-									<div>
-										<span class="type-color" :style="optionStyle(props.option.value)"></span>
-										{{ props.option.slug }}
-									</div>
-								</template>
-							</multiselect>
+									<template slot="option" slot-scope="props">
+										<div>
+											<span class="type-color" :style="optionStyle(props.option.value)"></span>
+											{{ props.option.slug }}
+										</div>
+									</template>
+								</multiselect>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</card>
+			</card>
 
-		<card class="strpied-tabled-with-hover">
-			<template slot="header">
-				<div class="d-flex justify-content-between">
-					<h4 class="card-title">
-						{{$ml.with('VueJS').get('txtTimeRecord')}}             
-					</h4>
-					<div class="align-self-end">
-						<button @click="exportExcel" class="btn btn-primary">
-							<i class="fa fa-download"></i>
-							{{$ml.with('VueJS').get('txtExportExcel')}}
-						</button>
+			<card class="strpied-tabled-with-hover">
+				<template slot="header">
+					<div class="d-flex justify-content-between">
+						<h4 class="card-title">
+							{{$ml.with('VueJS').get('txtTimeRecord')}}             
+						</h4>
+						<div class="align-self-end">
+							<button @click="exportExcel" class="btn btn-primary">
+								<i class="fa fa-download"></i>
+								{{$ml.with('VueJS').get('txtExportExcel')}}
+							</button>
+						</div>
 					</div>
+				</template>
+				<div class="table-responsive">
+					<table-no-action class="table-hover table-striped" :columns="columns" :data="logTime"></table-no-action>
 				</div>
-			</template>
-			<div class="table-responsive">
-				<no-action-table class="table-hover table-striped" :columns="columns" :data="logTime"></no-action-table>
-			</div>
-			<pagination
-			:data="logTimeData"
-			:show-disabled="jShowDisabled"
-			:limit="jLimit"
-			:align="jAlign"
-			:size="jSize"
-			@pagination-change-page="getResults"
-			></pagination>
-		</card>
+				<pagination
+				:data="logTimeData"
+				:show-disabled="jShowDisabled"
+				:limit="jLimit"
+				:align="jAlign"
+				:size="jSize"
+				@pagination-change-page="getResults"
+				></pagination>
+			</card>
+		</div>
 	</div>
-</div>
 </template>
 <script>
-import NoActionTable from "../../components/TableNoAction";
+import TableNoAction from "../../components/TableNoAction";
 import Card from "../../components/Cards/Card";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
@@ -160,7 +160,7 @@ import moment from "moment";
 
 export default {
 	components: {
-		NoActionTable,
+		TableNoAction,
 		Card,
 		Datepicker,
 		Multiselect

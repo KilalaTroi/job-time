@@ -37,7 +37,7 @@
 </template>
 <script>
     export default {
-        name: 'user-table',
+        name: 'table-user',
         props: {
             columns: Array,
             data: Array

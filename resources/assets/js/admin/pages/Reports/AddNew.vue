@@ -1,9 +1,13 @@
 <template>
     <card>
-        <div class="form-group d-flex justify-content-between align-items-center">
-            <h3>Create New Report</h3>
-            <button @click="$emit('finish-new-report')" class="btn btn-primary">Back</button>
-        </div>
+        <template slot="header">
+            <div class="d-flex justify-content-between">
+                <h4 class="card-title">Create New Report</h4>
+                <div class="align-self-end">
+                    <button @click="$emit('finish-new-report')" class="btn btn-primary">Back</button>
+                </div>
+            </div>
+        </template>
         <div class="form-group">
             <label class="">Title</label>
             <input v-model="title" type="text" class="form-control">

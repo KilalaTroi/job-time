@@ -20,7 +20,7 @@
 </template>
 <script>
 export default {
-    name: 'no-action-table',
+    name: 'table-no-action',
     props: {
         columns: Array,
         data: Array

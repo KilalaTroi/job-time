@@ -37,7 +37,7 @@
 </template>
 <script>
 export default {
-    name: 'project-table',
+    name: 'table-project',
     props: {
         columns: Array,
         data: Array

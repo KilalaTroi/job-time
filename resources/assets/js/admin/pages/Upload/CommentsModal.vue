@@ -9,16 +9,16 @@
             </template>
             <div v-if="currentProcess">
 				<div class="table-responsive">
-					<no-action-table class="table-hover table-striped" :columns="columns" :data="dataProcess"></no-action-table>
+					<table-no-action class="table-hover table-striped" :columns="columns" :data="dataProcess"></table-no-action>
 				</div>
 				<h4>{{$ml.with('VueJS').get('txtProcessList')}}</h4>
 				<div v-if="listComments.length">
 					<div class="table-responsive">
-						<no-action-table
+						<table-no-action
 						class="table-hover table-striped"
 						:columns="columns2"
 						:data="listComments"
-						></no-action-table>
+						></table-no-action>
 					</div>
 				</div> 
 			</div>
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import NoActionTable from "../../components/TableNoAction";
+import TableNoAction from "../../components/TableNoAction";
 import Modal from "../../components/Modals/Modal";
 import moment from 'moment';
 
@@ -35,7 +35,7 @@ export default {
 	name: "comments-modal",
 	components: {
 		Modal,
-		NoActionTable
+		TableNoAction
 	},
 	props: ["currentProcess"],
 	data() {
