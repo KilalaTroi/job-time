@@ -359,19 +359,15 @@ class ReportsController extends Controller
         }
 
         $deptSelects = $request->get('deptSelects');
-        $deptArr = array();
+        $deptArr = false;
         if ( $deptSelects ) {
-            $deptArr = array_map(function($obj) {
-                return $obj['id'];
-            }, $deptSelects);
+            $deptArr = $deptSelects['id'] != 1 ?  $deptSelects['id'] : false;
         }
 
         $projectSelects = $request->get('projectSelects');
-        $projectArr = array();
+        $projectArr = false;
         if ( $projectSelects ) {
-            $projectArr = array_map(function($obj) {
-                return $obj['id'];
-            }, $projectSelects);
+            $projectArr = $projectSelects['id'];
         }
 
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
@@ -384,7 +380,7 @@ class ReportsController extends Controller
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->when($deptArr, function ($query, $deptArr) {
-            return $query->whereIn('p.dept_id', $deptArr);
+            return $query->where('p.dept_id', $deptArr);
         })
         ->when($issueFilter, function ($query, $issueFilter) {
             return $query->where('i.name', 'like', '%'.$issueFilter.'%');

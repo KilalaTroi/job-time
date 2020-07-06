@@ -53,12 +53,12 @@
 							<label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
 							<div>
 								<multiselect
-								:multiple="true"
+								:multiple="false"
 								v-model="deptSelects"
 								:options="departments"
-								:clear-on-select="false"
-								:preserve-search="true"
-								:placeholder="$ml.with('VueJS').get('txtPickSome')"
+								:clear-on-select="true"
+								:preserve-search="false"
+								:placeholder="$ml.with('VueJS').get('txtSelectOne')"
 								label="text"
 								track-by="text"
 								:preselect-first="true"
@@ -66,17 +66,17 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-4" v-show="deptSelects">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
 							<div>
 								<multiselect
-								:multiple="true"
+								:multiple="false"
 								v-model="projectSelects"
 								:options="projects"
-								:clear-on-select="false"
-								:preserve-search="true"
-								:placeholder="$ml.with('VueJS').get('txtPickSome')"
+								:clear-on-select="true"
+								:preserve-search="false"
+								:placeholder="$ml.with('VueJS').get('txtSelectOne')"
 								label="text"
 								track-by="text"
 								:preselect-first="true"
@@ -84,7 +84,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-4" v-show="projectSelects">
 						<div class="form-group">
 							<label class>
 								{{$ml.with('VueJS').get('txtIssue')}}
@@ -145,8 +145,8 @@ export default {
             report_type: 0,
             start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
 			end_date: new Date(),
-			deptSelects: [],
-			projectSelects: [],
+			deptSelects: null,
+			projectSelects: null,
 			issue: "",
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
@@ -251,4 +251,10 @@ export default {
 
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
+
+.multiselect__single {
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 </style>
