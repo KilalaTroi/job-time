@@ -84,21 +84,34 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-4" v-show="projectSelects">
+					<div class="col-sm-4" v-show="deptSelects">
 						<div class="form-group">
-							<label class>
-								{{$ml.with('VueJS').get('txtIssue')}}
-							</label>
-							<input v-model="issue" type="text" name="issue" class="form-control" />
+							<label class>{{$ml.with('VueJS').get('txtIssue')}}</label>
+							<div>
+								<multiselect
+								:multiple="false"
+								v-model="issueSelects"
+								:options="issues"
+								:clear-on-select="true"
+								:preserve-search="false"
+								:placeholder="$ml.with('VueJS').get('txtSelectOne')"
+								label="text"
+								track-by="text"
+								:preselect-first="true"
+								></multiselect>
+							</div>
 						</div>
 					</div>
 				</div>
 		    </card>
+
             <div class="form-group" v-show="!actionNewReport">
-                <button @click="addNewReport" class="btn btn-primary">Create New Report</button>
+                <button @click="addNewReport" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Report</button>
             </div>
-            <add-new v-show="actionNewReport" v-on:finish-new-report="finishNewReport"></add-new>
-			<card class="strpied-tabled-with-hover">
+
+            <add-new v-if="actionNewReport" v-on:finish-new-report="finishNewReport"></add-new>
+
+			<card class="strpied-tabled-with-hover" v-show="!actionNewReport">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
@@ -107,10 +120,10 @@
 					</div>
 				</template>
 				<div class="table-responsive">
-					<table-upload class="table-hover table-striped" :columns="columns" :data="projects"></table-upload>
+					<table-report class="table-hover table-striped" :columns="columns" :data="reports.data"></table-report>
 				</div>
 				<pagination
-				:data="dataProjects"
+				:data="reports"
 				:show-disabled="jShowDisabled"
 				:limit="jLimit"
 				:align="jAlign"
@@ -136,22 +149,30 @@ export default {
         AddNew,
         Card,
 		Datepicker,
-        Multiselect,
+        Multiselect, 
 		Select2,
 		TableReport
     },
     data() {
         return {
+			columns: [
+				{ id: "type", value: 'Report Type', width: "120", class: "" },
+				{ id: "date_time", value: 'Report Date', width: "", class: "" },
+				{ id: "issue", value: 'Issue', width: "120", class: "" },
+				{ id: "title", value: 'Title', width: "120", class: "" }
+			],
             report_type: 0,
             start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
 			end_date: new Date(),
 			deptSelects: null,
 			projectSelects: null,
-			issue: "",
+			issueSelects: null,
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
 			departments: [],
-            projects: [],
+			projects: [],
+			issues: [],
+			reports: {},
             dataLang: {
                 vi: vi,
                 ja: ja,
@@ -206,11 +227,13 @@ export default {
 				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueSelects: this.issue
 			})
 			.then(res => {
 				this.departments = res.data.departments;
 				this.projects = res.data.projects;
+				this.issues = res.data.issues;
+				this.reports = res.data.reports;
 			})
 			.catch(err => {
 				console.log(err);
@@ -224,7 +247,7 @@ export default {
 				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueSelects: this.issue
 			})
 			.then(res => {
 				this.projects = res.data.projects;
@@ -239,12 +262,40 @@ export default {
         },
         finishNewReport() {
             this.actionNewReport = false;
-        }
+		},
+		getResults(page = 1) {
+			let uri = "/data/reports?page=" + page;
+			axios
+			.post(uri, {
+				user_id: this.user_id,
+				deptSelects: this.deptSelects,
+				projectSelects: this.projectSelects,
+				issueSelects: this.issue
+			})
+			.then(res => {
+				this.reports = res.data.reports;
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not load data");
+			});
+		},
+		resetProject() {
+			this.projectSelects = null;
+		},
+		resetIssue() {
+			this.issueSelects = null;
+		}
     },
     watch: {
-        deptSelects: [{
-            handler: "fetchDataFilter"
-        }]
+        deptSelects: [
+			{ handler: "fetchDataFilter" },
+			{ handler: "resetProject" }
+		],
+		projectSelects: [
+			{ handler: "fetchDataFilter" },
+			{ handler: "resetIssue" }
+		]
     }
 }
 </script>

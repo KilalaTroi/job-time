@@ -87,7 +87,7 @@ import EditProject from './EditProject'
 import EditIssue from './EditIssue'
 import ImportIssue from './ImportIssue'
 import AddIssue from './AddIssue'
-import CreateButton from '../../components/Buttons/Create' 
+import ButtonCreate from '../../components/Buttons/Create' 
 import TableProject from '../../components/TableProject'
 import moment from 'moment'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
@@ -102,7 +102,7 @@ export default {
         EditProject,
         EditIssue,
         AddIssue,
-        CreateButton,
+        ButtonCreate,
         TableProject,
         ImportIssue
     },

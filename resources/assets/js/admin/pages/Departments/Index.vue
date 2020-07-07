@@ -48,7 +48,7 @@
     import Card from "../../components/Cards/Card";
     import CreateItem from "./Create";
     import EditItem from "./Edit";
-    import CreateButton from "../../components/Buttons/Create";
+    import ButtonCreate from "../../components/Buttons/Create";
 
     export default {
         components: {
@@ -56,7 +56,7 @@
             Card,
             CreateItem,
             EditItem,
-            CreateButton
+            ButtonCreate
         },
 
         data() {

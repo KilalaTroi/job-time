@@ -48,7 +48,7 @@
     import Card from "../../components/Cards/Card";
     import CreateItem from "./Create";
     import EditItem from "./Edit";
-    import CreateButton from "../../components/Buttons/Create";
+    import ButtonCreate from "../../components/Buttons/Create";
 
     const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
 
@@ -58,7 +58,7 @@
             Card,
             CreateItem,
             EditItem,
-            CreateButton
+            ButtonCreate
         },
         data() {
             return {

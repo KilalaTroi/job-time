@@ -4,8 +4,7 @@
             <slot name="columns">
                 <tr>
                     <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
-                    <th width="110" class="text-center">{{$ml.with('VueJS').get('txtProcess')}}</th>
-                    <th width="110" class="text-center">{{$ml.with('VueJS').get('txtFinish')}}</th>
+                    <th width="120" class="text-center">{{$ml.with('VueJS').get('txtAction')}}</th>
                 </tr>
             </slot>
         </thead>
@@ -17,10 +16,10 @@
                     </td>
                 </slot>
                 <td class="text-center">
-                    <i @click="$emit('get-process', item.id)" class="fa fa-plus-circle btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i>  
-                    <i @click="$emit('get-process', item.id)" class="ml-1 fa fa-eye btn-process" data-toggle="modal" data-target="#commentsModal" data-backdrop="static" data-keyboard="false"></i>  
+                    <i @click="$emit('edit-report', item.id)" class="fa fa-pencil btn-process" aria-hidden="true"></i>  
+                    <i @click="$emit('send-report', item.id)" class="ml-1 fa fa-paper-plane btn-process" aria-hidden="true"></i> 
+                    <i @click="$emit('view-report', item.id)" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>  
                 </td>
-                <td class="text-center"><i @click="$emit('change-status-process', item.id)" :class="itemClassActive(item)"></i></td>
             </tr>
         </tbody>
     </table>
@@ -46,17 +45,12 @@ export default {
 }
 </script>
 <style lang="scss">
-.btn-process, .btn-flag {
-    font-size: 24px;
+.btn-process {
+    font-size: 20px;
     width: 24px;
     color: #6c757d;
     cursor: pointer;
 
-    &.active {
-        color: #dc3545;
-    }
-}
-.btn-process {
     &:hover {
         color: #dc3545;
     }

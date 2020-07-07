@@ -348,8 +348,6 @@ class ReportsController extends Controller
     }
 
     function getData(Request $request) {
-        $issueFilter = $request->get('issueFilter');
-
         $user_id = $request->get('user_id');
         $userArr = array();
         if ( $user_id ) {
@@ -361,7 +359,7 @@ class ReportsController extends Controller
         $deptSelects = $request->get('deptSelects');
         $deptArr = false;
         if ( $deptSelects ) {
-            $deptArr = $deptSelects['id'] != 1 ?  $deptSelects['id'] : false;
+            $deptArr = $deptSelects['id'];
         }
 
         $projectSelects = $request->get('projectSelects');
@@ -370,25 +368,36 @@ class ReportsController extends Controller
             $projectArr = $projectSelects['id'];
         }
 
+        $issueSelects = $request->get('issueSelects');
+        $issueArr = false;
+        if ( $issueSelects ) {
+            $issueArr = $issueSelects['id'];
+        }
+
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
-        $projects = DB::table('projects as p')
+
+        $projects = $deptArr ? DB::table('projects as p')
         ->select(
             'p.id', 
-            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
-            DB::raw('max(i.id) as issue_id')
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text')
         )
-        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->when($deptArr, function ($query, $deptArr) {
-            return $query->where('p.dept_id', $deptArr);
+            if ( $deptArr > 1 )
+                return $query->where('p.dept_id', $deptArr);
+            return $query;
         })
-        ->when($issueFilter, function ($query, $issueFilter) {
-            return $query->where('i.name', 'like', '%'.$issueFilter.'%');
-        })
-        ->where('i.status', 'publish')
-        ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
-        ->get()->toArray();
+        ->get()->toArray() : array();
+
+        $issues = $projectSelects ? DB::table('issues as i')
+        ->select(
+            'id',
+            'name AS text'
+        )
+        ->where('project_id', $projectSelects)
+        ->orderBy('id', 'desc')
+        ->get()->toArray() : array();
 
         $users = DB::table('role_user as ru')
             ->select(
@@ -401,10 +410,18 @@ class ReportsController extends Controller
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
             ->get()->toArray();
 
+        // DB::enableQueryLog();
+        $dataReports = DB::table('reports as r')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(20);
+        // dd(DB::getQueryLog());
+
         return response()->json([
+            'reports' => $dataReports,
             'users' => $users,
             'departments' => $departments,
-            'projects' => $projects
+            'projects' => $projects,
+            'issues' => $issues
         ]);
     }
 }
