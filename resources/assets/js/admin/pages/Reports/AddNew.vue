@@ -8,14 +8,28 @@
                 </div>
             </div>
         </template>
-        <div class="form-group">
-            <label class="">Title</label>
-            <input v-model="title" type="text" class="form-control">
+        <div class="row">
+            <div class="col-sm-9">
+                <div class="form-group">
+                    <label class=""><strong>Title</strong></label>
+                    <input v-model="title" type="text" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class=""><strong>Report Type</strong></label>
+                    <select-2 v-model="reportType" class="select2">
+                        <option value="Trouble">Trouble</option>
+                        <option value="Meeting">Meeting</option>
+                    </select-2>
+                </div>
+            </div>
         </div>
         <div class="row form-group">
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label>Date</label>
+                    <label><strong>Date</strong></label>
                     <datepicker
                     name="date"
                     input-class="form-control"
@@ -28,9 +42,14 @@
                 </div>
             </div>
 
-            <div class="col-sm-9">
+            <div class="col-sm-3" v-if="isMeeting()"> 
+                <label><strong>Time</strong></label>
+                <vue-timepicker input-class="form-control" v-model="time" hide-disabled-items :minute-range="MinuteRange" :hour-range="HourRange"  input-width="100%" close-on-complete required></vue-timepicker>
+            </div>
+
+            <div :class="[{'col-sm-6' : isMeeting()}, {'col-sm-9' : !isMeeting()}]">
                 <div class="form-group">
-                    <label class>{{$ml.with('VueJS').get('txtUsers')}}</label>
+                    <label class><strong>Reporter</strong></label>
                     <div>
                         <multiselect
                         :multiple="true"
@@ -49,10 +68,10 @@
 
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtDepts')}}</strong></label>
                     <div>
                         <multiselect
-                        :multiple="true"
+                        :multiple="false"
                         v-model="deptSelects"
                         :options="departments"
                         :clear-on-select="false"
@@ -67,10 +86,10 @@
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtProjects')}}</strong></label>
                     <div>
                         <multiselect
-                        :multiple="true"
+                        :multiple="false"
                         v-model="projectSelects"
                         :options="projects"
                         :clear-on-select="false"
@@ -85,16 +104,25 @@
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label class>
-                        {{$ml.with('VueJS').get('txtIssue')}}
-                    </label>
-                    <input v-model="issue" type="text" name="issue" class="form-control" />
+                    <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
+                    <div>
+                        <multiselect
+                        :multiple="false"
+                        v-model="issueSelects"
+                        :options="issues"
+                        :clear-on-select="true"
+                        :preserve-search="false"
+                        :placeholder="$ml.with('VueJS').get('txtSelectOne')"
+                        label="text"
+                        track-by="text"
+                        :preselect-first="true"
+                        ></multiselect>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label class="">{{$ml.with('VueJS').get('txtLang')}}
-                    </label>
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtLang')}}</strong></label>
                     <select-2 v-model="language" class="select2">
                         <option value="vi">Vietnamese</option>
                         <option value="ja">Japanese</option>
@@ -119,6 +147,7 @@
 </template>
 <script>
 import Datepicker from "vuejs-datepicker";
+import VueTimepicker from 'vue2-timepicker';
 import Multiselect from "vue-multiselect";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
@@ -239,26 +268,31 @@ export default {
         Datepicker,
         Multiselect,
         Card,
-        ErrorItem
+        ErrorItem,
+        VueTimepicker
     },
     data() {
         return {
             title: '',
             date: '',
+            time: '',
+            HourRange: [[8, 17]],
+            MinuteRange: [0, 10, 20, 30, 40, 50],
             dataLang: {
                 vi: vi,
-                ja: ja,
-                en: en
+                ja: ja
             }, 
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             user_id: [],
             userOptions: [],
             deptSelects: [],
 			projectSelects: [],
-			issue: "",
+            issueSelects: null,
+            reportType: 'Trouble',
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 			departments: [],
             projects: [],
+            issues: [],
             
             isEditing: false,
             editor: DecoupledEditor,
@@ -299,12 +333,13 @@ export default {
 				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueSelects: this.issueSelects
 			})
 			.then(res => {
                 this.userOptions = res.data.users;
 				this.departments = res.data.departments;
 				this.projects = res.data.projects;
+				this.issues = res.data.issues;
 			})
 			.catch(err => {
 				console.log(err);
@@ -318,10 +353,12 @@ export default {
 				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueSelects: this.issueSelects
 			})
 			.then(res => {
 				this.projects = res.data.projects;
+				this.issues = res.data.issues;
+				this.reports = res.data.reports;
 			})
 			.catch(err => {
 				console.log(err);
@@ -378,8 +415,8 @@ export default {
                 this.errors = [['Please choosing the department'], ...this.errors];
             } 
 
-            if ( !this.issue ) {
-                this.errors = [['Please typing the issue'], ...this.errors];
+            if ( !this.issueSelects ) {
+                this.errors = [['Please choosing the issue'], ...this.errors];
             } 
 
             if ( !this.projectSelects.length ) {
@@ -395,10 +432,10 @@ export default {
                 let newItem = {
                     title: this.title,
                     date_time: this.date,
-                    issue: this.issue,
+                    issue: this.issueSelects,
                     language: this.language,
                     translate_id: 0,
-                    type: this.userID,
+                    type: this.reportType,
                     content: this.editorData,
                     seen: this.userID,
                     author: this.userID,
@@ -411,7 +448,8 @@ export default {
                         this.user_id = [];
                         this.deptSelects = [];
                         this.projectSelects = [];
-                        this.issue = "";
+                        this.issueSelects = "";
+                        this.reportType = 'Trouble';
                         this.editorData = '';
                         this.errors = [];
                         this.$emit('finish-new-report');
@@ -419,23 +457,50 @@ export default {
                     .catch(err => {
                         console.log(err);
                         if (err.response.status == 422) {
-                            this.validationErrors = err.response.data;
+                            this.errors = err.response.data;
                         }
                     });
             }
+        },
+		resetProject() {
+			this.projectSelects = null;
+		},
+		resetIssue() {
+			this.issueSelects = null;
+        },
+        isMeeting() {
+            return this.reportType == 'Meeting';
         }
     },
     watch: {
         editorData: [{
             handler: 'contentChange'
-        }],
-        deptSelects: [{
-            handler: "fetchDataFilter"
-        }]
+        }], 
+        deptSelects: [
+			{ handler: "fetchDataFilter" },
+			{ handler: "resetProject" }
+		],
+		projectSelects: [
+			{ handler: "fetchDataFilter" },
+			{ handler: "resetIssue" }
+		]
     }
 }
 </script>
 
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
+@import '~vue2-timepicker/dist/VueTimepicker.css';
+
+.multiselect__single {
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vue__time-picker input.display-time {
+    height: 40px;
+    background-color: transparent;
+    cursor: pointer;
+}
 </style>

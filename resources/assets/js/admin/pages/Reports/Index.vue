@@ -14,9 +14,8 @@
 						<div class="form-group">
 							<label class="">Report Type</label>
                             <select-2 v-model="report_type" class="select2">
-                                <option value="0">Select type</option>
-                                <option value="trouble">Trouble</option>
-                                <option value="meeting">Meeting</option>
+                                <option value="Trouble">Trouble</option>
+                                <option value="Meeting">Meeting</option>
                             </select-2>
 						</div>
 					</div>
@@ -66,7 +65,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-4" v-show="deptSelects">
+					<div class="col-sm-4">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
 							<div>
@@ -84,7 +83,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-4" v-show="deptSelects">
+					<div class="col-sm-4">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtIssue')}}</label>
 							<div>
@@ -161,7 +160,7 @@ export default {
 				{ id: "issue", value: 'Issue', width: "120", class: "" },
 				{ id: "title", value: 'Title', width: "120", class: "" }
 			],
-            report_type: 0,
+            report_type: 'Trouble',
             start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
 			end_date: new Date(),
 			deptSelects: null,
@@ -227,7 +226,7 @@ export default {
 				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueSelects: this.issue
+				issueSelects: this.issueSelects
 			})
 			.then(res => {
 				this.departments = res.data.departments;
@@ -247,10 +246,12 @@ export default {
 				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueSelects: this.issue
+				issueSelects: this.issueSelects
 			})
 			.then(res => {
 				this.projects = res.data.projects;
+				this.issues = res.data.issues;
+				this.reports = res.data.reports;
 			})
 			.catch(err => {
 				console.log(err);
@@ -270,9 +271,11 @@ export default {
 				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueSelects: this.issue
+				issueSelects: this.issueSelects
 			})
 			.then(res => {
+				this.projects = res.data.projects;
+				this.issues = res.data.issues;
 				this.reports = res.data.reports;
 			})
 			.catch(err => {

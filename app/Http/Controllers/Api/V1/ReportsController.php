@@ -393,7 +393,7 @@ class ReportsController extends Controller
         $issues = $projectSelects ? DB::table('issues as i')
         ->select(
             'id',
-            'name AS text'
+            DB::raw('IFNULL(name, "(--)") AS text')
         )
         ->where('project_id', $projectSelects)
         ->orderBy('id', 'desc')
