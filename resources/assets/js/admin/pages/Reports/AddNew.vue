@@ -66,7 +66,33 @@
                 </div>
             </div>
 
-            <div class="col-sm-3">
+            <div class="col-sm-12" v-if="isMeeting()">
+                <div class="form-group">
+                    <label class><strong>Attend Person (KILALA)</strong></label>
+                    <div>
+                        <multiselect
+                        :multiple="true"
+                        v-model="attendPerson"
+                        :options="userOptions"
+                        :clear-on-select="false"
+                        :preserve-search="true"
+                        :placeholder="$ml.with('VueJS').get('txtPickSome')"
+                        label="text"
+                        track-by="text"
+                        :preselect-first="true"
+                        ></multiselect>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-9" v-if="isMeeting()">
+                <div class="form-group">
+                    <label class><strong>Attend Person (Other)</strong></label>
+                    <input v-model="attendPersonOther" type="text" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-sm-3" v-if="!isMeeting()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtDepts')}}</strong></label>
                     <div>
@@ -84,7 +110,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-3" v-if="!isMeeting()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtProjects')}}</strong></label>
                     <div>
@@ -102,7 +128,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-3" v-if="!isMeeting()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
                     <div>
@@ -284,6 +310,8 @@ export default {
             }, 
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             user_id: [],
+            attendPerson: [],
+            attendPersonOther: '',
             userOptions: [],
             deptSelects: [],
 			projectSelects: [],
