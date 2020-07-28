@@ -42,7 +42,7 @@
                 </div>
             </div>
 
-            <div class="col-sm-3" v-if="isMeeting()"> 
+            <div class="col-sm-3" v-if="isMeeting()">
                 <label><strong>Time</strong></label>
                 <vue-timepicker input-class="form-control" v-model="time" hide-disabled-items :minute-range="MinuteRange" :hour-range="HourRange"  input-width="100%" close-on-complete required></vue-timepicker>
             </div>
@@ -60,7 +60,7 @@
                         :placeholder="$ml.with('VueJS').get('txtPickSome')"
                         label="text"
                         track-by="text"
-                        :preselect-first="true"
+                        :preselect-first="false"
                         ></multiselect>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
                         :placeholder="$ml.with('VueJS').get('txtPickSome')"
                         label="text"
                         track-by="text"
-                        :preselect-first="true"
+                        :preselect-first="false"
                         ></multiselect>
                     </div>
                 </div>
@@ -105,7 +105,7 @@
                         :placeholder="$ml.with('VueJS').get('txtSelectOne')"
                         label="text"
                         track-by="text"
-                        :preselect-first="true"
+                        :preselect-first="false"
                         ></multiselect>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                         :placeholder="$ml.with('VueJS').get('txtSelectOne')"
                         label="text"
                         track-by="text"
-                        :preselect-first="true"
+                        :preselect-first="false"
                         ></multiselect>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
                         :placeholder="$ml.with('VueJS').get('txtSelectOne')"
                         label="text"
                         track-by="text"
-                        :preselect-first="true"
+                        :preselect-first="false"
                         ></multiselect>
                     </div>
                 </div>
@@ -307,21 +307,21 @@ export default {
             dataLang: {
                 vi: vi,
                 ja: ja
-            }, 
+            },
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             user_id: [],
             attendPerson: [],
             attendPersonOther: '',
             userOptions: [],
-            deptSelects: [],
-			projectSelects: [],
+            deptSelects: null,
+			projectSelects: null,
             issueSelects: null,
             reportType: 'Trouble',
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 			departments: [],
             projects: [],
             issues: [],
-            
+
             isEditing: false,
             editor: DecoupledEditor,
             editorData: '',
@@ -429,54 +429,71 @@ export default {
 
             if ( !this.title ) {
                 this.errors = [['Please typing the title'], ...this.errors];
-            } 
+            }
 
             if ( !this.date ) {
                 this.errors = [['Please choosing the date'], ...this.errors];
-            } 
+            }
 
             if ( !this.user_id.length ) {
-                this.errors = [['Please choosing the user'], ...this.errors];
-            } 
+                this.errors = [['Please choosing the user report'], ...this.errors];
+            }
 
-            if ( !this.deptSelects.length ) {
-                this.errors = [['Please choosing the department'], ...this.errors];
-            } 
+            if ( this.isMeeting() ) {
+                if ( !this.attendPerson.length ) {
+                    this.errors = [['Please choosing the user attend'], ...this.errors];
+                }
+            } else {
+                if ( !this.deptSelects ) {
+                    this.errors = [['Please choosing the department'], ...this.errors];
+                }
 
-            if ( !this.issueSelects ) {
-                this.errors = [['Please choosing the issue'], ...this.errors];
-            } 
+                if ( !this.projectSelects ) {
+                    this.errors = [['Please choosing the project'], ...this.errors];
+                }
 
-            if ( !this.projectSelects.length ) {
-                this.errors = [['Please choosing the project'], ...this.errors];
-            } 
+                if ( !this.issueSelects ) {
+                    this.errors = [['Please choosing the issue'], ...this.errors];
+                }
+            }
 
             if ( !this.editorData ) {
                 this.errors = [['Please typing the content'], ...this.errors];
-            } 
+            }
 
             if ( !this.errors.length ) {
                 let uri = '/data/reports-action';
                 let newItem = {
                     title: this.title,
-                    date_time: this.date,
-                    issue: this.issueSelects,
                     language: this.language,
                     translate_id: 0,
                     type: this.reportType,
                     content: this.editorData,
-                    seen: this.userID,
-                    author: this.userID,
+                    seen: this.userID.toString(),
+                    author: this.user_id.map((item, index) => { return item.id }).toString(),
                 };
+
+                if ( this.isMeeting() ) {
+                    newItem.attend_person = this.attendPerson.map((item, index) => { return item.id }).toString();
+                    newItem.attend_other_person = this.attendPersonOther;
+                    newItem.date_time = moment(this.date).format("YYYY-MM-DD") + " " + this.time;
+                } else {
+                    newItem.date_time = moment(this.date).format("YYYY-MM-DD");
+                    newItem.issue = this.issueSelects.id;
+                }
+
                 axios.post(uri, newItem)
                     .then(res => {
                         console.log(res.data.message);
                         this.title = '';
                         this.date = '';
+                        this.time = '';
+                        this.attendPerson = [];
+                        this.attendPersonOther = '';
                         this.user_id = [];
-                        this.deptSelects = [];
-                        this.projectSelects = [];
-                        this.issueSelects = "";
+                        this.deptSelects = null;
+                        this.projectSelects = null;
+                        this.issueSelects = null;
                         this.reportType = 'Trouble';
                         this.editorData = '';
                         this.errors = [];
@@ -498,12 +515,22 @@ export default {
         },
         isMeeting() {
             return this.reportType == 'Meeting';
+        },
+        typeReportChange() {
+            this.errors = [];
+
+            if ( this.isMeeting() ) {
+                this.deptSelects = [];
+            } else {
+                this.attendPerson = [];
+                this.attendPersonOther = '';
+            }
         }
     },
     watch: {
         editorData: [{
             handler: 'contentChange'
-        }], 
+        }],
         deptSelects: [
 			{ handler: "fetchDataFilter" },
 			{ handler: "resetProject" }
@@ -511,7 +538,10 @@ export default {
 		projectSelects: [
 			{ handler: "fetchDataFilter" },
 			{ handler: "resetIssue" }
-		]
+		],
+        reportType: [{
+            handler: 'typeReportChange'
+        }]
     }
 }
 </script>
