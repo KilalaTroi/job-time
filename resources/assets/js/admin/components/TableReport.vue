@@ -3,6 +3,7 @@
         <thead>
             <slot name="columns">
                 <tr>
+                    <th width="50"><i class="nc-icon nc-bell-55"></i></th>
                     <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
                     <th width="120" class="text-center">{{$ml.with('VueJS').get('txtAction')}}</th>
                 </tr>
@@ -10,6 +11,7 @@
         </thead>
         <tbody>
             <tr v-for="(item, index) in data" :key="index">
+                <td><i class="nc-icon nc-bell-55" v-if="checkSeen(item.seen)"></i></td>
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
                         <span v-html="itemValue(item, column)"></span>
@@ -40,6 +42,11 @@ export default {
         },
         itemClassActive(item) {
             return item.status ? 'fa fa-flag btn-flag active' : 'fa fa-flag btn-flag'
+        },
+        checkSeen(data) {
+            let arrSeen = data.split(',');
+            let userID = document.querySelector("meta[name='user-id']").getAttribute('content');
+            return !arrSeen.includes(userID)
         }
     }
 }
@@ -52,6 +59,19 @@ export default {
     cursor: pointer;
 
     &:hover {
+        color: #dc3545;
+    }
+}
+
+.nc-bell-55 {
+    font-size: 20px;
+    font-weight: 700;
+
+    th & {
+        color: #000;
+    }
+
+    td & {
         color: #dc3545;
     }
 }

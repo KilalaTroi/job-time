@@ -478,7 +478,7 @@ export default {
                     newItem.attend_other_person = this.attendPersonOther;
                     newItem.date_time = moment(this.date).format("YYYY-MM-DD") + " " + this.time;
                 } else {
-                    newItem.date_time = moment(this.date).format("YYYY-MM-DD");
+                    newItem.date_time = moment(this.date).format("YYYY-MM-DD HH:mm");
                     newItem.issue = this.issueSelects.id;
                 }
 
@@ -497,7 +497,7 @@ export default {
                         this.reportType = 'Trouble';
                         this.editorData = '';
                         this.errors = [];
-                        this.$emit('finish-new-report');
+                        this.$emit('finish-new-report', true);
                     })
                     .catch(err => {
                         console.log(err);

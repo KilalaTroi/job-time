@@ -157,7 +157,9 @@ export default {
 			columns: [
 				{ id: "type", value: 'Report Type', width: "120", class: "" },
 				{ id: "date_time", value: 'Report Date', width: "", class: "" },
-				{ id: "issue", value: 'Issue', width: "120", class: "" },
+				{ id: "dept_name", value: 'Department', width: "", class: "" },
+				{ id: "project_name", value: 'Project', width: "", class: "" },
+				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
 				{ id: "title", value: 'Title', width: "120", class: "" }
 			],
             report_type: 'Trouble',
@@ -261,8 +263,10 @@ export default {
         addNewReport() {
             this.actionNewReport = true;
         },
-        finishNewReport() {
-            this.actionNewReport = false;
+        finishNewReport(newData = false) {
+			this.actionNewReport = false;
+			
+			if ( newData ) this.fetchDataFilter();
 		},
 		getResults(page = 1) {
 			let uri = "/data/reports?page=" + page;

@@ -599,7 +599,7 @@ class StatisticsController extends Controller
 
             if ( isset($disableUsersInMonth[$key]) ) {
                 $usersOld -= $disableUsersInMonth[$key];
-                $ckHoursDisableUser = $hoursDisableUser[$key];
+                $ckHoursDisableUser = isset($hoursDisableUser[$key]) ? $hoursDisableUser[$key] : 0;
             } 
 
             $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + round($ckHoursDisableUser);

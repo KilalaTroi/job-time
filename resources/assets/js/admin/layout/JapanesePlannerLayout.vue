@@ -21,6 +21,10 @@
                 <i class="nc-icon nc-chart-bar-32"></i>
                 <p v-text="$ml.with('VueJS').get('sbTotaling')" />
             </sidebar-link>
+            <sidebar-link to="/reports">
+                <i class="nc-icon nc-single-copy-04"></i>
+                <p v-text="$ml.with('VueJS').get('sbReports')" />
+            </sidebar-link>
             <!-- <sidebar-link to="/upload">
                 <i class="nc-icon nc-cloud-upload-94"></i>
                 <p v-text="$ml.with('VueJS').get('txtUpload')" />

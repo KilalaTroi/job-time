@@ -412,7 +412,20 @@ class ReportsController extends Controller
 
         // DB::enableQueryLog();
         $dataReports = DB::table('reports as r')
-            ->orderBy('updated_at', 'desc')
+            ->select(
+                'r.id as id',
+                DB::raw('IFNULL(i.name, "--") AS issue_name'),
+                'title',
+                'date_time',
+                'type',
+                'p.name AS project_name',
+                'd.name AS dept_name',
+                'seen'
+            )
+            ->leftJoin('issues as i', 'i.id', '=', 'r.issue')
+            ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+            ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->orderBy('r.updated_at', 'desc')
             ->paginate(20);
         // dd(DB::getQueryLog());
 
