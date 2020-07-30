@@ -15,6 +15,9 @@ import './admin/ml';
 // component
 Vue.component('pagination', require('laravel-vue-pagination'));
 
+import CKEditor from '@ckeditor/ckeditor5-vue';
+window.Vue.use( CKEditor );
+
 // LightBootstrap plugin
 import LightBootstrap from './admin/light-bootstrap-main'
 

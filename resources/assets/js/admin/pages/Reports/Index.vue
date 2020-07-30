@@ -1,7 +1,7 @@
 <template>
     <div class="content">
         <div class="container">
-            <card v-show="!actionNewReport">
+            <card v-show="!actionNewReport && !actionPreview">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
@@ -104,13 +104,15 @@
 				</div>
 		    </card>
 
-            <div class="form-group" v-show="!actionNewReport">
+            <div class="form-group" v-show="!actionNewReport && !actionPreview">
                 <button @click="addNewReport" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Report</button>
             </div>
 
-            <add-new v-if="actionNewReport" v-on:finish-new-report="finishNewReport"></add-new>
+            <add-new v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
 
-			<card class="strpied-tabled-with-hover" v-show="!actionNewReport">
+			<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList"></preview>
+
+			<card class="strpied-tabled-with-hover" v-show="!actionNewReport && !actionPreview">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
@@ -119,7 +121,7 @@
 					</div>
 				</template>
 				<div class="table-responsive">
-					<table-report class="table-hover table-striped" :columns="columns" :data="reports.data"></table-report>
+					<table-report class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport"></table-report>
 				</div>
 				<pagination
 				:data="reports"
@@ -135,6 +137,7 @@
 </template>
 <script>
 import AddNew from './AddNew';
+import Preview from './Preview';
 import Card from "../../components/Cards/Card";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
@@ -145,7 +148,8 @@ import TableReport from "../../components/TableReport";
 
 export default {
     components: {
-        AddNew,
+		AddNew,
+		Preview,
         Card,
 		Datepicker,
         Multiselect, 
@@ -162,6 +166,8 @@ export default {
 				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
 				{ id: "title", value: 'Title', width: "120", class: "" }
 			],
+			currentReport: {},
+			userOptions: [],
             report_type: 'Trouble',
             start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
 			end_date: new Date(),
@@ -181,6 +187,7 @@ export default {
             },
 
 			actionNewReport: false,
+			actionPreview: false,
 			jLimit: 2,
 			jShowDisabled: true,
 			jAlign: "right",
@@ -192,6 +199,14 @@ export default {
 		_this.fetchData();
     },
 	methods: {
+		getObjectValue(data, id) {
+            let obj = data.filter((elem) => {
+                if (elem.id === id) return elem;
+            });
+
+            if (obj.length > 0)
+                return obj[0];
+        },
         customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
 		},
@@ -235,6 +250,7 @@ export default {
 				this.projects = res.data.projects;
 				this.issues = res.data.issues;
 				this.reports = res.data.reports;
+				this.userOptions = res.data.users;
 			})
 			.catch(err => {
 				console.log(err);
@@ -262,9 +278,14 @@ export default {
         },
         addNewReport() {
             this.actionNewReport = true;
+		},
+		viewReport(id) {
+			this.actionPreview = true;
+			this.currentReport = this.getObjectValue(this.reports.data, id);
         },
-        finishNewReport(newData = false) {
+        backToList(newData = false) {
 			this.actionNewReport = false;
+			this.actionPreview = false;
 			
 			if ( newData ) this.fetchDataFilter();
 		},

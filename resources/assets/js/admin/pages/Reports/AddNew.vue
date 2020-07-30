@@ -4,7 +4,7 @@
             <div class="d-flex justify-content-between">
                 <h4 class="card-title">Create New Report</h4>
                 <div class="align-self-end">
-                    <button @click="$emit('finish-new-report')" class="btn btn-primary">Back</button>
+                    <button @click="$emit('back-to-list')" class="btn btn-primary">Back</button>
                 </div>
             </div>
         </template>
@@ -497,7 +497,7 @@ export default {
                         this.reportType = 'Trouble';
                         this.editorData = '';
                         this.errors = [];
-                        this.$emit('finish-new-report', true);
+                        this.$emit('back-to-list', true);
                     })
                     .catch(err => {
                         console.log(err);

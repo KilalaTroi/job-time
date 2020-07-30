@@ -347,6 +347,26 @@ class ReportsController extends Controller
         $array = array_merge ($first_array, $insert_array, $array);
     }
 
+    function getNotify() {
+        $user_id = $_GET['user_id'];
+        $count_notify = 0;
+
+        $notify = DB::table('reports')
+            ->select( 'seen' )
+            ->get()->toArray();
+        
+        $notifyArr = array();
+
+        array_map(function($obj) use (&$count_notify, $user_id) {
+            $seenArr = explode(',', $obj->seen);
+            if ( ! in_array($user_id, $seenArr) ) $count_notify++;
+        }, $notify);
+
+        return response()->json([
+            'notify' =>  $count_notify,
+        ]);
+    }
+
     function getData(Request $request) {
         $user_id = $request->get('user_id');
         $userArr = array();
@@ -418,8 +438,13 @@ class ReportsController extends Controller
                 'title',
                 'date_time',
                 'type',
-                'p.name AS project_name',
-                'd.name AS dept_name',
+                'p.name as project_name',
+                'd.name as dept_name',
+                'author as reporter',
+                'attend_person',
+                'attend_other_person',
+                'content',
+                'r.language as language',
                 'seen'
             )
             ->leftJoin('issues as i', 'i.id', '=', 'r.issue')
