@@ -63,6 +63,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::get('notify', 'ReportsController@getNotify');
     Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');
     Route::post('reports', 'ReportsController@getData');
+    Route::post('update-seen', 'ReportsController@updateSeen');
     Route::resource('reports-action', 'ReportsController', ['except' => ['create', 'edit']]);
     Route::post('import-projects', 'ProjectsController@importProjects');
 

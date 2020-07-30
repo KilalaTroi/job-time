@@ -39,7 +39,7 @@
         </side-bar>
         <div class="main-panel">
             <top-navbar></top-navbar>
-            <dashboard-content @click="toggleSidebar">
+            <dashboard-content @click="toggleSidebar" v-on:update-seen="updateSeen">
             </dashboard-content>
             <content-footer></content-footer>
         </div>
@@ -98,6 +98,9 @@ export default {
 				console.log(err);
 				alert("Could not load data");
 			});
+        },
+        updateSeen() {
+            this.getNotify()
         }
     }
 }

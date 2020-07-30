@@ -18,9 +18,9 @@
                     </td>
                 </slot>
                 <td class="text-center">
-                    <i @click="$emit('edit-report', item.id)" class="fa fa-pencil btn-process" aria-hidden="true"></i>  
-                    <i @click="$emit('send-report', item.id)" class="ml-1 fa fa-paper-plane btn-process" aria-hidden="true"></i> 
-                    <i @click="$emit('view-report', item.id)" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>  
+                    <i @click="$emit('edit-report', item.id, checkSeen(item.seen))" class="fa fa-pencil btn-process" aria-hidden="true"></i>
+                    <i @click="$emit('send-report', item.id)" class="ml-1 fa fa-paper-plane btn-process" aria-hidden="true"></i>
+                    <i @click="$emit('view-report', item.id, checkSeen(item.seen))" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>
                 </td>
             </tr>
         </tbody>
@@ -31,7 +31,8 @@ export default {
     name: 'table-report',
     props: {
         columns: Array,
-        data: Array
+        data: Array,
+        userID: String,
     },
     methods: {
         hasValue(item, column) {
@@ -45,8 +46,7 @@ export default {
         },
         checkSeen(data) {
             let arrSeen = data.split(',');
-            let userID = document.querySelector("meta[name='user-id']").getAttribute('content');
-            return !arrSeen.includes(userID)
+            return !arrSeen.includes(this.userID)
         }
     }
 }

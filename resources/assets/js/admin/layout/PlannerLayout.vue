@@ -13,7 +13,7 @@
                 <i class="nc-icon nc-watch-time"></i>
                 <p v-text="$ml.with('VueJS').get('sbJobs')" />
             </sidebar-link>
-            <sidebar-link to="/off-days"> 
+            <sidebar-link to="/off-days">
                 <i class="nc-icon nc-spaceship"></i>
                 <p v-text="$ml.with('VueJS').get('sbOffDays')" />
             </sidebar-link>
@@ -47,7 +47,7 @@
         </side-bar>
         <div class="main-panel">
             <top-navbar></top-navbar>
-            <dashboard-content @click="toggleSidebar">
+            <dashboard-content @click="toggleSidebar" v-on:update-seen="updateSeen">
             </dashboard-content>
             <content-footer></content-footer>
         </div>
@@ -106,6 +106,9 @@ export default {
 				console.log(err);
 				alert("Could not load data");
 			});
+        },
+        updateSeen() {
+            this.getNotify()
         }
     }
 }

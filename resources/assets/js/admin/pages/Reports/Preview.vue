@@ -108,6 +108,10 @@ export default {
             editorDisabled: true
         }
     },
+    mounted() {
+        let _this = this;
+        if ( this.currentReport.isSeen ) _this.updateSeen();
+    },
     methods: {
         getObjectValue(data, id) {
             let obj = data.filter((elem) => {
@@ -122,11 +126,14 @@ export default {
         },
         getReporter(data) {
             let result = [];
-            let arrdata = data.split(',');
-            result = arrdata.map((item, index) => {
+            let arrData = data.split(',');
+            result = arrData.map((item, index) => {
                 return this.getObjectValue(this.userOptions, item).text;
             });
             return result.join(', ');
+        },
+        updateSeen() {
+            this.$emit('update-seen');
         }
     }
 }

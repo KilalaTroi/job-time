@@ -34,7 +34,7 @@ class ReportsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function exportReportTimeUser(Request $request) {
-        $filenameExcel = array(); 
+        $filenameExcel = array();
         $userConcatName = '';
         // POST data
         $start_time = $request->get('start_date');
@@ -90,7 +90,7 @@ class ReportsController extends Controller
             $titleExcel = $userConcatName;
         }
         $numberRows = count($dataTimeUser['data']) + 5;
-        
+
         $results = Excel::create('Report_'. implode('--', $filenameExcel) . "--" . $start_time . "--" . $end_time, function($excel) use ($dataTimeUser, $start_time, $end_time, $titleExcel, $numberRows, $userArr) {
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
@@ -150,7 +150,7 @@ class ReportsController extends Controller
                     $sheet->setCellValue('G5', "ISSUE");
                     $sheet->setCellValue('H5', "JOB TYPE");
                 }
-                
+
                 for ($i=5; $i<=$numberRows; $i++) {
                     $sheet->cell('A'. $i.':'.$columnName.$i, function($cells) {
                         $cells->setBorder('thin','thin','thin','thin');
@@ -217,7 +217,7 @@ class ReportsController extends Controller
                     //set title table
                     $sheet->setCellValue('A5', "NAME");
                     $sheet->setCellValue('B5', "TOTAL");
-                    
+
                     for ($i=5; $i<=$numberRows; $i++) {
                         $sheet->cell('A'. $i.':'.$columnName.$i, function($cells) {
                             $cells->setBorder('thin','thin','thin','thin');
@@ -238,7 +238,7 @@ class ReportsController extends Controller
                         $cells->setValignment('middle');
                     });
                     $sheet->setBorder($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), 'thin');
-                }); 
+                });
             }
         })->store('xlsx');
 
@@ -281,7 +281,7 @@ class ReportsController extends Controller
 
             $dataTotal = $data->select( "u.name" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('u.id')->get();
         }
-        
+
         $dataDetail = collect($dataDetail)->map(function($x){ return (array) $x; })->toArray();
         $totalTime = 0;
 
@@ -289,7 +289,7 @@ class ReportsController extends Controller
             $dataTotal = $dataTotal->sortByDesc(function ($item, $key) {
                 return $item->total*1;
             });
-            
+
             $dataTotal = collect($dataTotal)->map(function($x){ return (array) $x; })->toArray();
 
             foreach ($dataTotal as $key => $item) {
@@ -354,7 +354,7 @@ class ReportsController extends Controller
         $notify = DB::table('reports')
             ->select( 'seen' )
             ->get()->toArray();
-        
+
         $notifyArr = array();
 
         array_map(function($obj) use (&$count_notify, $user_id) {
@@ -367,15 +367,31 @@ class ReportsController extends Controller
         ]);
     }
 
-    function getData(Request $request) {
-        $user_id = $request->get('user_id');
-        $userArr = array();
-        if ( $user_id ) {
-            $userArr = array_map(function($obj) {
-                return $obj['id'];
-            }, $user_id);
+    function updateSeen(Request $request) {
+        $userID = $request->get('userID');
+        $reportID = $request->get('reportID');
+        $seenData = '';
+
+        $report = Report::findOrFail($reportID);
+        $seenArr = explode(',', $report->seen);
+        if ( ! in_array($userID, $seenArr) ) $seenData = $report->seen . ',' . $userID;
+
+        if ( $seenData ) {
+            $report->update([
+                'seen' => $seenData
+            ]);
         }
 
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    function getData(Request $request) {
+        $indexPage = $request->get('indexPage');
+        $reportType = $request->get('reportType');
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
         $deptSelects = $request->get('deptSelects');
         $deptArr = false;
         if ( $deptSelects ) {
@@ -394,11 +410,11 @@ class ReportsController extends Controller
             $issueArr = $issueSelects['id'];
         }
 
-        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+        $departments = $indexPage ? DB::table('departments')->select('id', 'name as text')->get()->toArray() : [];
 
         $projects = $deptArr ? DB::table('projects as p')
         ->select(
-            'p.id', 
+            'p.id',
             DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text')
         )
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
@@ -410,16 +426,16 @@ class ReportsController extends Controller
         ->orderBy('p.id', 'desc')
         ->get()->toArray() : array();
 
-        $issues = $projectSelects ? DB::table('issues as i')
+        $issues = $projectArr ? DB::table('issues as i')
         ->select(
             'id',
             DB::raw('IFNULL(name, "(--)") AS text')
         )
-        ->where('project_id', $projectSelects)
+        ->where('project_id', $projectArr)
         ->orderBy('id', 'desc')
         ->get()->toArray() : array();
 
-        $users = DB::table('role_user as ru')
+        $users = $indexPage ? DB::table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -428,10 +444,10 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
-            ->get()->toArray();
+            ->get()->toArray() : [];
 
-        // DB::enableQueryLog();
-        $dataReports = DB::table('reports as r')
+        //DB::enableQueryLog();
+        $dataReports = $indexPage ? DB::table('reports as r')
             ->select(
                 'r.id as id',
                 DB::raw('IFNULL(i.name, "--") AS issue_name'),
@@ -445,14 +461,33 @@ class ReportsController extends Controller
                 'attend_other_person',
                 'content',
                 'r.language as language',
-                'seen'
+                'seen',
+                'r.issue',
+                'i.project_id',
+                'p.dept_id'
             )
             ->leftJoin('issues as i', 'i.id', '=', 'r.issue')
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->when( $reportType, function ($query,  $reportType) {
+                return $query->where('r.type', $reportType);
+            })
+            ->when($issueArr, function ($query, $issueArr) {
+                return $query->where('i.id', $issueArr);
+            })
+            ->when($projectArr, function ($query, $projectArr) {
+                return $query->where('p.id', $projectArr);
+            })
+            ->when($deptArr, function ($query, $deptArr) {
+                if ( $deptArr > 1 )
+                    return $query->where('d.id', $deptArr);
+                return $query;
+            })
+            ->where('r.date_time', '>=', $startDate)
+            ->where('r.date_time', '<=', $endDate)
             ->orderBy('r.updated_at', 'desc')
-            ->paginate(20);
-        // dd(DB::getQueryLog());
+            ->paginate(20) : [];
+        //dd(DB::getQueryLog());
 
         return response()->json([
             'reports' => $dataReports,

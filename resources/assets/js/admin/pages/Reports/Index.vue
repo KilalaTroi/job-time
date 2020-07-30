@@ -5,7 +5,7 @@
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
-							Filter Report          
+							Filter Report
 						</h4>
 					</div>
 				</template>
@@ -14,6 +14,7 @@
 						<div class="form-group">
 							<label class="">Report Type</label>
                             <select-2 v-model="report_type" class="select2">
+								<option value="0">All</option>
                                 <option value="Trouble">Trouble</option>
                                 <option value="Meeting">Meeting</option>
                             </select-2>
@@ -108,20 +109,20 @@
                 <button @click="addNewReport" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Report</button>
             </div>
 
-            <add-new v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
+            <add-new :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
 
-			<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList"></preview>
+			<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList" v-on:update-seen="updateSeen"></preview>
 
 			<card class="strpied-tabled-with-hover" v-show="!actionNewReport && !actionPreview">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
-							Report List           
+							Report List
 						</h4>
 					</div>
 				</template>
 				<div class="table-responsive">
-					<table-report class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport"></table-report>
+					<table-report :userID="userID" class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport"></table-report>
 				</div>
 				<pagination
 				:data="reports"
@@ -152,7 +153,7 @@ export default {
 		Preview,
         Card,
 		Datepicker,
-        Multiselect, 
+        Multiselect,
 		Select2,
 		TableReport
     },
@@ -166,9 +167,10 @@ export default {
 				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
 				{ id: "title", value: 'Title', width: "120", class: "" }
 			],
+			userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
 			currentReport: {},
 			userOptions: [],
-            report_type: 'Trouble',
+            report_type: 0,
             start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
 			end_date: new Date(),
 			deptSelects: null,
@@ -240,7 +242,10 @@ export default {
 			let uri = "/data/reports";
 			axios
 			.post(uri, {
-				user_id: this.user_id,
+				indexPage: true,
+				reportType: this.report_type,
+				startDate: this.dateFormatter(this.start_date),
+				endDate: this.dateFormatter(this.end_date),
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
 				issueSelects: this.issueSelects
@@ -261,7 +266,10 @@ export default {
 			let uri = "/data/reports";
 			axios
 			.post(uri, {
-				user_id: this.user_id,
+				indexPage: true,
+				reportType: this.report_type,
+				startDate: this.dateFormatter(this.start_date),
+				endDate: this.dateFormatter(this.end_date),
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
 				issueSelects: this.issueSelects
@@ -279,21 +287,21 @@ export default {
         addNewReport() {
             this.actionNewReport = true;
 		},
-		viewReport(id) {
+		viewReport(id, seen) {
 			this.actionPreview = true;
 			this.currentReport = this.getObjectValue(this.reports.data, id);
+			this.currentReport.isSeen = seen;
         },
         backToList(newData = false) {
 			this.actionNewReport = false;
 			this.actionPreview = false;
-			
+
 			if ( newData ) this.fetchDataFilter();
 		},
 		getResults(page = 1) {
 			let uri = "/data/reports?page=" + page;
 			axios
 			.post(uri, {
-				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
 				issueSelects: this.issueSelects
@@ -302,6 +310,22 @@ export default {
 				this.projects = res.data.projects;
 				this.issues = res.data.issues;
 				this.reports = res.data.reports;
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not load data");
+			});
+		},
+		updateSeen() {
+			let uri = "/data/update-seen";
+			axios
+			.post(uri, {
+				userID: this.userID,
+				reportID: this.currentReport.id,
+			})
+			.then(res => {
+				this.fetchDataFilter();
+				this.$emit('update-seen');
 			})
 			.catch(err => {
 				console.log(err);
@@ -323,6 +347,18 @@ export default {
 		projectSelects: [
 			{ handler: "fetchDataFilter" },
 			{ handler: "resetIssue" }
+		],
+		issueSelects: [
+			{ handler: "fetchDataFilter" }
+		],
+		report_type: [
+			{ handler: "fetchDataFilter" }
+		],
+		start_date: [
+			{ handler: "fetchDataFilter" }
+		],
+		end_date: [
+			{ handler: "fetchDataFilter" }
 		]
     }
 }

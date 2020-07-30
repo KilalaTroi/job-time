@@ -44,14 +44,14 @@
             </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">
-                    <i class="nc-icon nc-button-power"></i> 
+                    <i class="nc-icon nc-button-power"></i>
                     <p v-text="$ml.with('VueJS').get('mnLogOut')" />
                 </a>
             </li>
         </side-bar>
         <div class="main-panel">
             <top-navbar></top-navbar>
-            <dashboard-content @click="toggleSidebar">
+            <dashboard-content @click="toggleSidebar" v-on:update-seen="updateSeen">
             </dashboard-content>
             <content-footer></content-footer>
         </div>
@@ -110,6 +110,9 @@ export default {
 				console.log(err);
 				alert("Could not load data");
 			});
+        },
+        updateSeen() {
+            this.getNotify()
         }
     }
 }

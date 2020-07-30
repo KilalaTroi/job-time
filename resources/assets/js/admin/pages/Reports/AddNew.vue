@@ -297,6 +297,7 @@ export default {
         ErrorItem,
         VueTimepicker
     },
+    props: ['userOptions', 'departments', 'userID'],
     data() {
         return {
             title: '',
@@ -308,17 +309,14 @@ export default {
                 vi: vi,
                 ja: ja
             },
-            userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
             user_id: [],
             attendPerson: [],
             attendPersonOther: '',
-            userOptions: [],
             deptSelects: null,
 			projectSelects: null,
             issueSelects: null,
             reportType: 'Trouble',
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
-			departments: [],
             projects: [],
             issues: [],
 
@@ -335,10 +333,6 @@ export default {
             errors: []
         }
     },
-    mounted() {
-		let _this = this;
-		_this.fetchData();
-    },
     beforeMount() {
         window.addEventListener("beforeunload", this.preventNav)
         this.$once("hook:beforeDestroy", () => {
@@ -354,31 +348,10 @@ export default {
         next();
     },
     methods: {
-        fetchData() {
-			let uri = "/data/reports";
-			axios
-			.post(uri, {
-				user_id: this.user_id,
-				deptSelects: this.deptSelects,
-				projectSelects: this.projectSelects,
-				issueSelects: this.issueSelects
-			})
-			.then(res => {
-                this.userOptions = res.data.users;
-				this.departments = res.data.departments;
-				this.projects = res.data.projects;
-				this.issues = res.data.issues;
-			})
-			.catch(err => {
-				console.log(err);
-				alert("Could not load data");
-			});
-        },
         fetchDataFilter() {
 			let uri = "/data/reports";
 			axios
 			.post(uri, {
-				user_id: this.user_id,
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
 				issueSelects: this.issueSelects
@@ -386,7 +359,6 @@ export default {
 			.then(res => {
 				this.projects = res.data.projects;
 				this.issues = res.data.issues;
-				this.reports = res.data.reports;
 			})
 			.catch(err => {
 				console.log(err);
