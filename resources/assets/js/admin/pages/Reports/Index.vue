@@ -1,7 +1,7 @@
 <template>
     <div class="content">
         <div class="container">
-            <card v-show="!actionNewReport && !actionPreview">
+            <card v-show="!actionNewReport && !actionPreview && !actionEdit">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
@@ -105,15 +105,17 @@
 				</div>
 		    </card>
 
-            <div class="form-group" v-show="!actionNewReport && !actionPreview">
+            <div class="form-group" v-show="!actionNewReport && !actionPreview && !actionEdit">
                 <button @click="addNewReport" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Report</button>
             </div>
 
             <add-new :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
 
+			<edit :currentReport="currentReport" :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionEdit" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:delete-report="deleteReport"></edit>
+
 			<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList" v-on:update-seen="updateSeen"></preview>
 
-			<card class="strpied-tabled-with-hover" v-show="!actionNewReport && !actionPreview">
+			<card class="strpied-tabled-with-hover" v-show="!actionNewReport && !actionPreview && !actionEdit">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
@@ -122,7 +124,7 @@
 					</div>
 				</template>
 				<div class="table-responsive">
-					<table-report :userID="userID" class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport"></table-report>
+					<table-report :userID="userID" class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport" v-on:edit-report="editReport" v-on:send-report="sendReport"></table-report>
 				</div>
 				<pagination
 				:data="reports"
@@ -138,6 +140,7 @@
 </template>
 <script>
 import AddNew from './AddNew';
+import Edit from './Edit';
 import Preview from './Preview';
 import Card from "../../components/Cards/Card";
 import Multiselect from "vue-multiselect";
@@ -150,6 +153,7 @@ import TableReport from "../../components/TableReport";
 export default {
     components: {
 		AddNew,
+		Edit,
 		Preview,
         Card,
 		Datepicker,
@@ -171,7 +175,7 @@ export default {
 			currentReport: {},
 			userOptions: [],
             report_type: 0,
-            start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
+            start_date: new Date(moment().subtract(1,'months').startOf('month').format('YYYY/MM/DD')),
 			end_date: new Date(),
 			deptSelects: null,
 			projectSelects: null,
@@ -190,6 +194,7 @@ export default {
 
 			actionNewReport: false,
 			actionPreview: false,
+			actionEdit: false,
 			jLimit: 2,
 			jShowDisabled: true,
 			jAlign: "right",
@@ -291,10 +296,17 @@ export default {
 			this.actionPreview = true;
 			this.currentReport = this.getObjectValue(this.reports.data, id);
 			this.currentReport.isSeen = seen;
+		},
+		editReport(id, seen) {
+			this.actionEdit = true;
+			this.currentReport = this.getObjectValue(this.reports.data, id);
+			this.currentReport.isSeen = seen;
         },
         backToList(newData = false) {
 			this.actionNewReport = false;
 			this.actionPreview = false;
+			this.actionEdit = false;
+			this.currentReport = {};
 
 			if ( newData ) this.fetchDataFilter();
 		},
@@ -331,6 +343,34 @@ export default {
 				console.log(err);
 				alert("Could not load data");
 			});
+		},
+		deleteReport(id) {
+			if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
+                let uri = '/data/reports-action/' + id;
+                axios.delete(uri).then((res) => {
+                    this.actionNewReport = false;
+					this.actionPreview = false;
+					this.actionEdit = false;
+					this.currentReport = {};
+					this.fetchDataFilter();
+                }).catch(err => console.log(err));
+            }
+		},
+		sendReport() {
+			if (confirm('Send members about this update?')) {
+				let uri = "/data/send-report";
+			axios
+			.post(uri, {
+				userID: this.userID
+			})
+			.then(res => {
+				alert('Email was sent!')
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not send email!");
+			});
+			}
 		},
 		resetProject() {
 			this.projectSelects = null;

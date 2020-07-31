@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use Mail;
 use App\Type;
 use App\Report;
 use Carbon\Carbon;
@@ -24,6 +25,38 @@ class ReportsController extends Controller
 
         return response()->json(array(
             'id' => $report->id,
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id, Request $request)
+    {
+        $report = Report::findOrFail($id);
+        $report->update($request->all());
+
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $report = Report::findOrFail($id);
+        $report->delete();
+
+        return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
     }
@@ -382,6 +415,42 @@ class ReportsController extends Controller
             ]);
         }
 
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    function sendReport(Request $request) {
+        $userID = $request->get('userID');
+
+        $from = DB::table('users')
+            ->where('id', $userID)
+            ->get()->toArray()[0];
+
+        $users = DB::table('role_user as ru')
+            ->select(
+                'user.email as email',
+            )
+            ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+            ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+            ->whereNotIn('role.name', ['japanese_planner'])
+            ->whereNotIn('user.email', [$from->email])
+            ->where('user.disable_date', null)
+            ->get()->toArray();
+        
+        $emails = array_map(function($obj) {
+            return $obj->email;
+        }, $users);
+
+        $emails[] = 'troi.hoang@kilala.vn';
+
+        Mail::send('emails.report', [], function($message) use ($emails, $from)
+        {    
+            $message->from($from->email, $from->name);
+            $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System'); 
+            $message->to($emails)->subject('Jobtime Report');  
+        });
+        
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
