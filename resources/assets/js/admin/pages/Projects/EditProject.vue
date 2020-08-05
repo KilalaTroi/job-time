@@ -55,14 +55,6 @@
 					</div>
 				</div>
 			</div>
-			<div class="row">
-				<div class="col-sm-12">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtLineRoomId')}}</label>
-						<input v-model="currentItem.room_id" type="text" name="room_id" class="form-control" />
-					</div>
-				</div>
-			</div>
 			<error-item :errors="errors"></error-item>
 			<success-item :success="success"></success-item>
 			<hr />

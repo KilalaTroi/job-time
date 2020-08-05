@@ -6,7 +6,6 @@ use App\OffDay;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 
 class OffDaysController extends Controller
 {
@@ -17,12 +16,9 @@ class OffDaysController extends Controller
      */
     public function index()
     {
+        $startDate = $_GET['startDate'];
+        $endDate = $_GET['endDate'];
     	$userID = $_GET['user_id'];
-        $nextMonth = Carbon::now()->addMonths(2)->format('Y-m-01');
-        $currentMonth = Carbon::now()->format('Y-m-01');
-        $now = date("Y-m-d");
-        $lastYear = strtotime($now . ' -1 year');
-        $lastYear = date('Y-m-d', $lastYear);
 
         $offDays = DB::table('off_days')
             ->select(
@@ -32,7 +28,8 @@ class OffDaysController extends Controller
             )
             ->where('status', '=', 'approved')
             ->where('user_id', '=', $userID)
-            ->where('date', '>=',  $lastYear)
+            ->where('date', '>=',  $startDate)
+            ->where('date', '<',  $endDate)
             ->get()->toArray();
 
         return response()->json([
@@ -47,11 +44,8 @@ class OffDaysController extends Controller
      */
     public function allOffDays()
     {
-        $nextMonth = Carbon::now()->addMonths(2)->format('Y-m-01');
-        $currentMonth = Carbon::now()->format('Y-m-01');
-        $now = date("Y-m-d");
-        $lastYear = strtotime($now . ' -1 year');
-        $lastYear = date('Y-m-d', $lastYear);
+        $startDate = $_GET['startDate'];
+        $endDate = $_GET['endDate'];
 
         $offDays = DB::table('off_days')
             ->select(
@@ -62,7 +56,8 @@ class OffDaysController extends Controller
             )
             ->leftJoin('users', 'users.id', '=', 'off_days.user_id')
             ->where('off_days.status', '=', 'approved')
-            ->where('off_days.date', '>=',  $lastYear)
+            ->where('off_days.date', '>=',  $startDate)
+            ->where('off_days.date', '<',  $endDate)
             ->get()->toArray();
 
         return response()->json([

@@ -1,20 +1,17 @@
 <template>
     <card>
         <h4 slot="header" class="card-title">{{$ml.with('VueJS').get('txtStaffOffDay')}}</h4>
-        
-        <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" :locale="getLanguage(this.$ml)" />
+        <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" :locale="getLanguage(this.$ml)" :datesRender="handleMonthChange" />
     </card>
 </template>
-
-
 <script>
-import FullCalendar from '@fullcalendar/vue'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timeGrid'
-import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
-import listPlugin from '@fullcalendar/list'
-import Card from '../../components/Cards/Card'
-import moment from 'moment'
+import FullCalendar from "@fullcalendar/vue";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timeGrid";
+import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import Card from "../../components/Cards/Card";
+import moment from "moment";
 
 export default {
     components: {
@@ -23,55 +20,80 @@ export default {
     },
     data() {
         return {
-            offDayTypes: [
-                {
-                    id: 'morning',
-                    name: 'Half-day (8:00 - 12:00)',
-                    color: '#00AEEF'
+            offDayTypes: [{
+                    id: "morning",
+                    name: "Half-day (8:00 - 12:00)",
+                    color: "#00AEEF"
                 },
                 {
-                    id: 'afternoon',
-                    name: 'Half-day (13:00 - 17:00)',
-                    color: '#FFDD00'
+                    id: "afternoon",
+                    name: "Half-day (13:00 - 17:00)",
+                    color: "#FFDD00"
                 },
                 {
-                    id: 'all_day',
-                    name: 'Full-day (8:00 - 17:00)',
-                    color: '#FF0000'
+                    id: "all_day",
+                    name: "Full-day (8:00 - 17:00)",
+                    color: "#F55555"
                 }
             ],
             offDays: [],
             offDaysData: [],
 
-            calendarPlugins: [listPlugin, interactionPlugin, dayGridPlugin, timeGridPlugin],
+            calendarPlugins: [
+                listPlugin,
+                interactionPlugin,
+                dayGridPlugin,
+                timeGridPlugin
+            ],
             calendarHeader: {
-                left: 'prev',
-                center: 'title',
-                right: 'next'
+                left: "prev",
+                center: "title",
+                right: "next"
             },
             businessHours: [{
                     // days of week. an array of zero-based day of week integers (0=Sunday)
-                    daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
+                    daysOfWeek: [1, 2, 3, 4, 5] // Monday - Thursday
                 },
                 {
                     // days of week. an array of zero-based day of week integers (0=Sunday)
-                    daysOfWeek: [6], // Monday - Thursday
+                    daysOfWeek: [6] // Monday - Thursday
                 }
             ],
             editable: false,
             droppable: false,
             allDaySlot: false,
-            height: 'auto',
-            hiddenDays: [0]
-        }
+            height: "auto",
+            hiddenDays: [0],
+
+            currentStart: '',
+            currentEnd: ''
+        };
     },
-    mounted() {
-        this.fetchItems();
-    },
+    mounted() {},
     methods: {
+        recapName(str) {
+            let words = str.split(" ");
+            let firstName = words[words.length - 1],
+                middleName = words[words.length - 2] ?
+                words[words.length - 2] + " " :
+                "";
+            return middleName + firstName;
+        },
+        recapTime(type) {
+            if (type == "all_day") {
+                return "[" + this.$ml.with('VueJS').get('txtRCFullDay') + "] ";
+            }
+            if (type == "morning") {
+                return "[" + this.$ml.with('VueJS').get('txtRCAM') + "] ";
+            }
+            if (type == "afternoon") {
+                return "[" + this.$ml.with('VueJS').get('txtRCPM') + "] ";
+            }
+        },
         fetchItems() {
-            let uri = '/data/all-off-days';
-            axios.get(uri)
+            let uri = '/data/all-off-days?&startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD');
+            axios
+                .get(uri)
                 .then(res => {
                     this.offDaysData = res.data.offDays;
                 })
@@ -81,21 +103,21 @@ export default {
                 });
         },
         getObjectValue(data, id) {
-            let obj = data.filter((elem) => {
+            let obj = data.filter(elem => {
                 if (elem.id === id) return elem;
             });
 
-            if (obj.length > 0)
-                return obj[0];
+            if (obj.length > 0) return obj[0];
         },
-        getDataOffDays(data) { 
+        getDataOffDays(data) {
             if (data.length) {
                 this.offDays = data.map((item, index) => {
                     return {
                         id: item.id,
-                        title: item.name,
+                        title: this.recapTime(item.type) + this.recapName(item.name),
                         borderColor: this.getObjectValue(this.offDayTypes, item.type).color,
-                        backgroundColor: this.getObjectValue(this.offDayTypes, item.type).color,
+                        backgroundColor: this.getObjectValue(this.offDayTypes, item.type)
+                            .color,
                         start: moment(item.date).format(),
                         end: moment(item.date).format()
                     };
@@ -109,24 +131,31 @@ export default {
             };
         },
         customFormatter(date) {
-            return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY-MM-DD') : '--';
+            return moment(date).format("DD-MM-YYYY") !== "Invalid date" ?
+                moment(date).format("YYYY-MM-DD") :
+                "--";
         },
         getLanguage(data) {
-            return data.current
+            return data.current;
         },
+        handleMonthChange(arg) {
+            this.currentStart = arg.view.currentStart;
+            this.currentEnd = arg.view.currentEnd;
+            this.fetchItems();
+        }
     },
     watch: {
         offDaysData: [{
-            handler: 'getDataOffDays'
+            handler: "getDataOffDays"
         }]
     }
-}
+};
 </script>
 <style lang="scss">
-@import '~@fullcalendar/core/main.css';
-@import '~@fullcalendar/daygrid/main.css';
-@import '~@fullcalendar/timegrid/main.css';
-@import '~@fullcalendar/list/main.css';
+@import "~@fullcalendar/core/main.css";
+@import "~@fullcalendar/daygrid/main.css";
+@import "~@fullcalendar/timegrid/main.css";
+@import "~@fullcalendar/list/main.css";
 
 .fc-time-grid .fc-event {
     padding: 5px;
@@ -134,12 +163,12 @@ export default {
 
 .fc-event {
     cursor: move;
-    color: rgba(0,0,0,0.8);
+    color: rgba(0, 0, 0, 0.8);
 }
 
 .fc-time-grid-event .fc-time,
 .fc-time-grid-event .fc-title {
-    color: rgba(0,0,0,0.8);
+    color: rgba(0, 0, 0, 0.8);
 }
 
 .fc-time-grid .fc-slats td {
@@ -154,7 +183,16 @@ export default {
     background-color: #ffd05b;
 }
 
-.fc-unthemed th, .fc-unthemed td, .fc-unthemed thead, .fc-unthemed tbody, .fc-unthemed .fc-divider, .fc-unthemed .fc-row, .fc-unthemed .fc-content, .fc-unthemed .fc-popover, .fc-unthemed .fc-list-view, .fc-unthemed .fc-list-heading td {
+.fc-unthemed th,
+.fc-unthemed td,
+.fc-unthemed thead,
+.fc-unthemed tbody,
+.fc-unthemed .fc-divider,
+.fc-unthemed .fc-row,
+.fc-unthemed .fc-content,
+.fc-unthemed .fc-popover,
+.fc-unthemed .fc-list-view,
+.fc-unthemed .fc-list-heading td {
     border-color: #b3aeae;
 }
 

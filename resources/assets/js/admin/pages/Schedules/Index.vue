@@ -20,7 +20,7 @@
                     </card>
                 </div>
                 <div class="col-sm-12 col-lg-9 col-xl-10">
-                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" />
+                    <FullCalendar defaultView="timeGridWeek" :scroll-time="scrollTime" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="schedules" :event-overlap="true" :all-day-slot="allDaySlot" :min-time="minTime" :max-time="maxTime" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @datesRender="handleMonthChange" @eventDrop="dropEvent" @eventResize="resizeEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" />
                 </div>
             </div>
         </div>
@@ -90,17 +90,19 @@ export default {
             validationSuccess: '',
 
             search: '',
-            searchResults: []
+            searchResults: [],
+
+            currentStart: '',
+            currentEnd: ''
 
         }
     },
     mounted() {
-        this.fetchItems();
         this.makeDraggable();
     },
     methods: {
         fetchItems() {
-            let uri = '/data/schedules';
+            let uri = '/data/schedules?startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD');
             axios.get(uri)
                 .then(res => {
                     this.types = res.data.types;
@@ -343,6 +345,11 @@ export default {
         getLanguage(data) {
             return data.current
         },
+        handleMonthChange(arg) {
+            this.currentStart = arg.view.currentStart;
+            this.currentEnd = arg.view.currentEnd;
+            this.fetchItems();
+        }
     },
     watch: {
         projectData: [{

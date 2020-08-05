@@ -33,7 +33,7 @@
 </template>
 <script>
     export default {
-        name: 'action-table',
+        name: 'table-action',
         props: {
             columns: Array,
             data: Array

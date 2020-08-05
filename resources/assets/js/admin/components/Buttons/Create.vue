@@ -6,6 +6,6 @@
 </template>
 <script>
     export default {
-        name: 'create-button'
+        name: 'button-create'
     }
 </script>

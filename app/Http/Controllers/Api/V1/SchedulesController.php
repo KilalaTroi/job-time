@@ -6,7 +6,6 @@ use App\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 
 class SchedulesController extends Controller
 {
@@ -17,15 +16,10 @@ class SchedulesController extends Controller
      */
     public function index()
     {
-        $nextMonth = Carbon::now()->addMonths(2)->format('Y-m-01');
-        $currentMonth = Carbon::now()->format('Y-m-01');
-        $now = date("Y-m-d");
-        $lastYear = strtotime($now . ' -1 year');
-        $lastYear = date('Y-m-d', $lastYear);
+        $startDate = $_GET['startDate'];
+        $endDate = $_GET['endDate'];
 
         $types = DB::table('types')->select('id', 'value')->get()->toArray();
-        // $typesTR = DB::table('types')->select('id')->where('slug', 'like', '%_tr')->get()->toArray();
-        // $typesTR = collect($typesTR)->map(function($x){ return $x->id; })->toArray();
         
         $projects = DB::table('projects as p')
             ->select(
@@ -41,14 +35,13 @@ class SchedulesController extends Controller
             ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
-            // ->whereNotIn('type_id', $typesTR)
-            ->where(function ($query) use ($nextMonth) {
-                $query->where('start_date', '<=',  $nextMonth)
+            ->where(function ($query) use ($endDate) {
+                $query->where('start_date', '<', $endDate)
                       ->orWhere('start_date', '=',  NULL);
             })
-            ->where(function ($query) use ($currentMonth) {
-                $query->where('end_date', '>=',  $currentMonth)
-                      ->orWhere('end_date', '=',  NULL);
+            ->where(function ($query) use ($startDate) {
+                $query->where('end_date', '>=', $startDate)
+                      ->orWhere('end_date', '=', NULL);
             })
             ->orderBy('p.name', 'asc')
             ->orderBy('i.name', 'asc')
@@ -70,15 +63,14 @@ class SchedulesController extends Controller
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
-            ->where('s.date', '>=',  $lastYear)
+            ->where('s.date', '>=',  $startDate)
+            ->where('s.date', '<',  $endDate)
             ->get()->toArray();
 
         return response()->json([
             'types' => $types,
             'projects' => $projects,
-            'schedules' => $schedules,
-            'nextMonth' => $nextMonth,
-            'currentMonth' => $currentMonth
+            'schedules' => $schedules
         ]);
     }
 

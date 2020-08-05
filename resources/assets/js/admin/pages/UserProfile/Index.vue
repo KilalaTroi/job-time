@@ -4,9 +4,9 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-12 col-sm-auto">
-                        <create-button>
+                        <button-create>
                             <template slot="title">{{$ml.with('VueJS').get('txtCreateUser')}}</template>
-                        </create-button>
+                        </button-create>
                     </div>
                 </div>
             </div>
@@ -16,13 +16,14 @@
                     <h4 class="card-title">{{$ml.with('VueJS').get('txtUserList')}}</h4>
                 </template>
                 <div class="table-responsive">
-                    <action-table
+                    <table-user
                             class="table-hover table-striped"
                             :columns="columns"
                             :data="users"
                             v-on:get-item="getUser"
+                            v-on:archive-user="archiveUser"
                             v-on:delete-item="deleteUser">
-                    </action-table>
+                    </table-user>
                 </div>
             </card>
 
@@ -46,19 +47,20 @@
     </div>
 </template>
 <script>
-    import ActionTable from "../../components/TableAction";
+    import TableUser from "../../components/TableUser";
     import Card from "../../components/Cards/Card";
     import CreateItem from "./Create";
     import EditItem from "./Edit";
-    import CreateButton from "../../components/Buttons/Create";
+    import ButtonCreate from "../../components/Buttons/Create";
+    import moment from 'moment';
 
     export default {
         components: {
-            ActionTable,
+            TableUser,
             Card,
             CreateItem,
             EditItem,
-            CreateButton
+            ButtonCreate
         },
 
         data() {
@@ -167,6 +169,16 @@
                             this.validationErrors = err.response.data;
                         }
                     });
+            },
+            archiveUser(item) {
+                let disable_date = !item.disable_date ? moment().format('YYYY-MM-DD') : null;
+                let uri = '/data/users/archive/' + item.id + '/' + disable_date;
+
+                axios.get(uri).then((response) => {
+                    let foundIndex = this.users.findIndex(x => x.id == item.id);
+                    this.users[foundIndex].disable_date = disable_date;
+                    this.users = [...this.users];
+                }).catch(err => console.log(err));
             },
             resetValidate() {
                 this.validationSuccess = "";

@@ -17,7 +17,7 @@
                 </card>
             </div>
             <div class="col-sm-12 col-lg-9">
-                <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" />
+                <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" @eventReceive="addEvent" @eventClick="clickEvent" :locale="getLanguage(this.$ml)" :datesRender="handleMonthChange" />
             </div>
         </div>
 
@@ -59,7 +59,7 @@ export default {
                 {
                     id: 'all_day',
                     name: 'Full-day (8:00 - 17:00)',
-                    color: '#FF0000'
+                    color: '#F55555'
                 }
             ],
             offDays: [],
@@ -85,16 +85,18 @@ export default {
             droppable: false,
             allDaySlot: false,
             height: 'auto',
-            hiddenDays: [0]
+            hiddenDays: [0],
+
+            currentStart: '',
+            currentEnd: ''
         }
     },
     mounted() {
-        this.fetchItems();
         this.makeDraggable();
     },
     methods: {
         fetchItems() {
-            let uri = '/data/offdays/?user_id=' + this.userID;
+            let uri = '/data/offdays?user_id=' + this.userID + '&startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD');
             axios.get(uri)
                 .then(res => {
                     this.offDaysData = res.data.offDays;
@@ -199,6 +201,11 @@ export default {
         getLanguage(data) {
             return data.current
         },
+        handleMonthChange(arg) {
+            this.currentStart = arg.view.currentStart;
+            this.currentEnd = arg.view.currentEnd;
+            this.fetchItems();
+        }
     },
     watch: {
         offDaysData: [{

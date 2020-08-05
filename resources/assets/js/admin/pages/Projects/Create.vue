@@ -45,14 +45,6 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="form-group">
-                        <label class="">{{$ml.with('VueJS').get('txtLineRoomId')}}</label>
-                        <input v-model="room_id" type="text" name="room_id" class="form-control">
-                    </div>
-                </div>
-            </div>
             <hr>
             <div class="row">
                 <div class="col-sm-6">
@@ -106,7 +98,7 @@ import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Datepicker from 'vuejs-datepicker';
-import { vi, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
@@ -127,7 +119,6 @@ export default {
             p_name: '',
             p_name_vi: '',
             p_name_ja: '',
-            room_id: '',
             no_period: false,
             has_period: true,
             i_name: '',
@@ -135,13 +126,18 @@ export default {
             start_date: '',
             end_date: '',
             modalLg: 'modal-lg',
+            dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
         }
     },
     mounted() {
     },
     methods: {
         getLanguage(data) {
-            return data.current === "vi" ? vi : ja
+            return this.dataLang[data.current]
         },
         updatePeriod(data) {
             if ( data ) {
@@ -161,7 +157,6 @@ export default {
                 p_name: this.p_name,
                 p_name_vi: this.p_name_vi,
                 p_name_ja: this.p_name_ja,
-                room_id: this.room_id,
                 i_name: this.i_name,
                 page: this.page,
                 start_date: this.start_date,
@@ -195,7 +190,6 @@ export default {
                 this.p_name = '';
                 this.p_name_vi = '';
                 this.p_name_ja = '';
-                this.room_id = '';
                 this.no_period = false;
                 this.i_name = '';
                 this.page = '';

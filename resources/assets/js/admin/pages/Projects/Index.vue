@@ -39,9 +39,9 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-12 col-sm-auto">
-                        <create-button>
+                        <button-create>
                             <template slot="title">{{$ml.with('VueJS').get('txtCreateProject')}}</template>
-                        </create-button>
+                        </button-create>
                     </div>
                     <div class="col-12 col-sm-auto ml-auto">
                         <button type="button" class="btn btn-primary mr-3" data-toggle="modal" data-target="#issueImport" data-backdrop="static" data-keyboard="false">
@@ -63,8 +63,8 @@
                     </div>
                 </template>
                 <div class="table-responsive" v-if="filterResults">
-                    <project-table class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
-                    </project-table>
+                    <table-project class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
+                    </table-project>
                 </div>
                 <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
             </card>
@@ -87,8 +87,8 @@ import EditProject from './EditProject'
 import EditIssue from './EditIssue'
 import ImportIssue from './ImportIssue'
 import AddIssue from './AddIssue'
-import CreateButton from '../../components/Buttons/Create' 
-import ProjectTable from '../../components/TableProject'
+import ButtonCreate from '../../components/Buttons/Create' 
+import TableProject from '../../components/TableProject'
 import moment from 'moment'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
@@ -102,8 +102,8 @@ export default {
         EditProject,
         EditIssue,
         AddIssue,
-        CreateButton,
-        ProjectTable,
+        ButtonCreate,
+        TableProject,
         ImportIssue
     },
     data() {
@@ -220,7 +220,6 @@ export default {
                         issue_id: item.issue_id,
                         page: item.page,
                         status: item.status,
-                        room_id: item.room_id,
                         type: this.getObjectValue(this.types, item.type_id).slug,
                         value: this.getObjectValue(this.types, item.type_id).value,
                         start_date: this.customFormatter(item.start_date),
@@ -315,7 +314,6 @@ export default {
                         p_name: res.data.p_name,
                         p_name_vi: res.data.p_name_vi,
                         p_name_ja: res.data.p_name_ja,
-                        room_id: res.data.room_id,
                         status: 'publish',
                     }, newIssue);
                     // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];
@@ -417,12 +415,12 @@ export default {
                 this.getProjects(this.showArchive);
                 this.validationSuccess = '';
                 this.validationErrors = '';
-                this.currentItem = null;
+                this.currentItem = false;
             }
         },
         resetImport() {
             this.getProjects(this.showArchive);
-            this.currentItem = null;
+            this.currentItem = false;
         }
     },
     watch: {

@@ -23,6 +23,10 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
+        if ( !$request->user()->disable_date == null ) {
+            return view('errors.disable');
+        }
+
         // redirect view by user
         if ( $request->user()->authorizeRoles('admin') ) { 
             return view('dashboard');

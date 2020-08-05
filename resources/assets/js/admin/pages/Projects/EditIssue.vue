@@ -39,7 +39,7 @@
                         <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="currentItem.start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </div>
-                </div>
+                </div> 
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtEndDate')}}</label>
@@ -65,7 +65,7 @@ import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Datepicker from 'vuejs-datepicker';
-import { vi, ja } from 'vuejs-datepicker/dist/locale'
+import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
@@ -82,6 +82,11 @@ export default {
         return {
             modalLg: 'modal-lg',
             has_period: true,
+            dataLang: {
+                vi: vi,
+                ja: ja,
+                en: en
+            }
         }
     },
     mounted() {
@@ -93,13 +98,13 @@ export default {
     },
     methods: {
         getLanguage(data) {
-            return data.current === "vi" ? vi : ja
+            return this.dataLang[data.current]
         },
         customFormatter(date) {
             return moment(date).format('YYYY/MM/DD');
         },
         disabledStartDates() {
-            if (this.currentItem.start_date) {
+            if (this.currentItem && this.currentItem.start_date) {
                 let obj = {
                     to: new Date(this.currentItem.start_date), // Disable all dates after specific date
                     // days: [0], // Disable Saturday's and Sunday's
@@ -108,7 +113,7 @@ export default {
             }
         },
         disabledEndDates() {
-            if (this.currentItem.end_date) {
+            if (this.currentItem && this.currentItem.end_date) {
                 let obj = {
                     from: new Date(this.currentItem.end_date), // Disable all dates after specific date
                     // days: [0], // Disable Saturday's and Sunday's
@@ -117,7 +122,7 @@ export default {
             }
         },
         updatePeriod() {
-            if (this.currentItem.no_period) {
+            if (this.currentItem && this.currentItem.no_period) {
                 this.currentItem.start_date = '';
                 this.currentItem.end_date = '';
                 this.has_period = false;

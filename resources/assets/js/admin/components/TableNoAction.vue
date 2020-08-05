@@ -11,7 +11,7 @@
             <tr v-for="(item, index) in data" :key="index">
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
-                        <span>{{itemValue(item, column)}}</span>
+                        <span v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
             </tr>
@@ -20,7 +20,7 @@
 </template>
 <script>
 export default {
-    name: 'no-action-table',
+    name: 'table-no-action',
     props: {
         columns: Array,
         data: Array

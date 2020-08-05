@@ -1,10 +1,16 @@
 <template>
   <transition name="fade" mode="out-in">
-    <router-view></router-view>
+    <router-view v-on:update-seen="updateSeen"></router-view>
   </transition>
 </template>
 <script>
-  export default {}
+  export default {
+    methods: {
+      updateSeen() {
+        this.$emit('update-seen');
+      }
+    }
+  }
 </script>
 <style>
   .fade-enter-active,

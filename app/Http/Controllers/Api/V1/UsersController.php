@@ -24,6 +24,7 @@ class UsersController extends Controller
                 'user.username as username',
                 'user.email as email',
                 'user.language as language',
+                'user.disable_date as disable_date',
                 'role.name as r_name'
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
@@ -127,6 +128,26 @@ class UsersController extends Controller
             'username' => $request->get('username'),
             'language' => $request->get('language'),
             'email' => $request->get('email'),
+            'disable_date' => $request->get('disable_date'),
+        ]);
+
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    /**
+     * Archive the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function archive($id, $disable_date)
+    {
+        $User = User::findOrFail($id);
+
+        $User->update([
+            'disable_date' => $disable_date == 'null' ? null : $disable_date
         ]);
 
         return response()->json(array(
