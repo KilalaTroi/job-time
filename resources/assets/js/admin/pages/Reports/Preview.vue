@@ -10,9 +10,13 @@
         </template>
         <div class="row">
             <div class="col-sm-9">
-                <div class="form-group">
+                <div v-if="language=='vi'" class="form-group">
                     <label class=""><strong>Title</strong></label>
                     <input :value="currentReport.title" type="text" class="form-control" :disabled="true">
+                </div>
+                <div v-if="language=='ja'" class="form-group">
+                    <label class=""><strong>Title</strong></label>
+                    <input :value="currentReport.title_ja" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
@@ -73,7 +77,7 @@
             <div class="col-sm-3">
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtLang')}}</strong></label>
-                    <select-2 :value="currentReport.language" class="select2" :disabled="true">
+                    <select-2 :value="language" class="select2">
                         <option value="vi">Vietnamese</option>
                         <option value="ja">Japanese</option>
                     </select-2>
@@ -84,7 +88,8 @@
         <div class="form-group">
             <div id="toolbar-container"></div>
             <div id="ck-editor">
-                <ckeditor :editor="editor" :value="currentReport.content" :disabled="editorDisabled"></ckeditor>
+                <ckeditor v-if="language=='vi'" :editor="editor" :value="currentReport.content" :disabled="editorDisabled"></ckeditor>
+                <ckeditor v-if="language=='ja'" :editor="editor" :value="currentReport.content_ja" :disabled="editorDisabled"></ckeditor>
             </div>
         </div>
     </card>
@@ -105,7 +110,8 @@ export default {
     data() {
         return {
             editor: DecoupledEditor,
-            editorDisabled: true
+            editorDisabled: true,
+            language: this.$ml.current,
         }
     },
     mounted() {

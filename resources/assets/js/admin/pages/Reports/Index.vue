@@ -9,6 +9,7 @@
 						</h4>
 					</div>
 				</template>
+
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="form-group">
@@ -20,6 +21,7 @@
                             </select-2>
 						</div>
 					</div>
+
 					<div class="col-sm-4">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtStartDate')}}</label>
@@ -34,6 +36,7 @@
 							></datepicker>
 						</div>
 					</div>
+
 					<div class="col-sm-4">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtEndDate')}}</label>
@@ -48,6 +51,7 @@
 							></datepicker>
 						</div>
 					</div>
+
 					<div class="col-sm-4">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
@@ -66,6 +70,7 @@
 							</div>
 						</div>
 					</div>
+
 					<div class="col-sm-4">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
@@ -84,6 +89,7 @@
 							</div>
 						</div>
 					</div>
+
 					<div class="col-sm-4">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtIssue')}}</label>
@@ -123,9 +129,11 @@
 						</h4>
 					</div>
 				</template>
+
 				<div class="table-responsive">
 					<table-report :userID="userID" class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport" v-on:edit-report="editReport" v-on:send-report="sendReport"></table-report>
 				</div>
+
 				<pagination
 				:data="reports"
 				:show-disabled="jShowDisabled"
@@ -138,6 +146,7 @@
         </div>
     </div>
 </template>
+
 <script>
 import AddNew from './AddNew';
 import Edit from './Edit';
@@ -169,7 +178,7 @@ export default {
 				{ id: "dept_name", value: 'Department', width: "", class: "" },
 				{ id: "project_name", value: 'Project', width: "", class: "" },
 				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
-				{ id: "title", value: 'Title', width: "120", class: "" }
+				{ id: this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "120", class: "" }
 			],
 			userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
 			currentReport: {},
@@ -204,6 +213,16 @@ export default {
     mounted() {
 		let _this = this;
 		_this.fetchData();
+		$(document).on('click', '.languages button', function() {
+			_this.columns = [
+				{ id: "type", value: 'Report Type', width: "120", class: "" },
+				{ id: "date_time", value: 'Report Date', width: "", class: "" },
+				{ id: "dept_name", value: 'Department', width: "", class: "" },
+				{ id: "project_name", value: 'Project', width: "", class: "" },
+				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
+				{ id: _this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "120", class: "" }
+			];
+		});
     },
 	methods: {
 		getObjectValue(data, id) {

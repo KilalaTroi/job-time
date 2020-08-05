@@ -10,9 +10,13 @@
         </template>
         <div class="row">
             <div class="col-sm-9">
-                <div class="form-group">
+                <div v-if="language=='vi'" class="form-group">
                     <label class=""><strong>Title</strong></label>
                     <input v-model="title" type="text" class="form-control">
+                </div>
+                <div v-if="language=='ja'" class="form-group">
+                    <label class=""><strong>Title</strong></label>
+                    <input v-model="titleJA" type="text" class="form-control">
                 </div>
             </div>
 
@@ -160,7 +164,8 @@
         <div class="form-group">
             <div id="toolbar-container"></div>
             <div id="ck-editor">
-                <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onReady"></ckeditor>
+                <ckeditor v-if="language=='vi'" :editor="editor" v-model="editorData" :config="editorConfig" @ready="onReady"></ckeditor>
+                <ckeditor v-if="language=='ja'" :editor="editor" v-model="editorDataJA" :config="editorConfig" @ready="onReady"></ckeditor>
             </div>
         </div>
 
@@ -301,6 +306,7 @@ export default {
     data() {
         return {
             title: '',
+            titleJA: '',
             date: '',
             time: '',
             HourRange: [[8, 17]],
@@ -323,6 +329,7 @@ export default {
             isEditing: false,
             editor: DecoupledEditor,
             editorData: '',
+            editorDataJA: '',
             editorConfig: {
                 // The configuration of the editor.
                 // language: 'ja'
@@ -330,6 +337,7 @@ export default {
             },
 
             language: this.$ml.current,
+            translatable: 0,
             errors: []
         }
     },
@@ -399,7 +407,7 @@ export default {
         emitCreateReport() {
             this.errors = [];
 
-            if ( !this.title ) {
+            if ( !this.title && !this.titleJA ) {
                 this.errors = [['Please typing the title'], ...this.errors];
             }
 
@@ -429,18 +437,20 @@ export default {
                 }
             }
 
-            if ( !this.editorData ) {
+            if ( !this.editorData && !this.editorDataJA ) {
                 this.errors = [['Please typing the content'], ...this.errors];
             }
 
             if ( !this.errors.length ) {
                 let uri = '/data/reports-action';
                 let newItem = {
-                    title: this.title,
+                    title: this.title ? this.title : this.titleJA,
+                    title_ja: this.title ? this.title : this.titleJA,
                     language: this.language,
-                    translate_id: 0,
+                    translatable: this.translatable,
                     type: this.reportType,
-                    content: this.editorData,
+                    content: this.editorData ? this.editorData : this.editorDataJA,
+                    content_ja: this.editorData ? this.editorData : this.editorDataJA,
                     seen: this.userID.toString(),
                     author: this.user_id.map((item, index) => { return item.id }).toString(),
                 };
@@ -458,6 +468,7 @@ export default {
                     .then(res => {
                         console.log(res.data.message);
                         this.title = '';
+                        this.titleJA = '';
                         this.date = '';
                         this.time = '';
                         this.attendPerson = [];
@@ -468,6 +479,7 @@ export default {
                         this.issueSelects = null;
                         this.reportType = 'Trouble';
                         this.editorData = '';
+                        this.editorDataJA = '';
                         this.errors = [];
                         this.$emit('back-to-list', true);
                     })
@@ -497,6 +509,13 @@ export default {
                 this.attendPerson = [];
                 this.attendPersonOther = '';
             }
+        },
+        languageChange() {
+            this.errors = [];
+            this.title = '';
+            this.titleJA = '';
+            this.editorData = '';
+            this.editorDataJA = '';
         }
     },
     watch: {
@@ -513,6 +532,9 @@ export default {
 		],
         reportType: [{
             handler: 'typeReportChange'
+        }],
+        language: [{
+            handler: 'languageChange'
         }]
     }
 }

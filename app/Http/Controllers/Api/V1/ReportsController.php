@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Excel;
+use Google\Cloud\Translate\TranslateClient;
 
 class ReportsController extends Controller
 {
@@ -420,6 +421,29 @@ class ReportsController extends Controller
         ), 200);
     }
 
+    function translateContent(Request $request) {
+        # Instantiates a client
+        $translate = new TranslateClient([
+            'key' => 'AIzaSyDDDRVsy3D1qt0ilbL9vANhrmzWyl-qrGc',
+            'format' => 'html'
+        ]);
+        
+        # The text to translate
+        $text = $request->get('text');
+
+        # The target language
+        $target = $request->get('lang');
+
+        # Translates some text into Russian
+        $translation = $translate->translate($text, [
+            'target' => $target
+        ]);
+
+        return response()->json([
+            'contentTranslated' => $translation['text']
+        ]);
+    }
+
     function sendReport(Request $request) {
         $userID = $request->get('userID');
 
@@ -429,7 +453,7 @@ class ReportsController extends Controller
 
         $users = DB::table('role_user as ru')
             ->select(
-                'user.email as email',
+                'user.email as email'
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
@@ -521,6 +545,7 @@ class ReportsController extends Controller
                 'r.id as id',
                 DB::raw('IFNULL(i.name, "--") AS issue_name'),
                 'title',
+                'title_ja',
                 'date_time',
                 'type',
                 'p.name as project_name',
@@ -529,7 +554,9 @@ class ReportsController extends Controller
                 'attend_person',
                 'attend_other_person',
                 'content',
+                'content_ja',
                 'r.language as language',
+                'r.translatable as translatable',
                 'seen',
                 'r.issue',
                 'i.project_id',

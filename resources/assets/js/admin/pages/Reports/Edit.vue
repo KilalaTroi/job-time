@@ -4,6 +4,7 @@
             <div class="d-flex justify-content-between">
                 <h4 class="card-title">Edit Report</h4>
                 <div class="align-self-end">
+                    <button v-if="checkTranslate()" @click="translateContent()" class="btn btn-success mr-3">Translate</button>
                     <button @click="$emit('delete-report', currentReport.id)" class="btn btn-danger mr-3">Delete</button>
                     <button @click="$emit('back-to-list')" class="btn btn-primary">Back</button>
                 </div>
@@ -11,9 +12,13 @@
         </template>
         <div class="row">
             <div class="col-sm-9">
-                <div class="form-group">
+                <div v-if="language=='vi'" class="form-group">
                     <label class=""><strong>Title</strong></label>
                     <input v-model="title" type="text" class="form-control">
+                </div>
+                <div v-if="language=='ja'" class="form-group">
+                    <label class=""><strong>Title</strong></label>
+                    <input v-model="titleJA" type="text" class="form-control">
                 </div>
             </div>
 
@@ -161,7 +166,8 @@
         <div class="form-group">
             <div id="toolbar-container"></div>
             <div id="ck-editor">
-                <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onReady"></ckeditor>
+                <ckeditor v-if="language=='vi'" :editor="editor" v-model="editorData" :config="editorConfig" @ready="onReady"></ckeditor>
+                <ckeditor v-if="language=='ja'" :editor="editor" v-model="editorDataJA" :config="editorConfig" @ready="onReady"></ckeditor>
             </div>
         </div>
 
@@ -303,6 +309,7 @@ export default {
         return {
             countLoad: 0,
             title: this.currentReport.title,
+            titleJA: this.currentReport.title_ja,
             date: this.currentReport.date_time,
             time: this.currentReport.date_time.split(' ')[1],
             HourRange: [[8, 17]],
@@ -325,13 +332,15 @@ export default {
             isEditing: false,
             editor: DecoupledEditor,
             editorData: this.currentReport.content,
+            editorDataJA: this.currentReport.content_ja,
             editorConfig: {
                 // The configuration of the editor.
                 // language: 'ja'
                 extraPlugins: [ MyCustomUploadAdapterPlugin ],
             },
 
-            language: this.currentReport.language,
+            language: this.$ml.current,
+            translatable: this.currentReport.translatable,
             errors: []
         }
     },
@@ -355,6 +364,52 @@ export default {
         next();
     },
     methods: {
+        checkTranslate() {
+            return (! this.translatable) && (this.currentReport.language != this.language);
+        },
+        translateContent() {
+            let uri = "/data/translate-content";
+            let title = this.language == 'vi' ? this.title : this.titleJA;
+            let content = this.language == 'vi' ? this.editorData : this.editorDataJA;
+
+            this.translatable = 1;
+            
+            // translate Title
+			axios
+			.post(uri, {
+				lang: this.language,
+				text: title,
+			})
+			.then(res => {
+				if ( this.language == 'vi' ) {
+                    this.title = res.data.contentTranslated;
+                } else {
+                    this.titleJA = res.data.contentTranslated;
+                }
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not translate");
+            });
+            
+            // translate Content
+            axios
+			.post(uri, {
+				lang: this.language,
+				text: content,
+			})
+			.then(res => {
+				if ( this.language == 'vi' ) {
+                    this.editorData = res.data.contentTranslated;
+                } else {
+                    this.editorDataJA = res.data.contentTranslated;
+                }
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not translate");
+			});
+        },
         getObjectValue(data, id) {
             let obj = data.filter((elem) => {
                 if (elem.id == id) return elem;
@@ -457,7 +512,11 @@ export default {
         emitUpdateReport() {
             this.errors = [];
 
-            if ( !this.title ) {
+            if ( !this.title && this.language == 'vi' ) {
+                this.errors = [['Please typing the title'], ...this.errors];
+            }
+
+            if ( !this.titleJA && this.language == 'ja' ) {
                 this.errors = [['Please typing the title'], ...this.errors];
             }
 
@@ -487,21 +546,35 @@ export default {
                 }
             }
 
-            if ( !this.editorData ) {
+            if ( !this.editorData && this.language == 'vi' ) {
+                this.errors = [['Please typing the content'], ...this.errors];
+            }
+
+            if ( !this.editorDataJA && this.language == 'ja' ) {
                 this.errors = [['Please typing the content'], ...this.errors];
             }
 
             if ( !this.errors.length ) {
                 let uri = '/data/reports-action/' + this.currentReport.id;
                 let newItem = {
-                    title: this.title,
                     language: this.language,
                     translate_id: 0,
                     type: this.reportType,
-                    content: this.editorData,
                     seen: this.userID.toString(),
                     author: this.user_id.map((item, index) => { return item.id }).toString(),
                 };
+
+                if ( this.language == 'vi' ) {
+                    newItem.title = this.title;
+                    newItem.content = this.editorData;
+                } else {
+                    newItem.title_ja = this.titleJA;
+                    newItem.content_ja = this.editorDataJA;
+                }
+
+                if ( this.translatable ) {
+                    newItem.translatable = this.translatable;
+                }
 
                 if ( this.isMeeting() ) {
                     newItem.attend_person = this.attendPerson.map((item, index) => { return item.id }).toString();

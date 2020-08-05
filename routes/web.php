@@ -65,6 +65,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('reports', 'ReportsController@getData');
     Route::post('send-report', 'ReportsController@sendReport');
     Route::post('update-seen', 'ReportsController@updateSeen');
+    Route::post('translate-content', 'ReportsController@translateContent');
     Route::resource('reports-action', 'ReportsController', ['except' => ['create', 'edit']]);
     Route::post('import-projects', 'ProjectsController@importProjects');
 
