@@ -424,7 +424,7 @@ class ReportsController extends Controller
     function translateContent(Request $request) {
         # Instantiates a client
         $translate = new TranslateClient([
-            'key' => 'AIzaSyDDDRVsy3D1qt0ilbL9vANhrmzWyl-qrGc',
+            'key' => env('GOOGLE_TRANSLATE_KEY', ''),
             'format' => 'html'
         ]);
         
