@@ -558,7 +558,6 @@ export default {
                 let uri = '/data/reports-action/' + this.currentReport.id;
                 let newItem = {
                     language: this.language,
-                    translate_id: 0,
                     type: this.reportType,
                     seen: this.userID.toString(),
                     author: this.user_id.map((item, index) => { return item.id }).toString(),
@@ -628,6 +627,9 @@ export default {
     },
     watch: {
         editorData: [{
+            handler: 'contentChange'
+        }],
+        editorDataJA: [{
             handler: 'contentChange'
         }],
         deptSelects: [

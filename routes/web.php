@@ -39,6 +39,7 @@ Route::get('/logout', function () {
 Auth::routes();
 
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
+Route::get('/pdf/report', 'pdfController@index')->name('report');
 
 # Get Data
 Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {

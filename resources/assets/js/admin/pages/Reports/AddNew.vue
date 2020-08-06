@@ -342,6 +342,8 @@ export default {
         }
     },
     beforeMount() {
+        this.defaultContent();
+
         window.addEventListener("beforeunload", this.preventNav)
         this.$once("hook:beforeDestroy", () => {
             window.removeEventListener("beforeunload", this.preventNav);
@@ -444,16 +446,24 @@ export default {
             if ( !this.errors.length ) {
                 let uri = '/data/reports-action';
                 let newItem = {
-                    title: this.title ? this.title : this.titleJA,
-                    title_ja: this.title ? this.title : this.titleJA,
                     language: this.language,
                     translatable: this.translatable,
                     type: this.reportType,
-                    content: this.editorData ? this.editorData : this.editorDataJA,
-                    content_ja: this.editorData ? this.editorData : this.editorDataJA,
                     seen: this.userID.toString(),
                     author: this.user_id.map((item, index) => { return item.id }).toString(),
                 };
+
+                if ( this.language == 'vi' ) {
+                    newItem.title = this.title;
+                    newItem.content = this.editorData;
+                    newItem.title_ja = this.title;
+                    newItem.content_ja = this.editorData;
+                } else {
+                    newItem.title = this.titleJA;
+                    newItem.content = this.editorDataJA;
+                    newItem.title_ja = this.titleJA;
+                    newItem.content_ja = this.editorDataJA;
+                }
 
                 if ( this.isMeeting() ) {
                     newItem.attend_person = this.attendPerson.map((item, index) => { return item.id }).toString();
@@ -497,11 +507,23 @@ export default {
 		resetIssue() {
 			this.issueSelects = null;
         },
+        defaultContent() {
+            if ( this.isMeeting() ) {
+                this.editorData = '<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>';
+                this.editorDataJA = '<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>';
+            } else {
+                console.log('def');
+                this.editorData = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
+                this.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
+            }
+        },
         isMeeting() {
             return this.reportType == 'Meeting';
         },
         typeReportChange() {
             this.errors = [];
+
+            this.defaultContent();
 
             if ( this.isMeeting() ) {
                 this.deptSelects = [];
@@ -514,12 +536,14 @@ export default {
             this.errors = [];
             this.title = '';
             this.titleJA = '';
-            this.editorData = '';
-            this.editorDataJA = '';
+            this.defaultContent();
         }
     },
     watch: {
         editorData: [{
+            handler: 'contentChange'
+        }],
+        editorDataJA: [{
             handler: 'contentChange'
         }],
         deptSelects: [

@@ -457,7 +457,8 @@ class ReportsController extends Controller
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
-            ->whereNotIn('role.name', ['japanese_planner'])
+            ->whereNotIn('role.name', ['admin'])
+            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
             ->whereNotIn('user.email', [$from->email])
             ->where('user.disable_date', null)
             ->get()->toArray();
@@ -535,7 +536,7 @@ class ReportsController extends Controller
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
-            ->whereNotIn('role.name', ['admin','japanese_planner'])
+            ->whereNotIn('role.name', ['admin'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
             ->get()->toArray() : [];
 
