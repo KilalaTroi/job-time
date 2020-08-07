@@ -4,6 +4,7 @@
             <div class="d-flex justify-content-between">
                 <h4 class="card-title">Preview Report</h4>
                 <div class="align-self-end">
+                    <button @click="exportPDF" class="btn btn-danger mr-3">Export PDF</button>
                     <button @click="$emit('back-to-list')" class="btn btn-primary">Back</button>
                 </div>
             </div>
@@ -77,7 +78,7 @@
             <div class="col-sm-3">
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtLang')}}</strong></label>
-                    <select-2 :value="language" class="select2">
+                    <select-2 v-model="language" class="select2">
                         <option value="vi">Vietnamese</option>
                         <option value="ja">Japanese</option>
                     </select-2>
@@ -134,12 +135,39 @@ export default {
             let result = [];
             let arrData = data.split(',');
             result = arrData.map((item, index) => {
-                return this.getObjectValue(this.userOptions, item).text;
+                return this.getObjectValue(this.userOptions, item).text; 
             });
             return result.join(', ');
         },
         updateSeen() {
             this.$emit('update-seen');
+        },
+        exportPDF() {
+            let uri = "/pdf/report";
+            let data = {
+                is_metting: this.isMeeting() ? 1 : 0,
+                title: this.language=='vi' ? this.currentReport.title : this.currentReport.title_ja,
+                date_time: this.currentReport.date_time,
+                reporter: this.getReporter(this.currentReport.reporter),
+                attend_person: this.isMeeting() ? this.getReporter(this.currentReport.attend_person) : '',
+                attend_other_person: this.currentReport.attend_other_person,
+                dept_name: this.currentReport.dept_name,
+                project_name: this.currentReport.project_name,
+                issue_name: this.currentReport.issue_name,
+                content: this.language=='vi' ? this.currentReport.content : this.currentReport.content_ja
+            };
+            
+			axios
+			.post(uri, {
+				data: data
+			})
+			.then(res => {
+                window.open(res.data.file_name, "_blank");
+			})
+			.catch(err => {
+				console.log(err);
+				alert("Could not load data");
+			});
         }
     }
 }

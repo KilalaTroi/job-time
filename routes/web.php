@@ -39,7 +39,7 @@ Route::get('/logout', function () {
 Auth::routes();
 
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
-Route::get('/pdf/report', 'pdfController@index')->name('report');
+Route::post('/pdf/report', 'pdfController@index')->name('report');
 
 # Get Data
 Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
@@ -82,6 +82,21 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::get('exports/{filename}', function ($filename)
     {
         $path = storage_path() . '/exports/' . $filename;
+
+        if(!File::exists($path)) abort(404);
+
+        $file = File::get($path);
+        $type = File::mimeType($path);
+
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+
+        return $response;
+    });
+
+    Route::get('pdf/{filename}', function ($filename)
+    {
+        $path = storage_path() . '/app/public/pdf/' . $filename;
 
         if(!File::exists($path)) abort(404);
 
