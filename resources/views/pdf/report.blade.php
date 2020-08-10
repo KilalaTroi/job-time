@@ -11,8 +11,6 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <style>
-        *{ font-family: DejaVu Sans !important;}
-        
         .page-break {
             page-break-after: always;
         }
