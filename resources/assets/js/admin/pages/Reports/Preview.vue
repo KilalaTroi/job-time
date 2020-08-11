@@ -11,11 +11,11 @@
         </template>
         <div class="row">
             <div class="col-sm-9">
-                <div v-if="language=='vi'" class="form-group">
+                <div v-if="preLanguage=='vi'" class="form-group">
                     <label class=""><strong>Title</strong></label>
                     <input :value="currentReport.title" type="text" class="form-control" :disabled="true">
                 </div>
-                <div v-if="language=='ja'" class="form-group">
+                <div v-if="preLanguage=='ja'" class="form-group">
                     <label class=""><strong>Title</strong></label>
                     <input :value="currentReport.title_ja" type="text" class="form-control" :disabled="true">
                 </div>
@@ -78,7 +78,7 @@
             <div class="col-sm-3">
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtLang')}}</strong></label>
-                    <select-2 v-model="language" class="select2">
+                    <select-2 v-model="preLanguage" class="select2">
                         <option value="vi">Vietnamese</option>
                         <option value="ja">Japanese</option>
                     </select-2>
@@ -89,8 +89,8 @@
         <div class="form-group">
             <div id="toolbar-container"></div>
             <div id="ck-editor">
-                <ckeditor v-if="language=='vi'" :editor="editor" :value="currentReport.content" :disabled="editorDisabled"></ckeditor>
-                <ckeditor v-if="language=='ja'" :editor="editor" :value="currentReport.content_ja" :disabled="editorDisabled"></ckeditor>
+                <ckeditor v-if="preLanguage=='vi'" :editor="editor" :value="currentReport.content" :disabled="editorDisabled"></ckeditor>
+                <ckeditor v-if="preLanguage=='ja'" :editor="editor" :value="currentReport.content_ja" :disabled="editorDisabled"></ckeditor>
             </div>
         </div>
     </card>
@@ -112,7 +112,7 @@ export default {
         return {
             editor: DecoupledEditor,
             editorDisabled: true,
-            language: this.$ml.current,
+            preLanguage: this.$ml.current,
         }
     },
     mounted() {
@@ -146,7 +146,7 @@ export default {
             let uri = "/pdf/report";
             let data = {
                 is_metting: this.isMeeting() ? 1 : 0,
-                title: this.language=='vi' ? this.currentReport.title : this.currentReport.title_ja,
+                title: this.preLanguage=='vi' ? this.currentReport.title : this.currentReport.title_ja,
                 date_time: this.currentReport.date_time,
                 reporter: this.getReporter(this.currentReport.reporter),
                 attend_person: this.isMeeting() ? this.getReporter(this.currentReport.attend_person) : '',
@@ -154,9 +154,9 @@ export default {
                 dept_name: this.currentReport.dept_name,
                 project_name: this.currentReport.project_name,
                 issue_name: this.currentReport.issue_name,
-                content: this.language=='vi' ? this.currentReport.content : this.currentReport.content_ja
+                content: this.preLanguage=='vi' ? this.currentReport.content : this.currentReport.content_ja
             };
-            
+             
 			axios
 			.post(uri, {
 				data: data

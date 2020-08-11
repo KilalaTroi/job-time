@@ -115,7 +115,7 @@
                 <button @click="addNewReport" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Report</button>
             </div>
 
-            <add-new :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
+            <add-new :actionNewReport="actionNewReport" :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
 
 			<edit :currentReport="currentReport" :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionEdit" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:delete-report="deleteReport"></edit>
 
@@ -126,7 +126,7 @@
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
 							Report List
-						</h4>
+						</h4> 
 					</div>
 				</template>
 

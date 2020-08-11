@@ -12,11 +12,11 @@
         </template>
         <div class="row">
             <div class="col-sm-9">
-                <div v-if="language=='vi'" class="form-group">
+                <div v-if="editLanguage=='vi'" class="form-group">
                     <label class=""><strong>Title</strong></label>
                     <input v-model="title" type="text" class="form-control">
                 </div>
-                <div v-if="language=='ja'" class="form-group">
+                <div v-if="editLanguage=='ja'" class="form-group">
                     <label class=""><strong>Title</strong></label>
                     <input v-model="titleJA" type="text" class="form-control">
                 </div>
@@ -155,7 +155,7 @@
             <div class="col-sm-3">
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtLang')}}</strong></label>
-                    <select-2 v-model="language" class="select2">
+                    <select-2 v-model="editLanguage" class="select2">
                         <option value="vi">Vietnamese</option>
                         <option value="ja">Japanese</option>
                     </select-2>
@@ -166,8 +166,8 @@
         <div class="form-group">
             <div id="toolbar-container"></div>
             <div id="ck-editor">
-                <ckeditor v-if="language=='vi'" :editor="editor" v-model="editorData" :config="editorConfig" @ready="onReady"></ckeditor>
-                <ckeditor v-if="language=='ja'" :editor="editor" v-model="editorDataJA" :config="editorConfig" @ready="onReady"></ckeditor>
+                <ckeditor v-if="editLanguage=='vi'" :editor="editor" v-model="editorData" :config="editorConfig" @ready="onReady"></ckeditor>
+                <ckeditor v-if="editLanguage=='ja'" :editor="editor" v-model="editorDataJA" :config="editorConfig" @ready="onReady"></ckeditor>
             </div>
         </div>
 
@@ -339,7 +339,7 @@ export default {
                 extraPlugins: [ MyCustomUploadAdapterPlugin ],
             },
 
-            language: this.$ml.current,
+            editLanguage: this.$ml.current,
             translatable: this.currentReport.translatable,
             errors: []
         }
@@ -365,23 +365,23 @@ export default {
     },
     methods: {
         checkTranslate() {
-            return (! this.translatable) && (this.currentReport.language != this.language);
+            return (! this.translatable) && (this.currentReport.language != this.editLanguage);
         },
         translateContent() {
             let uri = "/data/translate-content";
-            let title = this.language == 'vi' ? this.title : this.titleJA;
-            let content = this.language == 'vi' ? this.editorData : this.editorDataJA;
+            let title = this.editLanguage == 'vi' ? this.title : this.titleJA;
+            let content = this.editLanguage == 'vi' ? this.editorData : this.editorDataJA;
 
             this.translatable = 1;
             
             // translate Title
 			axios
 			.post(uri, {
-				lang: this.language,
+				lang: this.editLanguage,
 				text: title,
 			})
 			.then(res => {
-				if ( this.language == 'vi' ) {
+				if ( this.editLanguage == 'vi' ) {
                     this.title = res.data.contentTranslated;
                 } else {
                     this.titleJA = res.data.contentTranslated;
@@ -395,14 +395,14 @@ export default {
             // translate Content
             axios
 			.post(uri, {
-				lang: this.language,
+				lang: this.editLanguage,
 				text: content,
 			})
 			.then(res => {
-				if ( this.language == 'vi' ) {
+				if ( this.editLanguage == 'vi' ) {
                     this.editorData = res.data.contentTranslated;
                 } else {
-                    this.editorDataJA = res.data.contentTranslated;
+                    this.editorDataJA = res.data.contentTranslated; 
                 }
 			})
 			.catch(err => {
@@ -512,11 +512,11 @@ export default {
         emitUpdateReport() {
             this.errors = [];
 
-            if ( !this.title && this.language == 'vi' ) {
+            if ( !this.title && this.editLanguage == 'vi' ) {
                 this.errors = [['Please typing the title'], ...this.errors];
             }
 
-            if ( !this.titleJA && this.language == 'ja' ) {
+            if ( !this.titleJA && this.editLanguage == 'ja' ) {
                 this.errors = [['Please typing the title'], ...this.errors];
             }
 
@@ -546,24 +546,23 @@ export default {
                 }
             }
 
-            if ( !this.editorData && this.language == 'vi' ) {
+            if ( !this.editorData && this.editLanguage == 'vi' ) {
                 this.errors = [['Please typing the content'], ...this.errors];
             }
 
-            if ( !this.editorDataJA && this.language == 'ja' ) {
+            if ( !this.editorDataJA && this.editLanguage == 'ja' ) {
                 this.errors = [['Please typing the content'], ...this.errors];
             }
 
             if ( !this.errors.length ) {
                 let uri = '/data/reports-action/' + this.currentReport.id;
                 let newItem = {
-                    language: this.language,
                     type: this.reportType,
                     seen: this.userID.toString(),
                     author: this.user_id.map((item, index) => { return item.id }).toString(),
                 };
 
-                if ( this.language == 'vi' ) {
+                if ( this.editLanguage == 'vi' ) {
                     newItem.title = this.title;
                     newItem.content = this.editorData;
                 } else {
@@ -630,7 +629,7 @@ export default {
             handler: 'contentChange'
         }],
         editorDataJA: [{
-            handler: 'contentChange'
+            handler: 'contentChange' 
         }],
         deptSelects: [
 			{ handler: "fetchDataFilter" },
