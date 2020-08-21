@@ -302,7 +302,7 @@ export default {
         ErrorItem,
         VueTimepicker
     },
-    props: ['userOptions', 'departments', 'userID'],
+    props: ['userOptions', 'departments', 'userID', 'actionNewReport'],
     data() {
         return {
             title: '',
@@ -505,14 +505,13 @@ export default {
 			this.projectSelects = null;
 		},
 		resetIssue() {
-			this.issueSelects = null;
+			this.issueSelects = null; 
         },
         defaultContent() {
             if ( this.isMeeting() ) {
                 this.editorData = '<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>';
                 this.editorDataJA = '<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>';
             } else {
-                console.log('def');
                 this.editorData = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
                 this.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
             }
@@ -533,10 +532,12 @@ export default {
             }
         },
         languageChange() {
-            this.errors = [];
-            this.title = '';
-            this.titleJA = '';
-            this.defaultContent();
+            if ( this.actionNewReport ) {
+                this.errors = [];
+                this.title = '';
+                this.titleJA = '';
+                this.defaultContent();
+            }
         }
     },
     watch: {
