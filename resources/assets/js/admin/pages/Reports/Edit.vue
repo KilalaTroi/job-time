@@ -2,32 +2,29 @@
     <card>
         <template slot="header">
             <div class="d-flex justify-content-between">
-                <h4 class="card-title">Edit Report</h4>
+                <h4 class="card-title">{{$ml.with('VueJS').get('txtEdit')}}</h4>
                 <div class="align-self-end">
-                    <button v-if="checkTranslate()" @click="translateContent()" class="btn btn-success mr-3">Translate</button>
-                    <button @click="$emit('delete-report', currentReport.id)" class="btn btn-danger mr-3">Delete</button>
-                    <button @click="$emit('back-to-list')" class="btn btn-primary">Back</button>
+                    <button v-if="checkTranslate()" @click="translateContent()" class="btn btn-success mr-3">{{$ml.with('VueJS').get('txtTranslate')}}</button>
+                    <button @click="$emit('delete-report', currentReport.id)" class="btn btn-danger mr-3">{{$ml.with('VueJS').get('txtDelete')}}</button>
+                    <button @click="$emit('back-to-list')" class="btn btn-primary">{{$ml.with('VueJS').get('txtBack')}}</button>
                 </div>
             </div>
         </template>
         <div class="row">
             <div class="col-sm-9">
-                <div v-if="editLanguage=='vi'" class="form-group">
-                    <label class=""><strong>Title</strong></label>
-                    <input v-model="title" type="text" class="form-control">
-                </div>
-                <div v-if="editLanguage=='ja'" class="form-group">
-                    <label class=""><strong>Title</strong></label>
-                    <input v-model="titleJA" type="text" class="form-control">
+                <div class="form-group">
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtTitle')}}</strong></label>
+                    <input v-if="editLanguage=='vi'" v-model="title" type="text" class="form-control">
+                    <input v-if="editLanguage=='ja'" v-model="titleJA" type="text" class="form-control">
                 </div>
             </div>
 
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label class=""><strong>Report Type</strong></label>
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtReportType')}}</strong></label>
                     <select-2 v-model="reportType" class="select2">
-                        <option value="Trouble">Trouble</option>
-                        <option value="Meeting">Meeting</option>
+                        <option value="Trouble">{{$ml.with('VueJS').get('txtTrouble')}}</option>
+                        <option value="Meeting">{{$ml.with('VueJS').get('txtMeeting')}}</option>
                     </select-2>
                 </div>
             </div>
@@ -35,7 +32,7 @@
         <div class="row form-group">
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label><strong>Date</strong></label>
+                    <label><strong>{{$ml.with('VueJS').get('lblDate')}}</strong></label>
                     <datepicker
                     name="date"
                     input-class="form-control"
@@ -49,13 +46,13 @@
             </div>
 
             <div class="col-sm-3" v-if="isMeeting()">
-                <label><strong>Time</strong></label>
+                <label><strong>{{$ml.with('VueJS').get('lblTime')}}</strong></label>
                 <vue-timepicker input-class="form-control" v-model="time" hide-disabled-items :minute-range="MinuteRange" :hour-range="HourRange"  input-width="100%" close-on-complete required></vue-timepicker>
             </div>
 
             <div :class="[{'col-sm-6' : isMeeting()}, {'col-sm-9' : !isMeeting()}]">
                 <div class="form-group">
-                    <label class><strong>Reporter</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtReporter')}}</strong></label>
                     <div>
                         <multiselect
                         :multiple="true"
@@ -74,7 +71,7 @@
 
             <div class="col-sm-12" v-if="isMeeting()">
                 <div class="form-group">
-                    <label class><strong>Attend Person (KILALA)</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtAttendee')}} (KILALA)</strong></label>
                     <div>
                         <multiselect
                         :multiple="true"
@@ -93,7 +90,7 @@
 
             <div class="col-sm-9" v-if="isMeeting()">
                 <div class="form-group">
-                    <label class><strong>Attend Person (Other)</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtAttendee')}} (Other)</strong></label>
                     <input v-model="attendPersonOther" type="text" class="form-control">
                 </div>
             </div>
@@ -156,8 +153,8 @@
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtLang')}}</strong></label>
                     <select-2 v-model="editLanguage" class="select2">
-                        <option value="vi">Vietnamese</option>
-                        <option value="ja">Japanese</option>
+                        <option value="vi">{{$ml.with('VueJS').get('txtVi')}}</option>
+                        <option value="ja">{{$ml.with('VueJS').get('txtJa')}}</option>
                     </select-2>
                 </div>
             </div>
