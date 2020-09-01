@@ -2,28 +2,25 @@
     <card class="preview">
         <template slot="header">
             <div class="d-flex justify-content-between">
-                <h4 class="card-title">Preview Report</h4>
+                <h4 class="card-title">{{$ml.with('VueJS').get('txtPreview')}}</h4>
                 <div class="align-self-end">
-                    <button @click="exportPDF" class="btn btn-danger mr-3">Export PDF</button>
-                    <button @click="$emit('back-to-list')" class="btn btn-primary">Back</button>
+                    <button @click="exportPDF" class="btn btn-danger mr-3">{{$ml.with('VueJS').get('txtExportPDF')}}</button>
+                    <button @click="$emit('back-to-list')" class="btn btn-primary">{{$ml.with('VueJS').get('txtBack')}}</button>
                 </div>
             </div>
         </template>
         <div class="row">
             <div class="col-sm-9">
-                <div v-if="preLanguage=='vi'" class="form-group">
-                    <label class=""><strong>Title</strong></label>
-                    <input :value="currentReport.title" type="text" class="form-control" :disabled="true">
-                </div>
-                <div v-if="preLanguage=='ja'" class="form-group">
-                    <label class=""><strong>Title</strong></label>
-                    <input :value="currentReport.title_ja" type="text" class="form-control" :disabled="true">
+                <div class="form-group">
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtTitle')}}</strong></label>
+                    <input v-if="preLanguage=='vi'" :value="currentReport.title" type="text" class="form-control" :disabled="true">
+                    <input v-if="preLanguage=='ja'" :value="currentReport.title_ja" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label class=""><strong>Report Type</strong></label>
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtReportType')}}</strong></label>
                     <input :value="currentReport.type" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
@@ -31,28 +28,28 @@
         <div class="row form-group">
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label><strong>Date</strong></label>
+                    <label><strong>{{$ml.with('VueJS').get('lblDate')}}</strong></label>
                     <input :value="currentReport.date_time" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
             <div class="col-sm-9">
                 <div class="form-group">
-                    <label class><strong>Reporter</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtReporter')}}</strong></label>
                     <input :value="getReporter(currentReport.reporter)" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
             <div class="col-sm-12" v-if="isMeeting()">
                 <div class="form-group">
-                    <label class><strong>Attend Person (KILALA)</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (KILALA)</strong></label>
                     <input :value="getReporter(currentReport.attend_person)" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
             <div class="col-sm-9" v-if="isMeeting()">
                 <div class="form-group">
-                    <label class><strong>Attend Person (Other)</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} ({{$ml.with('VueJS').get('txtOther')}} )</strong></label>
                     <input :value="currentReport.attend_other_person" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
@@ -79,8 +76,8 @@
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtLang')}}</strong></label>
                     <select-2 v-model="preLanguage" class="select2">
-                        <option value="vi">Vietnamese</option>
-                        <option value="ja">Japanese</option>
+                        <option value="vi">{{$ml.with('VueJS').get('txtVi')}}</option>
+                        <option value="ja">{{$ml.with('VueJS').get('txtJa')}}</option>
                     </select-2>
                 </div>
             </div>

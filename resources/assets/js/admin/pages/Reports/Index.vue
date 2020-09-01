@@ -5,7 +5,7 @@
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
-							Filter Report
+							{{$ml.with('VueJS').get('txtFilter')}}
 						</h4>
 					</div>
 				</template>
@@ -13,11 +13,11 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="form-group">
-							<label class="">Report Type</label>
+							<label class="">{{$ml.with('VueJS').get('txtReportType')}}</label>
                             <select-2 v-model="report_type" class="select2">
 								<option value="0">All</option>
-                                <option value="Trouble">Trouble</option>
-                                <option value="Meeting">Meeting</option>
+                                <option value="Trouble">{{$ml.with('VueJS').get('txtTrouble')}}</option>
+                                <option value="Meeting">{{$ml.with('VueJS').get('txtMeeting')}}</option>
                             </select-2>
 						</div>
 					</div>
@@ -125,7 +125,7 @@
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
-							Report List
+							{{$ml.with('VueJS').get('txtReportList')}}
 						</h4> 
 					</div>
 				</template>
@@ -178,14 +178,14 @@ export default {
 				{ id: "dept_name", value: 'Department', width: "", class: "" },
 				{ id: "project_name", value: 'Project', width: "", class: "" },
 				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
-				{ id: this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "120", class: "" }
+				{ id: this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "280", class: "" }
 			],
 			userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
 			currentReport: {},
 			userOptions: [],
             report_type: 0,
-            start_date: new Date(moment().subtract(1,'months').startOf('month').format('YYYY/MM/DD')),
-			end_date: new Date(),
+            start_date: new Date(moment().subtract(1,'years').startOf('month').format('YYYY/MM/DD')),
+			end_date: new Date(moment().add(1,'days').format('YYYY/MM/DD')),
 			deptSelects: null,
 			projectSelects: null,
 			issueSelects: null,
@@ -216,11 +216,11 @@ export default {
 		$(document).on('click', '.languages button', function() {
 			_this.columns = [
 				{ id: "type", value: 'Report Type', width: "120", class: "" },
-				{ id: "date_time", value: 'Report Date', width: "", class: "" },
+				{ id: "date_time", value: 'Report Date', width: "100", class: "" },
 				{ id: "dept_name", value: 'Department', width: "", class: "" },
 				{ id: "project_name", value: 'Project', width: "", class: "" },
 				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
-				{ id: _this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "120", class: "" }
+				{ id: _this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "280", class: "" }
 			];
 		});
     },
