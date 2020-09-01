@@ -13,7 +13,19 @@ class AddForeignKeySchedules extends Migration
      */
     public function up()
     {
-        Schema::table('schedules', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('schedules', function (Blueprint $table) {
+            $table->foreign('issue_id')
+                ->references('id')->on('issues')
+                ->onDelete('cascade');
+        });
+
+        Schema::connection('mysql_path')->table('schedules', function (Blueprint $table) {
+            $table->foreign('issue_id')
+                ->references('id')->on('issues')
+                ->onDelete('cascade');
+        });
+
+        Schema::connection('mysql_web')->table('schedules', function (Blueprint $table) {
             $table->foreign('issue_id')
                 ->references('id')->on('issues')
                 ->onDelete('cascade');
@@ -27,7 +39,15 @@ class AddForeignKeySchedules extends Migration
      */
     public function down()
     {
-        Schema::table('schedules', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('schedules', function (Blueprint $table) {
+            $table->dropForeign(['issue_id']);
+        });
+
+        Schema::connection('mysql_path')->table('schedules', function (Blueprint $table) {
+            $table->dropForeign(['issue_id']);
+        });
+
+        Schema::connection('mysql_web')->table('schedules', function (Blueprint $table) {
             $table->dropForeign(['issue_id']);
         });
     }
