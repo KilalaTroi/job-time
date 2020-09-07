@@ -48,6 +48,7 @@ class TypesController extends Controller
      */
     public function show($id)
     {
+        $this->changeDB();
         return response()->json(Type::findOrFail($id));
     }
 
@@ -60,6 +61,7 @@ class TypesController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->changeDB();
         $this->validate($request, [
             'slug' => 'required|unique:types,slug,'.$id.'|max:255'
         ]);
@@ -80,6 +82,7 @@ class TypesController extends Controller
      */
     public function destroy($id)
     {
+        $this->changeDB();
         $type = Type::findOrFail($id);
         $type->delete();
 
