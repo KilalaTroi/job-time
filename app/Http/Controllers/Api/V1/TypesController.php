@@ -15,6 +15,7 @@ class TypesController extends Controller
      */
     public function index()
     {
+        $this->changeDB();
         return response()->json(Type::all());
     }
 
@@ -26,7 +27,7 @@ class TypesController extends Controller
      */
     public function store(Request $request)
     {
-
+        $this->changeDB();
         $this->validate($request, [
             'slug' => 'required|unique:types|max:255'
         ]);
