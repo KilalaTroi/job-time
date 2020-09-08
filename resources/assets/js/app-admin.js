@@ -10,6 +10,7 @@ require('select2');
 window.Vue = require('vue');
 import VueRouter from 'vue-router';
 import App from './admin/App.vue';
+import store from './store/index'
 import './admin/ml';
 
 // component
@@ -43,7 +44,6 @@ import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
 import Ckeditor from './admin/pages/Ckeditor';
 import Reports from './admin/pages/Reports';
-// import Upload from './admin/pages/Upload';
 
 const routes = [{
         path: '/',
@@ -124,11 +124,6 @@ const routes = [{
                 name: 'Reports',
                 component: Reports
             },
-            // {
-            //     path: 'upload',
-            //     name: 'Upload',
-            //     component: Upload
-            // },
             {
                 path: '*',
                 component: NotFound
@@ -151,6 +146,7 @@ const router = new VueRouter({
 
 const app = new Vue({
     el: '#app',
+    store,
     render: h => h(App),
     router
 });

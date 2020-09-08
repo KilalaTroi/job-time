@@ -32,6 +32,7 @@ class UsersController extends Controller
             ->get()->toArray();
 
         return response()->json([
+            'login_user' => session()->get('Auth'),
             'users' => $users,
             'roles' => Role::all()
         ]);
