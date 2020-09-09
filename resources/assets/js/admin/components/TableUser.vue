@@ -59,7 +59,7 @@ export default {
             getUserById: 'users/getUserById'
         })
     },
-    
+
     mounted() {
         const _this = this
         const _translate = _this.$ml.with('VueJS')
