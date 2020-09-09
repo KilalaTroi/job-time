@@ -1,36 +1,34 @@
 <template>
   <modal id="itemCreate" v-on:reset-validation="resetValidation">
     <template slot="title">{{$ml.with('VueJS').get('txtCreateDept')}}</template>
-    <form @submit="emitDepartment">
-      <div class="form-group">
-        <label class>{{$ml.with('VueJS').get('txtName')}}</label>
-        <input
-          v-model="selectedDepartment.name"
-          type="text"
-          name="name"
-          class="form-control"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
-        <input v-model="selectedDepartment.name_vi" type="text" name="name_vi" class="form-control" />
-      </div>
-      <div class="form-group">
-        <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
-        <input v-model="selectedDepartment.name_ja" type="text" name="name_ja" class="form-control" />
-      </div>
-      <error-item :errors="validationErrors"></error-item>
-      <success-item :success="validationSuccess"></success-item>
-      <hr />
-      <div class="form-group text-right">
-        <button
-          @click="emitDepartment"
-          type="button"
-          class="btn btn-primary"
-        >{{$ml.with('VueJS').get('txtCreate')}}</button>
-      </div>
-    </form>
+    <div class="form-group">
+      <label class>{{$ml.with('VueJS').get('txtName')}}</label>
+      <input
+        v-model="selectedDepartment.name"
+        type="text"
+        name="name"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
+      <input v-model="selectedDepartment.name_vi" type="text" name="name_vi" class="form-control" />
+    </div>
+    <div class="form-group">
+      <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
+      <input v-model="selectedDepartment.name_ja" type="text" name="name_ja" class="form-control" />
+    </div>
+    <error-item :errors="validationErrors"></error-item>
+    <success-item :success="validationSuccess"></success-item>
+    <hr />
+    <div class="form-group text-right">
+      <button
+        @click="createDepartment(selectedDepartment)"
+        type="button"
+        class="btn btn-primary"
+      >{{$ml.with('VueJS').get('txtCreate')}}</button>
+    </div>
   </modal>
 </template>
 
@@ -62,14 +60,9 @@ export default {
       createDepartment: "departments/createDepartment",
     }),
 
-    emitDepartment() {
-      let department = Object.assign({}, {}, this.selectedDepartment);
-      this.createDepartment(department);
-    },
-
     resetValidation() {
-      this.resetValidate();
-      this.resetSelectedDepartment();
+      this.resetValidate()
+      this.resetSelectedDepartment()
     },
   },
 };

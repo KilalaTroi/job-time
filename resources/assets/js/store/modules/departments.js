@@ -68,7 +68,7 @@ export default {
 
 		updateDepartment({ commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/departments/" + department.id;
+			const uri = "/data/departments/" + department.id
 			axios
 				.patch(uri, department)
 				.then(res => {
@@ -82,10 +82,11 @@ export default {
 
 		createDepartment({ commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/departments/";
+			const uri = "/data/departments"
 			axios
 				.post(uri, department)
 				.then(res => {
+					commit('SET_SELECTED_DEPARTMENT', {})
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {
@@ -95,7 +96,7 @@ export default {
 		},
 
 		resetValidate({ dispatch, commit }) {
-			dispatch('getAllDepartments');
+			dispatch('getAllDepartments')
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 

@@ -50,7 +50,7 @@ class UsersController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:100|unique:users',
             'email' => 'required|string|email|max:100|unique:users',
-            'role' => 'required|not_in:0',
+            'r_name' => 'required|not_in:0',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -64,7 +64,7 @@ class UsersController extends Controller
 
         $user
             ->roles()
-            ->attach(Role::where('name', $request->get('role'))->first());
+            ->attach(Role::where('name', $request->get('r_name'))->first());
 
         return response()->json(array(
             'id' => $user->id,

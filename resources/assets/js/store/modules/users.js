@@ -5,6 +5,7 @@ export default {
         columns: [],
         items: [],
         roles: [],
+        roleOptions: [],
         selectedUser: {},
         validationErrors: '',
         validationSuccess: ''
@@ -14,15 +15,24 @@ export default {
         columns: state => state.columns,
         items: state => state.items,
         roles: state => state.roles,
+        roleOptions: state => state.roleOptions,
         selectedUser: state => state.selectedUser,
         validationErrors: state => state.validationErrors,
-        validationSuccess: state => state.validationSuccess,
+        validationSuccess: state => state.validationSuccess
     },
 
     mutations: {
+        SET_COLUMNS: (state, columns) => {
+            state.columns = columns
+        },
+
         GET_ALL_USER: (state, data) => {
             state.items = data.users
             state.roles = data.roles
+        },
+
+        SET_ROLE_OPTIONS: (state, dataOptions) => {
+            state.roleOptions = dataOptions
         },
 
         SET_USERS: (state, users) => {
@@ -36,41 +46,62 @@ export default {
         SET_VALIDATE: (state, data) => {
             state.validationErrors = data.error
             state.validationSuccess = data.success
-        },
-
-        SET_COLUMNS: (state, columns) => {
-            state.columns = columns
         }
     },
 
     actions: {
+        setColumns({ commit }, _translate) {
+            const columns = [
+                { id: "username", value: _translate.get('lblUsername'), width: "120", class: "" },
+                { id: "r_name", value: _translate.get('txtRole'), width: "120", class: "" },
+                { id: "name", value: _translate.get('txtName'), width: "120", class: "" },
+                { id: "email", value: _translate.get('txtEmail'), width: "120", class: "" }
+            ]
+
+            commit('SET_COLUMNS', columns)
+        },
+
         getAllUser({ commit }) {
             axios.get('/data/users').then(response => {
                 commit('GET_ALL_USER', response.data)
             })
         },
 
-        deleteUser({ state, commit }, user) {
+        getRoleOptions({ state, commit }) {
+            let dataOptions = []
+            let obj = {
+                id: 0,
+                text: "Select role"
+            }
+            dataOptions.push(obj)
+            
+            dataOptions = [...dataOptions, ...state.roles.map(item => {
+                return {
+                    id: item.name,
+                    text: item.name
+                }
+            })]
+
+            commit('SET_ROLE_OPTIONS', dataOptions)
+        },
+
+        deleteUser({ dispatch }, user) {
             if (confirm(user.msgText)) {
                 axios.delete('/data/users/' + user.id)
                 .then(res => {
-                    const users = state.items.filter(item => item.id !== user.id)
-                    commit('SET_USERS', [...users])
+                    dispatch('getAllUser')
                 })
                 .catch(err => console.log(err))
             }
         },
 
-        archiveUser({ state, commit, rootGetters }, user) {
+        archiveUser({ dispatch, rootGetters }, user) {
             const disable_date = !user.disable_date ? rootGetters['dateFormat'](new Date(), 'YYYY-MM-DD') : null
             const uri = '/data/users/archive/' + user.id + '/' + disable_date
 
             axios.get(uri)
             .then((response) => {
-                const users = state.items
-                const foundIndex = users.findIndex(x => x.id == user.id )
-                users[foundIndex].disable_date = disable_date
-                commit('SET_USERS', [...users])
+                dispatch('getAllUser')
             }).catch(err => console.log(err))
         },
 
@@ -79,22 +110,17 @@ export default {
             commit('SET_SELECTED_USER', user)
         },
 
-        resetSelectedUser({ commit }) {
-            commit('SET_SELECTED_USER', {})
+        setSelectedUser({ state, commit, rootGetters }, obj) {
+            commit('SET_SELECTED_USER', obj)
         },
 
-        updateUser({ state, commit }, user) {
+        updateUser({ commit }, user) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
             const uri = "/data/users/" + user.id;
             axios
                 .patch(uri, user)
                 .then(res => {
-                    const users = state.items
-                    const foundIndex = users.findIndex(x => x.id == user.id);
-                    users[foundIndex] = user;
-
-                    commit('SET_USERS', [...users])
                     commit('SET_VALIDATE', { error: '', success: res.data.message })
                 })
                 .catch(err => {
@@ -105,19 +131,30 @@ export default {
                 });
         },
 
-        resetValidate({ commit }) {
+        resetValidate({ dispatch, commit }) {
+            dispatch('getAllUser')
             commit('SET_VALIDATE', {error: '', success: ''})
         },
 
-        setColumns({ commit }, _translate) {
-            const columns = [
-                { id: "username", value: _translate.get('lblUsername'), width: "120", class: "" },
-                { id: "r_name", value: _translate.get('txtRole'), width: "120", class: "" },
-                { id: "name", value: _translate.get('txtName'), width: "120", class: "" },
-                { id: "email", value: _translate.get('txtEmail'), width: "120", class: "" }
-            ]
+        createUser({ state, commit }, newUser) {
+            commit('SET_VALIDATE', {error: '', success: ''})
+            const uri = "/data/users";
+            axios
+                .post(uri, newUser)
+                .then(res => {
+                    commit('SET_SELECTED_USER', {})
+                    commit('SET_VALIDATE', { error: '', success: res.data.message })
+                })
+                .catch(err => {
+                    console.log(err);
+                    if (err.response.status == 422) {
+                        commit('SET_VALIDATE', { error: err.response.data, success: '' })
+                    }
+                });
+        },
 
-            commit('SET_COLUMNS', columns)
-        }
+        resetSelectedUser({ commit }) {
+            commit('SET_SELECTED_USER', {})
+        },
     }
 }
