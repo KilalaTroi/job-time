@@ -5,6 +5,7 @@ export default {
         columns: [],
         items: [],
         roles: [],
+        roleOptions: [],
         selectedUser: {},
         validationErrors: '',
         validationSuccess: ''
@@ -14,15 +15,20 @@ export default {
         columns: state => state.columns,
         items: state => state.items,
         roles: state => state.roles,
+        roleOptions: state => state.roleOptions,
         selectedUser: state => state.selectedUser,
         validationErrors: state => state.validationErrors,
-        validationSuccess: state => state.validationSuccess,
+        validationSuccess: state => state.validationSuccess
     },
 
     mutations: {
         GET_ALL_USER: (state, data) => {
             state.items = data.users
             state.roles = data.roles
+        },
+
+        SET_ROLE_OPTIONS: (state, dataOptions) => {
+            state.roleOptions = dataOptions
         },
 
         SET_USERS: (state, users) => {
@@ -91,7 +97,7 @@ export default {
                 .patch(uri, user)
                 .then(res => {
                     const users = state.items
-                    const foundIndex = users.findIndex(x => x.id == user.id);
+                    const foundIndex = users.findIndex(x => x.id == user.id)
                     users[foundIndex] = user;
 
                     commit('SET_USERS', [...users])
@@ -118,6 +124,43 @@ export default {
             ]
 
             commit('SET_COLUMNS', columns)
+        },
+
+        getRoleOptions({ state, commit }) {
+            let dataOptions = []
+            let obj = {
+                id: 0,
+                text: "Select role"
+            }
+            dataOptions.push(obj)
+            
+            dataOptions = [...dataOptions, ...state.roles.map(item => {
+                return {
+                    id: item.name,
+                    text: item.name
+                }
+            })]
+
+            commit('SET_ROLE_OPTIONS', dataOptions)
+        },
+
+        createUser({ state, commit }, newUser) {
+            commit('SET_VALIDATE', {error: '', success: ''})
+            const uri = "/data/users";
+            axios
+                .post(uri, newUser)
+                .then(res => {
+                    newUser.r_name = newUser.role;
+                    const addIdItem = Object.assign({}, {id: res.data.id}, newUser)
+                    commit('SET_USERS', [...state.items, addIdItem])
+                    commit('SET_VALIDATE', { error: '', success: res.data.message })
+                })
+                .catch(err => {
+                    console.log(err);
+                    if (err.response.status == 422) {
+                        commit('SET_VALIDATE', { error: err.response.data, success: '' })
+                    }
+                });
         }
     }
 }

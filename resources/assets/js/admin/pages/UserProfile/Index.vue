@@ -16,17 +16,11 @@
                     <h4 class="card-title">{{$ml.with('VueJS').get('txtUserList')}}</h4>
                 </template>
                 <div class="table-responsive">
-                    <table-user class="table-hover table-striped" />
+                    <table-user class="table-hover table-striped"/>
                 </div>
             </card>
 
-            <create-item
-                    :errors="validationErrors"
-                    :success="validationSuccess"
-                    :roles="roles"
-                    v-on:create-user="createUser">
-            </create-item>
-
+            <create-item/>
             <edit-item/>
         </div>
     </div>
@@ -50,38 +44,26 @@
 
         computed: {
             ...mapGetters({
-                columns: 'users/columns',
-                users: 'users/items',
-                roles: 'users/roles',
-                selectedUser: 'users/selectedUser',
-                validationErrors: 'users/validationErrors',
-                validationSuccess: 'users/validationSuccess'
+                roles: 'users/roles'
             })
         },
 
         methods: {
-            createUser(newUser) {
-                // Reset validate
-                this.validationErrors = "";
-                this.validationSuccess = "";
-
-                let uri = "/data/users";
-                axios
-                    .post(uri, newUser)
-                    .then(res => {
-                        newUser.r_name = newUser.role;
-                        let addIdItem = Object.assign({}, {id: res.data.id}, newUser);
-                        this.users = [...this.users, addIdItem];
-                        this.validationSuccess = res.data.message;
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        if (err.response.status == 422) {
-                            this.validationErrors = err.response.data;
-                            console.log(this.validationErrors)
-                        }
-                    });
-            }
+            ...mapActions({
+                getAllUser: 'users/getAllUser',
+                getRoleOptions: 'users/getRoleOptions'
+            })
         },
+
+        mounted() {
+            const _this = this
+            _this.getAllUser()
+        },
+
+        watch: {
+            roles: [{
+                handler: 'getRoleOptions'
+            }]
+        }
     };
 </script>

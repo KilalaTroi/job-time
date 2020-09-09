@@ -1,5 +1,5 @@
 <template>
-	<modal id="itemCreate" v-on:reset-validation="$emit('reset-validation')">
+	<modal id="itemCreate" v-on:reset-validation="resetValidation">
 		<template slot="title">{{$ml.with('VueJS').get('txtCreateUser')}}</template>
 		<form @submit="emitCreateUser">
 			<div class="form-group">
@@ -29,7 +29,7 @@
 				<label class="">{{$ml.with('VueJS').get('txtRole')}}
 				</label>
 				<div>
-					<select-2 :options="rolesOption" v-model="role" class="select2">
+					<select-2 :options="roleOptions" v-model="role" class="select2">
 						<option disabled value="0">{{$ml.with('VueJS').get('txtSelectRole')}}</option>
 					</select-2>
 				</div>
@@ -44,8 +44,8 @@
 				</label>
 				<input v-model="password_confirmation" type="password" name="password_confirmation" class="form-control" required>
 			</div>
-			<error-item :errors="errors"></error-item>
-			<success-item :success="success"></success-item>
+			<error-item :errors="validationErrors"></error-item>
+			<success-item :success="validationSuccess"></success-item>
 			<hr>
 			<div class="form-group text-right">
 				<button type="submit" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}
@@ -54,21 +54,24 @@
 		</form>
 	</modal>
 </template>
+
 <script>
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
 	name: 'CreateItem',
+
 	components: {
 		Select2,
 		ErrorItem,
 		SuccessItem,
 		Modal
 	},
-	props: ['roles', 'errors', 'success'],
+
 	data() {
 		return {
 			name: '',
@@ -77,36 +80,24 @@ export default {
 			language: this.$ml.current,
 			role: 0,
 			password: '',
-			password_confirmation: '',
-			rolesOption: []
+			password_confirmation: ''
 		}
 	},
-	mounted() {
-		let _this = this;
-		$(document).on('click', '.languages button', function() {
-			_this.language = _this.$ml.current
-		});
-	},
-	methods: {
-		getDataRoles(data) {
-			if (data.length) {
-				let dataOptions = [];
-				let obj = {
-					id: 0,
-					text: "Select role"
-				};
-				dataOptions.push(obj);
 
-				for (let i = 0; i < data.length; i++) {
-					let obj = {
-						id: data[i].name,
-						text: data[i].name
-					};
-					dataOptions.push(obj);
-				}
-				this.rolesOption = dataOptions;
-			}
-		},
+	computed: {
+        ...mapGetters({
+            roleOptions: 'users/roleOptions',
+            validationErrors: 'users/validationErrors',
+			validationSuccess: 'users/validationSuccess'
+        })
+	},
+
+	methods: {
+		...mapActions({
+            resetValidate: 'users/resetValidate',
+            createUser: 'users/createUser'
+		}),
+		
 		emitCreateUser(e) {
 			e.preventDefault();
 
@@ -120,25 +111,9 @@ export default {
 				password_confirmation: this.password_confirmation
 			};
 
-			this.$emit('create-user', newUser);
+			this.createUser(newUser);
 		},
-		customFormatter(date) {
-			return moment(date).format('DD-MM-YYYY');
-		},
-		disabledStartDates() {
-			let obj = {
-				to: new Date(this.start_date), // Disable all dates after specific date
-				// days: [0], // Disable Saturday's and Sunday's
-			};
-			return obj;
-		},
-		disabledEndDates() {
-			let obj = {
-				from: new Date(this.end_date), // Disable all dates after specific date
-				// days: [0], // Disable Saturday's and Sunday's
-			};
-			return obj;
-		},
+
 		resetData(data) {
 			// Reset
 			if (data.length) {
@@ -150,13 +125,23 @@ export default {
 				this.password = '';
 				this.password_confirmation = '';
 			}
-		}
+		},
+
+		resetValidation() {
+            this.resetValidate()
+            this.resetData()
+        }
 	},
+	
+	mounted() {
+		let _this = this;
+		$(document).on('click', '.languages button', function() {
+			_this.language = _this.$ml.current
+		});
+	},
+
 	watch: {
-		roles: [{
-			handler: 'getDataRoles'
-		}],
-		success: [{
+		validationSuccess: [{
 			handler: 'resetData'
 		}]
 	}

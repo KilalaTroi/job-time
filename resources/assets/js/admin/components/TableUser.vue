@@ -53,7 +53,6 @@ export default {
     methods: {
         ...mapActions({
             setColumns: 'users/setColumns',
-            getAllUser: 'users/getAllUser',
             deleteUser: 'users/deleteUser',
             archiveUser: 'users/archiveUser',
             getUserById: 'users/getUserById'
@@ -64,7 +63,6 @@ export default {
         const _this = this
         const _translate = _this.$ml.with('VueJS')
         _this.setColumns(_translate)
-        _this.getAllUser()
         $(document).on('click', '.languages button', function() {
             _this.setColumns(_translate)
         })

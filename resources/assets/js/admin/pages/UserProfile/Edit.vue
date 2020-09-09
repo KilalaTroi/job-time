@@ -24,7 +24,7 @@
             <div class="form-group">
                 <label class="">{{$ml.with('VueJS').get('txtRole')}}</label>
                 <div>
-                    <select-2 :options="rolesOption" v-model="selectedUser.r_name" class="select2">
+                    <select-2 :options="roleOptions" v-model="selectedUser.r_name" class="select2">
                         <option disabled value="0">Select role</option>
                     </select-2>
                 </div>
@@ -75,14 +75,13 @@ export default {
     data() {
         return {
             password: '',
-            password_confirmation: '',
-            rolesOption: []
+            password_confirmation: ''
         }
     },
 
     computed: {
         ...mapGetters({
-            roles: 'users/roles',
+            roleOptions: 'users/roleOptions',
             selectedUser: 'users/selectedUser',
             validationErrors: 'users/validationErrors',
             validationSuccess: 'users/validationSuccess',
@@ -97,26 +96,6 @@ export default {
             resetSelectedUser: 'users/resetSelectedUser',
             updateUser: 'users/updateUser'
         }),
-
-        getDataRoles(data) {
-            if (data.length) {
-                let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select role"
-                };
-                dataOptions.push(obj);
-
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].name,
-                        text: data[i].name
-                    };
-                    dataOptions.push(obj);
-                }
-                this.rolesOption = dataOptions;
-            }
-        },
 
         emitUser() {
             let user = Object.assign({}, {
@@ -135,12 +114,6 @@ export default {
             this.resetValidate()
             this.resetSelectedUser()
         }
-    },
-
-    watch: {
-        roles: [{
-            handler: 'getDataRoles'
-        }]
     }
 }
 </script>
