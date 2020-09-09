@@ -43,41 +43,6 @@
         </td>
       </tr>
     </tbody>
-    <!-- <tbody>
-      <tr v-for="(item, index) in data" :key="index">
-        <slot :row="item">
-          <td v-for="(column, index) in columns" :key="index" :class="column.class">
-            <span
-              v-if="checkTypeColor(column)"
-              :style="setBackground(itemValue(item, column))"
-              class="type-color"
-            ></span>
-            <span v-else v-html="itemValue(item, column)"></span>
-          </td>
-        </slot>
-        <td class="text-center">
-          <button
-            @click="$emit('get-item', item.id)"
-            type="button"
-            class="btn btn-xs btn-default"
-            data-toggle="modal"
-            data-target="#itemDetail"
-            data-backdrop="static"
-            data-keyboard="false"
-          >
-            <i class="fa fa-pencil" aria-hidden="true"></i>
-          </button>
-
-          <button
-            @click="$emit('delete-item', item.id)"
-            type="button"
-            class="btn btn-xs btn-danger ml-sm-2"
-          >
-            <i class="fa fa-trash" aria-hidden="true"></i>
-          </button>
-        </td>
-      </tr>
-    </tbody>-->
   </table>
 </template>
 <script>
@@ -90,8 +55,7 @@ export default {
     ...mapGetters({
       columns: "departments/columns",
       departmens: "departments/items",
-      itemValue: "table/itemValue",
-      archiveClass: "table/archiveClass",
+      itemValue: "table/itemValue"
     }),
   },
 

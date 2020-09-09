@@ -25,7 +25,7 @@
       <hr />
       <div class="form-group text-right">
         <button
-          @click="emitDepartment"
+          @click="updateDepartment(selectedDepartment)"
           type="button"
           class="btn btn-primary"
         >{{$ml.with('VueJS').get('txtUpdate')}}</button>
@@ -61,14 +61,9 @@ export default {
       updateDepartment: "departments/updateDepartment",
     }),
 
-    emitDepartment() {
-      let department = Object.assign({}, {}, this.selectedDepartment);
-
-      this.updateDepartment(department);
-    },
-
     resetValidation() {
-      this.resetSelectedDepartment();
+      this.resetValidate()
+      this.resetSelectedDepartment()
     },
   },
 };

@@ -36,17 +36,17 @@
             </div>
             <div class="form-group">
                 <label class="">{{$ml.with('VueJS').get('txtPassword')}}</label>
-                <input v-model="password" type="password" name="password" class="form-control">
+                <input v-model="selectedUser.password" type="password" name="password" class="form-control">
             </div>
             <div class="form-group">
                 <label class="">{{$ml.with('VueJS').get('txtRePassword')}}</label>
-                <input v-model="password_confirmation" type="password" name="password_confirmation" class="form-control">
+                <input v-model="selectedUser.password_confirmation" type="password" name="password_confirmation" class="form-control">
             </div>
             <error-item :errors="validationErrors"></error-item>
             <success-item :success="validationSuccess"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button @click="emitUser" type="button" class="btn btn-primary">
+                <button @click="updateUser(selectedUser)" type="button" class="btn btn-primary">
                     {{$ml.with('VueJS').get('txtUpdate')}}
                 </button>
             </div>
@@ -72,13 +72,6 @@ export default {
         Datepicker
     },
 
-    data() {
-        return {
-            password: '',
-            password_confirmation: ''
-        }
-    },
-
     computed: {
         ...mapGetters({
             roleOptions: 'users/roleOptions',
@@ -96,15 +89,6 @@ export default {
             resetSelectedUser: 'users/resetSelectedUser',
             updateUser: 'users/updateUser'
         }),
-
-        emitUser() {
-            let user = Object.assign({}, {
-                password: this.password,
-                password_confirmation: this.password_confirmation
-            }, this.selectedUser);
-
-            this.updateUser(user);
-        },
 
         customFormatter(date) {
             return this.dateFormat(date, 'YYYY/MM/DD');

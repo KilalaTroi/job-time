@@ -24,6 +24,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import TableDepartment from "../../components/TableDepartment";
 import Card from "../../components/Cards/Card";
@@ -39,13 +40,6 @@ export default {
     CreateItem,
     EditItem,
     ButtonCreate,
-  },
-
-  computed: {
-    ...mapGetters({
-      columns: "departments/columns",
-      departments: "departments/items",
-    }),
-  },
+  }
 };
 </script>
