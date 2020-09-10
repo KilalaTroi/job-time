@@ -51,7 +51,7 @@ export default {
 			if (confirm(department.msgText)) {
 				axios.delete('/data/departments/' + department.id)
 					.then(res => {
-						dispatch('getAllDepartments');
+						dispatch('getAllDepartments')
 					})
 					.catch(err => console.log(err))
 			}
