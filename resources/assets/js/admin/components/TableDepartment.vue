@@ -70,11 +70,10 @@ export default {
 
   mounted() {
     const _this = this;
-    const _translate = _this.$ml.with("VueJS");
-    _this.setColumns(_translate);
+    _this.setColumns();
     _this.getAllDepartments();
     $(document).on("click", ".languages button", function () {
-      _this.setColumns(_translate);
+      _this.setColumns();
     });
   },
 };

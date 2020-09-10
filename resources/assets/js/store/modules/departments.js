@@ -100,11 +100,11 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit }, _translate) {
+		setColumns({ commit, rootState, rootGetters }) {
 			const columns = [
-				{ id: "name", value: _translate.get('txtName'), width: "", class: "" },
-				{ id: "name_vi", value: _translate.get('txtNameVi'), width: "", class: "" },
-				{ id: "name_ja", value: _translate.get('txtNameJa'), width: "", class: "" },
+				{ id: "name", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: "", class: "" },
+				{ id: "name_vi", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtNameVi'), width: "", class: "" },
+				{ id: "name_ja", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtNameJa'), width: "", class: "" },
 			]
 
 			commit('SET_COLUMNS', columns)

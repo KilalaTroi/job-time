@@ -102,13 +102,13 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit }, _translate) {
+		setColumns({ commit, rootState, rootGetters }) {
 			const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
 			const columns = [
-				{id: 'slug', value: _translate.get('txtSlug'), width: '200', class: ''},
-				{id: 'value', value: _translate.get('txtColor'), width: '110', class: 'text-center'},
-				{id: 'slug_' + langDefault, value: _translate.get('txtName'), width: '200', class: ''},
-				{id: 'description_' + langDefault, value: _translate.get('txtDesc'), width: '', class: ''}
+				{id: 'slug', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtSlug'), width: '200', class: ''},
+				{id: 'value', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtColor'), width: '110', class: 'text-center'},
+				{id: 'slug_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: '200', class: ''},
+				{id: 'description_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtDesc'), width: '', class: ''}
 			]
 
 			commit('SET_COLUMNS', columns)
