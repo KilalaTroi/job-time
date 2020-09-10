@@ -12,16 +12,19 @@ export default {
                 return item[column.id.toLowerCase()]
             }
         },
+
         itemValue() {
             return (item, column) => {
                 return item[column.id.toLowerCase()] ? item[column.id.toLowerCase()] : '--'
             }
         },
+
         checkTypeColor() {
             return (data) => {
                 return data.id == 'value'
             }
         },
+
         setBackground() {
             return (color) => {
                 return {
@@ -29,6 +32,7 @@ export default {
                 };
             }
         },
+        
         archiveClass() {
             return (archive) => {
                 return archive === null ? "fa fa-archive" : "fa fa-unlock"

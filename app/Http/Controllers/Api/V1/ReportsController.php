@@ -382,6 +382,8 @@ class ReportsController extends Controller
     }
 
     function getNotify() {
+        $this->changeDB();
+        
         $user_id = $_GET['user_id'];
         $count_notify = 0;
 

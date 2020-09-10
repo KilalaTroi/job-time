@@ -6,7 +6,7 @@
                     <img width="50" src="/images/logo.png" :alt="$ml.with('VueJS').get('siteName')">
                 </div>
             </router-link>
-            <p class="navbar-brand d-none d-sm-block">{{$ml.with('VueJS').get('txtWelcome')}} {{ currentUser.name }}</p>
+            <p class="navbar-brand d-none d-sm-block">{{$ml.with('VueJS').get('txtWelcome')}} {{ loginUser.name }}</p>
             <div class="languages nav-item d-block d-sm-none ml-auto mr-3">
                 <button
                     v-for="lang in $ml.list"
@@ -48,52 +48,56 @@
         </div>
     </nav>
 </template>
+
 <script>
+import { mapGetters, mapActions } from "vuex"
+
 export default {
     computed: {
+        ...mapGetters({
+            loginUser: 'loginUser'
+        }),
+
         routeName() {
             const { name } = this.$route
             return this.capitalizeFirstLetter(name)
         }
     },
-    data() {
-        return {
-            activeNotifications: false,
-            userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
-            currentUser: {}
-        }
-    },
-    mounted() {
-        this.fetch();
-    },
+    
     methods: {
-        fetch() {
-            let uri = '/data/users/' + this.userID;
-            axios.get(uri).then((response) => {
-                this.currentUser = response.data.user;
-            });
-        },
+        ...mapActions({
+            setTranslateTexts: 'setTranslateTexts',
+            setLoginUser: 'setLoginUser'
+        }),
+        
         activeLanguage(language) {
             $('body').attr('class', '').addClass('language-'+this.$ml.current);
             if ( this.$ml.current === language )
                 return 'bg-success';
             return 'bg-secondary';
         },
+
         capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1)
         },
-        toggleNotificationDropDown() {
-            this.activeNotifications = !this.activeNotifications
-        },
-        closeDropDown() {
-            this.activeNotifications = false
-        },
+
         toggleSidebar() {
             this.$sidebar.displaySidebar(!this.$sidebar.showSidebar)
         },
+
         hideSidebar() {
             this.$sidebar.displaySidebar(false)
         }
+    },
+
+    mounted() {
+        const _this = this;
+
+        const userID = document.querySelector("meta[name='user-id']").getAttribute('content')
+        _this.setLoginUser(userID)
+
+        const _translateTexts = _this.$ml.with("VueJS");
+        _this.setTranslateTexts(_translateTexts);
     }
 }
 </script>

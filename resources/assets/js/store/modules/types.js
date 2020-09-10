@@ -1,7 +1,6 @@
 export default {
 	namespaced: true,
 
-
 	state: {
 		columns: [],
 		items: [],
@@ -17,7 +16,7 @@ export default {
 		items: state => state.items,
 		selectedType: state => state.selectedType,
 		validationErrors: state => state.validationErrors,
-		validationSuccess: state => state.validationSuccess,
+		validationSuccess: state => state.validationSuccess
 	},
 
 	mutations: {
@@ -54,7 +53,7 @@ export default {
 			if (confirm(type.msgText)) {
 				axios.delete('/data/types/' + type.id)
 					.then(res => {
-						dispatch('getAllTypes');
+						dispatch('getAllTypes')
 					})
 					.catch(err => console.log(err))
 			}

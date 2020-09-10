@@ -30,7 +30,6 @@ import Card from "../../components/Cards/Card";
 import CreateItem from "./Create";
 import EditItem from "./Edit";
 import ButtonCreate from "../../components/Buttons/Create";
-import { mapGetters, mapActions } from "vuex";
 
 export default {
   components: {
