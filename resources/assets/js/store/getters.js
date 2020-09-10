@@ -8,11 +8,13 @@ export default {
             return result.length ? result[0] : {}
         }
     },
+
     dateFormat() {
         return (date, string) => {
             return moment(date).format(string)
         }
     },
+
     getLangCode() {
         const dataLang = {
             vi: vi,

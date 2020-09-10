@@ -9,6 +9,7 @@ import actions from './actions'
 import table from './modules/table'
 import users from './modules/users'
 import departments from './modules/departments'
+import types from './modules/types'
 
 Vue.use(Vuex)
 
@@ -20,7 +21,8 @@ export default new Vuex.Store({
   modules: {
     table,
     users,
-    departments
+    departments,
+    types
   },
 })
 
