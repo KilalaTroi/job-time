@@ -23,6 +23,7 @@ class UsersController extends Controller
                 'user.name as name',
                 'user.username as username',
                 'user.email as email',
+                'user.team as team',
                 'user.language as language',
                 'user.disable_date as disable_date',
                 'role.name as r_name'
@@ -50,6 +51,7 @@ class UsersController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:100|unique:users',
             'email' => 'required|string|email|max:100|unique:users',
+            'team' => 'required',
             'r_name' => 'required|not_in:0',
             'password' => 'required|string|min:6|confirmed',
         ]);
@@ -59,6 +61,7 @@ class UsersController extends Controller
             'username' => $request->get('username'),
             'language' => $request->get('language'),
             'email' => $request->get('email'),
+            'team' => $request->get('team'),
             'password' => bcrypt($request->get('password')),
         ]);
 
@@ -100,6 +103,7 @@ class UsersController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:100|unique:users,username,'.$id.'|alpha_dash',
             'email' => 'required|string|email|max:100|unique:users,email,'.$id,
+            'team' => 'required',
         ]);
 
         $user = User::findOrFail($id);
@@ -129,6 +133,7 @@ class UsersController extends Controller
             'username' => $request->get('username'),
             'language' => $request->get('language'),
             'email' => $request->get('email'),
+            'team' => $request->get('team'),
             'disable_date' => $request->get('disable_date'),
         ]);
 
