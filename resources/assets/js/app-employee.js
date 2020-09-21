@@ -10,6 +10,7 @@ require('select2');
 window.Vue = require('vue');
 import VueRouter from 'vue-router';
 import App from './admin/App.vue';
+import store from './store/index'
 import './admin/ml';
 
 // component
@@ -94,6 +95,7 @@ const router = new VueRouter({
 
 const app = new Vue({
     el: '#app',
+    store,
     render: h => h(App),
     router
 });
