@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 class StatisticsController extends Controller
 {
     public function timeAllocation() {
+        $this->changeDB();
         $data = array();
         $startMonth = $_GET['startMonth'];
         $endMonth = $_GET['endMonth'];
@@ -38,6 +39,7 @@ class StatisticsController extends Controller
     }
 
     public function filterAllocation() {
+        $this->changeDB();
         $data = array();
         $user_id = $_GET['user_id'];
         $startMonth = $_GET['startMonth'];
@@ -57,6 +59,7 @@ class StatisticsController extends Controller
 
     public function getDataTotaling(Request $request) {
         // POST data
+        $this->changeDB();
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
@@ -369,25 +372,39 @@ class StatisticsController extends Controller
 
             $monthsText[] = $getM->format('M');
             $daysOfMonth[$inYearMonth] = array(
-                 'start' => $startM,
-                 'end' => $endM
+                'start' => $startM,
+                'end' => $endM
             );
 
             // Full day off
-            $data['off_days'][$inYearMonth]['full'] = DB::table('off_days')
+            $data['off_days'][$inYearMonth]['full'] = DB::connection('mysql')->table('off_days')
+            ->leftJoin('users', 'users.id', '=', 'off_days.user_id')
             ->where('type', '=', 'all_day')
             ->where('date', '<=', $endM)
             ->where('date', '>=',  $startM)
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
             ->count();
 
             // Half day off
-            $data['off_days'][$inYearMonth]['half'] = DB::table('off_days')
+            $data['off_days'][$inYearMonth]['half'] = DB::connection('mysql')->table('off_days')
+            ->leftJoin('users', 'users.id', '=', 'off_days.user_id')
             ->where('type', '<>', 'all_day')
             ->where('date', '<=', $endM)
             ->where('date', '>=',  $startM)
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
@@ -421,7 +438,7 @@ class StatisticsController extends Controller
     }
 
     function getUsers($startMonth, $endMonth, $user_id = 0) {
-        $users['all'] = DB::table('role_user as ru')
+        $users['all'] = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -430,12 +447,24 @@ class StatisticsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->get()->toArray();
 
-        $users['old'] = DB::table('role_user')
+        $users['old'] = DB::connection('mysql')->table('role_user')
             ->select('users.id')
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('users.id', $user_id);
             })
@@ -447,9 +476,32 @@ class StatisticsController extends Controller
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
             ->where('users.created_at', "<", str_replace('/', '-', $startMonth))
             ->count();
+        
+
+        $userDisableArr = array();
+
+        $users['disable'] = DB::connection('mysql')->table('users')
+            ->select(
+                'id'
+            )
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
+            ->where('disable_date', ">=", str_replace('/', '-', $startMonth))
+            ->where('disable_date', "<=", str_replace('/', '-', $endMonth))
+            ->get()->toArray();
+        
+        if ( is_array($users['disable']) && count($users['disable']) > 0 ) {
+            $userDisableArr = array_map(function($obj) {
+                return $obj->id;
+            }, $users['disable']);
+        }
 
         // Return newUsersInMonth
-        $newUsersPerMonth = DB::table('role_user')
+        $newUsersPerMonth = DB::connection('mysql')->table('role_user')
             ->select(
                 DB::raw('concat(year(users.created_at),"", LPAD(month(users.created_at), 2, "0")) as yearMonth'),
                 DB::raw('COUNT(users.id) as number')
@@ -461,6 +513,12 @@ class StatisticsController extends Controller
             })
             ->whereNotIn('roles.name', ['admin','japanese_planner'])
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->where('users.created_at', ">=", str_replace('/', '-', $startMonth))
             ->where('users.created_at', "<=", str_replace('/', '-', $endMonth))
             ->orderBy('yearMonth', 'desc')
@@ -476,7 +534,7 @@ class StatisticsController extends Controller
         $users['newUsersPerMonth'] = $convertUserMonth;
 
         // Return disableUsersInMonth
-        $disableUsersInMonth = !$user_id ? DB::table('role_user')
+        $disableUsersInMonth = !$user_id ? DB::connection('mysql')->table('role_user')
             ->select(
                 DB::raw('concat(year(users.disable_date),"", LPAD(month(users.disable_date), 2, "0")) as yearMonth'),
                 DB::raw('COUNT(users.id) as number')
@@ -488,6 +546,12 @@ class StatisticsController extends Controller
             })
             ->whereNotIn('roles.name', ['admin','japanese_planner'])
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->where('users.disable_date', ">=", str_replace('/', '-', $startMonth))
             ->where('users.disable_date', "<=", str_replace('/', '-', $endMonth))
             ->orderBy('yearMonth', 'desc')
@@ -495,6 +559,8 @@ class StatisticsController extends Controller
             ->get()->toArray() : [];
         
         $convertUserMonth = array();
+
+        dd($this->teamIDs);
 
         foreach ($disableUsersInMonth as $key => $value) {
             $convertUserMonth[$value->yearMonth] = $value->number;
@@ -509,11 +575,9 @@ class StatisticsController extends Controller
                 DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
             )
             ->join('issues', 'issues.id', '=', 'jobs.issue_id')
-            ->join('users', 'users.id', '=', 'jobs.user_id')
             ->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
             ->where('jobs.date', "<", str_replace('/', '-', $endMonth))
-            ->where('users.disable_date', ">=", str_replace('/', '-', $startMonth))
-            ->where('users.disable_date', "<=", str_replace('/', '-', $endMonth))
+            ->whereIn('jobs.issue_id', $userDisableArr)
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('jobs.user_id', $user_id);
             })
@@ -544,21 +608,21 @@ class StatisticsController extends Controller
         $endDate = $currentDate->endOfMonth()->format('Y-m-d');
 
         // Full day off
-        $off_days['full'] = DB::table('off_days')
+        $off_days['full'] = DB::connection('mysql')->table('off_days')
         ->where('type', '=', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
         ->count();
 
         // Half day off
-        $off_days['half'] = DB::table('off_days')
+        $off_days['half'] = DB::connection('mysql')->table('off_days')
         ->where('type', '<>', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
         ->count();
 
         // Return disableUsersInMonth
-        $disableUsersInMonth = DB::table('role_user')
+        $disableUsersInMonth = DB::connection('mysql')->table('role_user')
             ->select('users.id')
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
