@@ -8,7 +8,8 @@ export default {
         roleOptions: [],
         selectedUser: {},
         validationErrors: '',
-        validationSuccess: ''
+        validationSuccess: '',
+        teamOptions: [{ id: 1, text: "DTP" }, { id: 2, text: "PATH" }, { id: 3, text: "WEB" }]
     },
 
     getters: {
@@ -16,6 +17,7 @@ export default {
         items: state => state.items,
         roles: state => state.roles,
         roleOptions: state => state.roleOptions,
+        teamOptions: state => state.teamOptions,
         selectedUser: state => state.selectedUser,
         validationErrors: state => state.validationErrors,
         validationSuccess: state => state.validationSuccess
@@ -50,12 +52,12 @@ export default {
     },
 
     actions: {
-        setColumns({ commit }, _translate) {
+        setColumns({ commit, rootState, rootGetters }) {
             const columns = [
-                { id: "username", value: _translate.get('lblUsername'), width: "120", class: "" },
-                { id: "r_name", value: _translate.get('txtRole'), width: "120", class: "" },
-                { id: "name", value: _translate.get('txtName'), width: "120", class: "" },
-                { id: "email", value: _translate.get('txtEmail'), width: "120", class: "" }
+                { id: "username", value: rootGetters['getTranslate'](rootState.translateTexts, 'lblUsername'), width: "120", class: "" },
+                { id: "r_name", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtRole'), width: "120", class: "" },
+                { id: "name", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: "120", class: "" },
+                { id: "email", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtEmail'), width: "120", class: "" }
             ]
 
             commit('SET_COLUMNS', columns)
@@ -107,19 +109,35 @@ export default {
 
         getUserById({ state, commit, rootGetters }, id) {
             const user = rootGetters['getObjectByID'](state.items, id)
+            if ( user.team ) {
+                const arrTeam = user.team.split(',')
+                user.team = arrTeam.map((item, index) => {
+                    return rootGetters['getObjectByID'](state.teamOptions, +item)
+                })
+            }
             commit('SET_SELECTED_USER', user)
         },
 
         setSelectedUser({ state, commit, rootGetters }, obj) {
+            if ( obj.team ) {
+                const arrTeam = obj.team.split(',')
+                obj.team = arrTeam.map((item, index) => {
+                    return rootGetters['getObjectByID'](state.teamOptions, +item)
+                })
+            }
             commit('SET_SELECTED_USER', obj)
         },
 
         updateUser({ commit }, user) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
-            const uri = "/data/users/" + user.id;
+            const data = Object. assign({}, user)
+            data.team = data.team.map((item, index) => { return item.id }).toString()
+
+            const uri = "/data/users/" + user.id
+
             axios
-                .patch(uri, user)
+                .patch(uri, data)
                 .then(res => {
                     commit('SET_VALIDATE', { error: '', success: res.data.message })
                 })
@@ -136,11 +154,16 @@ export default {
             commit('SET_VALIDATE', {error: '', success: ''})
         },
 
-        createUser({ state, commit }, newUser) {
+        createUser({ commit }, newUser) {
             commit('SET_VALIDATE', {error: '', success: ''})
-            const uri = "/data/users";
+
+            const data = Object. assign({}, newUser)
+            data.team = data.team.map((item, index) => { return item.id }).toString()
+
+            const uri = "/data/users"
+
             axios
-                .post(uri, newUser)
+                .post(uri, data)
                 .then(res => {
                     commit('SET_SELECTED_USER', {})
                     commit('SET_VALIDATE', { error: '', success: res.data.message })
