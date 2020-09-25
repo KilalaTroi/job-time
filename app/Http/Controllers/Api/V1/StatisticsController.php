@@ -560,8 +560,6 @@ class StatisticsController extends Controller
         
         $convertUserMonth = array();
 
-        dd($this->teamIDs);
-
         foreach ($disableUsersInMonth as $key => $value) {
             $convertUserMonth[$value->yearMonth] = $value->number;
         }
