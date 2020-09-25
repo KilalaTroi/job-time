@@ -12,6 +12,7 @@ class Controller extends BaseController
 {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 	protected $defaultSQL;
+	public $teamIDs;
 	public function __construct()
 	{
 		$this->middleware(function ($request, $next) {
@@ -20,6 +21,7 @@ class Controller extends BaseController
 			$teams = explode(',',$user[0]['team']);
 			$rows = DB::table('teams')->select('code')->where('id',$teams[0])->first();
 			$this->defaultSQL = 'mysql_'.$rows->code;
+			$this->teamIDs = explode(',', $user[0]['team'])[0];
 			return $next($request);
 		});
 	}

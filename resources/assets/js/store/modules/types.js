@@ -1,7 +1,6 @@
 export default {
 	namespaced: true,
 
-
 	state: {
 		columns: [],
 		items: [],
@@ -17,7 +16,7 @@ export default {
 		items: state => state.items,
 		selectedType: state => state.selectedType,
 		validationErrors: state => state.validationErrors,
-		validationSuccess: state => state.validationSuccess,
+		validationSuccess: state => state.validationSuccess
 	},
 
 	mutations: {
@@ -54,7 +53,7 @@ export default {
 			if (confirm(type.msgText)) {
 				axios.delete('/data/types/' + type.id)
 					.then(res => {
-						dispatch('getAllTypes');
+						dispatch('getAllTypes')
 					})
 					.catch(err => console.log(err))
 			}
@@ -103,13 +102,13 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit }, _translate) {
+		setColumns({ commit, rootState, rootGetters }) {
 			const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
 			const columns = [
-				{id: 'slug', value: _translate.get('txtSlug'), width: '200', class: ''},
-				{id: 'value', value: _translate.get('txtColor'), width: '110', class: 'text-center'},
-				{id: 'slug_' + langDefault, value: _translate.get('txtName'), width: '200', class: ''},
-				{id: 'description_' + langDefault, value: _translate.get('txtDesc'), width: '', class: ''}
+				{id: 'slug', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtSlug'), width: '200', class: ''},
+				{id: 'value', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtColor'), width: '110', class: 'text-center'},
+				{id: 'slug_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: '200', class: ''},
+				{id: 'description_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtDesc'), width: '', class: ''}
 			]
 
 			commit('SET_COLUMNS', columns)

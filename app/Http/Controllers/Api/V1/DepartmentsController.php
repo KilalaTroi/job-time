@@ -29,7 +29,6 @@ class DepartmentsController extends Controller
     public function store(Request $request)
     {
         $this->changeDB();
-
         $this->validate($request, [
             'name' => 'required|unique:departments|max:255'
         ]);
@@ -50,6 +49,7 @@ class DepartmentsController extends Controller
      */
     public function show($id)
     {
+        $this->changeDB();
         return response()->json(Department::findOrFail($id));
     }
 
@@ -63,7 +63,6 @@ class DepartmentsController extends Controller
     public function update(Request $request, $id)
     {
         $this->changeDB();
-
         $this->validate($request, [
             'name' => 'required|unique:departments,name,' . $id . '|max:255'
         ]);

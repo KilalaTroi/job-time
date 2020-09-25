@@ -69,17 +69,20 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "edit-item",
+
   data() {
     return {
       modalLg: "modal-lg",
     };
   },
+
   components: {
     ErrorItem,
     SuccessItem,
     Modal,
     ColorPicker,
   },
+
   computed: {
     ...mapGetters({
       selectedType: "types/selectedType",
@@ -87,6 +90,7 @@ export default {
       validationSuccess: "types/validationSuccess",
     }),
   },
+  
   methods: {
     ...mapActions({
       resetValidate: "types/resetValidate",

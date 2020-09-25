@@ -4,7 +4,7 @@
       <slot name="columns">
         <tr>
           <th
-            v-for="(column, index) in columns"
+            v-for="(column, index) in columns.time_record"
             :key="index"
             :width="column.width"
             :class="column.class"
@@ -14,16 +14,15 @@
       </slot>
     </thead>
     <tbody>
-      <tr v-for="(item, index) in types" :key="index">
+      <tr v-for="(item, index) in items.time_record" :key="index">
         <slot :row="item">
           <td v-for="(column, index) in columns" :key="index" :class="column.class">
-            <span v-if="checkTypeColor(column)" :style="setBackground(itemValue(item, column))" class="type-color"></span>
-            <span v-else v-html="itemValue(item, column)"></span>
+            <span v-html="itemValue(item, column)"></span>
           </td>
         </slot>
         <td class="text-center">
           <button
-            @click="getTypeById(item.id)"
+            @click="getDepartmentById(item.id)"
             type="button"
             class="btn btn-xs btn-default"
             data-toggle="modal"
@@ -35,7 +34,7 @@
           </button>
 
           <button
-            @click="deleteType({id: item.id, msgText: $ml.with('VueJS').get('msgConfirmDelete')})"
+            @click="deleteDepartment({id: item.id, msgText: $ml.with('VueJS').get('msgConfirmDelete')})"
             type="button"
             class="btn btn-xs btn-danger ml-sm-2"
           >
@@ -50,35 +49,32 @@
 import { mapGetters, mapActions } from "vuex";
 
 export default {
-  name: "table-type",
+  name: "table-job-time-record",
 
-  /*GETTER*/ 
   computed: {
     ...mapGetters({
-      columns: "types/columns",
-      types: "types/items",
-      itemValue: "table/itemValue",
-      checkTypeColor:  "table/checkTypeColor",
-      setBackground:  "table/setBackground",
+      columns: "jobs/columns",
+      items: "jobs/items",
+      // itemValue: "table/itemValue"
     }),
   },
 
-  /*METHODS*/
   methods: {
     ...mapActions({
-      setColumns: "types/setColumns",
-      getAllTypes: "types/getAllTypes",
-      deleteType: "types/deleteType",
-      getTypeById: "types/getTypeById",
+      setColumns: "jobs/setColumns",
+      getAllJob: "jobs/getAllJob",
+      // deleteDepartment: "jobs/deleteDepartment",
+      // getDepartmentById: "jobs/getDepartmentById",
     }),
   },
 
   mounted() {
     const _this = this;
-    _this.setColumns();
-    _this.getAllTypes();
+    const _translate = _this.$ml.with("VueJS");
+    _this.setColumns(_translate);
+    _this.getAllJob();
     $(document).on("click", ".languages button", function () {
-      _this.setColumns();
+      _this.setColumns(_translate);
     });
   },
 };

@@ -2,6 +2,16 @@ import moment from 'moment'
 import { vi, ja } from 'vuejs-datepicker/dist/locale'
 
 export default {
+    translateTexts: state => state.translateTexts,
+    loginUser: state => state.loginUser,
+    reportNotify: state => state.reportNotify,
+
+    getTranslate() {
+        return (translateTexts, string) => {
+            return translateTexts ? translateTexts.get(string) : ''
+        }
+    },
+
     getObjectByID() {
         return (Arr, id) => {
             const result = Arr.filter(item => item.id === id)

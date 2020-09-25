@@ -67,17 +67,20 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "create-item",
+
   data() {
     return {
       modalLg: "modal-lg",
     };
   },
+
   components: {
     Modal,
     ErrorItem,
     SuccessItem,
     ColorPicker
   },
+  
   computed: {
     ...mapGetters({
       selectedType: "types/selectedType",
