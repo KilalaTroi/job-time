@@ -127,7 +127,7 @@ class StatisticsController extends Controller
         // DB::enableQueryLog();
         $dataLogTime = DB::table('jobs as j')
             ->select(
-                'u.name as username',
+                'j.user_id',
                 'j.date as date',
                 DB::raw('TIME_FORMAT(j.start_time,"%H:%i") as start_time'),
                 DB::raw('TIME_FORMAT(j.end_time,"%H:%i") as end_time'),
@@ -137,7 +137,6 @@ class StatisticsController extends Controller
                 'i.name as issue',
                 't.slug as job_type'
             )
-            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
             ->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
@@ -159,13 +158,13 @@ class StatisticsController extends Controller
             })
             ->where('j.date', '>=', $start_time)
             ->where('j.date', '<=', $end_time)
-            ->orderBy('u.name', 'asc')
+            ->orderBy('j.user_id', 'asc')
             ->orderBy('j.date', 'asc')
             ->orderBy('j.start_time', 'asc')
             ->paginate(20);
         // dd(DB::getQueryLog());
 
-        $users = DB::table('role_user as ru')
+        $users = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -277,7 +276,7 @@ class StatisticsController extends Controller
         $curentTimestampe = Carbon::now()->timestamp;
         
         return Excel::create("Report_" . $nameFile . "_" . $curentTimestampe, function($excel) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
-            dd('abc');
+            
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
@@ -293,8 +292,6 @@ class StatisticsController extends Controller
                 $sheet->mergeCells('A1:'.$columnName.'1');
                 $sheet->mergeCells('A2:'.$columnName.'2');
                 if ( $infoUser ) $sheet->mergeCells('A3:'.$columnName.'3');
-
-                dd($sheet);
 
                 // Style Sheet
                 $sheet->cell('A1:'.$columnName.'1', function($cells) {

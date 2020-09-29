@@ -280,6 +280,7 @@ class ReportsController extends Controller
     }
 
     public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
+        $this->changeDB();
         $dataDetail = '';
         $dataTotal = '';
         $data = DB::table('types as t')
@@ -287,7 +288,6 @@ class ReportsController extends Controller
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
-            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
             ->when($deptArr, function ($query, $deptArr) {
                 return $query->whereIn('p.dept_id', $deptArr);
             })
@@ -308,15 +308,29 @@ class ReportsController extends Controller
 
         if ( count($userArr) == 1 ) {
             $dataDetail = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         } else {
-            $dataDetail = $data->select( "u.name" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            $dataDetail = $data->select( "j.user_id" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
 
-            $dataTotal = $data->select( "u.name" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('u.id')->get();
+            $dataTotal = $data->select( "j.user_id" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('j.user_id')->get();
         }
 
-        $dataDetail = collect($dataDetail)->map(function($x){ return (array) $x; })->toArray();
+        $users = DB::connection('mysql')->table('role_user as ru')
+            ->select(
+                'user.id as id',
+                'user.name as text'
+            )
+            ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+            ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+            ->whereNotIn('role.name', ['admin','japanese_planner'])
+            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->get()->toArray();
+
+        $dataDetail = collect($dataDetail)->map(function($x){ 
+            dd($x);
+            return (array) $x; 
+        })->toArray();
         $totalTime = 0;
 
         if ( $dataTotal ) {
