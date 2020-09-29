@@ -186,6 +186,7 @@ class StatisticsController extends Controller
     }
 
     public function exportReport($file_extension) {
+        $this->changeDB();
         $data = array();
         $user_id = $_GET['user_id'];
         $startMonth = $_GET['startMonth'];
@@ -265,7 +266,7 @@ class StatisticsController extends Controller
         $mainTable['other'][''] = "  ";
         $mainTable['other']['Total'] = $otherTotal ? round($otherTotal/$numberWork, 1) . '%' : $otherTotal . '%';
 
-        $year = $nameFile = $startMonth . '-' . $endMonth;
+        $year = $nameFile = str_replace('/', '-', $startMonth) . '_' . str_replace('/', '-', $endMonth);
         if ( $infoUser ) $nameFile .= '-'.$infoUser[0]->text;
 
         // Excel
@@ -274,8 +275,9 @@ class StatisticsController extends Controller
         $startRow = $infoUser ? 5 : 4;
         $numberRows = count($mainTable) + $startRow;
         $curentTimestampe = Carbon::now()->timestamp;
-
-        return Excel::create('Report_'. $nameFile. "_" . $curentTimestampe, function($excel) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
+        
+        return Excel::create("Report_" . $nameFile . "_" . $curentTimestampe, function($excel) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
+            dd('abc');
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
@@ -291,6 +293,8 @@ class StatisticsController extends Controller
                 $sheet->mergeCells('A1:'.$columnName.'1');
                 $sheet->mergeCells('A2:'.$columnName.'2');
                 if ( $infoUser ) $sheet->mergeCells('A3:'.$columnName.'3');
+
+                dd($sheet);
 
                 // Style Sheet
                 $sheet->cell('A1:'.$columnName.'1', function($cells) {
@@ -575,7 +579,7 @@ class StatisticsController extends Controller
             ->join('issues', 'issues.id', '=', 'jobs.issue_id')
             ->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
             ->where('jobs.date', "<", str_replace('/', '-', $endMonth))
-            ->whereIn('jobs.issue_id', $userDisableArr)
+            ->whereIn('jobs.user_id', $userDisableArr)
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('jobs.user_id', $user_id);
             })
