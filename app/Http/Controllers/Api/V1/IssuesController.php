@@ -17,6 +17,7 @@ class IssuesController extends Controller
      */
     public function store(Request $request)
     {
+        $this->changeDB();
         $request->merge(['name' => $request->get('i_name')]);
         $project_id = $request->get('project_id');
 
@@ -76,7 +77,7 @@ class IssuesController extends Controller
      */
     public function update($id, Request $request)
     {
-        
+        $this->changeDB();
         $request->merge(['name' => $request->get('i_name')]);
         $issue = Issue::findOrFail($id);
 
@@ -129,6 +130,7 @@ class IssuesController extends Controller
      */
     public function archive($id, $status)
     {
+        $this->changeDB();
         $issue = Issue::findOrFail($id);
 
         if ( $status === 'publish' ) {
@@ -154,6 +156,7 @@ class IssuesController extends Controller
      */
     public function getpage($id)
     {
+        $this->changeDB();
         $issue = Issue::findOrFail($id);
 
         return response()->json(array(
@@ -169,6 +172,7 @@ class IssuesController extends Controller
      */
     public function destroy($id)
     {
+        $this->changeDB();
         $issue = Issue::findOrFail($id);
         $projectIssue = Issue::where('project_id', $issue->project_id)->count();
 

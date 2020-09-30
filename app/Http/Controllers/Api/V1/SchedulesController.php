@@ -16,6 +16,7 @@ class SchedulesController extends Controller
      */
     public function index()
     {
+        $this->changeDB();
         $startDate = $_GET['startDate'];
         $endDate = $_GET['endDate'];
 
@@ -82,6 +83,7 @@ class SchedulesController extends Controller
      */
     public function store(Request $request)
     {
+        $this->changeDB();
         $start_date = strtotime($request->get('date') . ' ' . $request->get('start_time'));
         $end_date = strtotime($request->get('date') . ' ' . $request->get('end_time'));
 
@@ -110,6 +112,7 @@ class SchedulesController extends Controller
      */
     public function update($id, Request $request)
     {
+        $this->changeDB();
         $schedule = Schedule::findOrFail($id);
         $schedule->update($request->all());
         return response()->json(array(
@@ -125,6 +128,7 @@ class SchedulesController extends Controller
      */
     public function destroy($id)
     {
+        $this->changeDB();
         $schedule = Schedule::findOrFail($id);
         $schedule->delete();
 

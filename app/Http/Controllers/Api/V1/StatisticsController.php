@@ -142,7 +142,7 @@ class StatisticsController extends Controller
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->when($userArr, function ($query, $userArr) {
-                return $query->whereIn('u.id', $userArr);
+                return $query->whereIn('j.user_id', $userArr);
             })
             ->when($deptArr, function ($query, $deptArr) {
                 return $query->whereIn('p.dept_id', $deptArr);
@@ -173,6 +173,12 @@ class StatisticsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->get()->toArray();
 
         return response()->json([
@@ -608,6 +614,13 @@ class StatisticsController extends Controller
 
         // Full day off
         $off_days['full'] = DB::connection('mysql')->table('off_days')
+        ->join('users', 'users.id', '=', 'off_days.user_id')
+        ->where(function ($query) {
+            $query->where('team', '=', $this->teamIDs)
+                  ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+        })
         ->where('type', '=', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
@@ -615,6 +628,13 @@ class StatisticsController extends Controller
 
         // Half day off
         $off_days['half'] = DB::connection('mysql')->table('off_days')
+        ->join('users', 'users.id', '=', 'off_days.user_id')
+        ->where(function ($query) {
+            $query->where('team', '=', $this->teamIDs)
+                  ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+        })
         ->where('type', '<>', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
@@ -627,6 +647,12 @@ class StatisticsController extends Controller
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
             ->whereNotIn('roles.name', ['admin','japanese_planner'])
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->where('users.disable_date', "<>", NULL)
             ->count();
 

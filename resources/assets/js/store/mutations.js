@@ -9,5 +9,9 @@ export default {
 
     SET_REPORT_NOTIFY: (state, reportNotify) => {
         state.reportNotify = reportNotify
-    }
+    },
+
+    UPDATE_REPORT_NOTIFY: (state) => {
+        state.reportNotify--;
+    },
 }

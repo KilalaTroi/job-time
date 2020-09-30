@@ -158,6 +158,7 @@ import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 import Select2 from '../../components/SelectTwo/SelectTwo.vue';
 import TableReport from "../../components/TableReport";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
     components: {
@@ -225,6 +226,9 @@ export default {
 		});
     },
 	methods: {
+		...mapActions({
+			updateReportNotify: "updateReportNotify",
+		}),
 		getObjectValue(data, id) {
             let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
@@ -356,7 +360,7 @@ export default {
 			})
 			.then(res => {
 				this.fetchDataFilter();
-				this.$emit('update-seen');
+				this.updateReportNotify();
 			})
 			.catch(err => {
 				console.log(err);

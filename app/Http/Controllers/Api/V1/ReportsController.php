@@ -22,6 +22,7 @@ class ReportsController extends Controller
      */
     public function store(Request $request)
     {
+        $this->changeDB();
         $report = Report::create($request->all());
 
         return response()->json(array(
@@ -38,6 +39,7 @@ class ReportsController extends Controller
      */
     public function update($id, Request $request)
     {
+        $this->changeDB();
         $report = Report::findOrFail($id);
         $report->update($request->all());
 
@@ -54,6 +56,7 @@ class ReportsController extends Controller
      */
     public function destroy($id)
     {
+        $this->changeDB();
         $report = Report::findOrFail($id);
         $report->delete();
 
@@ -325,10 +328,21 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->get()->toArray();
+        
+        $userArrName = array();
+        foreach ($users as $key => $value) {
+            $userArrName[$value->id] = $value->text;
+        }
 
-        $dataDetail = collect($dataDetail)->map(function($x){ 
-            dd($x);
+        $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){ 
+            if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
             return (array) $x; 
         })->toArray();
         $totalTime = 0;
@@ -338,7 +352,10 @@ class ReportsController extends Controller
                 return $item->total*1;
             });
 
-            $dataTotal = collect($dataTotal)->map(function($x){ return (array) $x; })->toArray();
+            $dataTotal = collect($dataTotal)->map(function($x) use ($userArrName){ 
+                if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
+                return (array) $x; 
+            })->toArray();
 
             foreach ($dataTotal as $key => $item) {
                 $hoursminsandsecs = $this->getHoursMinutes($item['total']*1, '%02dh %02dm');
@@ -418,6 +435,7 @@ class ReportsController extends Controller
     }
 
     function updateSeen(Request $request) {
+        $this->changeDB();
         $userID = $request->get('userID');
         $reportID = $request->get('reportID');
         $seenData = '';
@@ -461,13 +479,14 @@ class ReportsController extends Controller
     }
 
     function sendReport(Request $request) {
+        $this->changeDB();
         $userID = $request->get('userID');
 
-        $from = DB::table('users')
+        $from = DB::connection('mysql')->table('users')
             ->where('id', $userID)
             ->get()->toArray()[0];
 
-        $users = DB::table('role_user as ru')
+        $users = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.email as email'
             )
@@ -475,6 +494,12 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->whereNotIn('user.email', [$from->email])
             ->where('user.disable_date', null)
             ->get()->toArray();
@@ -498,6 +523,7 @@ class ReportsController extends Controller
     }
 
     function getData(Request $request) {
+        $this->changeDB();
         $indexPage = $request->get('indexPage');
         $reportType = $request->get('reportType');
         $startDate = $request->get('startDate');
@@ -545,7 +571,7 @@ class ReportsController extends Controller
         ->orderBy('id', 'desc')
         ->get()->toArray() : array();
 
-        $users = $indexPage ? DB::table('role_user as ru')
+        $users = $indexPage ? DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -554,6 +580,12 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->get()->toArray() : [];
 
         //DB::enableQueryLog();
