@@ -14,12 +14,13 @@
                 <td><i class="nc-icon nc-bell-55" v-if="checkSeen(item.seen)"></i></td>
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
-                        <span v-html="itemValue(item, column)"></span>
+                        <span v-if="checkDateColumn(column)" v-html="removeTime(item[column.id])"></span>
+                        <span v-else v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
                 <td class="text-center">
                     <i @click="$emit('edit-report', item.id, checkSeen(item.seen))" class="fa fa-pencil btn-process" aria-hidden="true"></i>
-                    <i @click="$emit('send-report')" class="ml-1 fa fa-paper-plane btn-process" aria-hidden="true"></i>
+                    <!--<i @click="$emit('send-report')" class="ml-1 fa fa-paper-plane btn-process" aria-hidden="true"></i>-->
                     <i @click="$emit('view-report', item.id, checkSeen(item.seen))" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>
                 </td>
             </tr>
@@ -47,12 +48,18 @@ export default {
         checkSeen(data) {
             let arrSeen = data.split(',');
             return !arrSeen.includes(this.userID)
+        },
+        removeTime(date) {
+            return date.split(" ")[0];
+        },
+        checkDateColumn(column) {
+            return column.id == "date_time";
         }
     }
 }
 </script>
 <style lang="scss">
-.btn-process {
+.table .btn-process {
     font-size: 20px;
     width: 24px;
     color: #6c757d;

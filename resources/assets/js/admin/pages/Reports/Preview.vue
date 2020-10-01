@@ -4,6 +4,7 @@
             <div class="d-flex justify-content-between">
                 <h4 class="card-title">{{$ml.with('VueJS').get('txtPreview')}}</h4>
                 <div class="align-self-end">
+                    <button @click="$emit('send-report')" class="btn btn-success btn-process mr-3"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
                     <button @click="exportPDF" class="btn btn-danger mr-3">{{$ml.with('VueJS').get('txtExportPDF')}}</button>
                     <button @click="$emit('back-to-list')" class="btn btn-primary">{{$ml.with('VueJS').get('txtBack')}}</button>
                 </div>
@@ -132,7 +133,7 @@ export default {
             let result = [];
             let arrData = data.split(',');
             result = arrData.map((item, index) => {
-                return this.getObjectValue(this.userOptions, item).text; 
+                return this.getObjectValue(this.userOptions, item).text;
             });
             return result.join(', ');
         },
@@ -153,7 +154,7 @@ export default {
                 issue_name: this.currentReport.issue_name,
                 content: this.preLanguage=='vi' ? this.currentReport.content : this.currentReport.content_ja
             };
-             
+
 			axios
 			.post(uri, {
 				data: data
@@ -173,5 +174,13 @@ export default {
 <style lang="scss">
 .preview #ck-editor {
     border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.btn-process {
+    color: #6c757d;
+    cursor: pointer;
+
+    &:hover {
+        color: #dc3545;
+    }
 }
 </style>

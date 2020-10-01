@@ -335,15 +335,15 @@ class ReportsController extends Controller
                       ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
             })
             ->get()->toArray();
-        
+
         $userArrName = array();
         foreach ($users as $key => $value) {
             $userArrName[$value->id] = $value->text;
         }
 
-        $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){ 
+        $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){
             if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
-            return (array) $x; 
+            return (array) $x;
         })->toArray();
         $totalTime = 0;
 
@@ -352,9 +352,9 @@ class ReportsController extends Controller
                 return $item->total*1;
             });
 
-            $dataTotal = collect($dataTotal)->map(function($x) use ($userArrName){ 
+            $dataTotal = collect($dataTotal)->map(function($x) use ($userArrName){
                 if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
-                return (array) $x; 
+                return (array) $x;
             })->toArray();
 
             foreach ($dataTotal as $key => $item) {
@@ -414,7 +414,7 @@ class ReportsController extends Controller
 
     function getNotify() {
         $this->changeDB();
-        
+
         $user_id = $_GET['user_id'];
         $count_notify = 0;
 
@@ -461,7 +461,7 @@ class ReportsController extends Controller
             'key' => env('GOOGLE_TRANSLATE_KEY', ''),
             'format' => 'html'
         ]);
-        
+
         # The text to translate
         $text = $request->get('text');
 
@@ -503,7 +503,7 @@ class ReportsController extends Controller
             ->whereNotIn('user.email', [$from->email])
             ->where('user.disable_date', null)
             ->get()->toArray();
-        
+
         $emails = array_map(function($obj) {
             return $obj->email;
         }, $users);
@@ -511,12 +511,12 @@ class ReportsController extends Controller
         $emails[] = 'troi.hoang@kilala.vn';
 
         Mail::send('emails.report', [], function($message) use ($emails, $from)
-        {    
+        {
             $message->from($from->email, $from->name);
-            $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System'); 
-            $message->to($emails)->subject('Jobtime Report');  
+            $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
+            $message->to($emails)->subject('Jobtime Report');
         });
-        
+
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
@@ -559,7 +559,7 @@ class ReportsController extends Controller
                 return $query->where('p.dept_id', $deptArr);
             return $query;
         })
-        ->orderBy('p.id', 'desc')
+        ->orderBy('text', 'asc')
         ->get()->toArray() : array();
 
         $issues = $projectArr ? DB::table('issues as i')
@@ -596,6 +596,7 @@ class ReportsController extends Controller
                 'title',
                 'title_ja',
                 'date_time',
+                'r.updated_at as update_date',
                 'type',
                 'p.name as project_name',
                 'd.name as dept_name',
