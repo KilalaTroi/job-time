@@ -41,15 +41,23 @@ export default {
 	},
 
 	actions: {
-		getAllDepartments({ commit }) {
-			axios.get('/data/departments').then(response => {
+		getAllDepartments({ rootState, commit }) {
+			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+			const uri = queryTeam && queryTeamID ? '/data/departments?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments'
+			
+			axios.get(uri).then(response => {
 				commit('GET_ALL_DEPARTMENTS', response.data)
 			})
 		},
 
-		deleteDepartment({ dispatch }, department) {
+		deleteDepartment({ rootState, dispatch }, department) {
 			if (confirm(department.msgText)) {
-				axios.delete('/data/departments/' + department.id)
+				const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+				const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+				const uri = queryTeam && queryTeamID ? '/data/departments/' + department.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments/' + department.id
+
+				axios.delete(uri)
 					.then(res => {
 						dispatch('getAllDepartments')
 					})
@@ -66,9 +74,13 @@ export default {
 			commit('SET_SELECTED_DEPARTMENT', {})
 		},
 
-		updateDepartment({ commit }, department) {
+		updateDepartment({ rootState, commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/departments/" + department.id
+
+			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+			const uri = queryTeam && queryTeamID ? '/data/departments/' + department.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments/' + department.id
+			
 			axios
 				.patch(uri, department)
 				.then(res => {
@@ -80,9 +92,13 @@ export default {
 				});
 		},
 
-		createDepartment({ commit }, department) {
+		createDepartment({ rootState, commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/departments"
+
+			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+			const uri = queryTeam && queryTeamID ? '/data/departments?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments'
+
 			axios
 				.post(uri, department)
 				.then(res => {

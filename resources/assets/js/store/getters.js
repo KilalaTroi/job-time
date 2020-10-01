@@ -4,6 +4,8 @@ import { vi, ja } from 'vuejs-datepicker/dist/locale'
 export default {
     translateTexts: state => state.translateTexts,
     loginUser: state => state.loginUser,
+    currentTeam: state => state.currentTeam,
+    currentTeamOption: state => state.currentTeamOption,
     reportNotify: state => state.reportNotify,
 
     getTranslate() {

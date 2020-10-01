@@ -22,7 +22,10 @@
                 <span class="navbar-toggler-bar burger-lines"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end">
-                <ul class="navbar-nav ml-auto">
+                <div v-if="currentTeamOption" class="switch-team ml-auto mr-3">
+                    <select-2 :options="currentTeamOption" v-model="selectTeam" class="select2" @input="setCurrentTeam(selectTeam)"></select-2>
+                </div>
+                <ul class="navbar-nav">
                     <li class="languages nav-item mr-3">
                         <button
                             v-for="lang in $ml.list"
@@ -50,12 +53,25 @@
 </template>
 
 <script>
+import Select2 from '../components/SelectTwo/SelectTwo.vue'
 import { mapGetters, mapActions } from "vuex"
 
 export default {
+    components: {
+        Select2
+    },
+
+    data() {
+        return {
+            selectTeam: this.currentTeam
+        }
+    },
+
     computed: {
         ...mapGetters({
-            loginUser: 'loginUser'
+            loginUser: 'loginUser',
+            currentTeamOption: 'currentTeamOption',
+            currentTeam: 'currentTeam'
         }),
 
         routeName() {
@@ -67,7 +83,8 @@ export default {
     methods: {
         ...mapActions({
             setTranslateTexts: 'setTranslateTexts',
-            setLoginUser: 'setLoginUser'
+            setLoginUser: 'setLoginUser',
+            setCurrentTeam: 'setCurrentTeam'
         }),
         
         activeLanguage(language) {
@@ -111,4 +128,22 @@ export default {
     font-size: 18px;
     vertical-align: text-top;
 }
+
+.navbar {
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 28px;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 30px;
+    }
+
+    .select2-container .select2-selection--single {
+        height: 30px;
+        border-radius: 0;
+        font-size: 14px;
+        font-weight: 700;
+    }
+}
+
 </style>

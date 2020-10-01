@@ -80,6 +80,17 @@ export default {
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
+
+    _this.unwatch = _this.$store.watch(
+      (state, getters) => getters.currentTeam,
+      (newValue, oldValue) => {
+        _this.getAllTypes();
+      },
+    );
+  },
+
+  beforeDestroy() {
+    this.unwatch();
   },
 };
 </script>

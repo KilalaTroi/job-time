@@ -55,7 +55,8 @@ export default {
     ...mapGetters({
       columns: "departments/columns",
       departmens: "departments/items",
-      itemValue: "table/itemValue"
+      itemValue: "table/itemValue",
+      currentTeam: 'currentTeam'
     }),
   },
 
@@ -75,7 +76,24 @@ export default {
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
+
+    _this.unwatch = _this.$store.watch(
+      (state, getters) => getters.currentTeam,
+      (newValue, oldValue) => {
+        _this.getAllDepartments();
+      },
+    );
   },
+
+  beforeDestroy() {
+    this.unwatch();
+  },
+
+  // watch: {
+  //   currentTeam: [{
+  //     handler: 'getDataDepartments'
+  //   }]
+  // }
 };
 </script>
 <style>

@@ -43,15 +43,23 @@ export default {
 	},
 
 	actions: {
-		getAllTypes({ commit }) {
-			axios.get('/data/types').then(response => {
+		getAllTypes({ rootState, commit }) {
+			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+			const uri = queryTeam && queryTeamID ? '/data/types?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types'
+
+			axios.get(uri).then(response => {
 				commit('GET_ALL_TYPES', response.data)
 			})
 		},
 
-		deleteType({ dispatch }, type) {
+		deleteType({ rootState, dispatch }, type) {
 			if (confirm(type.msgText)) {
-				axios.delete('/data/types/' + type.id)
+				const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+				const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+				const uri = queryTeam && queryTeamID ? '/data/types/' + type.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types/' + type.id
+
+				axios.delete(uri)
 					.then(res => {
 						dispatch('getAllTypes')
 					})
@@ -70,7 +78,11 @@ export default {
 
 		updateType({ commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/types/" + type.id
+
+			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+			const uri = queryTeam && queryTeamID ? '/data/types/' + type.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types/' + type.id
+
 			axios
 				.patch(uri, type)
 				.then(res => {
@@ -84,7 +96,11 @@ export default {
 
 		createType({ commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/types"
+
+			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
+			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
+			const uri = queryTeam && queryTeamID ? '/data/types/' + type.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types/' + type.id
+
 			axios
 				.post(uri, type)
 				.then(res => {

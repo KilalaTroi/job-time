@@ -7,6 +7,14 @@ export default {
         state.loginUser = loginUser
     },
 
+    SET_CURRENT_TEAM: (state, currentTeam) => {
+        state.currentTeam = currentTeam
+    },
+
+    SET_CURRENT_TEAM_OPTION: (state, currentTeamOption) => {
+        state.currentTeamOption = currentTeamOption
+    },
+
     SET_REPORT_NOTIFY: (state, reportNotify) => {
         state.reportNotify = reportNotify
     },
