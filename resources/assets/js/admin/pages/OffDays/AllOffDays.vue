@@ -4,6 +4,7 @@
         <FullCalendar class="off-days" defaultView="dayGridMonth" :plugins="calendarPlugins" :header="calendarHeader" :business-hours="businessHours" :editable="editable" :droppable="droppable" :events="offDays" :all-day-slot="allDaySlot" :height="height" :hidden-days="hiddenDays" :locale="getLanguage(this.$ml)" :datesRender="handleMonthChange" />
     </card>
 </template>
+
 <script>
 import FullCalendar from "@fullcalendar/vue";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -151,6 +152,11 @@ export default {
     }
 };
 </script>
+
+<script>
+
+</script>
+
 <style lang="scss">
 @import "~@fullcalendar/core/main.css";
 @import "~@fullcalendar/daygrid/main.css";

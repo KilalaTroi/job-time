@@ -6,7 +6,8 @@
     </div>
 </template>
 <script>
-import OffDays from './OffDays.vue'
+import OffDays from './OffDays';
+import { mapGetters, mapActions } from "vuex";
 
 export default {
     components: {
@@ -14,5 +15,6 @@ export default {
     }
 }
 </script>
+
 <style>
 </style>

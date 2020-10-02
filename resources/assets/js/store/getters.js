@@ -34,7 +34,18 @@ export default {
         }
 
         return (data) => {
+            console.log(dataLang[data.current])
             return dataLang[data.current]
         }
+    },
+
+    setBackground() {
+        return (color) => {
+            return {
+                backgroundColor: color,
+                borderColor: color
+            }
+        }
+
     }
 }
