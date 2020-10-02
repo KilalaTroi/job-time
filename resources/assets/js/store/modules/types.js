@@ -44,9 +44,7 @@ export default {
 
 	actions: {
 		getAllTypes({ rootState, commit }) {
-			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-			const uri = queryTeam && queryTeamID ? '/data/types?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types'
+			const uri = rootState.queryTeam ? '/data/types?' + rootState.queryTeam : '/data/types'
 
 			axios.get(uri).then(response => {
 				commit('GET_ALL_TYPES', response.data)
@@ -55,9 +53,7 @@ export default {
 
 		deleteType({ rootState, dispatch }, type) {
 			if (confirm(type.msgText)) {
-				const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-				const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-				const uri = queryTeam && queryTeamID ? '/data/types/' + type.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types/' + type.id
+				const uri = rootState.queryTeam ? '/data/types/' + type.id + '?' + rootState.queryTeam : '/data/types/' + type.id
 
 				axios.delete(uri)
 					.then(res => {
@@ -76,12 +72,10 @@ export default {
 			commit('SET_SELECTED_TYPE', {value: null})
 		},
 
-		updateType({ commit }, type) {
+		updateType({ rootState, commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-			const uri = queryTeam && queryTeamID ? '/data/types/' + type.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types/' + type.id
+			const uri = rootState.queryTeam ? '/data/types/' + type.id + '?' + rootState.queryTeam : '/data/types/' + type.id
 
 			axios
 				.patch(uri, type)
@@ -94,12 +88,10 @@ export default {
 				});
 		},
 
-		createType({ commit }, type) {
+		createType({ rootState, commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-			const uri = queryTeam && queryTeamID ? '/data/types/' + type.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/types/' + type.id
+			const uri = rootState.queryTeam ? '/data/types' + '?' + rootState.queryTeam : '/data/types'
 
 			axios
 				.post(uri, type)
@@ -118,13 +110,13 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit, rootState, rootGetters }) {
+		setColumns({ commit, rootGetters }) {
 			const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
 			const columns = [
-				{id: 'slug', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtSlug'), width: '200', class: ''},
-				{id: 'value', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtColor'), width: '110', class: 'text-center'},
-				{id: 'slug_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: '200', class: ''},
-				{id: 'description_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtDesc'), width: '', class: ''}
+				{id: 'slug', value: rootGetters['getTranslate']('txtSlug'), width: '200', class: ''},
+				{id: 'value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center'},
+				{id: 'slug_' + langDefault, value: rootGetters['getTranslate']('txtName'), width: '200', class: ''},
+				{id: 'description_' + langDefault, value: rootGetters['getTranslate']('txtDesc'), width: '', class: ''}
 			]
 
 			commit('SET_COLUMNS', columns)

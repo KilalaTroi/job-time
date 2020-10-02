@@ -3,5 +3,6 @@ export default {
     loginUser: {},
     currentTeamOption: [],
     currentTeam: {},
+    queryTeam: '',
     reportNotify: 0
 }

@@ -42,9 +42,7 @@ export default {
 
 	actions: {
 		getAllDepartments({ rootState, commit }) {
-			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-			const uri = queryTeam && queryTeamID ? '/data/departments?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments'
+			const uri = rootState.queryTeam ? '/data/departments?' + rootState.queryTeam : '/data/departments'
 			
 			axios.get(uri).then(response => {
 				commit('GET_ALL_DEPARTMENTS', response.data)
@@ -53,9 +51,7 @@ export default {
 
 		deleteDepartment({ rootState, dispatch }, department) {
 			if (confirm(department.msgText)) {
-				const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-				const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-				const uri = queryTeam && queryTeamID ? '/data/departments/' + department.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments/' + department.id
+				const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
 
 				axios.delete(uri)
 					.then(res => {
@@ -77,9 +73,7 @@ export default {
 		updateDepartment({ rootState, commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-			const uri = queryTeam && queryTeamID ? '/data/departments/' + department.id + '?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments/' + department.id
+			const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
 			
 			axios
 				.patch(uri, department)
@@ -95,9 +89,7 @@ export default {
 		createDepartment({ rootState, commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const queryTeam = rootState.currentTeam ? rootState.currentTeam.text.toLowerCase() : ''
-			const queryTeamID = rootState.currentTeam ? rootState.currentTeam.id : ''
-			const uri = queryTeam && queryTeamID ? '/data/departments?team=' + queryTeam + '&team_id=' + queryTeamID : '/data/departments'
+			const uri = rootState.queryTeam ? '/data/departments?' + rootState.queryTeam : '/data/departments'
 
 			axios
 				.post(uri, department)
@@ -116,11 +108,11 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit, rootState, rootGetters }) {
+		setColumns({ commit, rootGetters }) {
 			const columns = [
-				{ id: "name", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: "", class: "" },
-				{ id: "name_vi", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtNameVi'), width: "", class: "" },
-				{ id: "name_ja", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtNameJa'), width: "", class: "" },
+				{ id: "name", value: rootGetters['getTranslate']('txtName'), width: "", class: "" },
+				{ id: "name_vi", value: rootGetters['getTranslate']('txtNameVi'), width: "", class: "" },
+				{ id: "name_ja", value: rootGetters['getTranslate']('txtNameJa'), width: "", class: "" },
 			]
 
 			commit('SET_COLUMNS', columns)

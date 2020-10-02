@@ -118,6 +118,7 @@ export default {
     }
 }
 </script>
+
 <style lang="scss">
 .ic-custom {
     font-size: 24px;

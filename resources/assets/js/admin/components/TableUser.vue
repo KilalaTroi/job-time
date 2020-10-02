@@ -12,7 +12,8 @@
             <tr v-for="(item, index) in users" :key="index">
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
-                        <span v-html="itemValue(item, column)"></span>
+                        <span class="team-list-text" v-if="column.id == 'team'" v-html="getTeamText(item[column.id.toLowerCase()])"></span>
+                        <span v-else v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
                 <td class="text-center">
@@ -43,10 +44,12 @@ export default {
 
     computed: {
         ...mapGetters({
+            getTeamText: 'getTeamText',
             columns: 'users/columns',
             users: 'users/items',
+            teamOptions: 'users/teamOptions',
             itemValue: 'table/itemValue',
-            archiveClass: 'table/archiveClass'
+            archiveClass: 'table/archiveClass',
         })
     },
 

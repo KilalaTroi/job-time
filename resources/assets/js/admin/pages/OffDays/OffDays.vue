@@ -36,7 +36,7 @@
           :business-hours="businessHours"
           :editable="editable"
           :droppable="droppable"
-          :events="offDays"
+          :events="offDaysData"
           :all-day-slot="allDaySlot"
           :height="height"
           :hidden-days="hiddenDays"
@@ -71,9 +71,6 @@ export default {
   name: "off-days",
   data() {
     return {
-      userID: document
-        .querySelector("meta[name='user-id']")
-        .getAttribute("content"),
       calendarPlugins: [
         listPlugin,
         interactionPlugin,
@@ -112,11 +109,8 @@ export default {
   computed: {
     ...mapGetters({
       offDayTypes: "offdays/offDayTypes",
-      offDays: "offdays/offDays",
       offDaysData: "offdays/offDaysData",
       currentEvent: "offdays/currentEvent",
-      currentStart: "offdays/currentStart",
-      currentEnd: "offdays/currentEnd",
       setBackground: "setBackground",
     }),
   },
@@ -126,8 +120,7 @@ export default {
       handleMonthChange: "offdays/handleMonthChange",
       addEvent: "offdays/addEvent",
       clickEvent: "offdays/clickEvent",
-      getLanguage: "offdays/getLanguage",
-      fetchItems: "offdays/fetchItems",
+      getOffDaysRaw: "offdays/getOffDaysRaw",
       deleteEvent: "offdays/deleteEvent",
       getDataOffDays: "offdays/getDataOffDays",
     }),
@@ -155,21 +148,10 @@ export default {
 
   mounted() {
     this.makeDraggable();
-    this.fetchItems(this.userID);
-  },
-
-  watch: {
-    offDaysData: [
-      {
-        handler: "getDataOffDays",
-      },
-    ],
-  },
+    this.getOffDaysRaw();
+  }
 };
-
 </script>
-
-
 
 <style lang="scss">
 @import "~@fullcalendar/core/main.css";

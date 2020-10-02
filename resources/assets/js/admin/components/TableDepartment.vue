@@ -62,6 +62,7 @@ export default {
 
   methods: {
     ...mapActions({
+      setQueryTeam: 'setQueryTeam',
       setColumns: "departments/setColumns",
       getAllDepartments: "departments/getAllDepartments",
       deleteDepartment: "departments/deleteDepartment",
@@ -77,23 +78,18 @@ export default {
       _this.setColumns();
     });
 
-    _this.unwatch = _this.$store.watch(
+    _this.storeWatch = _this.$store.watch(
       (state, getters) => getters.currentTeam,
       (newValue, oldValue) => {
+        _this.setQueryTeam();
         _this.getAllDepartments();
       },
     );
   },
 
   beforeDestroy() {
-    this.unwatch();
-  },
-
-  // watch: {
-  //   currentTeam: [{
-  //     handler: 'getDataDepartments'
-  //   }]
-  // }
+    this.storeWatch();
+  }
 };
 </script>
 <style>

@@ -66,6 +66,7 @@ export default {
   /*METHODS*/
   methods: {
     ...mapActions({
+      setQueryTeam: 'setQueryTeam',
       setColumns: "types/setColumns",
       getAllTypes: "types/getAllTypes",
       deleteType: "types/deleteType",
@@ -81,16 +82,17 @@ export default {
       _this.setColumns();
     });
 
-    _this.unwatch = _this.$store.watch(
+    _this.storeWatch = _this.$store.watch(
       (state, getters) => getters.currentTeam,
       (newValue, oldValue) => {
+        _this.setQueryTeam();
         _this.getAllTypes();
       },
     );
   },
 
   beforeDestroy() {
-    this.unwatch();
+    this.storeWatch();
   },
 };
 </script>
