@@ -3,7 +3,7 @@ export default {
 
 	state: {
 		columns: [],
-		items: [],
+		items: {},
 		selectedType: {
 			value: null
 		},
@@ -43,29 +43,30 @@ export default {
 	},
 
 	actions: {
-		getAllTypes({ commit }) {
-			axios.get('/data/types').then(response => {
+		getAll({ commit }, page=1) {
+			const uri = '/data/types?page=' + page;
+			axios.get(uri).then(response => {
 				commit('GET_ALL_TYPES', response.data)
 			})
 		},
 
-		deleteType({ dispatch }, type) {
+		deleteItem({ dispatch }, type) {
 			if (confirm(type.msgText)) {
 				axios.delete('/data/types/' + type.id)
 					.then(res => {
-						dispatch('getAllTypes')
+						dispatch('getAll')
 					})
 					.catch(err => console.log(err))
 			}
 		},
 
-		getTypeById({ state, commit, rootGetters }, id) {
-			const type = rootGetters['getObjectByID'](state.items, id)
+		getItem({ state, commit, rootGetters }, id) {
+			const type = rootGetters['getObjectByID'](state.items.data, id)
 			commit('SET_SELECTED_TYPE', type)
 		},
 
 		resetSelectedType({ commit }) {
-			commit('SET_SELECTED_TYPE', {value: null})
+			commit('SET_SELECTED_TYPE', { value: null })
 		},
 
 		updateType({ commit }, type) {
@@ -98,17 +99,17 @@ export default {
 		},
 
 		resetValidate({ dispatch, commit }) {
-			dispatch('getAllTypes')
+			dispatch('getAll')
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
 		setColumns({ commit, rootState, rootGetters }) {
 			const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
 			const columns = [
-				{id: 'slug', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtSlug'), width: '200', class: ''},
-				{id: 'value', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtColor'), width: '110', class: 'text-center'},
-				{id: 'slug_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: '200', class: ''},
-				{id: 'description_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtDesc'), width: '', class: ''}
+				{ id: 'slug', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtSlug'), width: '200', class: '' },
+				{ id: 'htmlValue', value: rootGetters['getTranslate'](rootState.translateTexts, 'txtColor'), width: '110', class: 'text-center' },
+				{ id: 'slug_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: '200', class: '' },
+				{ id: 'description_' + langDefault, value: rootGetters['getTranslate'](rootState.translateTexts, 'txtDesc'), width: '', class: '' }
 			]
 
 			commit('SET_COLUMNS', columns)

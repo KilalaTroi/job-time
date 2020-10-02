@@ -3,7 +3,7 @@ export default {
 
 	state: {
 		columns: [],
-		items: [],
+		items: {},
 		selectedDepartment: {},
 		validationErrors: '',
 		validationSuccess: ''
@@ -41,24 +41,26 @@ export default {
 	},
 
 	actions: {
-		getAllDepartments({ commit }) {
-			axios.get('/data/departments').then(response => {
+
+		getAll({ commit }, page = 1) {
+			const uri = '/data/departments?page=' + page;
+			axios.get(uri).then(response => {
 				commit('GET_ALL_DEPARTMENTS', response.data)
 			})
 		},
 
-		deleteDepartment({ dispatch }, department) {
+		deleteItem({ dispatch }, department) {
 			if (confirm(department.msgText)) {
 				axios.delete('/data/departments/' + department.id)
 					.then(res => {
-						dispatch('getAllDepartments')
+						dispatch('getAll')
 					})
 					.catch(err => console.log(err))
 			}
 		},
 
-		getDepartmentById({ state, commit, rootGetters }, id) {
-			const department = rootGetters['getObjectByID'](state.items, id)
+		getItem({ state, commit, rootGetters }, id) {
+			const department = rootGetters['getObjectByID'](state.items.data, id)
 			commit('SET_SELECTED_DEPARTMENT', department)
 		},
 
@@ -96,7 +98,7 @@ export default {
 		},
 
 		resetValidate({ dispatch, commit }) {
-			dispatch('getAllDepartments')
+			dispatch('getAll')
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
