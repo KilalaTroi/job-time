@@ -5,7 +5,7 @@ export default {
 		columns: [],
 		items: {},
 		selectedType: {
-			value: null
+			value: ''
 		},
 		validationErrors: '',
 		validationSuccess: ''
@@ -66,7 +66,7 @@ export default {
 		},
 
 		resetSelectedType({ commit }) {
-			commit('SET_SELECTED_TYPE', { value: null })
+			commit('SET_SELECTED_TYPE', { value: '' })
 		},
 
 		updateType({ commit }, type) {
