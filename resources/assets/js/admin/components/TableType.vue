@@ -66,6 +66,7 @@ export default {
   /*METHODS*/
   methods: {
     ...mapActions({
+      setQueryTeam: 'setQueryTeam',
       setColumns: "types/setColumns",
       getAllTypes: "types/getAllTypes",
       deleteType: "types/deleteType",
@@ -80,6 +81,18 @@ export default {
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
+
+    _this.storeWatch = _this.$store.watch(
+      (state, getters) => getters.currentTeam,
+      (newValue, oldValue) => {
+        _this.setQueryTeam();
+        _this.getAllTypes();
+      },
+    );
+  },
+
+  beforeDestroy() {
+    this.storeWatch();
   },
 };
 </script>

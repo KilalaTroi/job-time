@@ -30,7 +30,7 @@
                             v-model="selectedUser.team"
                             :options="teamOptions"
                             :clear-on-select="false"
-                            :preserve-search="true"
+                            :preserve-search="false"
                             :placeholder="$ml.with('VueJS').get('txtPickSome')"
                             label="text"
                             track-by="text"

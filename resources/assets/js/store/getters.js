@@ -4,11 +4,14 @@ import { vi, ja } from 'vuejs-datepicker/dist/locale'
 export default {
     translateTexts: state => state.translateTexts,
     loginUser: state => state.loginUser,
+    currentTeam: state => state.currentTeam,
+    currentTeamOption: state => state.currentTeamOption,
+    queryTeam: state => state.queryTeam,
     reportNotify: state => state.reportNotify,
 
-    getTranslate() {
-        return (translateTexts, string) => {
-            return translateTexts ? translateTexts.get(string) : ''
+    getTranslate(state) {
+        return (string) => {
+            return state.translateTexts ? state.translateTexts.get(string) : ''
         }
     },
 
@@ -20,8 +23,9 @@ export default {
     },
 
     dateFormat() {
-        return (date, string) => {
-            return moment(date).format(string)
+        return (date, string = null) => {
+            if ( string ) return moment(date).format(string)
+            return moment(date).format()
         }
     },
 
@@ -33,6 +37,25 @@ export default {
 
         return (data) => {
             return dataLang[data.current]
+        }
+    },
+
+    setBackground() {
+        return (color) => {
+            return {
+                backgroundColor: color,
+                borderColor: color
+            }
+        }
+    },
+
+    getTeamText(state, getters) {
+        return (team) => {
+            if (typeof team === 'string' || team instanceof String) {
+                return team.split(',').map((item, index) => { 
+                    return '<span>' + getters['getObjectByID'](state.users.teamOptions, +item).text + '</span>'
+                }).toString()
+            }
         }
     }
 }

@@ -52,12 +52,13 @@ export default {
     },
 
     actions: {
-        setColumns({ commit, rootState, rootGetters }) {
+        setColumns({ commit, rootGetters }) {
             const columns = [
-                { id: "username", value: rootGetters['getTranslate'](rootState.translateTexts, 'lblUsername'), width: "120", class: "" },
-                { id: "r_name", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtRole'), width: "120", class: "" },
-                { id: "name", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: "120", class: "" },
-                { id: "email", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtEmail'), width: "120", class: "" }
+                { id: "username", value: rootGetters['getTranslate']('lblUsername'), width: "120", class: "" },
+                { id: "r_name", value: rootGetters['getTranslate']('txtRole'), width: "120", class: "" },
+                { id: "team", value: 'Team', width: "120", class: "" },
+                { id: "name", value: rootGetters['getTranslate']('txtName'), width: "120", class: "" },
+                { id: "email", value: rootGetters['getTranslate']('txtEmail'), width: "120", class: "" }
             ]
 
             commit('SET_COLUMNS', columns)

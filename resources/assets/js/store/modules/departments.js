@@ -41,17 +41,19 @@ export default {
 	},
 
 	actions: {
-
-		getAll({ commit }, page = 1) {
-			const uri = '/data/departments?page=' + page;
+		getAllDepartments({ rootState, commit }, page = 1) {
+			const uri = rootState.queryTeam ? '/data/departments?page=' + page + '&' + rootState.queryTeam : '/data/departments?page=' + page
+			
 			axios.get(uri).then(response => {
 				commit('GET_ALL_DEPARTMENTS', response.data)
 			})
 		},
 
-		deleteItem({ dispatch }, department) {
+		deleteItem({ rootState, dispatch }, department) {
 			if (confirm(department.msgText)) {
-				axios.delete('/data/departments/' + department.id)
+				const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
+
+				axios.delete(uri)
 					.then(res => {
 						dispatch('getAll')
 					})
@@ -68,9 +70,11 @@ export default {
 			commit('SET_SELECTED_DEPARTMENT', {})
 		},
 
-		updateDepartment({ commit }, department) {
+		updateDepartment({ rootState, commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/departments/" + department.id
+
+			const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
+			
 			axios
 				.patch(uri, department)
 				.then(res => {
@@ -82,9 +86,11 @@ export default {
 				});
 		},
 
-		createDepartment({ commit }, department) {
+		createDepartment({ rootState, commit }, department) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-			const uri = "/data/departments"
+
+			const uri = rootState.queryTeam ? '/data/departments?' + rootState.queryTeam : '/data/departments'
+
 			axios
 				.post(uri, department)
 				.then(res => {
@@ -102,11 +108,11 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit, rootState, rootGetters }) {
+		setColumns({ commit, rootGetters }) {
 			const columns = [
-				{ id: "name", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtName'), width: "", class: "" },
-				{ id: "name_vi", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtNameVi'), width: "", class: "" },
-				{ id: "name_ja", value: rootGetters['getTranslate'](rootState.translateTexts, 'txtNameJa'), width: "", class: "" },
+				{ id: "name", value: rootGetters['getTranslate']('txtName'), width: "", class: "" },
+				{ id: "name_vi", value: rootGetters['getTranslate']('txtNameVi'), width: "", class: "" },
+				{ id: "name_ja", value: rootGetters['getTranslate']('txtNameJa'), width: "", class: "" },
 			]
 
 			commit('SET_COLUMNS', columns)

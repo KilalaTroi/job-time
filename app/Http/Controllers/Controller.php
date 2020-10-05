@@ -18,10 +18,17 @@ class Controller extends BaseController
 		$this->middleware(function ($request, $next) {
 			// fetch session and use it in entire class with constructor
 			$user = $request->session()->get('Auth');
-			$teams = explode(',',$user[0]['team']);
-			$rows = DB::table('teams')->select('code')->where('id',$teams[0])->first();
-			$this->defaultSQL = 'mysql_'.$rows->code;
-			$this->teamIDs = explode(',', $user[0]['team'])[0];
+
+			if ( isset($_GET['team']) && $_GET['team_id'] ) {
+				$this->defaultSQL = 'mysql_' . $_GET['team'];
+				$this->teamIDs = $_GET['team_id'];
+			} else {
+				$teams = explode(',',$user[0]['team']);
+				$rows = DB::table('teams')->select('code')->where('id',$teams[0])->first();
+				$this->defaultSQL = 'mysql_'.$rows->code;
+				$this->teamIDs = explode(',', $user[0]['team'])[0];
+			}
+			
 			return $next($request);
 		});
 	}

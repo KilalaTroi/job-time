@@ -6,7 +6,7 @@
     </div>
 </template>
 <script>
-import OffDays from './OffDays';
+import OffDays from './OffDays.vue'
 
 export default {
     components: {
@@ -14,6 +14,5 @@ export default {
     }
 }
 </script>
-
 <style>
 </style>

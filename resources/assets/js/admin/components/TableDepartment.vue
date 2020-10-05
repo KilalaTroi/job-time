@@ -55,12 +55,14 @@ export default {
     ...mapGetters({
       columns: "departments/columns",
       departmens: "departments/items",
-      itemValue: "table/itemValue"
+      itemValue: "table/itemValue",
+      currentTeam: 'currentTeam'
     }),
   },
 
   methods: {
     ...mapActions({
+      setQueryTeam: 'setQueryTeam',
       setColumns: "departments/setColumns",
       getAllDepartments: "departments/getAllDepartments",
       deleteDepartment: "departments/deleteDepartment",
@@ -75,7 +77,19 @@ export default {
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
+
+    _this.storeWatch = _this.$store.watch(
+      (state, getters) => getters.currentTeam,
+      (newValue, oldValue) => {
+        _this.setQueryTeam();
+        _this.getAllDepartments();
+      },
+    );
   },
+
+  beforeDestroy() {
+    this.storeWatch();
+  }
 };
 </script>
 <style>

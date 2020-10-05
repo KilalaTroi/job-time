@@ -14,7 +14,7 @@ class pdfController extends Controller
         if ( $request->get('data') ) {
             $data = $request->get('data');
             $data['content'] = str_ireplace(url('data/reports'), storage_path('app/reports'), $data['content']);
-            $pdf = PDFSNAPPY::loadView('pdf.report',  compact('data'));
+            $pdf = PDFSNAPPY::loadView('pdf.report',  compact('data'))->setTemporaryFolder(storage_path('app/reports/tmp'));
             $file_name = 'report-'. date('ymjhis') .'.pdf';
             Storage::put('public/pdf/' . $file_name, $pdf->output());
 
