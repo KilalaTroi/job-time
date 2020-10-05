@@ -16,7 +16,7 @@ class DepartmentsController extends Controller
     public function index()
     {
         $this->changeDB();
-        $department = Department::where('id', '<>', 1)->get();
+        $department = Department::where('id', '<>', 1)->paginate(10);
         return response()->json($department);
     }
 

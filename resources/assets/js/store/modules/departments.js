@@ -3,7 +3,7 @@ export default {
 
 	state: {
 		columns: [],
-		items: [],
+		items: {},
 		selectedDepartment: {},
 		validationErrors: '',
 		validationSuccess: ''
@@ -41,28 +41,28 @@ export default {
 	},
 
 	actions: {
-		getAllDepartments({ rootState, commit }) {
-			const uri = rootState.queryTeam ? '/data/departments?' + rootState.queryTeam : '/data/departments'
+		getAllDepartments({ rootState, commit }, page = 1) {
+			const uri = rootState.queryTeam ? '/data/departments?page=' + page + '&' + rootState.queryTeam : '/data/departments?page=' + page
 			
 			axios.get(uri).then(response => {
 				commit('GET_ALL_DEPARTMENTS', response.data)
 			})
 		},
 
-		deleteDepartment({ rootState, dispatch }, department) {
+		deleteItem({ rootState, dispatch }, department) {
 			if (confirm(department.msgText)) {
 				const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
 
 				axios.delete(uri)
 					.then(res => {
-						dispatch('getAllDepartments')
+						dispatch('getAll')
 					})
 					.catch(err => console.log(err))
 			}
 		},
 
-		getDepartmentById({ state, commit, rootGetters }, id) {
-			const department = rootGetters['getObjectByID'](state.items, id)
+		getItem({ state, commit, rootGetters }, id) {
+			const department = rootGetters['getObjectByID'](state.items.data, id)
 			commit('SET_SELECTED_DEPARTMENT', department)
 		},
 
@@ -104,7 +104,7 @@ export default {
 		},
 
 		resetValidate({ dispatch, commit }) {
-			dispatch('getAllDepartments')
+			dispatch('getAll')
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 

@@ -5,7 +5,9 @@
         <div class="row">
           <div class="col-12 col-sm-auto">
             <button-create>
-              <template slot="title">{{$ml.with('VueJS').get('txtCreateDept')}}</template>
+              <template slot="title">{{
+                $ml.with("VueJS").get("txtCreateDept")
+              }}</template>
             </button-create>
           </div>
         </div>
@@ -13,11 +15,22 @@
 
       <card class="strpied-tabled-with-hover">
         <template slot="header">
-          <h4 class="card-title">{{$ml.with('VueJS').get('txtDeptList')}}</h4>
+          <h4 class="card-title">{{ $ml.with("VueJS").get("txtDeptList") }}</h4>
         </template>
-        <div class="table-responsive">
-          <table-department class="table-hover table-striped" />
-        </div>
+        <table-1
+          :dataItems="items"
+          :dataCols="columns"
+          dataAction="all"
+          dataPath="departments"
+        />
+        <pagination
+          :data="items"
+          :show-disabled="true"
+          :limit="2"
+          align="right"
+          size="small"
+          @pagination-change-page="getItems"
+        />
       </card>
       <create-item />
       <edit-item />
@@ -26,7 +39,7 @@
 </template>
 
 <script>
-import TableDepartment from "../../components/TableDepartment";
+import Table1 from "../../components/Table";
 import Card from "../../components/Cards/Card";
 import CreateItem from "./Create";
 import EditItem from "./Edit";
@@ -35,11 +48,34 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   components: {
-    TableDepartment,
+    Table1,
     Card,
     CreateItem,
     EditItem,
     ButtonCreate,
-  }
+  },
+
+  computed: {
+    ...mapGetters("departments", {
+      columns: "columns",
+      items: "items",
+    }),
+  },
+
+  methods: {
+    ...mapActions("departments", {
+      setColumns: "setColumns",
+      getItems: "getAll",
+    }),
+  },
+
+  mounted() {
+    const _this = this;
+    _this.setColumns();
+    _this.getItems();
+    $(document).on("click", ".languages button", function () {
+      _this.setColumns();
+    });
+  },
 };
 </script>

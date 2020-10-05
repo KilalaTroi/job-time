@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Type;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class TypesController extends Controller
 {
@@ -16,7 +17,14 @@ class TypesController extends Controller
     public function index()
     {
         $this->changeDB();
-        return response()->json(Type::all());
+        $types = Type::paginate(10);
+
+        $types->getCollection()->transform(function ($value) {
+            $value->htmlvalue = sprintf('<span class="type-color" style="background-color: %s;"></span>',$value->value);
+            return $value;
+        });
+
+        return response()->json($types);
     }
 
     /**
