@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 class StatisticsController extends Controller
 {
     public function timeAllocation() {
-        $this->changeDB();
         $data = array();
         $startMonth = $_GET['startMonth'];
         $endMonth = $_GET['endMonth'];
@@ -39,7 +38,6 @@ class StatisticsController extends Controller
     }
 
     public function filterAllocation() {
-        $this->changeDB();
         $data = array();
         $user_id = $_GET['user_id'];
         $startMonth = $_GET['startMonth'];
@@ -59,7 +57,6 @@ class StatisticsController extends Controller
 
     public function getDataTotaling(Request $request) {
         // POST data
-        $this->changeDB();
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
@@ -191,7 +188,6 @@ class StatisticsController extends Controller
     }
 
     public function exportReport($file_extension) {
-        $this->changeDB();
         $data = array();
         $user_id = $_GET['user_id'];
         $startMonth = $_GET['startMonth'];

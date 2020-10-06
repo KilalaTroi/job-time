@@ -22,7 +22,6 @@ class ReportsController extends Controller
      */
     public function store(Request $request)
     {
-        $this->changeDB();
         $report = Report::create($request->all());
 
         return response()->json(array(
@@ -39,7 +38,6 @@ class ReportsController extends Controller
      */
     public function update($id, Request $request)
     {
-        $this->changeDB();
         $report = Report::findOrFail($id);
         $report->update($request->all());
 
@@ -56,7 +54,6 @@ class ReportsController extends Controller
      */
     public function destroy($id)
     {
-        $this->changeDB();
         $report = Report::findOrFail($id);
         $report->delete();
 
@@ -283,7 +280,6 @@ class ReportsController extends Controller
     }
 
     public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
-        $this->changeDB();
         $dataDetail = '';
         $dataTotal = '';
         $data = DB::table('types as t')
@@ -413,7 +409,6 @@ class ReportsController extends Controller
     }
 
     function getNotify() {
-        $this->changeDB();
 
         $user_id = $_GET['user_id'];
         $count_notify = 0;
@@ -435,7 +430,6 @@ class ReportsController extends Controller
     }
 
     function updateSeen(Request $request) {
-        $this->changeDB();
         $userID = $request->get('userID');
         $reportID = $request->get('reportID');
         $seenData = '';
@@ -479,7 +473,6 @@ class ReportsController extends Controller
     }
 
     function sendReport(Request $request) {
-        $this->changeDB();
         $userID = $request->get('userID');
 
         $from = DB::connection('mysql')->table('users')
@@ -523,7 +516,6 @@ class ReportsController extends Controller
     }
 
     function getData(Request $request) {
-        $this->changeDB();
         $indexPage = $request->get('indexPage');
         $reportType = $request->get('reportType');
         $startDate = $request->get('startDate');

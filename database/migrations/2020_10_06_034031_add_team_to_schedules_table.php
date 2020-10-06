@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddPageToIssue extends Migration
+class AddTeamToSchedulesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddPageToIssue extends Migration
      */
     public function up()
     {
-        Schema::table('issues', function (Blueprint $table) {
-            $table->smallInteger('page')->nullable()->after('status');
+        Schema::table('schedules', function (Blueprint $table) {
+            $table->integer('team_id')->unsigned()->after('issue_id');
         });
     }
 
@@ -25,8 +25,8 @@ class AddPageToIssue extends Migration
      */
     public function down()
     {
-        Schema::table('issues', function (Blueprint $table) {
-            $table->dropColumn('page');
+        Schema::table('schedules', function (Blueprint $table) {
+            $table->dropColumn('team_id');
         });
     }
 }

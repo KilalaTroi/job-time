@@ -15,7 +15,6 @@ class DepartmentsController extends Controller
      */
     public function index()
     {
-        $this->changeDB();
         $department = Department::where('id', '<>', 1)->paginate(10);
         return response()->json($department);
     }
@@ -28,7 +27,6 @@ class DepartmentsController extends Controller
      */
     public function store(Request $request)
     {
-        $this->changeDB();
         $this->validate($request, [
             'name' => 'required|unique:departments|max:255'
         ]);
@@ -49,7 +47,6 @@ class DepartmentsController extends Controller
      */
     public function show($id)
     {
-        $this->changeDB();
         return response()->json(Department::findOrFail($id));
     }
 
@@ -62,7 +59,6 @@ class DepartmentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->changeDB();
         $this->validate($request, [
             'name' => 'required|unique:departments,name,' . $id . '|max:255'
         ]);
@@ -83,7 +79,6 @@ class DepartmentsController extends Controller
      */
     public function destroy($id)
     {
-        $this->changeDB();
         $department = Department::findOrFail($id);
         $department->delete();
         return response()->json('Successfully');

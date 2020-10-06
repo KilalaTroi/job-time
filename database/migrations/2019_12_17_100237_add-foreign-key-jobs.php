@@ -13,21 +13,12 @@ class AddForeignKeyJobs extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql_dtp')->table('jobs', function (Blueprint $table) {
+        Schema::table('jobs', function (Blueprint $table) {
             $table->foreign('issue_id')
                 ->references('id')->on('issues')
                 ->onDelete('cascade');
-        });
-
-        Schema::connection('mysql_path')->table('jobs', function (Blueprint $table) {
-            $table->foreign('issue_id')
-                ->references('id')->on('issues')
-                ->onDelete('cascade');
-        });
-
-        Schema::connection('mysql_web')->table('jobs', function (Blueprint $table) {
-            $table->foreign('issue_id')
-                ->references('id')->on('issues')
+            $table->foreign('user_id')
+                ->references('id')->on('users')
                 ->onDelete('cascade');
         });
     }
@@ -39,16 +30,8 @@ class AddForeignKeyJobs extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql_dtp')->table('jobs', function (Blueprint $table) {
-            $table->dropForeign(['issue_id']);
-        });
-
-        Schema::connection('mysql_path')->table('jobs', function (Blueprint $table) {
-            $table->dropForeign(['issue_id']);
-        });
-
-        Schema::connection('mysql_web')->table('jobs', function (Blueprint $table) {
-            $table->dropForeign(['issue_id']);
+        Schema::table('jobs', function (Blueprint $table) {
+            $table->dropForeign(['issue_id', 'user_id']);
         });
     }
 }
