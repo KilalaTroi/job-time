@@ -31,7 +31,8 @@ import NotFound from './admin/pages/NotFoundPage'
 
 // Admin pages
 import Overview from './admin/pages/Overview';
-import UserProfile from './admin/pages/UserProfile/Index.vue';
+import UserProfile from './admin/pages/UserProfile/';
+import Teams from './admin/pages/Teams';
 import TableList from './admin/pages/TableList';
 import Typography from './admin/pages/Typography';
 import Icons from './admin/pages/Icons';
@@ -63,6 +64,11 @@ const routes = [{
                 path: 'user',
                 name: 'User',
                 component: UserProfile
+            },
+            {
+                path: 'teams',
+                name: 'Teams',
+                component: Teams
             },
             {
                 path: 'table-list',

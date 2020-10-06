@@ -13,6 +13,10 @@
                 <i class="nc-icon nc-badge"></i>
                 <p v-text="$ml.with('VueJS').get('sbUsers')" />
             </sidebar-link>
+               <sidebar-link to="/teams">
+                <i class="nc-icon nc-vector"></i>
+                <p v-text="'teams'" />
+            </sidebar-link>
             <sidebar-link to="/departments">
                 <i class="nc-icon nc-bank"></i>
                 <p v-text="$ml.with('VueJS').get('sbDepartments')" />

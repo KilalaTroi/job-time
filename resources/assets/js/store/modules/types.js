@@ -43,7 +43,7 @@ export default {
 	},
 
 	actions: {
-		getAllTypes({ rootState, commit }, page=1) {
+		getAll({ rootState, commit }, page=1) {
 			const uri = rootState.queryTeam ? '/data/types?page=' + page+ '&' + rootState.queryTeam : '/data/types?page=' + page
 
 			axios.get(uri).then(response => {

@@ -41,9 +41,9 @@ export default {
 	},
 
 	actions: {
-		getAllDepartments({ rootState, commit }, page = 1) {
+		getAll({ rootState, commit }, page = 1) {
 			const uri = rootState.queryTeam ? '/data/departments?page=' + page + '&' + rootState.queryTeam : '/data/departments?page=' + page
-			
+
 			axios.get(uri).then(response => {
 				commit('GET_ALL_DEPARTMENTS', response.data)
 			})
@@ -74,7 +74,7 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
-			
+
 			axios
 				.patch(uri, department)
 				.then(res => {

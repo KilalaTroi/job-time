@@ -42,6 +42,7 @@ Route::post('/pdf/report', 'pdfController@index')->name('report');
 Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
     Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
+    Route::resource('teams', 'TeamsController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
     Route::get('issues/getpage/{id}', 'IssuesController@getpage');

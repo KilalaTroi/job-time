@@ -8,6 +8,7 @@ import actions from './actions'
 
 import table from './modules/table'
 import users from './modules/users'
+import teams from './modules/teams'
 import departments from './modules/departments'
 import types from './modules/types'
 import jobs from './modules/jobs'
@@ -23,6 +24,7 @@ export default new Vuex.Store({
   modules: {
     table,
     users,
+    teams,
     departments,
     types,
     jobs,

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Type;
+use App\Team;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class TypesController extends Controller
+class TeamsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,15 +15,8 @@ class TypesController extends Controller
      */
     public function index()
     {
-        $this->changeDB();
-        $types = Type::paginate(10);
-
-        $types->getCollection()->transform(function ($value) {
-            $value->htmlvalue = sprintf('<span class="type-color" style="background-color: %s;"></span>',$value->value);
-            return $value;
-        });
-
-        return response()->json($types);
+        $Teams = Team::paginate(10);
+        return response()->json($Teams);
     }
 
     /**
@@ -34,15 +27,14 @@ class TypesController extends Controller
      */
     public function store(Request $request)
     {
-        $this->changeDB();
         $this->validate($request, [
-            'slug' => 'required|unique:types|max:255'
+            'name' => 'required|unique:teams|max:255'
         ]);
 
-        $type = Type::create($request->all());
+        $team = Team::create($request->all());
 
         return response()->json(array(
-            'id' => $type->id,
+            'id' => $team->id,
             'message' => 'Successfully.'
         ), 200);
     }
@@ -55,8 +47,7 @@ class TypesController extends Controller
      */
     public function show($id)
     {
-        $this->changeDB();
-        return response()->json(Type::findOrFail($id));
+        return response()->json(Team::findOrFail($id));
     }
 
     /**
@@ -68,13 +59,12 @@ class TypesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->changeDB();
         $this->validate($request, [
-            'slug' => 'required|unique:types,slug,'.$id.'|max:255'
+            'name' => 'required|unique:teams,name,'.$id.'|max:255'
         ]);
 
-        $type = Type::findOrFail($id);
-        $type->update($request->all());
+        $team = Team::findOrFail($id);
+        $team->update($request->all());
 
         return response()->json(array(
             'message' => 'Successfully.'
@@ -89,9 +79,8 @@ class TypesController extends Controller
      */
     public function destroy($id)
     {
-        $this->changeDB();
-        $type = Type::findOrFail($id);
-        $type->delete();
+        $team = team::findOrFail($id);
+        $team->delete();
 
         return response()->json('Successfully');
     }
