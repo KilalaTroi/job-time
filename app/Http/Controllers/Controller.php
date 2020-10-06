@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 class Controller extends BaseController
 {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-	protected $defaultSQL;
 	public $teamIDs;
 	public function __construct()
 	{
@@ -20,22 +19,13 @@ class Controller extends BaseController
 			$user = $request->session()->get('Auth');
 
 			if ( isset($_GET['team']) && $_GET['team_id'] ) {
-				$this->defaultSQL = 'mysql_' . $_GET['team'];
 				$this->teamIDs = $_GET['team_id'];
 			} else {
 				$teams = explode(',',$user[0]['team']);
-				$rows = DB::table('teams')->select('code')->where('id',$teams[0])->first();
-				$this->defaultSQL = 'mysql_'.$rows->code;
 				$this->teamIDs = explode(',', $user[0]['team'])[0];
 			}
 			
 			return $next($request);
 		});
-	}
-
-	public function changeDB($db = NULL)
-	{
-		if (NULL === $db || empty($db))  $db = $this->defaultSQL;
-		config(['database.default' => $db]);
 	}
 }

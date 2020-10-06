@@ -23,7 +23,6 @@ class ProjectsController extends Controller
      */
     public function index()
     {
-        $this->changeDB();
         $search = isset($_GET['search']) ? json_decode($_GET['search']) : array();
         $keyword = isset($search->keyword) && $search->keyword !== '' ? $search->keyword : false;
         $type_id = isset($search->type_id) && $search->type_id != '-1' ? $search->type_id : false;
@@ -94,7 +93,6 @@ class ProjectsController extends Controller
      */
     public function store(Request $request)
     {
-        $this->changeDB();
         $request->merge(['name' => $request->get('p_name')]);
         
         $this->validate($request, [
@@ -154,7 +152,6 @@ class ProjectsController extends Controller
      */
     public function show($id, Request $request)
     {
-        $this->changeDB();
         $issue_id = $request->get('issue_id');
         $projects = DB::table('projects as p')
             ->select(
@@ -186,7 +183,6 @@ class ProjectsController extends Controller
      */
     public function update($id, Request $request)
     {
-        $this->changeDB();
         $request->merge(['name' => $request->get('p_name')]);
 
         $project = Project::findOrFail($id);
@@ -228,7 +224,6 @@ class ProjectsController extends Controller
      */
     public function destroy($id)
     {
-        $this->changeDB();
         $project = Project::findOrFail($id);
         $project->delete();
 
@@ -238,7 +233,6 @@ class ProjectsController extends Controller
     }
 
     public function importProjects(Request $request) {
-        $this->changeDB();
         
         $this->validate($request, [
             'file' => 'required'

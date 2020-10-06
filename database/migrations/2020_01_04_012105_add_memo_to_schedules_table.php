@@ -13,15 +13,7 @@ class AddMemoToSchedulesTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql_dtp')->table('schedules', function (Blueprint $table) {
-            $table->string('memo', 255)->nullable()->after('date');
-        });
-
-        Schema::connection('mysql_path')->table('schedules', function (Blueprint $table) {
-            $table->string('memo', 255)->nullable()->after('date');
-        });
-
-        Schema::connection('mysql_web')->table('schedules', function (Blueprint $table) {
+        Schema::table('schedules', function (Blueprint $table) {
             $table->string('memo', 255)->nullable()->after('date');
         });
     }
@@ -33,15 +25,7 @@ class AddMemoToSchedulesTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql_dtp')->table('schedules', function (Blueprint $table) {
-            $table->dropColumn('memo');
-        });
-
-        Schema::connection('mysql_path')->table('schedules', function (Blueprint $table) {
-            $table->dropColumn('memo');
-        });
-
-        Schema::connection('mysql_web')->table('schedules', function (Blueprint $table) {
+        Schema::table('schedules', function (Blueprint $table) {
             $table->dropColumn('memo');
         });
     }

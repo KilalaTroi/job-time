@@ -15,7 +15,6 @@ class TypesController extends Controller
      */
     public function index()
     {
-        $this->changeDB();
         $types = Type::paginate(10);
 
         $types->getCollection()->transform(function ($value) {
@@ -34,7 +33,6 @@ class TypesController extends Controller
      */
     public function store(Request $request)
     {
-        $this->changeDB();
         $this->validate($request, [
             'slug' => 'required|unique:types|max:255'
         ]);
@@ -55,7 +53,6 @@ class TypesController extends Controller
      */
     public function show($id)
     {
-        $this->changeDB();
         return response()->json(Type::findOrFail($id));
     }
 
@@ -68,7 +65,6 @@ class TypesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->changeDB();
         $this->validate($request, [
             'slug' => 'required|unique:types,slug,'.$id.'|max:255'
         ]);
@@ -89,7 +85,6 @@ class TypesController extends Controller
      */
     public function destroy($id)
     {
-        $this->changeDB();
         $type = Type::findOrFail($id);
         $type->delete();
 
