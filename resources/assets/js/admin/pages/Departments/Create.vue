@@ -1,72 +1,69 @@
 <template>
-    <modal id="itemCreate" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">{{$ml.with('VueJS').get('txtCreateDept')}}</template>
-        <form @submit="emitCreateItem">
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
-                <input v-model="name" type="text" name="name" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtNameVi')}}</label>
-                <input v-model="name_vi" type="text" name="name_vi" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtNameJa')}}</label>
-                <input v-model="name_ja" type="text" name="name_ja" class="form-control">
-            </div>
-            <error-item :errors="errors"></error-item>
-            <success-item :success="success"></success-item>
-            <hr>
-            <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}</button>
-            </div>
-        </form>
-    </modal>
+  <modal id="itemCreate" v-on:reset-validation="resetValidation">
+    <template slot="title">{{$ml.with('VueJS').get('txtCreateDept')}}</template>
+    <div class="form-group">
+      <label class>{{$ml.with('VueJS').get('txtName')}}</label>
+      <input
+        v-model="selectedDepartment.name"
+        type="text"
+        name="name"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
+      <input v-model="selectedDepartment.name_vi" type="text" name="name_vi" class="form-control" />
+    </div>
+    <div class="form-group">
+      <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
+      <input v-model="selectedDepartment.name_ja" type="text" name="name_ja" class="form-control" />
+    </div>
+    <error-item :errors="validationErrors"></error-item>
+    <success-item :success="validationSuccess"></success-item>
+    <hr />
+    <div class="form-group text-right">
+      <button
+        @click="createDepartment(selectedDepartment)"
+        type="button"
+        class="btn btn-primary"
+      >{{$ml.with('VueJS').get('txtCreate')}}</button>
+    </div>
+  </modal>
 </template>
 
 <script>
-    import ErrorItem from '../../components/Validations/Error'
-    import SuccessItem from '../../components/Validations/Success'
-    import Modal from '../../components/Modals/Modal'
+import ErrorItem from "../../components/Validations/Error";
+import SuccessItem from "../../components/Validations/Success";
+import Modal from "../../components/Modals/Modal";
+import { mapGetters, mapActions } from "vuex";
 
-    export default {
-        name: 'create-item',
-        components: {
-            Modal,
-            ErrorItem,
-            SuccessItem
-        },
-        props: ['errors', 'success'],
-        data() {
-            return {
-                name: '',
-                name_vi: '',
-                name_ja: '',
-            }
-        },
-        methods: {
-            emitCreateItem(e) {
-                e.preventDefault()
-                const newItem = {
-                    name: this.name,
-                    name_vi: this.name_vi,
-                    name_ja: this.name_ja,
-                };
-                this.$emit('create-item', newItem);
-            },
-            resetData(data) {
-                // Reset
-                if (data.length) {
-                    this.name = '';
-                    this.name_vi = '';
-                    this.name_ja = '';
-                }
-            }
-        },
-        watch: {
-            success: [{
-                handler: 'resetData'
-            }]
-        }
-    }
+export default {
+  name: "create-item",
+  components: {
+    Modal,
+    ErrorItem,
+    SuccessItem,
+  },
+  computed: {
+    ...mapGetters({
+      selectedDepartment: "departments/selectedDepartment",
+      validationErrors: "departments/validationErrors",
+      validationSuccess: "departments/validationSuccess",
+    }),
+  },
+
+  methods: {
+    ...mapActions({
+      resetValidate: "departments/resetValidate",
+      resetSelectedDepartment: "departments/resetSelectedDepartment",
+      createDepartment: "departments/createDepartment",
+    }),
+
+    resetValidation() {
+      this.resetValidate()
+      this.resetSelectedDepartment()
+    },
+  },
+};
 </script>

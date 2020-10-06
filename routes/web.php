@@ -31,10 +31,7 @@ Route::get('/clear-cache', function() {
     return "Cache is cleared";
 });
 
-Route::get('/logout', function () {
-    Auth::logout();
-    return redirect('/login');
-})->name('quick.logout');
+Route::get('/logout', 'Auth\LoginController@logout')->name('quick.logout');
 
 Auth::routes();
 

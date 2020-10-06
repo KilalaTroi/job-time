@@ -13,7 +13,15 @@ class AddPageToIssue extends Migration
      */
     public function up()
     {
-        Schema::table('issues', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('issues', function (Blueprint $table) {
+            $table->smallInteger('page')->nullable()->after('status');
+        });
+
+        Schema::connection('mysql_path')->table('issues', function (Blueprint $table) {
+            $table->smallInteger('page')->nullable()->after('status');
+        });
+
+        Schema::connection('mysql_web')->table('issues', function (Blueprint $table) {
             $table->smallInteger('page')->nullable()->after('status');
         });
     }
@@ -25,7 +33,15 @@ class AddPageToIssue extends Migration
      */
     public function down()
     {
-        Schema::table('issues', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('issues', function (Blueprint $table) {
+            $table->dropColumn('page');
+        });
+
+        Schema::connection('mysql_path')->table('issues', function (Blueprint $table) {
+            $table->dropColumn('page');
+        });
+
+        Schema::connection('mysql_web')->table('issues', function (Blueprint $table) {
             $table->dropColumn('page');
         });
     }

@@ -13,7 +13,27 @@ class CreateProjectsTable extends Migration
      */
     public function up()
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->create('projects', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('dept_id')->unsigned();
+            $table->string('name', 100);
+            $table->string('name_vi', 100)->nullable();
+            $table->string('name_ja', 100)->nullable();
+            $table->integer('type_id')->unsigned();
+            $table->timestamps();
+        });
+
+        Schema::connection('mysql_path')->create('projects', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('dept_id')->unsigned();
+            $table->string('name', 100);
+            $table->string('name_vi', 100)->nullable();
+            $table->string('name_ja', 100)->nullable();
+            $table->integer('type_id')->unsigned();
+            $table->timestamps();
+        });
+
+        Schema::connection('mysql_web')->create('projects', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('dept_id')->unsigned();
             $table->string('name', 100);
@@ -31,6 +51,8 @@ class CreateProjectsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('projects');
+        Schema::connection('mysql_dtp')->dropIfExists('projects');
+        Schema::connection('mysql_path')->dropIfExists('projects');
+        Schema::connection('mysql_web')->dropIfExists('projects');
     }
 }

@@ -119,19 +119,19 @@
 
 			<edit :currentReport="currentReport" :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionEdit" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:delete-report="deleteReport"></edit>
 
-			<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList" v-on:update-seen="updateSeen"></preview>
+			<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:send-report="sendReport"></preview>
 
 			<card class="strpied-tabled-with-hover" v-show="!actionNewReport && !actionPreview && !actionEdit">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
 							{{$ml.with('VueJS').get('txtReportList')}}
-						</h4> 
+						</h4>
 					</div>
 				</template>
 
 				<div class="table-responsive">
-					<table-report :userID="userID" class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport" v-on:edit-report="editReport" v-on:send-report="sendReport"></table-report>
+					<table-report :userID="userID" class="table-hover table-striped" :columns="columns" :data="reports.data" v-on:view-report="viewReport" v-on:edit-report="editReport"></table-report>
 				</div>
 
 				<pagination
@@ -158,6 +158,7 @@ import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 import Select2 from '../../components/SelectTwo/SelectTwo.vue';
 import TableReport from "../../components/TableReport";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
     components: {
@@ -175,6 +176,7 @@ export default {
 			columns: [
 				{ id: "type", value: 'Report Type', width: "120", class: "" },
 				{ id: "date_time", value: 'Report Date', width: "", class: "" },
+				{ id: "update_date", value: 'Update Date', width: "100", class: "" },
 				{ id: "dept_name", value: 'Department', width: "", class: "" },
 				{ id: "project_name", value: 'Project', width: "", class: "" },
 				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
@@ -217,6 +219,7 @@ export default {
 			_this.columns = [
 				{ id: "type", value: 'Report Type', width: "120", class: "" },
 				{ id: "date_time", value: 'Report Date', width: "100", class: "" },
+				{ id: "update_date", value: 'Update Date', width: "100", class: "" },
 				{ id: "dept_name", value: 'Department', width: "", class: "" },
 				{ id: "project_name", value: 'Project', width: "", class: "" },
 				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
@@ -225,6 +228,9 @@ export default {
 		});
     },
 	methods: {
+		...mapActions({
+			updateReportNotify: "updateReportNotify",
+		}),
 		getObjectValue(data, id) {
             let obj = data.filter((elem) => {
                 if (elem.id === id) return elem;
@@ -356,7 +362,7 @@ export default {
 			})
 			.then(res => {
 				this.fetchDataFilter();
-				this.$emit('update-seen');
+				this.updateReportNotify();
 			})
 			.catch(err => {
 				console.log(err);
@@ -383,7 +389,7 @@ export default {
 				userID: this.userID
 			})
 			.then(res => {
-				alert('Email was sent!')
+				console.log('Email was sent!')
 			})
 			.catch(err => {
 				console.log(err);

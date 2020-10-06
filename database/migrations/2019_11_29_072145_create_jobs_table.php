@@ -13,7 +13,27 @@ class CreateJobsTable extends Migration
      */
     public function up()
     {
-        Schema::create('jobs', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->create('jobs', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('user_id')->unsigned();
+            $table->integer('issue_id')->unsigned();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->date('date')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::connection('mysql_path')->create('jobs', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('user_id')->unsigned();
+            $table->integer('issue_id')->unsigned();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->date('date')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::connection('mysql_web')->create('jobs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('issue_id')->unsigned();
@@ -31,6 +51,8 @@ class CreateJobsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('jobs');
+        Schema::connection('mysql_dtp')->dropIfExists('jobs');
+        Schema::connection('mysql_path')->dropIfExists('jobs');
+        Schema::connection('mysql_web')->dropIfExists('jobs');
     }
 }

@@ -13,7 +13,23 @@ class CreateDepartmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->create('departments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('name_vi')->nullable();
+            $table->string('name_ja')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::connection('mysql_path')->create('departments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('name_vi')->nullable();
+            $table->string('name_ja')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::connection('mysql_web')->create('departments', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('name_vi')->nullable();
@@ -29,6 +45,8 @@ class CreateDepartmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('departments');
+        Schema::connection('mysql_dtp')->dropIfExists('departments');
+        Schema::connection('mysql_path')->dropIfExists('departments');
+        Schema::connection('mysql_web')->dropIfExists('departments');
     }
 }

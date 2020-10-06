@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Type;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class TypesController extends Controller
 {
@@ -15,7 +16,15 @@ class TypesController extends Controller
      */
     public function index()
     {
-        return response()->json(Type::all());
+        $this->changeDB();
+        $types = Type::paginate(10);
+
+        $types->getCollection()->transform(function ($value) {
+            $value->htmlvalue = sprintf('<span class="type-color" style="background-color: %s;"></span>',$value->value);
+            return $value;
+        });
+
+        return response()->json($types);
     }
 
     /**
@@ -26,7 +35,7 @@ class TypesController extends Controller
      */
     public function store(Request $request)
     {
-
+        $this->changeDB();
         $this->validate($request, [
             'slug' => 'required|unique:types|max:255'
         ]);
@@ -47,6 +56,7 @@ class TypesController extends Controller
      */
     public function show($id)
     {
+        $this->changeDB();
         return response()->json(Type::findOrFail($id));
     }
 
@@ -59,6 +69,7 @@ class TypesController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->changeDB();
         $this->validate($request, [
             'slug' => 'required|unique:types,slug,'.$id.'|max:255'
         ]);
@@ -79,6 +90,7 @@ class TypesController extends Controller
      */
     public function destroy($id)
     {
+        $this->changeDB();
         $type = Type::findOrFail($id);
         $type->delete();
 

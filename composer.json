@@ -11,7 +11,6 @@
         "google/cloud-translate": "^1.8",
         "guzzlehttp/guzzle": "^6.3",
         "laravel/framework": "5.4.*",
-        "laravel/passport": "^4.0",
         "laravel/tinker": "~1.0",
         "maatwebsite/excel": "~2.1.0",
         "wemersonjanuario/wkhtmltopdf-windows": "0.12.2.3"

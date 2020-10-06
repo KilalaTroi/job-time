@@ -13,7 +13,17 @@ class AddDescriptionToJobType extends Migration
      */
     public function up()
     {
-        Schema::table('types', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('types', function (Blueprint $table) {
+            $table->string('description_vi')->nullable()->after('slug_vi');
+            $table->string('description_ja')->nullable()->after('slug_ja');
+        });
+
+        Schema::connection('mysql_path')->table('types', function (Blueprint $table) {
+            $table->string('description_vi')->nullable()->after('slug_vi');
+            $table->string('description_ja')->nullable()->after('slug_ja');
+        });
+
+        Schema::connection('mysql_web')->table('types', function (Blueprint $table) {
             $table->string('description_vi')->nullable()->after('slug_vi');
             $table->string('description_ja')->nullable()->after('slug_ja');
         });
@@ -26,7 +36,17 @@ class AddDescriptionToJobType extends Migration
      */
     public function down()
     {
-        Schema::table('types', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('types', function (Blueprint $table) {
+            $table->dropColumn('description_vi');
+            $table->dropColumn('description_ja');
+        });
+
+        Schema::connection('mysql_path')->table('types', function (Blueprint $table) {
+            $table->dropColumn('description_vi');
+            $table->dropColumn('description_ja');
+        });
+
+        Schema::connection('mysql_web')->table('types', function (Blueprint $table) {
             $table->dropColumn('description_vi');
             $table->dropColumn('description_ja');
         });

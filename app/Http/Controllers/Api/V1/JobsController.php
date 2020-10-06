@@ -16,6 +16,7 @@ class JobsController extends Controller
      */
     public function index()
     {
+        $this->changeDB();
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
 
         $selectDate = $_GET['date'];
@@ -138,6 +139,7 @@ class JobsController extends Controller
      */
     public function store(Request $request)
     {
+        $this->changeDB();
         $this->validate($request, [
             'start_time' => 'nullable|required',
             'end_time' => 'nullable|required'
@@ -177,6 +179,7 @@ class JobsController extends Controller
      */
     public function update($id, Request $request)
     {
+        $this->changeDB();
         $job = Job::findOrFail($id);
 
         if ( $request->get('showLunchBreak') && $request->get('exceptLunchBreak') ) {
@@ -208,6 +211,7 @@ class JobsController extends Controller
      */
     public function destroy($id)
     {
+        $this->changeDB();
         $job = Job::findOrFail($id);
         $job->delete();
 

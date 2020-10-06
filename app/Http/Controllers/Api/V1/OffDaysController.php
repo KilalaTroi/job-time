@@ -73,7 +73,9 @@ class OffDaysController extends Controller
      */
     public function store(Request $request)
     {
-    	$ids = array();
+        $ids = array(); // ids ngày nghĩ bị trùng 
+        
+        // lấy ngày nghĩ bị trùng
         $oldOffDay = DB::table('off_days')
             ->select(
                 'id'
@@ -84,7 +86,7 @@ class OffDaysController extends Controller
 
         if ($oldOffDay) {
         	foreach ($oldOffDay as $value) {
-        		$ids[] = $value->id;
+        		$ids[] = $value->id; // ids ngày nghĩ bị trùng 
         	}
         	OffDay::destroy($ids);
     	}
@@ -101,7 +103,7 @@ class OffDaysController extends Controller
                 'backgroundColor' => $request->get('backgroundColor'),
                 'title' => $request->get('title')
             ),
-            'oldEvent' => $ids,
+            'oldEvent' => $ids, // ids ngày nghĩ bị trùng 
             'message' => 'Successfully.'
         ), 200);
     }

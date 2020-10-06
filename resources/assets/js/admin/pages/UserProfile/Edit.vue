@@ -1,52 +1,90 @@
 <template>
-    <modal id="itemDetail" v-on:reset-validation="$emit('reset-validation')">
+    <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="resetValidation">
         <template slot="title">{{$ml.with('VueJS').get('txtEditUser')}}</template>
-        <div v-if="currentUser">
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
-                <input v-model="currentUser.name" type="text" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtUsername')}}</label>
-                <input v-model="currentUser.username" type="text" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtEmail')}}</label>
-                <input v-model="currentUser.email" type="email" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtLang')}}</label>
-                <select-2 v-model="currentUser.language" class="select2">
-                    <option value="vi">Vietnamese</option>
-                    <option value="ja">Japanese</option>
-                </select-2>
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtRole')}}</label>
-                <div>
-                    <select-2 :options="rolesOption" v-model="currentUser.r_name" class="select2">
-                        <option disabled value="0">Select role</option>
-                    </select-2>
+        <div v-if="selectedUser">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
+                        <input v-model="selectedUser.name" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtUsername')}}</label>
+                        <input v-model="selectedUser.username" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtEmail')}}</label>
+                        <input v-model="selectedUser.email" type="email" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class>Team</label>
+                        <div>
+                            <multiselect
+                            :multiple="true"
+                            v-model="selectedUser.team"
+                            :options="teamOptions"
+                            :clear-on-select="false"
+                            :preserve-search="false"
+                            :placeholder="$ml.with('VueJS').get('txtPickSome')"
+                            label="text"
+                            track-by="text"
+                            :preselect-first="true"
+                            ></multiselect>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtRole')}}</label>
+                        <div>
+                            <select-2 :options="roleOptions" v-model="selectedUser.r_name" class="select2">
+                                <option disabled value="0">Select role</option>
+                            </select-2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtLang')}}</label>
+                        <select-2 v-model="selectedUser.language" class="select2">
+                            <option value="vi">Vietnamese</option>
+                            <option value="ja">Japanese</option>
+                        </select-2>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">Disable date</label>
+                        <datepicker name="disable_date" input-class="form-control" placeholder="Select Date" v-model="selectedUser.disable_date" :format="customFormatter" :language="getLangCode(this.$ml)">
+                        </datepicker>
+                    </div>
+                </div>
+                <div class="col-sm-6"></div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtPassword')}}</label>
+                        <input v-model="selectedUser.password" type="password" name="password" class="form-control">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="">{{$ml.with('VueJS').get('txtRePassword')}}</label>
+                        <input v-model="selectedUser.password_confirmation" type="password" name="password_confirmation" class="form-control">
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="">Disable date</label>
-                <datepicker name="disable_date" input-class="form-control" placeholder="Select Date" v-model="currentUser.disable_date" :format="customFormatter" :language="getLanguage(this.$ml)">
-                </datepicker>
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtPassword')}}</label>
-                <input v-model="password" type="password" name="password" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="">{{$ml.with('VueJS').get('txtRePassword')}}</label>
-                <input v-model="password_confirmation" type="password" name="password_confirmation" class="form-control">
-            </div>
-            <error-item :errors="errors"></error-item>
-            <success-item :success="success"></success-item>
+            
+            <error-item :errors="validationErrors"></error-item>
+            <success-item :success="validationSuccess"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button @click="emitUser" type="button" class="btn btn-primary">
+                <button @click="updateUser(selectedUser)" type="button" class="btn btn-primary">
                     {{$ml.with('VueJS').get('txtUpdate')}}
                 </button>
             </div>
@@ -59,70 +97,54 @@ import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Datepicker from 'vuejs-datepicker'
-import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
-import moment from 'moment'
+import Multiselect from "vue-multiselect"
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
     name: 'EditItem',
+
     components: {
         Select2,
         ErrorItem,
         SuccessItem,
         Modal,
-        Datepicker
+        Datepicker,
+        Multiselect
     },
-    props: ['currentUser', 'roles', 'errors', 'success'],
+
     data() {
         return {
-            password: '',
-            password_confirmation: '',
-            rolesOption: [],
-            dataLang: {
-                vi: vi,
-                ja: ja,
-                en: en
-            }
+            modalLg: 'modal-lg',
         }
     },
-    methods: {
-        getLanguage(data) {
-            return this.dataLang[data.current]
-        },
-        getDataRoles(data) {
-            if (data.length) {
-                let dataOptions = [];
-                let obj = {
-                    id: 0,
-                    text: "Select role"
-                };
-                dataOptions.push(obj);
 
-                for (let i = 0; i < data.length; i++) {
-                    let obj = {
-                        id: data[i].name,
-                        text: data[i].name
-                    };
-                    dataOptions.push(obj);
-                }
-                this.rolesOption = dataOptions;
-            }
-        },
-        emitUser() {
-            let user = Object.assign({}, {
-                password: this.password,
-                password_confirmation: this.password_confirmation
-            }, this.currentUser);
-
-            this.$emit('update-user', user);
-        },
-        customFormatter(date) {
-            return moment(date).format('YYYY/MM/DD');
-        },
+    computed: {
+        ...mapGetters({
+            roleOptions: 'users/roleOptions',
+            selectedUser: 'users/selectedUser',
+            teamOptions: 'users/teamOptions',
+            validationErrors: 'users/validationErrors',
+            validationSuccess: 'users/validationSuccess',
+            dateFormat: 'dateFormat',
+            getLangCode: 'getLangCode'
+        })
     },
-    watch: {
-        roles: [{
-            handler: 'getDataRoles'
-        }]
+
+    methods: {
+        ...mapActions({
+            resetValidate: 'users/resetValidate',
+            resetSelectedUser: 'users/resetSelectedUser',
+            updateUser: 'users/updateUser'
+        }),
+
+        customFormatter(date) {
+            return this.dateFormat(date, 'YYYY/MM/DD');
+        },
+
+        resetValidation() {
+            this.resetValidate()
+            this.resetSelectedUser()
+        }
     }
 }
 </script>

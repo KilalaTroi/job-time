@@ -11,23 +11,30 @@ class CreateReportsTable extends Migration
      *
      * @return void
      */
+
+    protected $arr_db = ['mysql_dtp', 'mysql_path', 'mysql_web'];
+
     public function up()
     {
-        Schema::create('reports', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('title');
-            $table->dateTime('date_time');
-            $table->string('author');
-            $table->string('issue')->nullable();
-            $table->string('attend_person')->nullable();
-            $table->string('attend_other_person')->nullable();
-            $table->string('language', 2);
-            $table->integer('translate_id')->unsigned();
-            $table->string('type');
-            $table->longText('content');
-            $table->string('seen');
-            $table->timestamps();
-        });
+        foreach ( $this->arr_db as $value ) {
+            Schema::connection($value)->create('reports', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('title');
+                $table->string('title_ja')->nullable();
+                $table->dateTime('date_time');
+                $table->string('author');
+                $table->string('issue')->nullable();
+                $table->string('attend_person')->nullable();
+                $table->string('attend_other_person')->nullable();
+                $table->string('language', 2);
+                $table->boolean('translatable')->nullable();
+                $table->string('type');
+                $table->longText('content');
+                $table->longText('content_ja')->nullable();
+                $table->string('seen');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
@@ -37,6 +44,8 @@ class CreateReportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reports');
+        foreach ( $this->arr_db as $value ) {
+            Schema::connection($value)->dropIfExists('reports');
+        }
     }
 }

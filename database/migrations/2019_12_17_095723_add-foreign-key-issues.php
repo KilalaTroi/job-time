@@ -13,7 +13,19 @@ class AddForeignKeyIssues extends Migration
      */
     public function up()
     {
-        Schema::table('issues', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('issues', function (Blueprint $table) {
+            $table->foreign('project_id')
+                ->references('id')->on('projects')
+                ->onDelete('cascade');
+        });
+
+        Schema::connection('mysql_path')->table('issues', function (Blueprint $table) {
+            $table->foreign('project_id')
+                ->references('id')->on('projects')
+                ->onDelete('cascade');
+        });
+
+        Schema::connection('mysql_web')->table('issues', function (Blueprint $table) {
             $table->foreign('project_id')
                 ->references('id')->on('projects')
                 ->onDelete('cascade');
@@ -27,7 +39,15 @@ class AddForeignKeyIssues extends Migration
      */
     public function down()
     {
-        Schema::table('issues', function (Blueprint $table) {
+        Schema::connection('mysql_dtp')->table('issues', function (Blueprint $table) {
+            $table->dropForeign(['project_id']);
+        });
+
+        Schema::connection('mysql_path')->table('issues', function (Blueprint $table) {
+            $table->dropForeign(['project_id']);
+        });
+
+        Schema::connection('mysql_web')->table('issues', function (Blueprint $table) {
             $table->dropForeign(['project_id']);
         });
     }

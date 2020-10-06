@@ -332,7 +332,7 @@ export default {
 			if (logTimeData.data.length) {
 				this.logTime = logTimeData.data.map((item, index) => {
 					return {
-						username: item.username,
+						username: this.getObjectValue(this.users, item.user_id).text,
 						date: this.customFormatter2(item.date),
 						start_time: item.start_time,
 						end_time: item.end_time,
