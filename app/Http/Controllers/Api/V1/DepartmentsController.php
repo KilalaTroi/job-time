@@ -13,9 +13,11 @@ class DepartmentsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $department = Department::where('id', '<>', 1)->paginate(10);
+        $page = $request->input('page');
+        if(isset($page) && !empty($page)) $department = Department::where('id', '<>', 1)->paginate(10);
+        else $department = Department::where('id', '<>', 1)->get();
         return response()->json($department);
     }
 

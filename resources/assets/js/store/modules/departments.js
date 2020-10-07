@@ -4,6 +4,7 @@ export default {
 	state: {
 		columns: [],
 		items: {},
+		options: [],
 		selectedDepartment: {},
 		validationErrors: '',
 		validationSuccess: ''
@@ -12,6 +13,7 @@ export default {
 	getters: {
 		columns: state => state.columns,
 		items: state => state.items,
+		options: state => state.options,
 		selectedDepartment: state => state.selectedDepartment,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess,
@@ -24,6 +26,10 @@ export default {
 
 		SET_DEPARTMENTS: (state, departments) => {
 			state.items = departments
+		},
+
+		GET_OPTIONS_DEPARTMENTS: (state, departments) => {
+			state.options = departments
 		},
 
 		SET_SELECTED_DEPARTMENT: (state, department) => {
@@ -46,6 +52,20 @@ export default {
 
 			axios.get(uri).then(response => {
 				commit('GET_ALL_DEPARTMENTS', response.data)
+			})
+		},
+
+		getOptions({ rootState, commit }) {
+			const uri = rootState.queryTeam ? '/data/departments?page=0&' + rootState.queryTeam : '/data/departments?page=0'
+			axios.get(uri).then(response => {
+				let dataOptions = [{id: 0,	text: "Select departmet"}]
+				dataOptions = [...dataOptions, ...response.data.map(item => {
+						return {
+								id: item.id,
+								text: item.name
+						}
+				})]
+				commit('GET_OPTIONS_DEPARTMENTS', dataOptions)
 			})
 		},
 

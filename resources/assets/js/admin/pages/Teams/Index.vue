@@ -14,7 +14,7 @@
       <card class="strpied-tabled-with-hover">
         <template slot="header">
           <h4 class="card-title">
-             {{ $ml.with("VueJS").get("txtJobTypeList") }}
+             {{ $ml.with("VueJS").get("txtTeamList") }}
           </h4>
         </template>
         <table-1
