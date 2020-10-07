@@ -8,7 +8,7 @@
       $ml.with("VueJS").get("txtCreateType")
     }}</template>
     <div class="form-group">
-      <label class>{{ $ml.with("VueJS").get("txtSlug") }}</label>
+      <label class>{{ $ml.with("VueJS").get("txtName") }}</label>
       <input
         v-model="selectedType.slug"
         type="text"
@@ -124,7 +124,7 @@ export default {
 
     ...mapGetters("departments", {
       deptOptions: "options",
-    }),
+    })
   },
 
   methods: {
@@ -134,19 +134,10 @@ export default {
       createType: "createType",
     }),
 
-    ...mapActions("departments", {
-      getDeptOptions: "getOptions",
-    }),
-
     resetValidation() {
       this.resetValidate();
       this.resetSelectedType();
     },
-  },
-
-  mounted() {
-    const _this = this;
-    _this.getDeptOptions();
-  },
+  }
 };
 </script>

@@ -22,11 +22,8 @@
                 <span class="navbar-toggler-bar burger-lines"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end">
-                <div v-if="currentTeamOption" class="switch-team ml-auto mr-3">
-                    <select-2 :options="currentTeamOption" v-model="selectTeam" class="select2" @input="setCurrentTeam(selectTeam)"></select-2>
-                </div>
                 <ul class="navbar-nav">
-                    <li class="languages nav-item mr-3">
+                    <li class="languages ml-auto nav-item mr-3">
                         <button
                             v-for="lang in $ml.list"
                             :key="lang"
@@ -53,25 +50,13 @@
 </template>
 
 <script>
-import Select2 from '../components/SelectTwo/SelectTwo.vue'
 import { mapGetters, mapActions } from "vuex"
 
 export default {
-    components: {
-        Select2
-    },
-
-    data() {
-        return {
-            selectTeam: this.currentTeam
-        }
-    },
-
     computed: {
         ...mapGetters({
             loginUser: 'loginUser',
-            currentTeamOption: 'currentTeamOption',
-            currentTeam: 'currentTeam'
+            currentLang: 'currentLang'
         }),
 
         routeName() {
@@ -84,12 +69,15 @@ export default {
         ...mapActions({
             setTranslateTexts: 'setTranslateTexts',
             setLoginUser: 'setLoginUser',
-            setCurrentTeam: 'setCurrentTeam'
+            setCurrentLang: 'setCurrentLang',
+            setCurrentTeam: 'setCurrentTeam',
+            getTeamsOptions: "teams/getOptions",
         }),
         
         activeLanguage(language) {
-            $('body').attr('class', '').addClass('language-'+this.$ml.current);
-            if ( this.$ml.current === language )
+            $('body').attr('class', '').addClass('language-' + this.currentLang);
+
+            if ( this.currentLang === language )
                 return 'bg-success';
             return 'bg-secondary';
         },
@@ -110,11 +98,19 @@ export default {
     mounted() {
         const _this = this;
 
+        _this.setCurrentLang(_this.$ml.current)
+
+        _this.getTeamsOptions()
+
         const userID = document.querySelector("meta[name='user-id']").getAttribute('content')
         _this.setLoginUser(userID)
 
         const _translateTexts = _this.$ml.with("VueJS");
         _this.setTranslateTexts(_translateTexts);
+
+        $(document).on("click", ".languages button", function () {
+            _this.setCurrentLang(_this.$ml.current)
+        });
     }
 }
 </script>
@@ -128,23 +124,6 @@ export default {
 .ic-custom-2 {
     font-size: 18px;
     vertical-align: text-top;
-}
-
-.navbar {
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 28px;
-    }
-    
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 30px;
-    }
-
-    .select2-container .select2-selection--single {
-        height: 30px;
-        border-radius: 0;
-        font-size: 14px;
-        font-weight: 700;
-    }
 }
 
 </style>

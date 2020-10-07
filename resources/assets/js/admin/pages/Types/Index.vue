@@ -64,16 +64,21 @@ export default {
   },
 
   methods: {
+    ...mapActions("departments", {
+      getDeptOptions: "getOptions",
+    }),
+
     ...mapActions("types", {
       setColumns: "setColumns",
       getItems: "getAll",
-    }),
+    })
   },
 
   mounted() {
     const _this = this;
     _this.setColumns();
     _this.getItems();
+    _this.getDeptOptions(true);
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });

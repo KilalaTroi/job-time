@@ -10,7 +10,7 @@ export default {
             commit('SET_LOGIN_USER', response.data.user)
 
             const arrTeam = response.data.user.team.split(",")
-            const teamOptions = state.users.teamOptions
+            const teamOptions = state.teams.options
             
             if ( arrTeam.length > 0 ) {
                 const currentTeamOption = [...arrTeam.map(item => {
@@ -22,9 +22,13 @@ export default {
         });
     },
 
+    setCurrentLang({ commit }, lang) {
+        commit('SET_CURRENT_LANG', lang)
+    },
+
     setCurrentTeam({ state, commit, getters }, data) {
         if ( data ) {
-            commit('SET_CURRENT_TEAM', getters['getObjectByID'](state.users.teamOptions, +data))
+            commit('SET_CURRENT_TEAM', getters['getObjectByID'](state.teams.options, +data))
         }
     },
 

@@ -20,15 +20,11 @@ export default {
 	},
 
 	mutations: {
-		GET_ALL_DEPARTMENTS: (state, data) => {
-			state.items = data
-		},
-
 		SET_DEPARTMENTS: (state, departments) => {
 			state.items = departments
 		},
 
-		GET_OPTIONS_DEPARTMENTS: (state, departments) => {
+		SET_OPTIONS_DEPARTMENTS: (state, departments) => {
 			state.options = departments
 		},
 
@@ -51,21 +47,21 @@ export default {
 			const uri = rootState.queryTeam ? '/data/departments?page=' + page + '&' + rootState.queryTeam : '/data/departments?page=' + page
 
 			axios.get(uri).then(response => {
-				commit('GET_ALL_DEPARTMENTS', response.data)
+				commit('SET_DEPARTMENTS', response.data)
 			})
 		},
 
-		getOptions({ rootState, commit }) {
+		getOptions({ rootState, commit }, dafaultValue = false) {
 			const uri = rootState.queryTeam ? '/data/departments?page=0&' + rootState.queryTeam : '/data/departments?page=0'
 			axios.get(uri).then(response => {
-				let dataOptions = [{id: 0,	text: "Select departmet"}]
+				let dataOptions = dafaultValue ? [{id: 0,	text: "Select departmet"}] : []
 				dataOptions = [...dataOptions, ...response.data.map(item => {
-						return {
-								id: item.id,
-								text: item.name
-						}
+					return {
+						id: item.id,
+						text: item.name
+					}
 				})]
-				commit('GET_OPTIONS_DEPARTMENTS', dataOptions)
+				commit('SET_OPTIONS_DEPARTMENTS', dataOptions)
 			})
 		},
 

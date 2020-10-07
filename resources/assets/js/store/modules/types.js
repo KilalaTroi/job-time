@@ -5,7 +5,7 @@ export default {
 		columns: [],
 		items: {},
 		selectedType: {
-			value: ''
+			value: '#000000'
 		},
 		validationErrors: '',
 		validationSuccess: ''
@@ -20,10 +20,6 @@ export default {
 	},
 
 	mutations: {
-		GET_ALL_TYPES: (state, data) => {
-			state.items = data
-		},
-
 		SET_TYPES: (state, types) => {
 			state.items = types
 		},
@@ -43,11 +39,11 @@ export default {
 	},
 
 	actions: {
-		getAll({ rootState, commit }, page=1) {
+		getAll({ rootState, commit }, page = 1) {
 			const uri = rootState.queryTeam ? '/data/types?page=' + page+ '&' + rootState.queryTeam : '/data/types?page=' + page
 
 			axios.get(uri).then(response => {
-				commit('GET_ALL_TYPES', response.data)
+				commit('SET_TYPES', response.data)
 			})
 		},
 
@@ -69,7 +65,7 @@ export default {
 		},
 
 		resetSelectedType({ commit }) {
-			commit('SET_SELECTED_TYPE', { value: '' })
+			commit('SET_SELECTED_TYPE', { value: '#000000' })
 		},
 
 		updateType({ rootState, commit }, type) {
@@ -96,7 +92,7 @@ export default {
 			axios
 				.post(uri, type)
 				.then(res => {
-					commit('SET_SELECTED_TYPE', {})
+					commit('SET_SELECTED_TYPE', { value: '#000000' })
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {
@@ -110,14 +106,13 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit, rootGetters }) {
-			const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
+		setColumns({ commit, rootGetters, rootState }) {
 			const columns = [
 				{id: 'slug', value: rootGetters['getTranslate']('txtName'), width: '200', class: ''},
 				{id: 'htmlValue', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center'},
 				{id: 'slug_vi', value: rootGetters['getTranslate']('txtName')+ ' VI', width: '200', class: ''},
 				{id: 'slug_ja', value: rootGetters['getTranslate']('txtName')+ ' JA', width: '200', class: ''},
-				{id: 'htmldept_' + langDefault, value: rootGetters['getTranslate']('txtDepartments'), width: '', class: ''},
+				{id: 'htmldept_' + rootState.currentLang, value: rootGetters['getTranslate']('txtDepartments'), width: '', class: ''},
 				{id: 'line_room', value: rootGetters['getTranslate']('txtLineRoom'), width: '200', class: ''},
 			]
 

@@ -17,6 +17,7 @@
              {{ $ml.with("VueJS").get("txtTeamList") }}
           </h4>
         </template>
+        
         <table-1
           :dataItems="items"
           :dataCols="columns"

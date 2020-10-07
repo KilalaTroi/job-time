@@ -8,13 +8,19 @@
                     </div>
                 </template>
                 <div class="row">
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">{{$ml.with('VueJS').get('txtKeyword')}}</label>
                             <input v-model="search.keyword" :placeholder="$ml.with('VueJS').get('txtKeyword')" type="text" class="form-control" v-on:keyup="filterItems(search.keyword)" v-on:keyup.enter="searchItems(search)">
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
+                        <label class="">Team</label>
+                        <div class="form-group">
+                            <select-2 :options="currentTeamOption" v-model="selectTeam" class="select2" @input="setCurrentTeam(selectTeam)"></select-2>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">{{$ml.with('VueJS').get('txtTypes')}}</label>
                             <div>
@@ -24,7 +30,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <div class="form-group"> 
                             <label class="">{{$ml.with('VueJS').get('txtDepartments')}}</label>
                             <div>
@@ -92,6 +98,7 @@ import TableProject from '../../components/TableProject'
 import moment from 'moment'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
+import { mapGetters, mapActions } from "vuex"
 
 export default {
     components: {
@@ -110,7 +117,7 @@ export default {
         return {
             columns: [
                 { id: 'department', value: this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
-                { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'project', value: this.$ml.with('VueJS').get('txtName'), width: '', class: '' },
                 { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '110', class: '' },
                 { id: 'page', value: this.$ml.with('VueJS').get('txtPage'), width: '60', class: '' },
                 { id: 'type', value: this.$ml.with('VueJS').get('txtType'), width: '', class: '' },
@@ -118,6 +125,7 @@ export default {
                 { id: 'start_date', value: this.$ml.with('VueJS').get('lblStartDate'), width: '', class: '' },
                 { id: 'end_date', value: this.$ml.with('VueJS').get('lblEndDate'), width: '', class: '' }
             ],
+            selectTeam: this.currentTeam,
             departments: [],
             types: [],
             departmentOptions: [],
@@ -141,6 +149,12 @@ export default {
             }
         }
     },
+    computed: {
+        ...mapGetters({
+            currentTeamOption: 'currentTeamOption',
+            currentTeam: 'currentTeam'
+        })
+    },
     mounted() {
         let _this = this;
         _this.fetchItems();
@@ -154,7 +168,7 @@ export default {
 
             _this.columns = [
                 { id: 'department', value: _this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
-                { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'project', value: _this.$ml.with('VueJS').get('txtName'), width: '', class: '' },
                 { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '110', class: '' },
                 { id: 'page', value: _this.$ml.with('VueJS').get('txtPage'), width: '60', class: '' },
                 { id: 'type', value: _this.$ml.with('VueJS').get('txtType'), width: '', class: '' },
@@ -165,6 +179,10 @@ export default {
         });
     },
     methods: {
+        ...mapActions({
+            setCurrentTeam: 'setCurrentTeam',
+        }),
+
         getObjectValue(data, id) {
             let obj = data.filter((elem) => {
                 if (elem.id == id) return elem;

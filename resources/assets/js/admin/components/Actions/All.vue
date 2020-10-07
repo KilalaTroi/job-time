@@ -16,11 +16,11 @@
     </button>
   </div>
 </template>
+
 <script>
-import { mapGetters, mapActions } from "vuex";
 export default {
   name: "action",
-  props: ["dataPath","dataItem"],
+  props: ["dataPath", "dataItem"],
 
   methods: {
     deleteItem(msgText) {
@@ -28,10 +28,10 @@ export default {
         'id' : this.dataItem.id,
         'msgText': msgText
       };
-      return this.$store.dispatch(this.dataPath + "/deleteItem",requestData);
+      return this.$store.dispatch(this.dataPath + "/deleteItem", requestData);
     },
     getItem() {
-      return this.$store.dispatch(this.dataPath + "/getItem",this.dataItem.id);
+      return this.$store.dispatch(this.dataPath + "/getItem", this.dataItem.id);
     },
   }
 };

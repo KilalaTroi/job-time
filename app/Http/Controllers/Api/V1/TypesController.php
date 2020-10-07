@@ -16,7 +16,7 @@ class TypesController extends Controller
      */
     public function index()
     {
-        $types = Type::paginate(10);
+        $types = Type::paginate(20);
         $departments = Department::all();
         $arrDepartments = array();
         foreach($departments->toArray() as $value){
@@ -24,8 +24,8 @@ class TypesController extends Controller
         }
         $types->getCollection()->transform(function ($value) use($arrDepartments) {
             $value->htmlvalue = sprintf('<span class="type-color" style="background-color: %s;"></span>',$value->value);
-            $value->htmldept_vi = $arrDepartments[$value->dept_id]['name_vi'];
-            $value->htmldept_ja = $arrDepartments[$value->dept_id]['name_ja'];
+            $value->htmldept_vi = $arrDepartments[$value->dept_id]['name_vi'] ? $arrDepartments[$value->dept_id]['name_vi'] : $arrDepartments[$value->dept_id]['name'];
+            $value->htmldept_ja = $arrDepartments[$value->dept_id]['name_ja'] ? $arrDepartments[$value->dept_id]['name_ja'] : $arrDepartments[$value->dept_id]['name'];
             return $value;
         });
 
@@ -41,7 +41,8 @@ class TypesController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'slug' => 'required|unique:types|max:255'
+            'slug' => 'required|unique:types|max:255',
+            'dept_id' => 'required|numeric|min:0|not_in:0'
         ]);
 
         $type = Type::create($request->all());

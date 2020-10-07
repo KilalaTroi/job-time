@@ -8,8 +8,7 @@ export default {
         roleOptions: [],
         selectedUser: {},
         validationErrors: '',
-        validationSuccess: '',
-        teamOptions: [{ id: 1, text: "DTP" }, { id: 2, text: "PATH" }, { id: 3, text: "WEB" }]
+        validationSuccess: ''
     },
 
     getters: {
@@ -17,7 +16,6 @@ export default {
         items: state => state.items,
         roles: state => state.roles,
         roleOptions: state => state.roleOptions,
-        teamOptions: state => state.teamOptions,
         selectedUser: state => state.selectedUser,
         validationErrors: state => state.validationErrors,
         validationSuccess: state => state.validationSuccess
@@ -113,7 +111,7 @@ export default {
             if ( user.team ) {
                 const arrTeam = user.team.split(',')
                 user.team = arrTeam.map((item, index) => {
-                    return rootGetters['getObjectByID'](state.teamOptions, +item)
+                    return rootGetters['getObjectByID'](state.teams.options, +item)
                 })
             }
             commit('SET_SELECTED_USER', user)
@@ -123,7 +121,7 @@ export default {
             if ( obj.team ) {
                 const arrTeam = obj.team.split(',')
                 obj.team = arrTeam.map((item, index) => {
-                    return rootGetters['getObjectByID'](state.teamOptions, +item)
+                    return rootGetters['getObjectByID'](state.team.options, +item)
                 })
             }
             commit('SET_SELECTED_USER', obj)

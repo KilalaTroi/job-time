@@ -3,7 +3,7 @@
     <template slot="title">{{$ml.with('VueJS').get('txtEditType')}}</template>
     <div v-if="selectedType">
       <div class="form-group">
-        <label class>{{$ml.with('VueJS').get('txtSlug')}}</label>
+        <label class>{{$ml.with('VueJS').get('txtName')}}</label>
         <input v-model="selectedType.slug" type="text" name="slug" class="form-control" required />
       </div>
       <div class="row">
@@ -96,6 +96,7 @@ export default {
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
     }),
+    
     ...mapGetters("departments", {
       deptOptions: "options",
     })
@@ -108,19 +109,10 @@ export default {
       updateType: "updateType",
     }),
 
-     ...mapActions("departments", {
-      getDeptOptions: "getOptions",
-    }),
-
     resetValidation() {
       this.resetValidate();
       this.resetSelectedType();
     }
-  },
-
-  mounted() {
-    const _this = this;
-    _this.getDeptOptions();
-  },
+  }
 };
 </script>

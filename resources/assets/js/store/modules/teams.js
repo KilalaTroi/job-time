@@ -4,6 +4,7 @@ export default {
 	state: {
 		columns: [],
 		items: {},
+		options: [],
 		selectedTeam: {},
 		validationErrors: '',
 		validationSuccess: ''
@@ -12,18 +13,19 @@ export default {
 	getters: {
 		columns: state => state.columns,
 		items: state => state.items,
+		options: state => state.options,
 		selectedTeam: state => state.selectedTeam,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess
 	},
 
 	mutations: {
-		GET_ALL_TEAMS: (state, data) => {
+		SET_TEAMS: (state, data) => {
 			state.items = data
 		},
 
-		SET_TEAMS: (state, data) => {
-			state.items = data
+		SET_OPTIONS_TEAMS: (state, data) => {
+			state.options = data
 		},
 
 		SET_SELECTED_TEAM: (state, data) => {
@@ -41,11 +43,25 @@ export default {
 	},
 
 	actions: {
-		getAll({ commit }, page=1) {
+		getAll({ commit }, page = 1) {
 			const uri = '/data/teams?page=' + page
 
 			axios.get(uri).then(response => {
-				commit('GET_ALL_TEAMS', response.data)
+				commit('SET_TEAMS', response.data)
+			})
+		},
+
+		getOptions({ rootState, commit }, dafaultValue = false) {
+			const uri = rootState.queryTeam ? '/data/teams?page=0&' + rootState.queryTeam : '/data/teams?page=0'
+			axios.get(uri).then(response => {
+				let dataOptions = dafaultValue ? [{id: 0,	text: "Select team"}] : []
+				dataOptions = [...dataOptions, ...response.data.map(item => {
+					return {
+						id: item.id,
+						text: item.name
+					}
+				})]
+				commit('SET_OPTIONS_TEAMS', dataOptions)
 			})
 		},
 

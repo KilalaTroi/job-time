@@ -122,7 +122,7 @@ export default {
         ...mapGetters({
             roleOptions: 'users/roleOptions',
             selectedUser: 'users/selectedUser',
-            teamOptions: 'users/teamOptions',
+            teamOptions: 'teams/options',
             validationErrors: 'users/validationErrors',
             validationSuccess: 'users/validationSuccess',
             dateFormat: 'dateFormat',
