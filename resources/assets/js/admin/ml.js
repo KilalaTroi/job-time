@@ -70,6 +70,7 @@ export default new MLCreate({
 		txtSelectDate: 'Select date',
 		txtLineRoomId: 'LINE WORKS Room ID',
 		txtLineRoomName: 'LINE WORKS Room Name',
+		txtLineRoom: 'LINE Room',
 		txtBoxUrl: 'Box Base Destination',
 		txtUpdateTime: 'Edit Time',
 		txtEditIssue: 'Edit issue',
@@ -93,6 +94,7 @@ export default new MLCreate({
 		txtEmail: 'Email',
 		txtRole: 'Role',
 		txtSelectRole: 'Select role',
+		txtSelectDept: 'Select department',
 		txtPassword: 'Password',
 		txtRePassword: 'Reconfirm password',
 		txtUserList: 'User List',
@@ -159,7 +161,7 @@ export default new MLCreate({
 		txtOther: 'Other',
 		txtTranslate: 'Translate',
 		txtReportList:'Report List',
-		txtJobTypeList: 'Teams List',
+		txtTeamList: 'Teams List',
 		txtCreateTeam: 'Create new team',
 		txtEditTeam: 'Edit team',
 	}),
@@ -450,7 +452,9 @@ export default new MLCreate({
 		txtJa: '日本語',
 		txtOther: 'その他',
 		txtTranslate: '通訳',
-		txtReportList:'レポートリスト'
+		txtReportList:'レポートリスト',
+		txtSelectDept: 'Select department',
+		txtLineRoom: 'Line Room',
 	})
 	]
 })

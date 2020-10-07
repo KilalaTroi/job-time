@@ -113,10 +113,12 @@ export default {
 		setColumns({ commit, rootGetters }) {
 			const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
 			const columns = [
-				{id: 'slug', value: rootGetters['getTranslate']('txtSlug'), width: '200', class: ''},
+				{id: 'slug', value: rootGetters['getTranslate']('txtName'), width: '200', class: ''},
 				{id: 'htmlValue', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center'},
-				{id: 'slug_' + langDefault, value: rootGetters['getTranslate']('txtName'), width: '200', class: ''},
-				{id: 'description_' + langDefault, value: rootGetters['getTranslate']('txtDesc'), width: '', class: ''}
+				{id: 'slug_vi', value: rootGetters['getTranslate']('txtName')+ ' VI', width: '200', class: ''},
+				{id: 'slug_ja', value: rootGetters['getTranslate']('txtName')+ ' JA', width: '200', class: ''},
+				{id: 'htmldept_' + langDefault, value: rootGetters['getTranslate']('txtDepartments'), width: '', class: ''},
+				{id: 'line_room', value: rootGetters['getTranslate']('txtLineRoom'), width: '200', class: ''},
 			]
 
 			commit('SET_COLUMNS', columns)

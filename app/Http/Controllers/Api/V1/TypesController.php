@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Department;
 use App\Type;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -16,9 +17,15 @@ class TypesController extends Controller
     public function index()
     {
         $types = Type::paginate(10);
-
-        $types->getCollection()->transform(function ($value) {
+        $departments = Department::all();
+        $arrDepartments = array();
+        foreach($departments->toArray() as $value){
+            $arrDepartments[$value['id']] = $value;
+        }
+        $types->getCollection()->transform(function ($value) use($arrDepartments) {
             $value->htmlvalue = sprintf('<span class="type-color" style="background-color: %s;"></span>',$value->value);
+            $value->htmldept_vi = $arrDepartments[$value->dept_id]['name_vi'];
+            $value->htmldept_ja = $arrDepartments[$value->dept_id]['name_ja'];
             return $value;
         });
 
