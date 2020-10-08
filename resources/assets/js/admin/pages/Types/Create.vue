@@ -49,11 +49,7 @@
             :options="deptOptions"
             v-model="selectedItem.dept_id"
             class="select2"
-          >
-            <option disabled value="0">
-              {{ $ml.with("VueJS").get("txtSelectDept") }}
-            </option>
-          </select-2>
+          ></select-2>
         </div>
       </div>
       <div class="col-sm-6">
@@ -116,14 +112,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters("types", {
-      selectedItem: "selectedItem",
-      validationErrors: "validationErrors",
-      validationSuccess: "validationSuccess",
-    }),
-
-    ...mapGetters("departments", {
-      deptOptions: "options",
+    ...mapGetters({
+      selectedItem: "types/selectedItem",
+      validationErrors: "types/validationErrors",
+      validationSuccess: "types/validationSuccess",
+      deptOptions: "departments/options",
     })
   },
 

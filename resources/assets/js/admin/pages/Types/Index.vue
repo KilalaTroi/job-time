@@ -66,7 +66,7 @@ export default {
 
   methods: {
     ...mapActions("departments", {
-      getDeptAll: "getAll",
+      getAllDept: "getAll",
     }),
 
     ...mapActions("types", {
@@ -75,11 +75,11 @@ export default {
     })
   },
 
-  mounted() {
+  async created(){
     const _this = this;
     _this.setColumns();
-    if ( !_this.deptOptions.length ) _this.getDeptAll();
-    _this.getAll();
+    if ( !_this.deptOptions.length ) await _this.getAllDept();
+    await _this.getAll();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });

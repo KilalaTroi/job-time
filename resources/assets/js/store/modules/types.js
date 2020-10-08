@@ -6,7 +6,8 @@ export default {
 		data: {},
 		options: [],
 		selectedItem: {
-			value: '#000000'
+			value: '#000000',
+			dept_id: 0
 		},
 		validationErrors: '',
 		validationSuccess: ''
@@ -45,10 +46,10 @@ export default {
 	},
 
 	actions: {
-		getAll({ rootState, rootGetters, commit, dispatch }, page = 1) {
+		async getAll({ rootState, rootGetters, commit, dispatch }, page = 1) {
 			const uri = rootState.queryTeam ? '/data/types?page=' + page+ '&' + rootState.queryTeam : '/data/types?page=' + page
 
-			axios.get(uri).then(response => {
+			await axios.get(uri).then(response => {
 				if (response.data.data.length) {
                     response.data.data = response.data.data.map((item, index) => {
 						return Object.assign({}, {
@@ -64,16 +65,18 @@ export default {
 			})
 		},
 
-		getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
+		async getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
 			const uri = rootState.queryTeam ? '/data/types?page=0&' + rootState.queryTeam : '/data/types?page=0'
 
-			axios.get(uri).then(response => {
+			await axios.get(uri).then(response => {
 				let dataOptions = dafaultValue ? [{id: 0, text: '<div>' + rootGetters['getTranslate']('txtSelectOne') + '<div>'}] : []
-				
+
 				dataOptions = [...dataOptions, ...response.data.map(item => {
 					return {
 						id: item.id,
-						text: '<div><span class="type-color" style="background: ' + item.value + '"></span>' + item.slug + '</div>'
+						text: '<div><span class="type-color" style="background: ' + item.value + '"></span>' + item.slug + '</div>',
+						slug: item.slug,
+						value: item.value,
 					}
 				})]
 				commit('SET_OPTIONS', dataOptions)
@@ -98,7 +101,7 @@ export default {
 		},
 
 		resetSelectedItem({ commit }) {
-			commit('SET_SELECTED_ITEM', { value: '#000000' })
+			commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 })
 		},
 
 		updateItem({ rootState, commit }, type) {
@@ -125,7 +128,7 @@ export default {
 			axios
 				.post(uri, type)
 				.then(res => {
-					commit('SET_SELECTED_ITEM', { value: '#000000' })
+					commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 })
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {

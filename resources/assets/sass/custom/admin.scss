@@ -832,7 +832,7 @@ td button .fa {
   font-size: 16px;
 }
 
-// Table 
+// Table
 table {
   @media (max-width: 575px) {
     .btn,
@@ -907,7 +907,7 @@ table {
 }
 
 // Team
-.team-list-text {
+.team-list-text, .cl-html_team {
   font-size: 0;
 
   > span {

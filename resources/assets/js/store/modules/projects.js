@@ -4,14 +4,13 @@ export default {
 	state: {
 		columns: [],
         data: {},
-        items: [],
 		options: [],
         selectedItem: {},
         filters: {
             keyword: '',
-            team: [],
-            type_id: -1,
-            dept_id: 1,
+            team: '',
+            type_id: 0,
+            dept_id: 0,
             showArchive: false
         },
 		validationErrors: '',
@@ -21,7 +20,6 @@ export default {
 	getters: {
         columns: state => state.columns,
         data: state => state.data,
-		items: state => state.items,
 		options: state => state.options,
         selectedItem: state => state.selectedItem,
         filters: state => state.filters,
@@ -33,10 +31,6 @@ export default {
         SET_DATA: (state, data) => {
 			state.data = data
         },
-        
-		SET_ITEMS: (state, items) => {
-			state.items = items
-		},
 
 		SET_OPTIONS: (state, options) => {
 			state.options = options
@@ -57,46 +51,43 @@ export default {
 	},
 
 	actions: {
-		getAll({ commit, state, rootState, rootGetters }, page = 1) {
+		async getAll({ commit, state, rootState, rootGetters, dispatch }, page = 1) {
             const uri = '/data/projects?page=' + page + '&filters=' + JSON.stringify(state.filters)
 
-			axios.get(uri).then(response => {
-                commit('SET_DATA', response.data)
+			await axios.get(uri).then(response => {
 
                 if (response.data.data.length) {
-                    let items = response.data.data.map((item, index) => {
+					response.data.data = response.data.data.map((item, index) => {
                         let checkArchive = item.status === "archive" ? " <i style='color: #FF4A55;'>(Archived)</i>" : ""
-                        let type = rootGetters['getObjectByID'](rootState.types.items, item.type_id)
+                        let type = rootGetters['getObjectByID'](rootState.types.options, item.type_id)
                         let checkTR = type.slug.includes("_tr") ? " (TR)" : ""
-                        let department = rootGetters['getObjectByID'](rootState.departments.items, item.dept_id)
+                        let department = rootGetters['getObjectByID'](rootState.departments.options, item.dept_id)
 
-                        return {
-                            id: item.id,
-                            department: department.text != 'All' ? department.text : '',
-                            project: item.p_name + checkTR + checkArchive,
-                            issue: item.i_name,
-                            issue_id: item.issue_id,
-                            page: item.page,
-                            status: item.status,
-                            type: type.slug,
-                            value: type.value,
-                            start_date: rootGetters['dateFormat'](item.start_date, 'YYYY/MM/DD'),
-                            end_date: rootGetters['dateFormat'](item.end_date, 'YYYY/MM/DD')
-                        };
+						return Object.assign({}, {
+							html_team: rootGetters['getTeamText']('' + item.team),
+							department: department.text !== 'All' ? department.text : '',
+							project: item.p_name + checkTR + checkArchive,
+							issue: item.i_name,
+							type: type.slug,
+							value: type.value,
+							ct_start_date: rootGetters['dateFormat'](item.start_date, 'YYYY/MM/DD'),
+							ct_end_date: rootGetters['dateFormat'](item.end_date, 'YYYY/MM/DD')
+						}, item)
                     });
-
-                    commit('SET_ITEMS', items)
                 }
+
+				commit('SET_DATA', response.data)
+				dispatch('getOptions', true)
 			})
 		},
 
-		getOptions({ commit, rootGetters, state }, dafaultValue = false) {
+		async getOptions({ commit, rootGetters, state }, dafaultValue = false) {
             const uri = '/data/projects?page=0&filters=' + JSON.stringify(state.filters)
 
-			axios.get(uri).then(response => {
+			await axios.get(uri).then(response => {
 				let dataOptions = dafaultValue ? [{id: 0,	text: rootGetters['getTranslate']('txtSelectOne')}] : []
                 dataOptions = [...dataOptions, ...response.data]
-                
+
 				commit('SET_OPTIONS', dataOptions)
 			})
 		},
@@ -164,12 +155,13 @@ export default {
 			const columns = [
 				{ id: 'department', value: rootGetters['getTranslate']('txtDepartment'), width: '', class: '' },
                 { id: 'project', value: rootGetters['getTranslate']('txtName'), width: '', class: '' },
-                { id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '110', class: '' },
+                { id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '150', class: '' },
                 { id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '' },
                 { id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '' },
                 { id: 'value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center' },
-                { id: 'start_date', value: rootGetters['getTranslate']('lblStartDate'), width: '', class: '' },
-                { id: 'end_date', value: rootGetters['getTranslate']('lblEndDate'), width: '', class: '' }
+				{ id: 'html_team', value: 'Team', width: '', class: 'text-center' },
+                { id: 'ct_start_date', value: rootGetters['getTranslate']('lblStartDate'), width: '', class: '' },
+                { id: 'ct_end_date', value: rootGetters['getTranslate']('lblEndDate'), width: '', class: '' }
 			]
 
 			commit('SET_COLUMNS', columns)

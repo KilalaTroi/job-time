@@ -43,18 +43,18 @@ export default {
 	},
 
 	actions: {
-		getAll({ rootState, commit, dispatch }, page = 1) {
+		async getAll({ rootState, commit, dispatch }, page = 1) {
 			const uri = rootState.queryTeam ? '/data/departments?page=' + page + '&' + rootState.queryTeam : '/data/departments?page=' + page
 
-			axios.get(uri).then(response => {
+			await axios.get(uri).then(response => {
 				commit('SET_DATA', response.data)
 				dispatch('getOptions', true)
 			})
 		},
 
-		getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
+		async getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
 			const uri = rootState.queryTeam ? '/data/departments?page=0&' + rootState.queryTeam : '/data/departments?page=0'
-			axios.get(uri).then(response => {
+			await axios.get(uri).then(response => {
 				let dataOptions = dafaultValue ? [{id: 0,	text: rootGetters['getTranslate']('txtSelectOne')}] : []
 				dataOptions = [...dataOptions, ...response.data.map(item => {
 					return {

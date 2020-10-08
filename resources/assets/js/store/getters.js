@@ -25,6 +25,7 @@ export default {
 
     dateFormat() {
         return (date, string = null) => {
+            if ( moment(date).format() === 'Invalid date' ) return '--'
             if ( string ) return moment(date).format(string)
             return moment(date).format()
         }
@@ -53,7 +54,7 @@ export default {
     getTeamText(state, getters) {
         return (team) => {
             if (typeof team === 'string' || team instanceof String) {
-                return team.split(',').map((item, index) => { 
+                return team.split(',').map((item, index) => {
                     return '<span>' + getters['getObjectByID'](state.teams.options, +item).text + '</span>'
                 }).toString()
             }

@@ -19,8 +19,8 @@
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </button>
 
-                        <span v-if="checkTypeColor(column)" :style="setBackground(itemValue(item, column))" class="type-color"></span>
-                        <span v-else v-html="itemValue(item, column)"></span>
+                        <span v-if="checkTypeColor(column)" :style="setBackground(itemValue(item, column))" :class="'cl-' + column.id" class="type-color"></span>
+                        <span v-else :class="'cl-' + column.id" v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
                 <td class="text-center">

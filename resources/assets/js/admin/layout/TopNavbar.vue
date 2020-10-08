@@ -39,7 +39,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="/logout" class="nav-link">
-                            <i class="nc-icon nc-button-power mr-2 ic-custom-2"></i> 
+                            <i class="nc-icon nc-button-power mr-2 ic-custom-2"></i>
                             {{$ml.with('VueJS').get('txtLogOut')}}
                         </a>
                     </li>
@@ -64,16 +64,17 @@ export default {
             return this.capitalizeFirstLetter(name)
         }
     },
-    
+
     methods: {
         ...mapActions({
             setTranslateTexts: 'setTranslateTexts',
             setLoginUser: 'setLoginUser',
             setCurrentLang: 'setCurrentLang',
             setCurrentTeam: 'setCurrentTeam',
+            setReportNotify: 'setReportNotify',
             getTeamsOptions: "teams/getOptions",
         }),
-        
+
         activeLanguage(language) {
             $('body').attr('class', '').addClass('language-' + this.currentLang);
 
@@ -95,18 +96,19 @@ export default {
         }
     },
 
-    mounted() {
+    async created(){
         const _this = this;
-
         _this.setCurrentLang(_this.$ml.current)
 
-        _this.getTeamsOptions()
+        const _translateTexts = _this.$ml.with("VueJS")
+        _this.setTranslateTexts(_translateTexts)
+
+        await _this.getTeamsOptions()
 
         const userID = document.querySelector("meta[name='user-id']").getAttribute('content')
-        _this.setLoginUser(userID)
+        await _this.setLoginUser(userID)
 
-        const _translateTexts = _this.$ml.with("VueJS");
-        _this.setTranslateTexts(_translateTexts);
+        _this.setReportNotify()
 
         $(document).on("click", ".languages button", function () {
             _this.setCurrentLang(_this.$ml.current)
