@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 06, 2020 lúc 12:56 PM
+-- Thời gian đã tạo: Th10 08, 2020 lúc 12:06 PM
 -- Phiên bản máy phục vụ: 10.4.14-MariaDB
 -- Phiên bản PHP: 7.3.22
 
@@ -47,7 +47,7 @@ INSERT INTO `departments` (`id`, `name`, `name_vi`, `name_ja`, `created_at`, `up
 (4, 'KILALA', NULL, 'KILALA', '2020-10-05 21:10:25', '2020-10-05 21:10:25'),
 (5, 'IMAGE', NULL, '画像処理', '2020-10-05 21:11:48', '2020-10-05 21:11:48'),
 (6, 'IMPOSITION', NULL, '製版', '2020-10-05 21:12:24', '2020-10-05 21:12:24'),
-(7, 'DATA', NULL, 'データ2次利用', '2020-10-05 21:12:54', '2020-10-05 21:12:54');
+(7, 'DATA MGT', NULL, 'データ2次利用', '2020-10-05 21:12:54', '2020-10-07 00:01:29');
 
 -- --------------------------------------------------------
 
@@ -7684,7 +7684,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (39, '2020_09_07_083048_create_teams_table', 10),
 (40, '2020_10_06_033040_add_team_to_projects_table', 11),
 (41, '2020_10_06_034031_add_team_to_schedules_table', 12),
-(42, '2020_10_06_034346_add_department_to_types_table', 12);
+(42, '2020_10_06_034346_add_department_to_types_table', 12),
+(43, '2020_10_06_092440_add_lineroom_to_types_table', 13);
 
 -- --------------------------------------------------------
 
@@ -9421,6 +9422,7 @@ INSERT INTO `teams` (`id`, `name`, `created_at`, `updated_at`) VALUES
 CREATE TABLE `types` (
   `id` int(10) UNSIGNED NOT NULL,
   `dept_id` int(10) UNSIGNED NOT NULL,
+  `line_room` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `slug` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `slug_vi` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `slug_ja` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -9433,13 +9435,19 @@ CREATE TABLE `types` (
 -- Đang đổ dữ liệu cho bảng `types`
 --
 
-INSERT INTO `types` (`id`, `dept_id`, `slug`, `slug_vi`, `slug_ja`, `value`, `created_at`, `updated_at`) VALUES
-(1, 1, 'kilala_work', NULL, 'Kilala案件', '#00aeef', '2019-12-17 03:18:58', '2020-09-09 03:02:10'),
-(2, 1, 'yuidea_dtp_work', NULL, 'DTP案件', '#FFDD00', '2019-12-17 03:19:17', '2019-12-17 03:24:04'),
-(3, 1, 'yuidea_dtp_tr', NULL, 'DTP練習', '#FCB531', '2019-12-17 03:19:39', '2019-12-17 03:19:39'),
-(4, 1, 'yuidea_other', NULL, 'YUIDEAその他', '#86CA92', '2019-12-17 03:20:04', '2019-12-17 03:20:04'),
-(5, 1, 'yuidea_design_work', NULL, 'デザイン案件', '#F49CC3', '2019-12-17 03:20:26', '2019-12-17 03:20:26'),
-(6, 1, 'yuidea_design_tr', NULL, 'デザイン練習', '#F5949C', '2019-12-17 03:20:46', '2019-12-17 03:20:46');
+INSERT INTO `types` (`id`, `dept_id`, `line_room`, `slug`, `slug_vi`, `slug_ja`, `value`, `created_at`, `updated_at`) VALUES
+(1, 4, NULL, 'kilala_work', 'kilala work', 'Kilala案件', '#00aeef', '2019-12-17 03:18:58', '2020-10-06 23:58:09'),
+(2, 2, NULL, 'yuidea_dtp_work', 'DTP work', 'DTP案件', '#FFDD00', '2019-12-17 03:19:17', '2020-10-06 23:58:23'),
+(3, 2, NULL, 'yuidea_dtp_tr', 'DTP training', 'DTP練習', '#FCB531', '2019-12-17 03:19:39', '2020-10-06 23:58:35'),
+(4, 1, NULL, 'yuidea_other', 'YUIDEA OTHER', 'YUIDEAその他', '#86CA92', '2019-12-17 03:20:04', '2020-10-07 00:00:12'),
+(5, 3, NULL, 'yuidea_design_work', 'Design work', 'デザイン案件', '#F49CC3', '2019-12-17 03:20:26', '2020-10-06 23:59:32'),
+(6, 3, NULL, 'yuidea_design_tr', 'Design training', 'デザイン練習', '#F5949C', '2019-12-17 03:20:46', '2020-10-07 00:00:46'),
+(7, 7, NULL, 'yuidea_image', 'Image work', '画像加工', '#D33115', '2020-10-06 23:57:42', '2020-10-06 23:57:42'),
+(8, 7, NULL, 'yuidea_image2', 'Image work 2', '画像加工2', '#E27300', '2020-10-07 00:35:50', '2020-10-07 00:36:19'),
+(9, 7, '110672717925', 'yuidea_imp', 'Imposition regular', '製版', '#FCC400', '2020-10-07 00:38:50', '2020-10-07 00:38:50'),
+(10, 7, '110672717925', 'yuidea_imp_tr', 'Imposition training', '製版練習', '#B0BC00', '2020-10-07 00:46:11', '2020-10-07 00:46:54'),
+(11, 7, NULL, 'yuidea_data', 'Data process', 'データ加工', '#68BC00', '2020-10-07 00:47:52', '2020-10-07 00:47:52'),
+(12, 7, NULL, 'yuidea_data_tr', 'Data process training', 'データ加工練習', '#16A5A5', '2020-10-07 00:51:02', '2020-10-07 00:51:13');
 
 -- --------------------------------------------------------
 
@@ -9466,7 +9474,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `username`, `team`, `language`, `email`, `disable_date`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Trần Tăng Quang', 'admin', '1,2,3', 'vi', 'quang.tran@kilala.vn', NULL, '$2y$10$EAGx2JnBt870veVtPY/E8.4Bq73eQY9S5wsC9jyApo1yemvcfWNYC', 'dvsShXpf6xaN4PLJuNXiw53m84aU0UTV4BZEZI2jW9Dfhj07vfwoznvRkrDj', '2019-12-31 18:45:58', '2020-01-10 01:02:26'),
+(1, 'Trần Tăng Quang', 'admin', '1,2', 'vi', 'quang.tran@kilala.vn', NULL, '$2y$10$EAGx2JnBt870veVtPY/E8.4Bq73eQY9S5wsC9jyApo1yemvcfWNYC', 'dvsShXpf6xaN4PLJuNXiw53m84aU0UTV4BZEZI2jW9Dfhj07vfwoznvRkrDj', '2019-12-31 18:45:58', '2020-10-06 19:12:08'),
 (2, 'Furuoya Masato', 'furuoya', '1', 'ja', 'furuoya_masato@kilala.vn', NULL, '$2y$10$1vRThhpGHfN8O3AWp2U/.umN0L5hpUBFlb3v3WYWV4yO1IfeYEXTi', '8Y4Q7mPfRWZoVMaY3FZAm756L193XYQOlcC9A3j938q9iNdMVWCEw6zDGB4C', '2019-12-31 18:45:59', '2020-05-25 19:57:36'),
 (3, 'Dương Thị Bích Ngọc', 'ngocduong', '1', 'vi', 'ngoc.duong@kilala.vn', NULL, '$2y$10$Pk3z1sCT3GFszdi4IUE1s.fLzBYN0OShL0zFp05m2h3dQVviaeq/K', 'GNmXP4zvhUgJBdPxjrWwGMZ3bFIvU1TFE49QmPaswHDgpjdkZ7GKMXwZDTtL', '2019-12-31 18:45:59', '2020-01-08 18:25:57'),
 (4, 'Đinh Thị Hạnh Nguyện', 'nguyendinh', '1', 'vi', 'nguyen.dinh@kilala.vn', '2020-07-29', '$2y$10$BV7HUz/3tzfhYRSxwnlJSuxhJW6gAGofe8Kd.zpyIYlFMFyZ4jRpi', 'VGsFmnUA1EKrYYgmrRX4wwpt05Pma8b4S6zGMabZLyY8VyklN0G3s76IdL53', '2019-12-31 18:45:59', '2020-07-29 03:03:12'),
@@ -9591,7 +9599,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `issues`
@@ -9609,7 +9617,7 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT cho bảng `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT cho bảng `off_days`
@@ -9651,13 +9659,13 @@ ALTER TABLE `schedules`
 -- AUTO_INCREMENT cho bảng `teams`
 --
 ALTER TABLE `teams`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `types`
 --
 ALTER TABLE `types`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
