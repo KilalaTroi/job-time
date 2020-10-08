@@ -15,9 +15,9 @@ class TeamsController extends Controller
      */
     public function index(Request $request)
     {
-        $page = $request->input('page');
-        if(isset($page) && !empty($page)) $teams = Team::paginate(20);
+        if ( $request->input('page') !== null && $request->input('page') ) $teams = Team::paginate(20);
         else $teams = Team::get();
+        
         return response()->json($teams);
     }
 

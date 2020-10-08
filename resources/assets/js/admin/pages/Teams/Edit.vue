@@ -1,17 +1,17 @@
 <template>
   <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="resetValidation">
     <template slot="title">{{$ml.with('VueJS').get('txtEditTeam')}}</template>
-    <div v-if="selectedTeam">
+    <div v-if="selectedItem">
       <div class="form-group">
         <label class>{{$ml.with('VueJS').get('txtName')}}</label>
-        <input v-model="selectedTeam.name" type="text" name="name" class="form-control" required />
+        <input v-model="selectedItem.name" type="text" name="name" class="form-control" required />
       </div>
       <error-item :errors="validationErrors"></error-item>
       <success-item :success="validationSuccess"></success-item>
       <hr />
       <div class="form-group text-right">
         <button
-          @click="updateType(selectedTeam)"
+          @click="updateItem(selectedItem)"
           type="button"
           class="btn btn-primary"
         >{{$ml.with('VueJS').get('txtUpdate')}}</button>
@@ -43,7 +43,7 @@ export default {
 
   computed: {
     ...mapGetters('teams',{
-      selectedTeam: "selectedTeam",
+      selectedItem: "selectedItem",
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
     }),
@@ -52,13 +52,13 @@ export default {
   methods: {
     ...mapActions('teams',{
       resetValidate: "resetValidate",
-      resetSelectedTeam: "resetSelectedTeam",
-      updateType: "updateTeam",
+      resetSelectedItem: "resetSelectedItem",
+      updateItem: "updateItem",
     }),
 
     resetValidation() {
       this.resetValidate();
-      this.resetSelectedTeam();
+      this.resetSelectedItem();
     },
   },
 };

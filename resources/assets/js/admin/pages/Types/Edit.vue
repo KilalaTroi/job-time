@@ -1,22 +1,22 @@
 <template>
   <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="resetValidation">
     <template slot="title">{{$ml.with('VueJS').get('txtEditType')}}</template>
-    <div v-if="selectedType">
+    <div v-if="selectedItem">
       <div class="form-group">
         <label class>{{$ml.with('VueJS').get('txtName')}}</label>
-        <input v-model="selectedType.slug" type="text" name="slug" class="form-control" required />
+        <input v-model="selectedItem.slug" type="text" name="slug" class="form-control" required />
       </div>
       <div class="row">
         <div class="col-sm-6">
           <div class="form-group">
             <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
-            <input v-model="selectedType.slug_vi" type="text" name="slug_vi" class="form-control" />
+            <input v-model="selectedItem.slug_vi" type="text" name="slug_vi" class="form-control" />
           </div>
         </div>
         <div class="col-sm-6">
           <div class="form-group">
             <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
-            <input v-model="selectedType.slug_ja" type="text" name="slug_ja" class="form-control" />
+            <input v-model="selectedItem.slug_ja" type="text" name="slug_ja" class="form-control" />
           </div>
         </div>
       </div>
@@ -26,7 +26,7 @@
             <label class>{{ $ml.with("VueJS").get("txtDepartments") }}</label>
             <select-2
               :options="deptOptions"
-              v-model="selectedType.dept_id"
+              v-model="selectedItem.dept_id"
               class="select2"
             >
               <option disabled value="0">
@@ -39,7 +39,7 @@
           <div class="form-group">
             <label class>{{ $ml.with("VueJS").get("txtLineRoom") }}</label>
             <input
-              v-model="selectedType.line_room"
+              v-model="selectedItem.line_room"
               type="text"
               name="line_room"
               class="form-control"
@@ -49,14 +49,14 @@
       </div>
       <div class="form-group">
         <label class>{{$ml.with('VueJS').get('txtColor')}}</label>
-        <color-picker :color="selectedType.value" v-model="selectedType.value"></color-picker>
+        <color-picker :color="selectedItem.value" v-model="selectedItem.value"></color-picker>
       </div>
       <error-item :errors="validationErrors"></error-item>
       <success-item :success="validationSuccess"></success-item>
       <hr />
       <div class="form-group text-right">
         <button
-          @click="updateType(selectedType)"
+          @click="updateItem(selectedItem)"
           type="button"
           class="btn btn-primary"
         >{{$ml.with('VueJS').get('txtUpdate')}}</button>
@@ -92,7 +92,7 @@ export default {
 
   computed: {
     ...mapGetters('types',{
-      selectedType: "selectedType",
+      selectedItem: "selectedItem",
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
     }),
@@ -105,13 +105,13 @@ export default {
   methods: {
     ...mapActions('types',{
       resetValidate: "resetValidate",
-      resetSelectedType: "resetSelectedType",
-      updateType: "updateType",
+      resetSelectedItem: "resetSelectedItem",
+      updateItem: "updateItem",
     }),
 
     resetValidation() {
       this.resetValidate();
-      this.resetSelectedType();
+      this.resetSelectedItem();
     }
   }
 };

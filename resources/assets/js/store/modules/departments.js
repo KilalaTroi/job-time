@@ -3,33 +3,33 @@ export default {
 
 	state: {
 		columns: [],
-		items: {},
+		data: {},
 		options: [],
-		selectedDepartment: {},
+		selectedItem: {},
 		validationErrors: '',
 		validationSuccess: ''
 	},
 
 	getters: {
 		columns: state => state.columns,
-		items: state => state.items,
+		data: state => state.data,
 		options: state => state.options,
-		selectedDepartment: state => state.selectedDepartment,
+		selectedItem: state => state.selectedItem,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess,
 	},
 
 	mutations: {
-		SET_DEPARTMENTS: (state, departments) => {
-			state.items = departments
+		SET_DATA: (state, data) => {
+			state.data = data
 		},
 
-		SET_OPTIONS_DEPARTMENTS: (state, departments) => {
-			state.options = departments
+		SET_OPTIONS: (state, options) => {
+			state.options = options
 		},
 
-		SET_SELECTED_DEPARTMENT: (state, department) => {
-			state.selectedDepartment = department
+		SET_SELECTED_ITEM: (state, selectedItem) => {
+			state.selectedItem = selectedItem
 		},
 
 		SET_VALIDATE: (state, data) => {
@@ -43,31 +43,32 @@ export default {
 	},
 
 	actions: {
-		getAll({ rootState, commit }, page = 1) {
+		getAll({ rootState, commit, dispatch }, page = 1) {
 			const uri = rootState.queryTeam ? '/data/departments?page=' + page + '&' + rootState.queryTeam : '/data/departments?page=' + page
 
 			axios.get(uri).then(response => {
-				commit('SET_DEPARTMENTS', response.data)
+				commit('SET_DATA', response.data)
+				dispatch('getOptions', true)
 			})
 		},
 
-		getOptions({ rootState, commit }, dafaultValue = false) {
+		getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
 			const uri = rootState.queryTeam ? '/data/departments?page=0&' + rootState.queryTeam : '/data/departments?page=0'
 			axios.get(uri).then(response => {
-				let dataOptions = dafaultValue ? [{id: 0,	text: "Select departmet"}] : []
+				let dataOptions = dafaultValue ? [{id: 0,	text: rootGetters['getTranslate']('txtSelectOne')}] : []
 				dataOptions = [...dataOptions, ...response.data.map(item => {
 					return {
 						id: item.id,
 						text: item.name
 					}
 				})]
-				commit('SET_OPTIONS_DEPARTMENTS', dataOptions)
+				commit('SET_OPTIONS', dataOptions)
 			})
 		},
 
-		deleteItem({ rootState, dispatch }, department) {
-			if (confirm(department.msgText)) {
-				const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
+		deleteItem({ rootState, dispatch }, item) {
+			if (confirm(item.msgText)) {
+				const uri = rootState.queryTeam ? '/data/departments/' + item.id + '?' + rootState.queryTeam : '/data/departments/' + item.id
 
 				axios.delete(uri)
 					.then(res => {
@@ -78,21 +79,21 @@ export default {
 		},
 
 		getItem({ state, commit, rootGetters }, id) {
-			const department = rootGetters['getObjectByID'](state.items.data, id)
-			commit('SET_SELECTED_DEPARTMENT', department)
+			const item = rootGetters['getObjectByID'](state.data.data, id)
+			commit('SET_SELECTED_ITEM', item)
 		},
 
-		resetSelectedDepartment({ commit }) {
-			commit('SET_SELECTED_DEPARTMENT', {})
+		resetSelectedItem({ commit }) {
+			commit('SET_SELECTED_ITEM', {})
 		},
 
-		updateDepartment({ rootState, commit }, department) {
+		updateItem({ rootState, commit }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
+			const uri = rootState.queryTeam ? '/data/departments/' + item.id + '?' + rootState.queryTeam : '/data/departments/' + item.id
 
 			axios
-				.patch(uri, department)
+				.patch(uri, item)
 				.then(res => {
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
@@ -102,15 +103,15 @@ export default {
 				});
 		},
 
-		createDepartment({ rootState, commit }, department) {
+		createItem({ rootState, commit }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const uri = rootState.queryTeam ? '/data/departments?' + rootState.queryTeam : '/data/departments'
 
 			axios
-				.post(uri, department)
+				.post(uri, item)
 				.then(res => {
-					commit('SET_SELECTED_DEPARTMENT', {})
+					commit('SET_SELECTED_ITEM', {})
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {

@@ -11,20 +11,20 @@
                     <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">{{$ml.with('VueJS').get('txtKeyword')}}</label>
-                            <input v-model="search.keyword" :placeholder="$ml.with('VueJS').get('txtKeyword')" type="text" class="form-control" v-on:keyup="filterItems(search.keyword)" v-on:keyup.enter="searchItems(search)">
+                            <input v-model="filters.keyword" :placeholder="$ml.with('VueJS').get('txtKeyword')" type="text" class="form-control" v-on:keyup="getAll()" v-on:keyup.enter="getAll()">
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <label class="">Team</label>
                         <div class="form-group">
-                            <select-2 :options="currentTeamOption" v-model="selectTeam" class="select2" @input="setCurrentTeam(selectTeam)"></select-2>
+                            <select-2 :options="currentTeamOption" v-model="filters.team" class="select2"></select-2>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="form-group">
                             <label class="">{{$ml.with('VueJS').get('txtTypes')}}</label>
                             <div>
-                                <select2-type :options="typeOptions" v-model="search.type_id" class="select2">
+                                <select2-type :options="typeOptions" v-model="filters.type_id" class="select2">
                                     <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                                 </select2-type>
                             </div>
@@ -34,7 +34,7 @@
                         <div class="form-group"> 
                             <label class="">{{$ml.with('VueJS').get('txtDepartments')}}</label>
                             <div>
-                                <select-2 :options="departmentOptions" v-model="search.dept_id" class="select2">
+                                <select-2 :options="departmentOptions" v-model="filters.dept_id" class="select2">
                                     <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                                 </select-2>
                             </div>
@@ -72,7 +72,7 @@
                     <table-project class="table-hover table-striped" :columns="columns" :data="filterResults" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
                     </table-project>
                 </div>
-                <pagination :data="projects" :show-disabled="showDisabled" :limit="limit" :align="align" :size="size" @pagination-change-page="getResults"></pagination>
+                <pagination :data="projects" :show-disabled="true" :limit="2" :align="right" :size="small" @pagination-change-page="getResults"></pagination>
             </card>
             <CreateItem :departments="departmentOptions" :types="typeOptions" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
@@ -113,74 +113,30 @@ export default {
         TableProject,
         ImportIssue
     },
-    data() {
-        return {
-            columns: [
-                { id: 'department', value: this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
-                { id: 'project', value: this.$ml.with('VueJS').get('txtName'), width: '', class: '' },
-                { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '110', class: '' },
-                { id: 'page', value: this.$ml.with('VueJS').get('txtPage'), width: '60', class: '' },
-                { id: 'type', value: this.$ml.with('VueJS').get('txtType'), width: '', class: '' },
-                { id: 'value', value: this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center' },
-                { id: 'start_date', value: this.$ml.with('VueJS').get('lblStartDate'), width: '', class: '' },
-                { id: 'end_date', value: this.$ml.with('VueJS').get('lblEndDate'), width: '', class: '' }
-            ],
-            selectTeam: this.currentTeam,
-            departments: [],
-            types: [],
-            departmentOptions: [],
-            typeOptions: [],
-            projects: {},
-            projectData: [],
-            projectOptions: [],
-            filterResults: [],
-            currentItem: null,
-            showArchive: false,
-            validationErrors: '',
-            validationSuccess: '',
-            limit: 2,
-            showDisabled: true,
-            align: 'right',
-            size: 'small',
-            search: {
-                keyword: '',
-                type_id: -1,
-                dept_id: 1
-            }
-        }
-    },
     computed: {
         ...mapGetters({
             currentTeamOption: 'currentTeamOption',
             currentTeam: 'currentTeam'
+        }),
+        ...mapActions('departments', {
+            departmentOptions: 'options',
+        }),
+        ...mapGetters('projects', {
+            filters: 'filters'
         })
     },
     mounted() {
         let _this = this;
-        _this.fetchItems();
-        
-        $(document).on('click', '.languages button', function() {
-            _this.langSlug = _this.$ml.current;
-            _this.getDataTypes(_this.types);
-            _this.getDataDepartments(_this.departments);
-            _this.projectOptions[0].text = _this.$ml.with('VueJS').get('txtSelectOne');
-            _this.projectOptions = [..._this.projectOptions]
-
-            _this.columns = [
-                { id: 'department', value: _this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
-                { id: 'project', value: _this.$ml.with('VueJS').get('txtName'), width: '', class: '' },
-                { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '110', class: '' },
-                { id: 'page', value: _this.$ml.with('VueJS').get('txtPage'), width: '60', class: '' },
-                { id: 'type', value: _this.$ml.with('VueJS').get('txtType'), width: '', class: '' },
-                { id: 'value', value: _this.$ml.with('VueJS').get('txtColor'), width: '110', class: 'text-center' },
-                { id: 'start_date', value: _this.$ml.with('VueJS').get('lblStartDate'), width: '', class: '' },
-                { id: 'end_date', value: _this.$ml.with('VueJS').get('lblEndDate'), width: '', class: '' }
-            ];
+        _this.setColumns();
+        if ( !_this.departmentOptions ) _this.getDeptOptions(true)
+        _this.getItems();
+        $(document).on("click", ".languages button", function () {
+            _this.setColumns();
         });
     },
     methods: {
-        ...mapActions({
-            setCurrentTeam: 'setCurrentTeam',
+        ...mapActions('departments', {
+            getDeptOptions: 'getOptions',
         }),
 
         getObjectValue(data, id) {
@@ -269,13 +225,13 @@ export default {
                 });
         },
         getResults(page = 1) {
-            axios.get('/data/projects?page=' + page + '&archive=' + this.showArchive + '&search=' + JSON.stringify(this.search))
+            axios.get('/data/projects?page=' + page + '&archive=' + this.showArchive + '&filter=' + JSON.stringify(this.filter))
                 .then(response => {
                     this.projects = response.data.projects; 
                 });
         },
         getProjects(archive) {
-            let uri = '/data/projects/?archive=' + archive + '&search=' + JSON.stringify(this.search);
+            let uri = '/data/projects/?archive=' + archive + '&filter=' + JSON.stringify(this.filter);
             axios.get(uri)
                 .then(res => {
                     this.projects = res.data.projects;
@@ -405,17 +361,7 @@ export default {
             });
         },
         filterItems(value) {
-            if ( value ) {
-                this.filterResults = this.projectData.filter(item => {
-                    let title = item.project + " " + item.issue;
-                    return title.toLowerCase().includes(value.toLowerCase());
-                });
-            } else {
-                this.filterResults = this.projectData;
-            }
-        },
-        searchItems(value) {
-            let uri = '/data/projects?search=' + JSON.stringify(value) + '&archive=' + this.showArchive;
+            let uri = '/data/projects?filter=' + JSON.stringify(value) + '&archive=' + this.showArchive;
             axios.get(uri)
                 .then(res => {
                     this.projects = res.data.projects;
@@ -455,8 +401,8 @@ export default {
         showArchive: [{
             handler: 'getProjects'
         }],
-        search: [{
-            handler: 'searchItems',
+        filter: [{
+            handler: 'filterItems',
             deep: true
         }],
     }

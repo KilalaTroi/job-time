@@ -4,7 +4,7 @@
     <div class="form-group">
       <label class>{{$ml.with('VueJS').get('txtName')}}</label>
       <input
-        v-model="selectedDepartment.name"
+        v-model="selectedItem.name"
         type="text"
         name="name"
         class="form-control"
@@ -13,18 +13,18 @@
     </div>
     <div class="form-group">
       <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
-      <input v-model="selectedDepartment.name_vi" type="text" name="name_vi" class="form-control" />
+      <input v-model="selectedItem.name_vi" type="text" name="name_vi" class="form-control" />
     </div>
     <div class="form-group">
       <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
-      <input v-model="selectedDepartment.name_ja" type="text" name="name_ja" class="form-control" />
+      <input v-model="selectedItem.name_ja" type="text" name="name_ja" class="form-control" />
     </div>
     <error-item :errors="validationErrors"></error-item>
     <success-item :success="validationSuccess"></success-item>
     <hr />
     <div class="form-group text-right">
       <button
-        @click="createDepartment(selectedDepartment)"
+        @click="createItem(selectedItem)"
         type="button"
         class="btn btn-primary"
       >{{$ml.with('VueJS').get('txtCreate')}}</button>
@@ -46,23 +46,23 @@ export default {
     SuccessItem,
   },
   computed: {
-    ...mapGetters({
-      selectedDepartment: "departments/selectedDepartment",
-      validationErrors: "departments/validationErrors",
-      validationSuccess: "departments/validationSuccess",
+    ...mapGetters('departments', {
+      selectedItem: "selectedItem",
+      validationErrors: "validationErrors",
+      validationSuccess: "validationSuccess",
     }),
   },
 
   methods: {
-    ...mapActions({
-      resetValidate: "departments/resetValidate",
-      resetSelectedDepartment: "departments/resetSelectedDepartment",
-      createDepartment: "departments/createDepartment",
+    ...mapActions('departments', {
+      resetValidate: "resetValidate",
+      resetSelectedItem: "resetSelectedItem",
+      createItem: "createItem",
     }),
 
     resetValidation() {
       this.resetValidate()
-      this.resetSelectedDepartment()
+      this.resetSelectedItem()
     },
   },
 };

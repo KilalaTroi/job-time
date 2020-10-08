@@ -21,30 +21,34 @@ class ProjectsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $search = isset($_GET['search']) ? json_decode($_GET['search']) : array();
-        $keyword = isset($search->keyword) && $search->keyword !== '' ? $search->keyword : false;
-        $type_id = isset($search->type_id) && $search->type_id != '-1' ? $search->type_id : false;
-        $dept_id = isset($search->dept_id) && $search->dept_id != '1' ? $search->dept_id : false;
-        $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
-        $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
-        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
-
-        $projectOptions = DB::table('projects as p')
-        ->select(
-            'p.id', 
-            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
-            DB::raw('max(i.id) as issue_id')
-        )
-        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-        ->whereIn('i.status', $status)
-        ->groupBy('p.id')
-        ->orderBy('p.id', 'desc')
-        ->get()->toArray();
+        $filters = json_decode($_GET['filters']);
+        $keyword = $filters->keyword !== '' ? $filters->keyword : false;
+        $type_id = $filters->type_id != '-1' ? $filters->type_id : false;
+        $dept_id = $filters->dept_id != '1' ? $filters->dept_id : false;
+        $team = count($filters->team) ? $filters->team : false;
+        $page = $request->input('page');
 
         $projects = DB::table('projects as p')
+        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        ->when($keyword, function ($query, $keyword) {
+            return $query->where(function ($query) use ($keyword) {
+                $query->where('p.name', 'like', '%'. $keyword .'%')
+                      ->orWhere('i.name', 'like', '%'. $keyword .'%');
+            });
+        })
+        ->when($type_id, function ($query, $type_id) {
+            return $query->where('type_id', '=', $type_id);
+        })
+        ->when($dept_id, function ($query, $dept_id) {
+            return $query->where('dept_id', '=', $dept_id);
+        });
+
+        if ( $request->input('page') !== null && $request->input('page') ) {
+
+            $status = !$filters->showArchive ? array('archive') : array('publish');
+            $projects->whereIn('i.status', $status)
             ->select(
                 'p.id as id',
                 'i.id as issue_id',
@@ -60,30 +64,24 @@ class ProjectsController extends Controller
                 'start_date',
                 'end_date'
             )
-            ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-            ->whereIn('i.status', $status)
-            ->when($keyword, function ($query, $keyword) {
-                return $query->where(function ($query) use ($keyword) {
-                    $query->where('p.name', 'like', '%'. $keyword .'%')
-                          ->orWhere('i.name', 'like', '%'. $keyword .'%');
-                });
-            })
-            ->when($type_id, function ($query, $type_id) {
-                return $query->where('type_id', '=', $type_id);
-            })
-            ->when($dept_id, function ($query, $dept_id) {
-                return $query->where('dept_id', '=', $dept_id);
-            })
             ->orderBy('issue_id', 'desc')
             ->paginate(20);
-            // ->take(100)->get()->toArray();
 
-        return response()->json([
-            'departments' => $departments,
-            'projectOptions' => $projectOptions,
-            'types' => $types,
-            'projects' => $projects
-        ]);
+        } else {
+
+            $projects->leftJoin('types as t', 't.id', '=', 'p.type_id')
+            ->select(
+                'p.id', 
+                DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
+                DB::raw('max(i.id) as issue_id')
+            )
+            ->groupBy('p.id')
+            ->orderBy('p.id', 'desc')
+            ->get()->toArray();
+
+        }
+
+        return response()->json($projects);
     }
 
     /**
