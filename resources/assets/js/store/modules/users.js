@@ -54,7 +54,7 @@ export default {
             const columns = [
                 { id: "username", value: rootGetters['getTranslate']('lblUsername'), width: "120", class: "" },
                 { id: "r_name", value: rootGetters['getTranslate']('txtRole'), width: "120", class: "" },
-                { id: "team", value: 'Team', width: "120", class: "" },
+                { id: "team", value: rootGetters['getTranslate']('txtTeam'), width: "120", class: "" },
                 { id: "name", value: rootGetters['getTranslate']('txtName'), width: "120", class: "" },
                 { id: "email", value: rootGetters['getTranslate']('txtEmail'), width: "120", class: "" }
             ]
