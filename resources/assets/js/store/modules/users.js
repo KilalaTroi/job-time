@@ -106,22 +106,22 @@ export default {
             }).catch(err => console.log(err))
         },
 
-        getUserById({ state, commit, rootGetters }, id) {
+        getUserById({ state, commit, rootGetters, rootState }, id) {
             const user = rootGetters['getObjectByID'](state.items, id)
             if ( user.team ) {
                 const arrTeam = user.team.split(',')
                 user.team = arrTeam.map((item, index) => {
-                    return rootGetters['getObjectByID'](state.teams.options, +item)
+                    return rootGetters['getObjectByID'](rootState.teams.options, +item)
                 })
             }
             commit('SET_SELECTED_USER', user)
         },
 
-        setSelectedUser({ state, commit, rootGetters }, obj) {
+        setSelectedUser({ state, commit, rootGetters, rootState }, obj) {
             if ( obj.team ) {
                 const arrTeam = obj.team.split(',')
                 obj.team = arrTeam.map((item, index) => {
-                    return rootGetters['getObjectByID'](state.team.options, +item)
+                    return rootGetters['getObjectByID'](rootState.teams.options, +item)
                 })
             }
             commit('SET_SELECTED_USER', obj)
