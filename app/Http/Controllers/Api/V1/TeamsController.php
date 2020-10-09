@@ -13,10 +13,12 @@ class TeamsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $Teams = Team::paginate(10);
-        return response()->json($Teams);
+        if ( $request->input('page') !== null && $request->input('page') ) $teams = Team::paginate(20);
+        else $teams = Team::get();
+        
+        return response()->json($teams);
     }
 
     /**

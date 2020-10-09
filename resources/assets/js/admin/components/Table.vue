@@ -46,7 +46,7 @@ import Action from "./Actions/All";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
-  name: "table-1",
+  name: "tbl-default",
 
   components: {
     Action,

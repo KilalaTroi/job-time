@@ -8,8 +8,7 @@ export default {
         roleOptions: [],
         selectedUser: {},
         validationErrors: '',
-        validationSuccess: '',
-        teamOptions: [{ id: 1, text: "DTP" }, { id: 2, text: "PATH" }, { id: 3, text: "WEB" }]
+        validationSuccess: ''
     },
 
     getters: {
@@ -17,7 +16,6 @@ export default {
         items: state => state.items,
         roles: state => state.roles,
         roleOptions: state => state.roleOptions,
-        teamOptions: state => state.teamOptions,
         selectedUser: state => state.selectedUser,
         validationErrors: state => state.validationErrors,
         validationSuccess: state => state.validationSuccess
@@ -108,22 +106,22 @@ export default {
             }).catch(err => console.log(err))
         },
 
-        getUserById({ state, commit, rootGetters }, id) {
+        getUserById({ state, commit, rootGetters, rootState }, id) {
             const user = rootGetters['getObjectByID'](state.items, id)
             if ( user.team ) {
                 const arrTeam = user.team.split(',')
                 user.team = arrTeam.map((item, index) => {
-                    return rootGetters['getObjectByID'](state.teamOptions, +item)
+                    return rootGetters['getObjectByID'](rootState.teams.options, +item)
                 })
             }
             commit('SET_SELECTED_USER', user)
         },
 
-        setSelectedUser({ state, commit, rootGetters }, obj) {
+        setSelectedUser({ state, commit, rootGetters, rootState }, obj) {
             if ( obj.team ) {
                 const arrTeam = obj.team.split(',')
                 obj.team = arrTeam.map((item, index) => {
-                    return rootGetters['getObjectByID'](state.teamOptions, +item)
+                    return rootGetters['getObjectByID'](rootState.teams.options, +item)
                 })
             }
             commit('SET_SELECTED_USER', obj)
@@ -132,7 +130,7 @@ export default {
         updateUser({ commit }, user) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
-            const data = Object. assign({}, user)
+            const data = Object.assign({}, user)
             data.team = data.team.map((item, index) => { return item.id }).toString()
 
             const uri = "/data/users/" + user.id
@@ -158,7 +156,7 @@ export default {
         createUser({ commit }, newUser) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
-            const data = Object. assign({}, newUser)
+            const data = Object.assign({}, newUser)
             data.team = data.team.map((item, index) => { return item.id }).toString()
 
             const uri = "/data/users"

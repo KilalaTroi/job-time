@@ -7,6 +7,10 @@ export default {
         state.loginUser = loginUser
     },
 
+    SET_CURRENT_LANG: (state, lang) => {
+        state.currentLang = lang
+    },
+
     SET_CURRENT_TEAM: (state, currentTeam) => {
         state.currentTeam = currentTeam
     },

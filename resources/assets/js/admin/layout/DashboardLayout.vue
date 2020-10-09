@@ -93,20 +93,11 @@ export default {
     },
 
     methods: {
-        ...mapActions({
-            setReportNotify: 'setReportNotify'
-        }),
-
         toggleSidebar() {
             if (this.$sidebar.showSidebar) {
                 this.$sidebar.displaySidebar(false)
             }
         }
-    },
-
-    mounted() {
-        const _this = this;
-		_this.setReportNotify();
     }
 }
 </script>

@@ -3,31 +3,33 @@ export default {
 
 	state: {
 		columns: [],
-		items: {},
-		selectedTeam: {},
+		data: {},
+		options: [],
+		selectedItem: {},
 		validationErrors: '',
 		validationSuccess: ''
 	},
 
 	getters: {
 		columns: state => state.columns,
-		items: state => state.items,
-		selectedTeam: state => state.selectedTeam,
+		data: state => state.data,
+		options: state => state.options,
+		selectedItem: state => state.selectedItem,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess
 	},
 
 	mutations: {
-		GET_ALL_TEAMS: (state, data) => {
-			state.items = data
+		SET_DATA: (state, data) => {
+			state.data = data
 		},
 
-		SET_TEAMS: (state, data) => {
-			state.items = data
+		SET_OPTIONS: (state, options) => {
+			state.options = options
 		},
 
-		SET_SELECTED_TEAM: (state, data) => {
-			state.selectedTeam = data
+		SET_SELECTED_ITEM: (state, selectedItem) => {
+			state.selectedItem = selectedItem
 		},
 
 		SET_VALIDATE: (state, data) => {
@@ -41,11 +43,26 @@ export default {
 	},
 
 	actions: {
-		getAll({ commit }, page=1) {
+		async getAll({ commit, dispatch }, page = 1) {
 			const uri = '/data/teams?page=' + page
 
-			axios.get(uri).then(response => {
-				commit('GET_ALL_TEAMS', response.data)
+			await axios.get(uri).then(response => {
+				commit('SET_DATA', response.data)
+				dispatch('getOptions')
+			})
+		},
+
+		async getOptions({ rootState, commit }, dafaultValue = false) {
+			const uri = rootState.queryTeam ? '/data/teams?page=0&' + rootState.queryTeam : '/data/teams?page=0'
+			await axios.get(uri).then(response => {
+				let dataOptions = dafaultValue ? [{id: 0,	text: rootGetters['getTranslate']('txtSelectOne')}] : []
+				dataOptions = [...dataOptions, ...response.data.map(item => {
+					return {
+						id: item.id,
+						text: item.name
+					}
+				})]
+				commit('SET_OPTIONS', dataOptions)
 			})
 		},
 
@@ -62,15 +79,15 @@ export default {
 		},
 
 		getItem({ state, commit, rootGetters }, id) {
-			const data = rootGetters['getObjectByID'](state.items.data, id)
-			commit('SET_SELECTED_TEAM', data)
+			const data = rootGetters['getObjectByID'](state.data.data, id)
+			commit('SET_SELECTED_ITEM', data)
 		},
 
-		resetSelectedTeam({ commit }) {
-			commit('SET_SELECTED_TEAM', { value: '' })
+		resetSelectedItem({ commit }) {
+			commit('SET_SELECTED_ITEM', {})
 		},
 
-		updateTeam({ commit }, data) {
+		updateItem({ commit }, data) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const uri = '/data/teams/' + data.id
@@ -86,7 +103,7 @@ export default {
 				});
 		},
 
-		createTeam({ commit }, data) {
+		createItem({ commit }, data) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const uri = '/data/teams'
@@ -94,7 +111,7 @@ export default {
 			axios
 				.post(uri, data)
 				.then(res => {
-					commit('SET_SELECTED_TEAM', {})
+					commit('SET_SELECTED_ITEM', {})
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {

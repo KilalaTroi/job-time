@@ -4,6 +4,7 @@ import { vi, ja } from 'vuejs-datepicker/dist/locale'
 export default {
     translateTexts: state => state.translateTexts,
     loginUser: state => state.loginUser,
+    currentLang: state => state.currentLang,
     currentTeam: state => state.currentTeam,
     currentTeamOption: state => state.currentTeamOption,
     queryTeam: state => state.queryTeam,
@@ -24,6 +25,7 @@ export default {
 
     dateFormat() {
         return (date, string = null) => {
+            if ( moment(date).format() === 'Invalid date' ) return '--'
             if ( string ) return moment(date).format(string)
             return moment(date).format()
         }
@@ -52,8 +54,8 @@ export default {
     getTeamText(state, getters) {
         return (team) => {
             if (typeof team === 'string' || team instanceof String) {
-                return team.split(',').map((item, index) => { 
-                    return '<span>' + getters['getObjectByID'](state.users.teamOptions, +item).text + '</span>'
+                return team.split(',').map((item, index) => {
+                    return '<span>' + getters['getObjectByID'](state.teams.options, +item).text + '</span>'
                 }).toString()
             }
         }

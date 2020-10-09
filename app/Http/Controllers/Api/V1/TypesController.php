@@ -14,20 +14,13 @@ class TypesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $types = Type::paginate(10);
-        $departments = Department::all();
-        $arrDepartments = array();
-        foreach($departments->toArray() as $value){
-            $arrDepartments[$value['id']] = $value;
+        if ( $request->input('page') !== null && $request->input('page') ) {
+            $types = Type::paginate(20);
+        } else {
+            $types = Type::get();
         }
-        $types->getCollection()->transform(function ($value) use($arrDepartments) {
-            $value->htmlvalue = sprintf('<span class="type-color" style="background-color: %s;"></span>',$value->value);
-            $value->htmldept_vi = $arrDepartments[$value->dept_id]['name_vi'];
-            $value->htmldept_ja = $arrDepartments[$value->dept_id]['name_ja'];
-            return $value;
-        });
 
         return response()->json($types);
     }
@@ -41,7 +34,8 @@ class TypesController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'slug' => 'required|unique:types|max:255'
+            'slug' => 'required|unique:types|max:255',
+            'dept_id' => 'required|numeric|min:0|not_in:0'
         ]);
 
         $type = Type::create($request->all());

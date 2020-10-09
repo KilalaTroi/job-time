@@ -3,9 +3,11 @@ export default {
 
 	state: {
 		columns: [],
-		items: {},
-		selectedType: {
-			value: ''
+		data: {},
+		options: [],
+		selectedItem: {
+			value: '#000000',
+			dept_id: 0
 		},
 		validationErrors: '',
 		validationSuccess: ''
@@ -13,23 +15,24 @@ export default {
 
 	getters: {
 		columns: state => state.columns,
-		items: state => state.items,
-		selectedType: state => state.selectedType,
+		data: state => state.data,
+		options: state => state.options,
+		selectedItem: state => state.selectedItem,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess
 	},
 
 	mutations: {
-		GET_ALL_TYPES: (state, data) => {
-			state.items = data
+		SET_DATA: (state, data) => {
+			state.data = data
 		},
 
-		SET_TYPES: (state, types) => {
-			state.items = types
+		SET_OPTIONS: (state, options) => {
+			state.options = options
 		},
 
-		SET_SELECTED_TYPE: (state, type) => {
-			state.selectedType = type
+		SET_SELECTED_ITEM: (state, selectedItem) => {
+			state.selectedItem = selectedItem
 		},
 
 		SET_VALIDATE: (state, data) => {
@@ -43,11 +46,40 @@ export default {
 	},
 
 	actions: {
-		getAll({ rootState, commit }, page=1) {
+		async getAll({ rootState, rootGetters, commit, dispatch }, page = 1) {
 			const uri = rootState.queryTeam ? '/data/types?page=' + page+ '&' + rootState.queryTeam : '/data/types?page=' + page
 
-			axios.get(uri).then(response => {
-				commit('GET_ALL_TYPES', response.data)
+			await axios.get(uri).then(response => {
+				if (response.data.data.length) {
+                    response.data.data = response.data.data.map((item, index) => {
+						return Object.assign({}, {
+							html_value: '<span class="type-color" style="background: ' + item.value + '"></span>',
+							htmldept_vi: rootGetters['getObjectByID'](rootState.departments.data.data, item.dept_id).name_vi,
+							htmldept_ja: rootGetters['getObjectByID'](rootState.departments.data.data, item.dept_id).name_ja,
+						}, item)
+                    });
+				}
+
+				commit('SET_DATA', response.data)
+				dispatch('getOptions', true)
+			})
+		},
+
+		async getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
+			const uri = rootState.queryTeam ? '/data/types?page=0&' + rootState.queryTeam : '/data/types?page=0'
+
+			await axios.get(uri).then(response => {
+				let dataOptions = dafaultValue ? [{id: 0, text: '<div>' + rootGetters['getTranslate']('txtSelectOne') + '<div>'}] : []
+
+				dataOptions = [...dataOptions, ...response.data.map(item => {
+					return {
+						id: item.id,
+						text: '<div><span class="type-color" style="background: ' + item.value + '"></span>' + item.slug + '</div>',
+						slug: item.slug,
+						value: item.value,
+					}
+				})]
+				commit('SET_OPTIONS', dataOptions)
 			})
 		},
 
@@ -64,15 +96,15 @@ export default {
 		},
 
 		getItem({ state, commit, rootGetters }, id) {
-			const type = rootGetters['getObjectByID'](state.items.data, id)
-			commit('SET_SELECTED_TYPE', type)
+			const type = rootGetters['getObjectByID'](state.data.data, id)
+			commit('SET_SELECTED_ITEM', type)
 		},
 
-		resetSelectedType({ commit }) {
-			commit('SET_SELECTED_TYPE', { value: '' })
+		resetSelectedItem({ commit }) {
+			commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 })
 		},
 
-		updateType({ rootState, commit }, type) {
+		updateItem({ rootState, commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const uri = rootState.queryTeam ? '/data/types/' + type.id + '?' + rootState.queryTeam : '/data/types/' + type.id
@@ -88,7 +120,7 @@ export default {
 				});
 		},
 
-		createType({ rootState, commit }, type) {
+		createItem({ rootState, commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const uri = rootState.queryTeam ? '/data/types' + '?' + rootState.queryTeam : '/data/types'
@@ -96,7 +128,7 @@ export default {
 			axios
 				.post(uri, type)
 				.then(res => {
-					commit('SET_SELECTED_TYPE', {})
+					commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 })
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {
@@ -110,14 +142,13 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
-		setColumns({ commit, rootGetters }) {
-			const langDefault = document.querySelector("meta[name='user-language']").getAttribute('content');
+		setColumns({ commit, rootGetters, rootState }) {
 			const columns = [
 				{id: 'slug', value: rootGetters['getTranslate']('txtName'), width: '200', class: ''},
-				{id: 'htmlValue', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center'},
+				{id: 'html_value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center'},
 				{id: 'slug_vi', value: rootGetters['getTranslate']('txtName')+ ' VI', width: '200', class: ''},
 				{id: 'slug_ja', value: rootGetters['getTranslate']('txtName')+ ' JA', width: '200', class: ''},
-				{id: 'htmldept_' + langDefault, value: rootGetters['getTranslate']('txtDepartments'), width: '', class: ''},
+				{id: 'htmldept_' + rootState.currentLang, value: rootGetters['getTranslate']('txtDepartments'), width: '', class: ''},
 				{id: 'line_room', value: rootGetters['getTranslate']('txtLineRoom'), width: '200', class: ''},
 			]
 

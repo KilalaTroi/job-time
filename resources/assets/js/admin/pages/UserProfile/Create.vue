@@ -100,7 +100,7 @@ import Multiselect from "vue-multiselect"
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-	name: 'CreateItem',
+	name: 'create-item',
 
 	components: {
 		Select2,
@@ -120,7 +120,7 @@ export default {
         ...mapGetters({
 			roleOptions: 'users/roleOptions',
 			selectedUser: 'users/selectedUser',
-			teamOptions: 'users/teamOptions',
+			teamOptions: 'teams/options',
             validationErrors: 'users/validationErrors',
 			validationSuccess: 'users/validationSuccess'
         })

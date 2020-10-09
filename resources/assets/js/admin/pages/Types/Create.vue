@@ -8,9 +8,9 @@
       $ml.with("VueJS").get("txtCreateType")
     }}</template>
     <div class="form-group">
-      <label class>{{ $ml.with("VueJS").get("txtSlug") }}</label>
+      <label class>{{ $ml.with("VueJS").get("txtName") }}</label>
       <input
-        v-model="selectedType.slug"
+        v-model="selectedItem.slug"
         type="text"
         name="slug"
         class="form-control"
@@ -22,7 +22,7 @@
         <div class="form-group">
           <label class>{{ $ml.with("VueJS").get("txtNameVi") }}</label>
           <input
-            v-model="selectedType.slug_vi"
+            v-model="selectedItem.slug_vi"
             type="text"
             name="slug_vi"
             class="form-control"
@@ -33,7 +33,7 @@
         <div class="form-group">
           <label class>{{ $ml.with("VueJS").get("txtNameJa") }}</label>
           <input
-            v-model="selectedType.slug_ja"
+            v-model="selectedItem.slug_ja"
             type="text"
             name="slug_ja"
             class="form-control"
@@ -47,20 +47,16 @@
           <label class>{{ $ml.with("VueJS").get("txtDepartments") }}</label>
           <select-2
             :options="deptOptions"
-            v-model="selectedType.dept_id"
+            v-model="selectedItem.dept_id"
             class="select2"
-          >
-            <option disabled value="0">
-              {{ $ml.with("VueJS").get("txtSelectDept") }}
-            </option>
-          </select-2>
+          ></select-2>
         </div>
       </div>
       <div class="col-sm-6">
         <div class="form-group">
           <label class>{{ $ml.with("VueJS").get("txtLineRoom") }}</label>
           <input
-            v-model="selectedType.line_room"
+            v-model="selectedItem.line_room"
             type="text"
             name="line_room"
             class="form-control"
@@ -71,8 +67,8 @@
     <div class="form-group">
       <label class>{{ $ml.with("VueJS").get("txtColor") }}</label>
       <color-picker
-        :color="selectedType.value"
-        v-model="selectedType.value"
+        :color="selectedItem.value"
+        v-model="selectedItem.value"
       ></color-picker>
     </div>
     <error-item :errors="validationErrors"></error-item>
@@ -80,7 +76,7 @@
     <hr />
     <div class="form-group text-right">
       <button
-        @click="createType(selectedType)"
+        @click="createItem(selectedItem)"
         type="button"
         class="btn btn-primary"
       >
@@ -116,37 +112,25 @@ export default {
   },
 
   computed: {
-    ...mapGetters("types", {
-      selectedType: "selectedType",
-      validationErrors: "validationErrors",
-      validationSuccess: "validationSuccess",
-    }),
-
-    ...mapGetters("departments", {
-      deptOptions: "options",
-    }),
+    ...mapGetters({
+      selectedItem: "types/selectedItem",
+      validationErrors: "types/validationErrors",
+      validationSuccess: "types/validationSuccess",
+      deptOptions: "departments/options",
+    })
   },
 
   methods: {
     ...mapActions("types", {
       resetValidate: "resetValidate",
-      resetSelectedType: "resetSelectedType",
-      createType: "createType",
-    }),
-
-    ...mapActions("departments", {
-      getDeptOptions: "getOptions",
+      resetSelectedItem: "resetSelectedItem",
+      createItem: "createItem",
     }),
 
     resetValidation() {
       this.resetValidate();
-      this.resetSelectedType();
+      this.resetSelectedItem();
     },
-  },
-
-  mounted() {
-    const _this = this;
-    _this.getDeptOptions();
-  },
+  }
 };
 </script>

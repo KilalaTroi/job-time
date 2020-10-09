@@ -11,6 +11,7 @@ import users from './modules/users'
 import teams from './modules/teams'
 import departments from './modules/departments'
 import types from './modules/types'
+import projects from './modules/projects'
 import jobs from './modules/jobs'
 import offdays from './modules/offdays'
 
@@ -27,6 +28,7 @@ export default new Vuex.Store({
     teams,
     departments,
     types,
+    projects,
     jobs,
     offdays
   },

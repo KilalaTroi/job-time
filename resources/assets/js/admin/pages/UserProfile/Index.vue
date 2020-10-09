@@ -17,6 +17,10 @@
                 </template>
                 <div class="table-responsive">
                     <table-user class="table-hover table-striped"/>
+
+                    <div v-if="!users.length" class="text-center mt-3">
+                        <img src="https://i.imgur.com/JfPpwOA.gif">
+                    </div>
                 </div>
             </card>
 
@@ -44,6 +48,7 @@
 
         computed: {
             ...mapGetters({
+                users: 'users/items',
                 roles: 'users/roles'
             })
         },

@@ -17,20 +17,25 @@
              {{ $ml.with("VueJS").get("txtTeamList") }}
           </h4>
         </template>
-        <table-1
-          :dataItems="items"
+        
+        <tbl-default
+          :dataItems="teamData" 
           :dataCols="columns"
           dataAction="all"
           dataPath="teams"
         />
 
+        <div v-if="!teamData.data" class="text-center mt-3">
+          <img src="https://i.imgur.com/JfPpwOA.gif">
+        </div>
+
         <pagination
-          :data="items"
+          :data="teamData"
           :show-disabled="true"
           :limit="2"
           align="right"
           size="small"
-          @pagination-change-page="getItems"
+          @pagination-change-page="getAll"
         />
       </card>
       <create-item />
@@ -39,7 +44,7 @@
   </div>
 </template>
 <script>
-import Table1 from "../../components/Table";
+import TblDefault from "../../components/Table";
 import Card from "../../components/Cards/Card";
 import CreateItem from "./Create";
 import EditItem from "./Edit";
@@ -48,7 +53,7 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   components: {
-    Table1,
+    TblDefault,
     Card,
     CreateItem,
     EditItem,
@@ -57,21 +62,21 @@ export default {
   computed: {
     ...mapGetters("teams", {
       columns: "columns",
-      items: "items",
+      teamData: "data",
     }),
   },
 
   methods: {
     ...mapActions("teams", {
       setColumns: "setColumns",
-      getItems: "getAll",
+      getAll: "getAll",
     }),
   },
 
   mounted() {
     const _this = this;
     _this.setColumns();
-    _this.getItems();
+    _this.getAll();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });

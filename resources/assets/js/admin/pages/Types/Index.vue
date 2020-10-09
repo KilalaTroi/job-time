@@ -19,20 +19,25 @@
             {{ $ml.with("VueJS").get("txtJobTypeList") }}
           </h4>
         </template>
-        <table-1
-          :dataItems="items"
+
+        <tbl-default
+          :dataItems="typeData"
           :dataCols="columns"
           dataAction="all"
           dataPath="types"
         />
 
+        <div v-if="!typeData.data" class="text-center mt-3">
+          <img src="https://i.imgur.com/JfPpwOA.gif">
+        </div>
+
         <pagination
-          :data="items"
+          :data="typeData"
           :show-disabled="true"
           :limit="2"
           align="right"
           size="small"
-          @pagination-change-page="getItems"
+          @pagination-change-page="getAll"
         />
       </card>
       <create-item />
@@ -41,7 +46,7 @@
   </div>
 </template>
 <script>
-import Table1 from "../../components/Table";
+import TblDefault from "../../components/Table";
 import Card from "../../components/Cards/Card";
 import CreateItem from "./Create";
 import EditItem from "./Edit";
@@ -50,7 +55,7 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   components: {
-    Table1,
+    TblDefault,
     Card,
     CreateItem,
     EditItem,
@@ -59,21 +64,27 @@ export default {
   computed: {
     ...mapGetters("types", {
       columns: "columns",
-      items: "items",
+      typeData: "data",
+      deptOptions: "options"
     }),
   },
 
   methods: {
+    ...mapActions("departments", {
+      getAllDept: "getAll",
+    }),
+
     ...mapActions("types", {
       setColumns: "setColumns",
-      getItems: "getAll",
-    }),
+      getAll: "getAll",
+    })
   },
 
-  mounted() {
+  async created(){
     const _this = this;
     _this.setColumns();
-    _this.getItems();
+    if ( !_this.deptOptions.length ) await _this.getAllDept();
+    await _this.getAll();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
