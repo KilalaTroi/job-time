@@ -100,8 +100,8 @@
             <CreateItem :departments="deptOptions" :types="typeOptions" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
             <edit-project />
-            <EditIssue :projects="projectOptions" :currentItem="selectedItem" :errors="validationErrors" :success="validationSuccess" v-on:update-issue="updateIssue" v-on:reset-validation="resetValidate">
-            </EditIssue>
+            <edit-issue :projects="projectOptions" :currentItem="selectedItem" :errors="validationErrors" :success="validationSuccess" v-on:update-issue="updateIssue" v-on:reset-validation="resetValidate">
+            </edit-issue>
             <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
             <ImportIssue v-on:reset-import="resetImport"></ImportIssue>
