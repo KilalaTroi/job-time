@@ -19,15 +19,20 @@
             {{ $ml.with("VueJS").get("txtJobTypeList") }}
           </h4>
         </template>
+
         <tbl-default
-          :dataItems="data"
+          :dataItems="typeData"
           :dataCols="columns"
           dataAction="all"
           dataPath="types"
         />
 
+        <div v-if="!typeData.data" class="text-center mt-3">
+          <img src="https://i.imgur.com/JfPpwOA.gif">
+        </div>
+
         <pagination
-          :data="data"
+          :data="typeData"
           :show-disabled="true"
           :limit="2"
           align="right"
@@ -59,7 +64,7 @@ export default {
   computed: {
     ...mapGetters("types", {
       columns: "columns",
-      data: "data",
+      typeData: "data",
       deptOptions: "options"
     }),
   },

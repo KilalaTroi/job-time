@@ -18,13 +18,16 @@
           <h4 class="card-title">{{ $ml.with("VueJS").get("txtDeptList") }}</h4>
         </template>
         <tbl-default
-          :dataItems="data"
+          :dataItems="departmentData"
           :dataCols="columns"
           dataAction="all"
           dataPath="departments"
         />
+        <div v-if="!departmentData.data" class="text-center mt-3">
+          <img src="https://i.imgur.com/JfPpwOA.gif">
+        </div>
         <pagination
-          :data="data"
+          :data="departmentData"
           :show-disabled="true"
           :limit="2"
           align="right"
@@ -58,7 +61,7 @@ export default {
   computed: {
     ...mapGetters('departments', {
       columns: "columns",
-      data: "data",
+      departmentData: "data",
     }),
   },
 

@@ -19,14 +19,18 @@
         </template>
         
         <tbl-default
-          :dataItems="data" 
+          :dataItems="teamData" 
           :dataCols="columns"
           dataAction="all"
           dataPath="teams"
         />
 
+        <div v-if="!teamData.data" class="text-center mt-3">
+          <img src="https://i.imgur.com/JfPpwOA.gif">
+        </div>
+
         <pagination
-          :data="data"
+          :data="teamData"
           :show-disabled="true"
           :limit="2"
           align="right"
@@ -58,7 +62,7 @@ export default {
   computed: {
     ...mapGetters("teams", {
       columns: "columns",
-      data: "data",
+      teamData: "data",
     }),
   },
 

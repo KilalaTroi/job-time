@@ -130,7 +130,7 @@ export default {
         updateUser({ commit }, user) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
-            const data = Object. assign({}, user)
+            const data = Object.assign({}, user)
             data.team = data.team.map((item, index) => { return item.id }).toString()
 
             const uri = "/data/users/" + user.id
@@ -156,7 +156,7 @@ export default {
         createUser({ commit }, newUser) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
-            const data = Object. assign({}, newUser)
+            const data = Object.assign({}, newUser)
             data.team = data.team.map((item, index) => { return item.id }).toString()
 
             const uri = "/data/users"

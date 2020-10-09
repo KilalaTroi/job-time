@@ -100,7 +100,7 @@ import Multiselect from "vue-multiselect"
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-	name: 'CreateItem',
+	name: 'create-item',
 
 	components: {
 		Select2,

@@ -101,7 +101,7 @@ import Multiselect from "vue-multiselect"
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-    name: 'EditItem',
+    name: 'edit-item',
 
     components: {
         Select2,

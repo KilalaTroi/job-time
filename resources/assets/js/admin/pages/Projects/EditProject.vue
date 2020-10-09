@@ -1,40 +1,15 @@
 <template>
-	<modal id="editProject" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
+	<modal id="editProject" :sizeClasses="modalLg" v-on:reset-validation="resetValidation">
 		<template slot="title">
 			{{$ml.with('VueJS').get('txtEditProject')}}     
 		</template>
-		<div v-if="currentItem">
+		<div v-if="selectedItem">
 			<div class="row">
-				<div class="col-sm-6">
-					<div class="form-group">
-						<label class>
-							{{$ml.with('VueJS').get('txtTypes')}}              
-						</label>
-						<div>
-							<select2-type :options="typeOptions" v-model="currentItem.type_id" class="select2">
-								<option disabled value="0">Select one</option>
-							</select2-type>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtDepartments')}}</label>
-						<div>
-							<select-2 :options="departments" v-model="currentItem.dept_id" class="select2">
-								<option disabled value="0">Select one</option>
-							</select-2>
-						</div>
-					</div>
-				</div>
-			</div>
-			<hr />
-			<div class="row">
-				<div class="col-sm-4">
+				<div class="col-sm-12">
 					<div class="form-group">
 						<label class>{{$ml.with('VueJS').get('txtName')}}</label>
 						<input
-							v-model="currentItem.p_name"
+							v-model="selectedItem.p_name"
 							type="text"
 							name="name"
 							class="form-control"
@@ -42,25 +17,55 @@
 						/>
 					</div>
 				</div>
-				<div class="col-sm-4">
+			</div>
+
+			<hr />
+
+			<div class="row">
+				<div class="col-sm-6">
 					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
-						<input v-model="currentItem.p_name_vi" type="text" name="name_vi" class="form-control" />
+						<label class>
+							{{$ml.with('VueJS').get('txtTypes')}}              
+						</label>
+						<div>
+							<select2-type :options="typeOptions" v-model="selectedItem.type_id" class="select2"></select2-type>
+						</div>
 					</div>
 				</div>
-				<div class="col-sm-4">
+				<div class="col-sm-6">
 					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
-						<input v-model="currentItem.p_name_ja" type="text" name="name_ja" class="form-control" />
+						<label class>{{$ml.with('VueJS').get('txtDepartments')}}</label>
+						<div>
+							<select-2 :options="deptOptions" v-model="selectedItem.dept_id" class="select2"></select-2>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-12">
+					<div class="form-group">
+						<label class="">Team</label>
+						<div>
+							<multiselect
+                            :multiple="true"
+                            v-model="selectedItem.team"
+                            :options="currentTeamOption"
+                            :clear-on-select="false"
+                            :preserve-search="false"
+                            :placeholder="$ml.with('VueJS').get('txtPickSome')"
+                            label="text"
+                            track-by="text"
+                            :preselect-first="true"
+                            ></multiselect>
+						</div>
 					</div>
 				</div>
 			</div>
-			<error-item :errors="errors"></error-item>
-			<success-item :success="success"></success-item>
+			
+			<error-item :errors="validationErrors"></error-item>
+			<success-item :success="validationSuccess"></success-item>
 			<hr />
 			<div class="form-group text-right">
 				<button
-					@click="$emit('update-project', currentItem)"
+					@click="updateItem(selectedItem)"
 					type="button"
 					class="btn btn-primary"
 				>{{$ml.with('VueJS').get('txtUpdate')}}</button>
@@ -68,69 +73,56 @@
 		</div>
 	</modal>
 </template>
+
 <script>
-import Select2 from "../../components/SelectTwo/SelectTwo.vue";
-import Select2Type from "../../components/SelectTwo/SelectTwoType.vue";
-import Modal from "../../components/Modals/Modal";
-import ErrorItem from "../../components/Validations/Error";
-import SuccessItem from "../../components/Validations/Success";
+import Select2 from "../../components/SelectTwo/SelectTwo.vue"
+import Select2Type from "../../components/SelectTwo/SelectTwoType.vue"
+import Modal from "../../components/Modals/Modal"
+import ErrorItem from "../../components/Validations/Error"
+import SuccessItem from "../../components/Validations/Success"
+import Multiselect from "vue-multiselect"
+import { mapGetters, mapActions } from "vuex"
 
 export default {
-	name: "EditProject",
+	name: "edit-project",
+
 	components: {
 		Select2,
 		Select2Type,
 		ErrorItem,
 		SuccessItem,
-		Modal
+		Modal,
+		Multiselect
 	},
-	props: ["currentItem", "departments", "types", "errors", "success"],
+
+	computed: {
+        ...mapGetters({
+            currentTeamOption: 'currentTeamOption',
+            deptOptions: 'departments/options',
+            typeOptions: 'types/options',
+            selectedItem: 'projects/selectedItem',
+            validationErrors: 'projects/validationErrors',
+            validationSuccess: 'projects/validationSuccess',
+        })
+	},
+	
 	data() {
 		return {
-			departmentOptions: [],
-			typeOptions: [],
 			modalLg: "modal-lg"
 		};
 	},
-	mounted() {
-        let _this = this;
-        
-        $(document).on('click', '.languages button', function() {
-            if(_this.currentItem) _this.currentItem.dept_id = 0;
-        });
-    },
-	methods: {
-		getDataTypes(data) {
-			if (data.length) {
-				let dataTypes = [];
-				let obj = {
-					id: 0,
-					text: "<div>Select one</div>"
-				};
-				dataTypes.push(obj);
 
-				for (let i = 0; i < data.length; i++) {
-					let obj = {
-						id: data[i].id,
-						text:
-							'<div><span class="type-color" style="background: ' +
-							data[i].value +
-							'"></span>' +
-							data[i].slug +
-							"</div>"
-					};
-					dataTypes.push(obj);
-				}
-				this.typeOptions = dataTypes;
-			}
-		}
-	},
-	watch: {
-		types: [
-			{
-				handler: "getDataTypes"
-			}
-		]
+	methods: {
+		...mapActions({
+			updateItem: 'projects/updateItem',
+			resetValidate: 'projects/resetValidate',
+			resetSelectedItem: 'projects/resetSelectedItem',
+		}),
+		
+		resetValidation() {
+			this.resetValidate();
+			this.resetSelectedItem();
+		},
 	}
 };
 </script>
