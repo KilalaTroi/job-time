@@ -17,9 +17,11 @@
                                 </div>
                             </div>
                             <div class="col-sm-6">
-                                <label class="">Team</label>
                                 <div class="form-group">
-                                    <select-2 :options="currentTeamOption" v-model="filters.team" class="select2"></select-2>
+                                    <label class="">Team</label>
+                                    <div>
+                                        <select-2 :options="currentTeamOption" v-model="filters.team" class="select2"></select-2>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -87,15 +89,17 @@
                     </div>
                 </template>
                 <div class="table-responsive">
-                    <table-project class="table-hover table-striped" :columns="columns" :data="data.data" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
+                    <table-project class="table-hover table-striped" :columns="columns" :data="projectData.data" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
                     </table-project>
+                    <div v-if="!projectData.data" class="text-center mt-3">
+                        <img src="https://i.imgur.com/JfPpwOA.gif">
+                    </div>
                 </div>
-                <pagination :data="data" :show-disabled="true" :limit="2" align="right" size="small" @pagination-change-page="getAllProject"></pagination>
+                <pagination :data="projectData" :show-disabled="true" :limit="2" align="right" size="small" @pagination-change-page="getAllProject"></pagination>
             </card>
             <CreateItem :departments="deptOptions" :types="typeOptions" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
-            <EditProject :currentItem="selectedItem" :departments="deptOptions" :types="typeOptions" :errors="validationErrors" :success="validationSuccess" v-on:update-project="updateProject" v-on:reset-validation="resetValidate">
-            </EditProject>
+            <edit-project />
             <EditIssue :projects="projectOptions" :currentItem="selectedItem" :errors="validationErrors" :success="validationSuccess" v-on:update-issue="updateIssue" v-on:reset-validation="resetValidate">
             </EditIssue>
             <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
@@ -139,7 +143,7 @@ export default {
             typeOptions: 'types/options',
             filters: 'projects/filters',
             columns: 'projects/columns',
-            data: 'projects/data',
+            projectData: 'projects/data',
             projectOptions: 'projects/options',
             selectedItem: 'projects/selectedItem',
             validationErrors: 'projects/validationErrors',
@@ -324,7 +328,9 @@ export default {
     }
 }
 </script>
+
 <style lang="scss">
+@import "~vue-multiselect/dist/vue-multiselect.min.css";
 .type-color {
     width: 60px;
     height: 20px;

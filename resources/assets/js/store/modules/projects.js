@@ -25,6 +25,12 @@ export default {
         filters: state => state.filters,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess,
+		getProjectByIssueID() {
+			return (Arr, id) => {
+				const result = Arr.filter(item => item.issue_id === id)
+				return result.length ? result[0] : {}
+			}
+		},
 	},
 
 	mutations: {
@@ -92,6 +98,43 @@ export default {
 			})
 		},
 
+		getItem({ state, commit, getters, rootGetters, rootState }, id) {
+			const item = getters['getProjectByIssueID'](state.data.data, id)
+            if ( item.team ) {
+                const arrTeam = item.team.split(',')
+                item.team = arrTeam.map((item, index) => {
+                    return rootGetters['getObjectByID'](rootState.teams.options, +item)
+                })
+            }
+			commit('SET_SELECTED_ITEM', item)
+		},
+		
+		updateItem({ commit }, item) {
+			commit('SET_VALIDATE', { error: '', success: '' })
+
+			const data = Object.assign({}, item)
+            data.team = data.team.map((item, index) => { return item.id }).toString()
+
+            const uri = '/data/projects/' + data.id;
+            axios.patch(uri, data).then((res) => {
+					commit('SET_VALIDATE', { error: '', success: res.data.message })
+                })
+                .catch(err => {
+                    if (err.response.status == 422) {
+						commit('SET_VALIDATE', { error: err.response.data, success: '' })
+                    }
+                });
+		},
+		
+		resetSelectedItem({ commit }) {
+			commit('SET_SELECTED_ITEM', {})
+		},
+
+		resetValidate({ dispatch, commit }) {
+			dispatch('getAll')
+			commit('SET_VALIDATE', { error: '', success: '' })
+		},
+
 		deleteItem({ rootState, dispatch }, department) {
 			if (confirm(department.msgText)) {
 				const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
@@ -102,11 +145,6 @@ export default {
 					})
 					.catch(err => console.log(err))
 			}
-		},
-
-		getItem({ state, commit, rootGetters }, id) {
-			const department = rootGetters['getObjectByID'](state.items.data, id)
-			commit('SET_SELECTED_DEPARTMENT', department)
 		},
 
 		resetSelectedDepartment({ commit }) {

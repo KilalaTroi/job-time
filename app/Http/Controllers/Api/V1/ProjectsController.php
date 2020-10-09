@@ -175,26 +175,26 @@ class ProjectsController extends Controller
      */
     public function show($id, Request $request)
     {
-        $issue_id = $request->get('issue_id');
-        $projects = DB::table('projects as p')
-            ->select(
-                'p.id as id',
-                'i.id as issue_id',
-                'p.name as p_name',
-                'p.name_vi as p_name_vi',
-                'p.name_ja as p_name_ja',
-                'i.name as i_name',
-                'i.page as page',
-                'status',
-                'dept_id',
-                'type_id',
-                'start_date',
-                'end_date'
-            )
-            ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-            ->where('i.id', '=', $issue_id)
-            ->get()->toArray();
-        return response()->json($projects[0]);
+        // $issue_id = $request->get('issue_id');
+        // $projects = DB::table('projects as p')
+        //     ->select(
+        //         'p.id as id',
+        //         'i.id as issue_id',
+        //         'p.name as p_name',
+        //         'p.name_vi as p_name_vi',
+        //         'p.name_ja as p_name_ja',
+        //         'i.name as i_name',
+        //         'i.page as page',
+        //         'status',
+        //         'dept_id',
+        //         'type_id',
+        //         'start_date',
+        //         'end_date'
+        //     )
+        //     ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        //     ->where('i.id', '=', $issue_id)
+        //     ->get()->toArray();
+        // return response()->json($projects[0]);
     }
 
     /**
@@ -224,14 +224,14 @@ class ProjectsController extends Controller
 
         $this->validate($request, [
             'type_id' => 'required|numeric|min:0|not_in:0',
+            'team' => 'required'
         ]);
 
         $project->update([
             'name' => $request->get('p_name'),
-            'name_vi' => $request->get('p_name_vi'),
-            'name_ja' => $request->get('p_name_ja'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
+            'team' => $request->get('team'),
         ]);
 
         return response()->json(array(
