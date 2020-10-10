@@ -54,8 +54,8 @@ export default {
                     response.data.data = response.data.data.map((item, index) => {
 						return Object.assign({}, {
 							html_value: '<span class="type-color" style="background: ' + item.value + '"></span>',
-							htmldept_vi: rootGetters['getObjectByID'](rootState.departments.data.data, item.dept_id).name_vi,
-							htmldept_ja: rootGetters['getObjectByID'](rootState.departments.data.data, item.dept_id).name_ja,
+							htmldept_vi: rootGetters['getObjectByID'](rootState.departments.options, item.dept_id).name_vi,
+							htmldept_ja: rootGetters['getObjectByID'](rootState.departments.options, item.dept_id).name_ja,
 						}, item)
                     });
 				}

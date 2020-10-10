@@ -15,7 +15,7 @@
                         <button v-if="checkProjectColumn(column)" @click="getItem(item.issue_id)" type="button" class="btn btn-xs btn-default mr-2" data-toggle="modal" data-target="#editProject" data-backdrop="static" data-keyboard="false">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </button>
-                        <button v-if="checkIssueColumn(column)" @click="$emit('get-item', item.id, item.issue_id)" type="button" class="btn btn-xs btn-default mr-2" data-toggle="modal" data-target="#editIssue" data-backdrop="static" data-keyboard="false">
+                        <button v-if="checkIssueColumn(column)" @click="getItem(item.issue_id)" type="button" class="btn btn-xs btn-default mr-2" data-toggle="modal" data-target="#editIssue" data-backdrop="static" data-keyboard="false">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </button>
 
@@ -43,8 +43,8 @@ export default {
     name: 'table-project',
     computed: {
         ...mapGetters({
-            projectData: 'projects/data',
             columns: 'projects/columns',
+            projectData: 'projects/data',
             itemValue: 'table/itemValue',
             checkTypeColor: 'table/checkTypeColor',
             setBackground: 'table/setBackground'

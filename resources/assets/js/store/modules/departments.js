@@ -59,7 +59,9 @@ export default {
 				dataOptions = [...dataOptions, ...response.data.map(item => {
 					return {
 						id: item.id,
-						text: item.name
+						text: item.name,
+						name_vi: item.name_vi,
+						name_ja: item.name_ja
 					}
 				})]
 				commit('SET_OPTIONS', dataOptions)

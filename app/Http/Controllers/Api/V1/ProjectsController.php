@@ -74,7 +74,7 @@ class ProjectsController extends Controller
         } else {
 
             $projects = DB::table('projects as p')
-                ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+                ->leftJoin('issues as i', 'p.id', '=', 'i.project_id')
                 ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->when($keyword, function ($query, $keyword) {
                     return $query->where(function ($query) use ($keyword) {

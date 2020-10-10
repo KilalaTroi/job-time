@@ -125,6 +125,21 @@ export default {
                     }
                 });
 		},
+
+		updateIssue({ commit }, item) {
+            commit('SET_VALIDATE', { error: '', success: '' })
+
+            // Update issue
+            const uri_issue = '/data/issues/' + item.issue_id;
+            axios.patch(uri_issue, item).then((res) => {
+                commit('SET_VALIDATE', { error: '', success: res.data.message })
+            })
+            .catch(err => {
+                if (err.response.status == 422) {
+                    commit('SET_VALIDATE', { error: err.response.data, success: '' })
+                }
+            });
+        },
 		
 		resetSelectedItem({ commit }) {
 			commit('SET_SELECTED_ITEM', {})

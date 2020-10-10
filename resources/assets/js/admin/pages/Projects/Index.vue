@@ -89,7 +89,7 @@
                     </div>
                 </template>
                 <div class="table-responsive">
-                    <table-project class="table-hover table-striped" :columns="columns" :data="projectData.data" v-on:get-item="getItem" v-on:delete-item="deleteItem" v-on:archive-item="archiveItem">
+                    <table-project class="table-hover table-striped">
                     </table-project>
                     <div v-if="!projectData.data" class="text-center mt-3">
                         <img src="https://i.imgur.com/JfPpwOA.gif">
@@ -100,8 +100,7 @@
             <CreateItem :departments="deptOptions" :types="typeOptions" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
             </CreateItem>
             <edit-project />
-            <edit-issue :projects="projectOptions" :currentItem="selectedItem" :errors="validationErrors" :success="validationSuccess" v-on:update-issue="updateIssue" v-on:reset-validation="resetValidate">
-            </edit-issue>
+            <edit-issue />
             <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
             </AddIssue>
             <ImportIssue v-on:reset-import="resetImport"></ImportIssue>
@@ -153,8 +152,8 @@ export default {
     async created(){
         let _this = this
         _this.setColumns();
-        if ( ! _this.deptOptions.length ) await _this.getAllDept()
-        if ( ! _this.typeOptions.length ) await _this.getAllType()
+        if ( ! _this.deptOptions.length ) await _this.getOptionsDept(true)
+        if ( ! _this.typeOptions.length ) await _this.getOptionsType(true)
         _this.filters.team = _this.currentTeam.id
         await _this.getAllProject()
         $(document).on("click", ".languages button", function () {
@@ -163,8 +162,8 @@ export default {
     },
     methods: {
         ...mapActions({
-            getAllDept: 'departments/getAll',
-            getAllType: "types/getAll",
+            getOptionsDept: 'departments/getOptions',
+            getOptionsType: "types/getOptions",
             setColumns: "projects/setColumns",
             getAllProject: "projects/getAll",
         }),
@@ -255,31 +254,6 @@ export default {
                 // this.projects.data = this.projects.data.filter(item => item.issue_id !== data.id);
                 // this.getProjects(this.showArchive);
             }).catch(err => console.log(err));
-        },
-        getItem(id, issue_id) {
-            let uri = '/data/projects/' + id + '?issue_id=' + issue_id;
-            axios.get(uri).then((response) => {
-                // this.currentItem = response.data;
-                // this.currentItem.no_period = false;
-            }).catch(err => console.log(err));
-        },
-        updateProject(item) {
-            // Reset validate
-            // this.validationErrors = '';
-            // this.validationSuccess = '';
-
-            let uri = '/data/projects/' + item.id;
-            axios.patch(uri, item).then((res) => {
-                    let foundIndex = this.projects.data.findIndex(x => x.issue_id == item.issue_id);
-                    // this.projects.data[foundIndex] = item;
-                    // this.projects.data = [...this.projects.data];
-                    // this.validationSuccess = res.data.message;
-                })
-                .catch(err => {
-                    if (err.response.status == 422) {
-                        // this.validationErrors = err.response.data;
-                    }
-                });
         },
         updateIssue(item) {
             // Reset validate

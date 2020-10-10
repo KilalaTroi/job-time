@@ -31,6 +31,12 @@ export default {
         }
     },
 
+    customFormatter() {
+        return (date) => {
+            return moment(date).format('YYYY/MM/DD');
+        }
+    },
+
     getLangCode() {
         const dataLang = {
             vi: vi,
