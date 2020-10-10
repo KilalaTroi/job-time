@@ -14,6 +14,7 @@ import types from './modules/types'
 import projects from './modules/projects'
 import jobs from './modules/jobs'
 import offdays from './modules/offdays'
+import schedules from './modules/schedules'
 
 Vue.use(Vuex)
 
@@ -30,7 +31,8 @@ export default new Vuex.Store({
     types,
     projects,
     jobs,
-    offdays
+    offdays,
+    schedules
   },
 })
 
