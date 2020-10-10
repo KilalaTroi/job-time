@@ -18,13 +18,8 @@ class Controller extends BaseController
 			// fetch session and use it in entire class with constructor
 			$user = $request->session()->get('Auth');
 
-			if ( isset($_GET['team']) && $_GET['team_id'] ) {
-				$this->teamIDs = $_GET['team_id'];
-			} else {
-				$teams = explode(',',$user[0]['team']);
-				$this->teamIDs = explode(',', $user[0]['team'])[0];
-			}
-			
+			if ( isset($_GET['team']) && $_GET['team_id'] ) $this->teamIDs = $_GET['team_id'];
+			else $this->teamIDs = explode(',',$user[0]['team'])[0];
 			return $next($request);
 		});
 	}

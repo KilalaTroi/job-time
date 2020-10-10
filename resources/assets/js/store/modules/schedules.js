@@ -2,24 +2,24 @@ export default {
   namespaced: true,
 
   state: {
-    columns: [],
     data: {},
     filters: {
       currentStart: '',
       currentEnd: '',
       team: '',
     },
-    options: [],
+    search: '',
+    searchResults: [],
     selectedItem: {},
     validationErrors: '',
     validationSuccess: ''
   },
 
   getters: {
-    columns: state => state.columns,
     data: state => state.data,
+    search: state => state.search,
+    searchResults: state => state.searchResults,
     filters: state => state.filters,
-    options: state => state.options,
     selectedItem: state => state.selectedItem,
     validationErrors: state => state.validationErrors,
     validationSuccess: state => state.validationSuccess
@@ -28,39 +28,42 @@ export default {
   mutations: {
     SET_DATA: (state, data) => {
       state.data = {
-        projects : data.projects,
-        schedules : data.schedules,
-        types : data.types
+        projects: data.projects,
+        schedules: data.schedules,
+        types: data.types
       }
     },
 
     SET_FILTER: (state, data) => {
-      state.filters = {
-        currentStart : data.currentStart,
-        currentEnd : data.currentEnd,
-        // team : data.currentTeam
-      }
+      if (data.view) state.filters.currentStart = data.view.currentStart
+      if (data.view) state.filters.currentEnd = data.view.currentEnd
+      if (data.team_id) state.filters.team_id = data.team_id
     },
 
-    GET_CURRENT_END: (state, data) => {
-      state.filters.currentEnd = data
+    SET_DATA_SEARCH: (state, data) => {
+      state.searchResults = data
     },
+
+    SET_VALIDATE: (state, data) => {
+      state.validationErrors = data.error
+      state.validationSuccess = data.success
+    }
   },
 
   actions: {
-    getAll({ commit, state, rootGetters, rootState }) {
-      const uri = '/data/schedules?startDate=' + rootGetters['dateFormat'](state.filters.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.filters.currentEnd, 'YYYY-MM-DD')
-      axios.get(uri).then(response => {
+    async getAll({ commit, state, rootGetters, rootState }) {
+      const uri = '/data/schedules?startDate=' + rootGetters['dateFormat'](state.filters.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.filters.currentEnd, 'YYYY-MM-DD') + '&team_id=' + state.filters.team
+      await axios.get(uri).then(response => {
         if (response.data.schedules.length) {
-					response.data.schedules = response.data.schedules.map((item, index) => {
+          response.data.schedules = response.data.schedules.map((item, index) => {
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
             return Object.assign({}, {
               title:
-              (item.i_name
-                ? item.p_name + checkTR + " " + item.i_name
-                : item.p_name + checkTR) +
-              "\n" +
-              (item.memo ? item.memo : ""),
+                (item.i_name
+                  ? item.p_name + checkTR + " " + item.i_name
+                  : item.p_name + checkTR) +
+                "\n" +
+                (item.memo ? item.memo : ""),
               borderColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
               backgroundColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
               start: rootGetters['dateFormat'](item.date + " " + item.start_time),
@@ -70,7 +73,7 @@ export default {
                 ? item.p_name + checkTR + " " + item.i_name
                 : item.p_name + checkTR,
             }, item)
-					});
+          });
         }
 
         if (response.data.projects.length) {
@@ -80,21 +83,33 @@ export default {
             return Object.assign({}, item, {
               project: item.p_name + checkTR,
               issue: item.i_name,
-              value:  rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
+              value: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
               start_date: rootGetters['dateFormat'](item.start_date),
               end_date: rootGetters['dateFormat'](item.end_date),
             })
-					});
+          });
         }
 
         commit('SET_DATA', response.data)
       })
     },
-    async handleMonthChange({ commit, dispatch, rootState, rootGetters }, data) {
-      var currentTeam = rootState.teams.currentTeam;
-      console.log(currentTeam)
-      commit('SET_FILTER', data.view)
-      await dispatch('getAll')
+    handleMonthChange({ commit, dispatch, state }, data) {
+      commit('SET_FILTER', data)
+      if (state.filters.currentStart && state.filters.currentEnd && state.filters.team) dispatch('getAll')
+    },
+    resetValidate({ dispatch, commit }) {
+      dispatch('getAll')
+      commit('SET_VALIDATE', { error: '', success: '' })
+    },
+    searchItem(commit, state) {
+      // let value = state.search;
+      // if (value) {
+      //   dataSearchResults = (state.data.projects).filter((item) => {
+      //     let title = item.project + " " + item.issue;
+      //     return title.toLowerCase().includes(value.toLowerCase());
+      //   });
+      // } else dataSearchResults = state.data.projects;
+      // commit('SET_DATA_SEARCH', dataSearchResults)
     }
   }
 }

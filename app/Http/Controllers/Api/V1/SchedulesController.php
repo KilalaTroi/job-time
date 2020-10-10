@@ -18,9 +18,10 @@ class SchedulesController extends Controller
     {
         $startDate = $_GET['startDate'];
         $endDate = $_GET['endDate'];
+        $teamID = $_GET['team_id'];
 
         $types = DB::table('types')->select('id', 'value')->get()->toArray();
-        
+
         $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
@@ -43,6 +44,12 @@ class SchedulesController extends Controller
                 $query->where('end_date', '>=', $startDate)
                       ->orWhere('end_date', '=', NULL);
             })
+            ->where(function ($query) use ($teamID) {
+                $query->where('team', '=', $teamID)
+                    ->orWhere('team', 'LIKE', $teamID . ',%')
+                    ->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
+                    ->orWhere('team', 'LIKE', '%,' . $teamID);
+            })
             ->orderBy('p.name', 'asc')
             ->orderBy('i.name', 'asc')
             ->get()->toArray();
@@ -63,6 +70,8 @@ class SchedulesController extends Controller
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
+            ->where('i.status', '=', 'publish')
+            ->where('s.team_id', '=', $teamID)
             ->where('s.date', '>=',  $startDate)
             ->where('s.date', '<',  $endDate)
             ->get()->toArray();

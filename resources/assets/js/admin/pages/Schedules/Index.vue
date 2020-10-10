@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content" >
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-3 col-xl-2">
@@ -28,7 +28,10 @@
                   :start="item.start_date"
                   :end="item.end_date"
                   :color="item.value"
-                  :style="setStyles(item.value)"
+                  :style="{
+                    backgroundColor: item.value,
+                    borderColor: item.value,
+                  }"
                 >
                   <span>{{ item.p_name }} {{ item.issue_id }}</span>
                 </div>
@@ -37,10 +40,10 @@
           </card>
         </div>
         <div class="col-sm-12 col-lg-9 col-xl-10">
-          <div class="col-sm-6">
-            <div class="form-group">
-              <label class="">Team</label>
-              <div>
+          <div class="filter_search">
+            <div class="form-group d-flex align-items-center">
+              <label class="mb-0" :style="{paddingRight: '10px'}">Team</label>
+              <div class="w-100">
                 <select-2
                   :options="currentTeamOption"
                   v-model="filters.team"
@@ -81,7 +84,7 @@
       :success="validationSuccess"
       v-on:update-event="updateEvent"
       v-on:delete-event="deleteEvent"
-      v-on:reset-validation="resetValidate"
+      v-on:reset-validation="resetValidation"
     ></EditEvent>
   </div>
 </template>
@@ -109,13 +112,9 @@ export default {
   data() {
     return {
       memo: "",
-      types: [],
-      projects: [],
-      projectData: [],
       schedules: [],
       currentEvent: {},
 
-      scrollTime: "8:00:00",
       calendarPlugins: [
         dayGridPlugin,
         listPlugin,
@@ -144,24 +143,22 @@ export default {
         },
       ],
       hiddenDays: [0],
-
-      validationErrors: "",
-      validationSuccess: "",
-
-      search: "",
-      searchResults: [],
-
-      currentStart: "",
-      currentEnd: "",
     };
   },
 
   computed: {
+    ...mapGetters("schedules", {
+      scheduleData: "data",
+      filters: "filters",
+      search: "search",
+      searchResults: "searchResults",
+      validationErrors: "validationErrors",
+      validationSuccess: "validationSuccess",
+    }),
     ...mapGetters({
       currentTeamOption: "currentTeamOption",
+      getLangCode: "getLangCode",
       currentTeam: "currentTeam",
-      scheduleData: "schedules/data",
-      filters: "schedules/filters",
       typeOptions: "types/options",
       deptOptions: "departments/options",
     }),
@@ -169,8 +166,9 @@ export default {
 
   methods: {
     ...mapActions("schedules", {
-      getAll: "getAll",
       handleMonthChange: "handleMonthChange",
+      resetValidate: "resetValidate",
+      searchItem: "searchItem",
     }),
 
     ...mapActions("types", {
@@ -181,55 +179,14 @@ export default {
       getOptionDept: "getOptions",
     }),
 
-    getObjectValue(data, id) {
-      let obj = data.filter((elem) => {
-        if (elem.id === id) return elem;
-      });
+    getLanguage(data) {
+      return data.current;
+    },
 
-      if (obj.length > 0) return obj[0];
+    resetValidation() {
+      this.resetValidate();
     },
-    getDataProjects(data) {
-      if (data.length) {
-        let dataProjects = data.map((item, index) => {
-          let checkTR = item.type.includes("_tr") ? " (TR)" : "";
-          return {
-            id: item.id,
-            project: item.p_name + checkTR,
-            issue: item.i_name,
-            issue_id: item.issue_id,
-            value: this.getObjectValue(this.types, item.type_id).value,
-            start_date: this.customFormatter(item.start_date),
-            end_date: this.customFormatter(item.end_date),
-          };
-        });
-        this.projects = this.searchResults = dataProjects;
-      }
-    },
-    getDataSchedules(data) {
-      if (data.length) {
-        this.schedules = data.map((item, index) => {
-          let checkTR = item.type.includes("_tr") ? " (TR)" : "";
-          return {
-            id: item.id,
-            title:
-              (item.i_name
-                ? item.p_name + checkTR + " " + item.i_name
-                : item.p_name + checkTR) +
-              "\n" +
-              (item.memo ? item.memo : ""),
-            borderColor: this.getObjectValue(this.types, item.type_id).value,
-            backgroundColor: this.getObjectValue(this.types, item.type_id)
-              .value,
-            start: moment(item.date + " " + item.start_time).format(),
-            end: moment(item.date + " " + item.end_time).format(),
-            memo: item.memo,
-            title_not_memo: item.i_name
-              ? item.p_name + checkTR + " " + item.i_name
-              : item.p_name + checkTR,
-          };
-        });
-      }
-    },
+
     makeDraggable() {
       let draggableEl = document.getElementById("external-events-list");
 
@@ -253,12 +210,7 @@ export default {
         },
       });
     },
-    setStyles(color) {
-      return {
-        backgroundColor: color,
-        borderColor: color,
-      };
-    },
+
     customFormatter(date) {
       return moment(date).format("DD-MM-YYYY") !== "Invalid date"
         ? moment(date).format("YYYY-MM-DD")
@@ -284,8 +236,6 @@ export default {
     },
     updateEvent(event) {
       // Reset validate
-      this.validationErrors = "";
-      this.validationSuccess = "";
 
       let uri = "/data/schedules/" + event.id;
       let newItem = {
@@ -298,12 +248,8 @@ export default {
           this.schedules[foundIndex].title =
             this.schedules[foundIndex].title_not_memo + "\n" + event.memo;
           this.schedules = [...this.schedules];
-          this.validationSuccess = res.data.message;
         })
-        .catch((err) => {
-          this.validationErrors = err.response.data;
-          this.validationSuccess = "";
-        });
+        .catch((err) => {});
     },
     clickEvent(info) {
       this.currentEvent = info.event;
@@ -411,37 +357,13 @@ export default {
           this.droppable = true;
         });
     },
-    searchItem() {
-      let value = this.search;
-      if (value) {
-        this.searchResults = this.projects.filter((item) => {
-          let title = item.project + " " + item.issue;
-          return title.toLowerCase().includes(value.toLowerCase());
-        });
-      } else {
-        this.searchResults = this.projects;
-      }
-    },
-    resetValidate() {
-      this.validationSuccess = "";
-      this.validationErrors = "";
-    },
-    getLanguage(data) {
-      return data.current;
-    },
-    // handleMonthChange(arg) {
-    //   this.currentStart = arg.view.currentStart;
-    //   this.currentEnd = arg.view.currentEnd;
-    //   this.fetchItems();
-    // },
   },
 
   async created() {
     let _this = this;
     if (!_this.deptOptions.length) await _this.getOptionDept();
     if (!_this.typeOptions.length) await _this.getOptionType();
-    // _this.filters.team =  await_this.currentTeam.id;
-
+    _this.filters.team = await _this.currentTeam.id;
   },
 
   mounted() {
@@ -449,22 +371,18 @@ export default {
     _this.makeDraggable();
   },
 
-    // beforeUpdate() {
-    //   let _this = this;
-    //   _this.filters.team = _this.currentTeam.id;
-    // },
-
   watch: {
-    projectData: [
+    search: [
       {
-        handler: "getDataProjects",
+        handler: "searchItem",
       },
     ],
-    // scheduleData: [
-    //   {
-    //     handler: "getDataSchedules",
-    //   },
-    // ],
+    filters: [
+      {
+        handler: "handleMonthChange",
+        deep: true,
+      },
+    ],
   },
 };
 </script>
@@ -499,6 +417,14 @@ export default {
 .fc .fc-view-container .fc-head .fc-today {
   background-color: #ffd05b;
 }
+
+.filter_search {
+  position: absolute;
+  width: 200px;
+  right: 15%;
+}
+
+
 
 .fc-unthemed th,
 .fc-unthemed td,
