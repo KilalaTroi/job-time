@@ -7,18 +7,24 @@ export default {
         commit('SET_LOGIN_USER', {id: id})
         const uri = '/data/users/' + id
         axios.get(uri).then((response) => {
-            commit('SET_LOGIN_USER', response.data.user)
+            let _user = response.data.user;
+            if (typeof _user.team === 'string' || _user.team instanceof String) {
+                const arrTeam = _user.team.split(',')
+                _user.team = arrTeam.map((item, index) => {
+                    return getters['getObjectByID'](state.teams.options, +item)
+                })
 
-            const arrTeam = response.data.user.team.split(",")
-            const teamOptions = state.teams.options
+                const teamOptions = state.teams.options
             
-            if ( arrTeam.length > 0 ) {
-                const currentTeamOption = [...arrTeam.map(item => {
-                    return getters['getObjectByID'](teamOptions, +item)
-                })]
-                commit('SET_CURRENT_TEAM_OPTION', currentTeamOption)
-                commit('SET_CURRENT_TEAM', currentTeamOption[0])
+                if ( arrTeam.length > 0 ) {
+                    const currentTeamOption = [...arrTeam.map(item => {
+                        return getters['getObjectByID'](teamOptions, +item)
+                    })]
+                    commit('SET_CURRENT_TEAM_OPTION', currentTeamOption)
+                    commit('SET_CURRENT_TEAM', currentTeamOption[0])
+                }
             }
+            commit('SET_LOGIN_USER', _user)
         });
     },
 

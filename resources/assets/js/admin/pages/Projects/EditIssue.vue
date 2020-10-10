@@ -69,7 +69,7 @@ import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
 import moment from 'moment'
 
 export default {
-    name: 'EditIssue',
+    name: 'edit-issue',
     components: {
         Select2,
         datepicker: Datepicker,
