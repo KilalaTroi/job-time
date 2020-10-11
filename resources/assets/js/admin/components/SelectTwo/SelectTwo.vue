@@ -3,41 +3,38 @@
 		<slot></slot>
 	</select>
 </template>
+
 <script>
 export default {
 	name: 'select-2',
 	props: ['options', 'value'],
 	mounted: function () {
-		var vm = this;
+		const _this = this;
 		$(this.$el)
 			// init select2
-			.select2({ data: this.options })
-			.val(this.value)
-			.trigger('change')
-			// emit event on change.
+			.select2({ data: _this.options })
+			.val(_this.value)
 			.on('change', function () {
-			    vm.$emit('input', this.value)
+				_this.$emit('input', _this.value)
 			})
-		},
-		watch: {
-			value: function (value) {
-			// update value
-			$(this.$el)
-			.val(value)
-			.trigger('change')
+	},
+	watch: {
+		value: function (old, value) {
+			// console.log(1111, old, value)
 		},
 		options: function (options) {
 			// update options
 			$(this.$el).empty().select2({ data: options });
 			if ( !$('.select2.no-disable-first-value').length )
 				$('.select2 option[value="0"]').prop('disabled',true);
-		}
+			}
 	},
 	destroyed: function () {
 		$(this.$el).off().select2('destroy')
 	}
 }
 </script>
+
 <style lang="scss">
 .select2-container {
 	width: 100%!important;

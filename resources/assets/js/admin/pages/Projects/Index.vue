@@ -101,8 +101,7 @@
             </CreateItem>
             <edit-project />
             <edit-issue />
-            <AddIssue :projects="projectOptions" :errors="validationErrors" :success="validationSuccess" v-on:add-issue="AddIssueFunc" v-on:reset-validation="resetValidate">
-            </AddIssue>
+            <AddIssue />
             <ImportIssue v-on:reset-import="resetImport"></ImportIssue>
         </div>
     </div>
@@ -209,35 +208,7 @@ export default {
                     }
                 });
         },
-        AddIssueFunc(newIssue) {
-            // Reset validate
-            // this.validationErrors = '';
-            // this.validationSuccess = '';
 
-            let uri = '/data/issues';
-            axios.post(uri, newIssue)
-                .then(res => {
-                    // let addIdItem = Object.assign({}, {
-                    //     id: res.data.id,
-                    //     issue_id: res.data.issue_id,
-                    //     page: res.data.page,
-                    //     dept_id: res.data.dept_id,
-                    //     type_id: res.data.type_id,
-                    //     p_name: res.data.p_name,
-                    //     p_name_vi: res.data.p_name_vi,
-                    //     p_name_ja: res.data.p_name_ja,
-                    //     status: 'publish',
-                    // }, newIssue);
-                    // // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];
-                    // this.validationSuccess = res.data.message;
-                })
-                .catch(err => {
-                    console.log(err);
-                    // if (err.response.status == 422) {
-                    //     this.validationErrors = err.response.data;
-                    // }
-                });
-        },
         deleteItem(issue_id) {
             if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
                 let uri = '/data/issues/' + issue_id;
@@ -254,35 +225,6 @@ export default {
                 // this.projects.data = this.projects.data.filter(item => item.issue_id !== data.id);
                 // this.getProjects(this.showArchive);
             }).catch(err => console.log(err));
-        },
-        updateIssue(item) {
-            // Reset validate
-            // this.validationErrors = '';
-            // this.validationSuccess = '';
-
-            // Update issue
-            let uri_issue = '/data/issues/' + item.issue_id;
-            axios.patch(uri_issue, item).then((res) => {
-                // this.validationSuccess = res.data.message;
-            })
-            .catch(err => {
-                if (err.response.status == 422) {
-                    // this.validationSuccess = '';
-                    // err.response.data.name = ["The issue has already been taken."];
-                    // this.validationErrors = err.response.data;
-                }
-            });
-        },
-        filterItems(value) {
-            let uri = '/data/projects?filter=' + JSON.stringify(value) + '&archive=' + this.showArchive;
-            axios.get(uri)
-                .then(res => {
-                    // this.projects = res.data.projects;
-                })
-                .catch(err => {
-                    console.log(err);
-                    alert("Could not load projects");
-                });
         },
         customFormatter(date) {
             return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY/MM/DD') : '--';

@@ -108,7 +108,7 @@ export default {
             }
 			commit('SET_SELECTED_ITEM', item)
 		},
-		
+
 		updateItem({ commit }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
@@ -120,7 +120,7 @@ export default {
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
                 })
                 .catch(err => {
-                    if (err.response.status == 422) {
+                    if (err.response.status === 422) {
 						commit('SET_VALIDATE', { error: err.response.data, success: '' })
                     }
                 });
@@ -135,12 +135,26 @@ export default {
                 commit('SET_VALIDATE', { error: '', success: res.data.message })
             })
             .catch(err => {
-                if (err.response.status == 422) {
+                if (err.response.status === 422) {
                     commit('SET_VALIDATE', { error: err.response.data, success: '' })
                 }
             });
         },
-		
+
+		addIssue({ commit }, item) {
+			commit('SET_VALIDATE', { error: '', success: '' })
+
+			const uri = '/data/issues';
+			axios.post(uri, item)
+				.then(res => {
+					commit('SET_SELECTED_ITEM', {})
+					commit('SET_VALIDATE', { error: '', success: res.data.message })
+				})
+				.catch(err => {
+					if (err.response.status === 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
+				});
+		},
+
 		resetSelectedItem({ commit }) {
 			commit('SET_SELECTED_ITEM', {})
 		},
@@ -197,11 +211,6 @@ export default {
 					console.log(err);
 					if (err.response.status == 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
 				});
-		},
-
-		resetValidate({ dispatch, commit }) {
-			dispatch('getAll')
-			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 
 		setColumns({ commit, rootGetters }) {

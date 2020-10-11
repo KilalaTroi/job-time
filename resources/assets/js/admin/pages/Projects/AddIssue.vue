@@ -1,11 +1,11 @@
 <template>
     <modal id="issueCreate" v-on:reset-validation="resetValidation">
         <template slot="title">{{$ml.with('VueJS').get('txtAddIssue')}}</template>
-        <form @submit="emitAddItem">
+        <form @submit="addIssue">
             <div class="form-group">
                 <label class="">{{$ml.with('VueJS').get('txtProject')}}</label>
                 <div>
-                    <select-2 :options="projectOptions" v-model="selectedItem.project_id" class="select2" @input="changeProjects">
+                    <select-2 :options="projectOptions" v-model="selectedItem.project_id" @input="changeProjects" class="select2">
                         <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
                     </select-2>
                 </div>
@@ -43,6 +43,7 @@ import Datepicker from 'vuejs-datepicker';
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
 import Modal from '../../components/Modals/Modal'
+import { mapGetters, mapActions } from "vuex"
 
 export default {
     name: 'AddIssue',
@@ -66,10 +67,10 @@ export default {
             getLangCode: 'getLangCode'
         })
     },
-    
+
     methods: {
         ...mapActions({
-			addIssue: 'projects/updateIssue',
+			addIssue: 'projects/addIssue',
 			resetValidate: 'projects/resetValidate',
 			resetSelectedItem: 'projects/resetSelectedItem',
 		}),
@@ -92,30 +93,19 @@ export default {
             return obj;
         },
         changeProjects() {
-            this.selectedItem.issue_id = this.getObjectByID(this.projectOptions, this.selectedItem.project_id).issue_id;
-            const uri = '/data/issues/getpage/' + this.selectedItem.issue_id;
+            console.log(this.selectedItem.project_id)
+            const issue_id = this.getObjectByID(this.projectOptions, +this.selectedItem.project_id).issue_id;
+            console.log(issue_id)
+            const uri = '/data/issues/getpage/' + issue_id;
             axios.get(uri)
                 .then(res => {
-                    console.log(res);
-                    this.page = res.data.page ? res.data.page : '';
+                    this.selectedItem.page = res.data.page ? res.data.page : '';
                 })
                 .catch(err => {
                     console.log(err);
                     alert("Could not found!");
                 });
         }
-    },
-    watch: {
-        selectedItem: [
-            {
-                handler: 'disabledStartDates',
-                deep: true
-            },
-            {
-                handler: 'disabledEndDates',
-                deep: true
-            }
-        ]
     }
 }
 </script>
