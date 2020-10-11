@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Team;
 use App\Department;
 use App\Imports\ProjectsImport;
 use App\Type;
@@ -25,8 +26,8 @@ class ProjectsController extends Controller
     {
         $filters = json_decode($_GET['filters']);
         $keyword = $filters->keyword !== '' ? $filters->keyword : false;
-        $type_id = $filters->type_id != '-1' ? $filters->type_id : false;
-        $dept_id = $filters->dept_id != '1' ? $filters->dept_id : false;
+        $type_id = $filters->type_id != '0' ? $filters->type_id : false;
+        $dept_id = $filters->dept_id != '0' ? $filters->dept_id : false;
         $team = $filters->team ? $filters->team : false;
 
         if ($request->input('page') !== null && $request->input('page')) {
@@ -116,20 +117,20 @@ class ProjectsController extends Controller
      */
     public function store(Request $request)
     {
-        $request->merge(['name' => $request->get('p_name')]);
+        $request->merge(['name' => $request->get('project_name')]);
 
         $this->validate($request, [
             'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
             'type_id' => 'required|numeric|min:0|not_in:0',
+            'team' => 'required',
             'page' => 'numeric|nullable',
         ]);
 
         $project = Project::create([
             'name' => $request->get('name'),
-            'name_vi' => $request->get('p_name_vi'),
-            'name_ja' => $request->get('p_name_ja'),
-            'dept_id' => $request->get('p.dept_id'),
-            'type_id' => $request->get('p.type_id'),
+            'dept_id' => $request->get('dept_id'),
+            'type_id' => $request->get('type_id'),
+            'team' => $request->get('team'),
         ]);
 
         $issue = array();
@@ -151,7 +152,7 @@ class ProjectsController extends Controller
         if (isset($project->id)) {
             $issue = Issue::create([
                 'project_id' => $project->id,
-                'name' => $request->get('i_name'),
+                'name' => $request->get('issue_name'),
                 'page' => $request->get('page'),
                 'start_date' => $start_date,
                 'end_date' => $end_date,
@@ -267,7 +268,7 @@ class ProjectsController extends Controller
             $reader->setHeaderRow(3);
 
         });
-        $dataList = $data->select(array('department', 'project', 'issue', 'page', 'type', 'start_date', 'end_date'))->get();
+        $dataList = $data->select(array('department', 'project', 'issue', 'page', 'type', 'team', 'start_date', 'end_date'))->get();
         $dataList = $data->toArray();
         foreach ($dataList as $keyItem => $item) {
             foreach ($item as $key => $value) {
@@ -292,6 +293,18 @@ class ProjectsController extends Controller
                 $dept = Department::where('name', trim($value['department']))->first();
                 $type = Type::where('slug', trim($value['type']))->first();
 
+                $teamArr = array();
+                $teamArrText = explode(",", strtoupper(trim($value['team'])));
+                $teamData = Team::whereIn('name', $teamArr)->select(
+                    'id'
+                )->get()->toArray();
+
+                if ( is_array($teamData) && count($teamData) > 0 ) {
+                    $teamArr = array_map(function($obj) {
+                        return $obj->id;
+                    }, $teamData);
+                }
+
                 $start_time = $value['start_date'];
                 $end_time = $value['end_date'];
                 $page = $value['page'];
@@ -304,9 +317,14 @@ class ProjectsController extends Controller
                     $listnote['errors'][$key][] = 'Row ' . ($key + 4) . ': Incorrect Type ' . $value['type'];
                 }
 
+                if (empty($teamArr)) {
+                    $listnote['errors'][$key][] = 'Row ' . ($key + 4) . ': Incorrect Team ' . $value['team'];
+                }
+
                 $deptId = $dept->id;
                 $typeId = $type->id;
-                if ($deptId && $typeId) {
+                $teamText = implode(",", $teamArr);
+                if ($deptId && $typeId && $teamText) {
                     $project = Project::where('name', trim($value['project']))->where('type_id', $typeId)->first();
                     if (empty($project)) {
                         $project = Project::create([
@@ -315,6 +333,7 @@ class ProjectsController extends Controller
                             'name_ja' => '',
                             'dept_id' => $deptId,
                             'type_id' => $typeId,
+                            'team' => $teamText
                         ]);
                     }
 
@@ -350,6 +369,7 @@ class ProjectsController extends Controller
     {
         return [
             '*.department' => 'required|max:255',
+            '*.team' => 'required',
             '*.project' => 'required|max:255',
             '*.issue' => 'max:255',
             '*.page' => 'numeric|nullable',

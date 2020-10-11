@@ -19,9 +19,7 @@
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtProject')}}</label>
                         <div>
-                            <select-2 :options="projectOptions" v-model="selectedItem.id" class="select2">
-                                <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
-                            </select-2>
+                            <select-2 :options="projectOptions" v-model="selectedItem.id" class="select2" />
                         </div>
                     </div>
                 </div>
@@ -109,7 +107,7 @@ export default {
 			this.resetSelectedItem();
 		},
         disabledStartDates() {
-            if (this.selectedItem && this.selectedItem.start_date) {
+            if (this.selectedItem.start_date) {
                 let obj = {
                     to: new Date(this.selectedItem.start_date), // Disable all dates after specific date
                     // days: [0], // Disable Saturday's and Sunday's
@@ -118,7 +116,7 @@ export default {
             }
         },
         disabledEndDates() {
-            if (this.selectedItem && this.selectedItem.end_date) {
+            if (this.selectedItem.end_date) {
                 let obj = {
                     from: new Date(this.selectedItem.end_date), // Disable all dates after specific date
                     // days: [0], // Disable Saturday's and Sunday's
@@ -127,7 +125,7 @@ export default {
             }
         },
         updatePeriod() {
-            if (this.selectedItem && this.selectedItem.no_period) {
+            if (this.selectedItem.no_period) {
                 this.selectedItem.start_date = '';
                 this.selectedItem.end_date = '';
                 this.has_period = false;

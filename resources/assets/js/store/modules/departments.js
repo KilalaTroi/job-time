@@ -43,8 +43,8 @@ export default {
 	},
 
 	actions: {
-		async getAll({ rootState, commit, dispatch }, page = 1) {
-			const uri = rootState.queryTeam ? '/data/departments?page=' + page + '&' + rootState.queryTeam : '/data/departments?page=' + page
+		async getAll({ commit, dispatch }, page = 1) {
+			const uri = '/data/departments?page=' + page
 
 			await axios.get(uri).then(response => {
 				commit('SET_DATA', response.data)
@@ -52,8 +52,8 @@ export default {
 			})
 		},
 
-		async getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
-			const uri = rootState.queryTeam ? '/data/departments?page=0&' + rootState.queryTeam : '/data/departments?page=0'
+		async getOptions({ commit, rootGetters }, dafaultValue = false) {
+			const uri = '/data/departments?page=0'
 			await axios.get(uri).then(response => {
 				let dataOptions = dafaultValue ? [{id: 0,	text: rootGetters['getTranslate']('txtSelectOne')}] : []
 				dataOptions = [...dataOptions, ...response.data.map(item => {
@@ -68,9 +68,9 @@ export default {
 			})
 		},
 
-		deleteItem({ rootState, dispatch }, item) {
+		deleteItem({ dispatch }, item) {
 			if (confirm(item.msgText)) {
-				const uri = rootState.queryTeam ? '/data/departments/' + item.id + '?' + rootState.queryTeam : '/data/departments/' + item.id
+				const uri = '/data/departments/' + item.id
 
 				axios.delete(uri)
 					.then(res => {
@@ -89,10 +89,10 @@ export default {
 			commit('SET_SELECTED_ITEM', {})
 		},
 
-		updateItem({ rootState, commit }, item) {
+		updateItem({ commit }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const uri = rootState.queryTeam ? '/data/departments/' + item.id + '?' + rootState.queryTeam : '/data/departments/' + item.id
+			const uri = '/data/departments/' + item.id
 
 			axios
 				.patch(uri, item)
@@ -105,10 +105,10 @@ export default {
 				});
 		},
 
-		createItem({ rootState, commit }, item) {
+		createItem({ commit }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const uri = rootState.queryTeam ? '/data/departments?' + rootState.queryTeam : '/data/departments'
+			const uri = '/data/departments'
 
 			axios
 				.post(uri, item)

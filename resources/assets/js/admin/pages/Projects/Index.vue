@@ -97,12 +97,11 @@
                 </div>
                 <pagination :data="projectData" :show-disabled="true" :limit="2" align="right" size="small" @pagination-change-page="getAllProject"></pagination>
             </card>
-            <CreateItem :departments="deptOptions" :types="typeOptions" :errors="validationErrors" :success="validationSuccess" v-on:create-item="createItem" v-on:reset-validation="resetValidate">
-            </CreateItem>
+            <create-item />
             <edit-project />
             <edit-issue />
-            <AddIssue />
-            <ImportIssue v-on:reset-import="resetImport"></ImportIssue>
+            <add-issue />
+            <import-issue v-on:reset-import="resetImport" />
         </div>
     </div>
 </template>
@@ -140,24 +139,10 @@ export default {
             deptOptions: 'departments/options',
             typeOptions: 'types/options',
             filters: 'projects/filters',
-            columns: 'projects/columns',
             projectData: 'projects/data',
-            projectOptions: 'projects/options',
-            selectedItem: 'projects/selectedItem',
             validationErrors: 'projects/validationErrors',
             validationSuccess: 'projects/validationSuccess',
         })
-    },
-    async created(){
-        let _this = this
-        _this.setColumns();
-        if ( ! _this.deptOptions.length ) await _this.getOptionsDept(true)
-        if ( ! _this.typeOptions.length ) await _this.getOptionsType(true)
-        _this.filters.team = _this.currentTeam.id
-        await _this.getAllProject()
-        $(document).on("click", ".languages button", function () {
-            _this.setColumns();
-        });
     },
     methods: {
         ...mapActions({
@@ -175,72 +160,21 @@ export default {
             this.filters.showArchive = false
             this.getAllProject(1)
         },
-
-        getObjectValue(data, id) {
-            let obj = data.filter((elem) => {
-                if (elem.id == id) return elem;
-            });
-
-            if (obj.length > 0)
-                return obj[0];
-        },
-        createItem(newItem) {
-            // Reset validate
-            // this.validationErrors = '';
-            // this.validationSuccess = '';
-
-            let uri = '/data/projects';
-            axios.post(uri, newItem)
-                .then(res => {
-                    // let addIdItem = Object.assign({}, {
-                    //     id: res.data.id,
-                    //     issue_id: res.data.issue_id,
-                    //     page: res.data.page,
-                    //     status: 'publish',
-                    // }, newItem);
-                    // // if ( !this.showArchive ) this.projects.data = [addIdItem, ...this.projects.data];
-                    // this.validationSuccess = res.data.message;
-                })
-                .catch(err => {
-                    console.log(err);
-                    if (err.response.status == 422) {
-                        // this.validationErrors = err.response.data;
-                    }
-                });
-        },
-
-        deleteItem(issue_id) {
-            if (confirm(this.$ml.with('VueJS').get('msgConfirmDelete'))) {
-                let uri = '/data/issues/' + issue_id;
-                axios.delete(uri).then((res) => {
-                    // this.projects.data = this.projects.data.filter(item => item.issue_id !== issue_id);
-                    // this.getProjects(this.showArchive);
-                    // console.log(res.data.message);
-                }).catch(err => console.log(err));
-            }
-        },
-        archiveItem(data) {
-            let uri = '/data/issues/archive/' + data.id + '/' + data.status;
-            axios.get(uri).then((response) => {
-                // this.projects.data = this.projects.data.filter(item => item.issue_id !== data.id);
-                // this.getProjects(this.showArchive);
-            }).catch(err => console.log(err));
-        },
-        customFormatter(date) {
-            return moment(date).format('DD-MM-YYYY') !== 'Invalid date' ? moment(date).format('YYYY/MM/DD') : '--';
-        },
-        resetValidate() {
-            // if ( this.validationErrors || this.validationSuccess ) {
-            //     this.getProjects(this.showArchive);
-            //     this.validationSuccess = '';
-            //     this.validationErrors = '';
-            //     this.currentItem = false;
-            // }
-        },
+        
         resetImport() {
-            // this.getProjects(this.showArchive);
-            // this.currentItem = false;
+            this.getAllProject(1)
         }
+    },
+    async created(){
+        let _this = this
+        _this.setColumns();
+        if ( ! _this.deptOptions.length ) await _this.getOptionsDept(true)
+        if ( ! _this.typeOptions.length ) await _this.getOptionsType(true)
+        _this.filters.team = _this.currentTeam.id
+        await _this.getAllProject()
+        $(document).on("click", ".languages button", function () {
+            _this.setColumns();
+        });
     }
 }
 </script>

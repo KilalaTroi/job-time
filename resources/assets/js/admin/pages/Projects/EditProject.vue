@@ -28,19 +28,11 @@
 							{{$ml.with('VueJS').get('txtTypes')}}              
 						</label>
 						<div>
-							<select2-type :options="typeOptions" v-model="selectedItem.type_id" class="select2"></select2-type>
+							<select2-type :options="typeOptions" v-model="selectedItem.type_id" class="select2" />
 						</div>
 					</div>
 				</div>
 				<div class="col-sm-6">
-					<div class="form-group">
-						<label class>{{$ml.with('VueJS').get('txtDepartments')}}</label>
-						<div>
-							<select-2 :options="deptOptions" v-model="selectedItem.dept_id" class="select2"></select-2>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-12">
 					<div class="form-group">
 						<label class="">Team</label>
 						<div>
@@ -98,7 +90,6 @@ export default {
 	computed: {
         ...mapGetters({
             currentTeamOption: 'currentTeamOption',
-            deptOptions: 'departments/options',
             typeOptions: 'types/options',
             selectedItem: 'projects/selectedItem',
             validationErrors: 'projects/validationErrors',

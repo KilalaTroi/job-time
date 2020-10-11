@@ -53,7 +53,7 @@
         <div class="col-md-6">
           <label class="">{{ $ml.with("VueJS").get("txtLang") }}</label>
           <select-2 v-model="loginUser.language" class="select2">
-            <option value="vi">English</option>
+            <option value="vi">Vietnamese</option>
             <option value="ja">Japanese</option>
           </select-2>
         </div>

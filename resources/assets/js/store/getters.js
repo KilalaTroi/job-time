@@ -7,7 +7,6 @@ export default {
     currentLang: state => state.currentLang,
     currentTeam: state => state.currentTeam,
     currentTeamOption: state => state.currentTeamOption,
-    queryTeam: state => state.queryTeam,
     reportNotify: state => state.reportNotify,
 
     getTranslate(state) {

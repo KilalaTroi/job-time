@@ -24,10 +24,10 @@
                     </td>
                 </slot>
                 <td class="text-center">
-                    <button @click="$emit('archive-item', {'id':item.issue_id, 'status':item.status})" type="button" class="btn btn-xs btn-second">
+                    <button @click="archiveItem({'id':item.issue_id, 'status':item.status})" type="button" class="btn btn-xs btn-second">
                         <i :class="archiveClass(item.status)" aria-hidden="true" title="archive"></i>
                     </button>
-                    <button @click="$emit('delete-item', item.issue_id)" type="button" class="btn btn-xs btn-danger ml-sm-2">
+                    <button @click="deleteItem({id: item.issue_id, msgText: $ml.with('VueJS').get('msgConfirmDelete')})" type="button" class="btn btn-xs btn-danger ml-sm-2">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                 </td>
@@ -52,7 +52,9 @@ export default {
     },
     methods: {
         ...mapActions({
-            getItem: 'projects/getItem'
+            getItem: 'projects/getItem',
+            archiveItem: 'projects/archiveItem',
+            deleteItem: 'projects/deleteItem'
         }),
 
         checkProjectColumn(data) {

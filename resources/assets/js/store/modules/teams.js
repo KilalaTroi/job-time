@@ -52,8 +52,8 @@ export default {
 			})
 		},
 
-		async getOptions({ rootState, commit }, dafaultValue = false) {
-			const uri = rootState.queryTeam ? '/data/teams?page=0&' + rootState.queryTeam : '/data/teams?page=0'
+		async getOptions({ rootGetters, commit }, dafaultValue = false) {
+			const uri = '/data/teams?page=0'
 			await axios.get(uri).then(response => {
 				let dataOptions = dafaultValue ? [{id: 0,	text: rootGetters['getTranslate']('txtSelectOne')}] : []
 				dataOptions = [...dataOptions, ...response.data.map(item => {
