@@ -295,13 +295,16 @@ class ProjectsController extends Controller
 
                 $teamArr = array();
                 $teamArrText = explode(",", strtoupper(trim($value['team'])));
-                $teamData = Team::whereIn('name', $teamArr)->select(
+                $teamArrText = array_map(function($item) {
+                    return trim($item);
+                }, $teamArrText);
+                $teamData = Team::whereIn('name', $teamArrText)->select(
                     'id'
                 )->get()->toArray();
 
                 if ( is_array($teamData) && count($teamData) > 0 ) {
-                    $teamArr = array_map(function($obj) {
-                        return $obj->id;
+                    $teamArr = array_map(function($item) {
+                        return $item['id'];
                     }, $teamData);
                 }
 

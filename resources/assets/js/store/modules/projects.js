@@ -220,7 +220,7 @@ export default {
                 { id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '' },
                 { id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '' },
                 { id: 'value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center' },
-				{ id: 'html_team', value: 'Team', width: '', class: 'text-center' },
+				{ id: 'html_team', value: rootGetters['getTranslate']('txtTeam'), width: '', class: 'text-center' },
                 { id: 'ct_start_date', value: rootGetters['getTranslate']('lblStartDate'), width: '', class: '' },
                 { id: 'ct_end_date', value: rootGetters['getTranslate']('lblEndDate'), width: '', class: '' }
 			]
