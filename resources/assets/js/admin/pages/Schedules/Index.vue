@@ -1,5 +1,5 @@
 <template>
-  <div class="content" >
+  <div class="content">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-3 col-xl-2">
@@ -15,7 +15,6 @@
                 :placeholder="$ml.with('VueJS').get('txtScheduleSearch')"
                 type="text"
                 class="form-control"
-                v-on:keyup="searchItem"
               />
             </div>
             <div id="external-events">
@@ -42,7 +41,7 @@
         <div class="col-sm-12 col-lg-9 col-xl-10">
           <div class="filter_search">
             <div class="form-group d-flex align-items-center">
-              <label class="mb-0" :style="{paddingRight: '10px'}">Team</label>
+              <label class="mb-0" :style="{ paddingRight: '10px' }">Team</label>
               <div class="w-100">
                 <select-2
                   :options="currentTeamOption"
@@ -58,8 +57,8 @@
             :plugins="calendarPlugins"
             :header="calendarHeader"
             :business-hours="businessHours"
-            :editable="true"
-            :droppable="true"
+            :editable="fullCalendar.editable"
+            :droppable="fullCalendar.droppable"
             :events="scheduleData.schedules"
             :event-overlap="true"
             :all-day-slot="false"
@@ -67,25 +66,18 @@
             max-time="17:00:00"
             height="auto"
             :hidden-days="hiddenDays"
-            @eventReceive="addEvent"
+            @eventReceive="addSchedule"
             @datesRender="handleMonthChange"
-            @eventDrop="dropEvent"
-            @eventResize="resizeEvent"
-            @eventClick="clickEvent"
+            @eventDrop="dropSchedule"
+            @eventResize="resizeSchedule"
+            @eventClick="getItem"
             :locale="getLanguage(this.$ml)"
           />
         </div>
       </div>
     </div>
 
-    <EditEvent
-      :currentEvent="currentEvent"
-      :errors="validationErrors"
-      :success="validationSuccess"
-      v-on:update-event="updateEvent"
-      v-on:delete-event="deleteEvent"
-      v-on:reset-validation="resetValidation"
-    ></EditEvent>
+    <edit-item />
   </div>
 </template>
 
@@ -97,7 +89,7 @@ import timeGridPlugin from "@fullcalendar/timeGrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import Card from "../../components/Cards/Card";
-import EditEvent from "./Edit";
+import EditItem from "./Edit";
 import moment from "moment";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import { mapGetters, mapActions } from "vuex";
@@ -107,13 +99,12 @@ export default {
     Select2,
     FullCalendar, // make the <FullCalendar> tag available
     Card,
-    EditEvent,
+    EditItem,
   },
   data() {
     return {
       memo: "",
       schedules: [],
-      currentEvent: {},
 
       calendarPlugins: [
         dayGridPlugin,
@@ -143,6 +134,7 @@ export default {
         },
       ],
       hiddenDays: [0],
+      search: "",
     };
   },
 
@@ -150,10 +142,7 @@ export default {
     ...mapGetters("schedules", {
       scheduleData: "data",
       filters: "filters",
-      search: "search",
-      searchResults: "searchResults",
-      validationErrors: "validationErrors",
-      validationSuccess: "validationSuccess",
+      fullCalendar: "fullCalendar",
     }),
     ...mapGetters({
       currentTeamOption: "currentTeamOption",
@@ -169,6 +158,10 @@ export default {
       handleMonthChange: "handleMonthChange",
       resetValidate: "resetValidate",
       searchItem: "searchItem",
+      addSchedule: "addSchedule",
+      dropSchedule: "dropSchedule",
+      resizeSchedule: "resizeSchedule",
+      getItem: "getItem",
     }),
 
     ...mapActions("types", {
@@ -183,13 +176,8 @@ export default {
       return data.current;
     },
 
-    resetValidation() {
-      this.resetValidate();
-    },
-
     makeDraggable() {
       let draggableEl = document.getElementById("external-events-list");
-
       new Draggable(draggableEl, {
         itemSelector: ".fc-event",
         eventData: (eventEl) => {
@@ -199,9 +187,7 @@ export default {
             borderColor: eventEl.getAttribute("color"),
             backgroundColor: eventEl.getAttribute("color"),
             constraint: {
-              start: moment(
-                eventEl.getAttribute("start") + " " + "08:00"
-              ).format(),
+              start: moment(eventEl.getAttribute("start") + " " + "08:00").format(),
               end: moment(eventEl.getAttribute("end") + " " + "17:00").format(),
             },
             overlap: true,
@@ -209,153 +195,6 @@ export default {
           };
         },
       });
-    },
-
-    customFormatter(date) {
-      return moment(date).format("DD-MM-YYYY") !== "Invalid date"
-        ? moment(date).format("YYYY-MM-DD")
-        : "--";
-    },
-    hourFormatter(date) {
-      return moment(date).format("HH:mm");
-    },
-    deleteEvent(event) {
-      $("#editEvent").modal("hide");
-
-      if (confirm(this.$ml.with("VueJS").get("msgConfirmDelete"))) {
-        let uri = "/data/schedules/" + event.id;
-        axios
-          .delete(uri)
-          .then((res) => {
-            this.schedules = this.schedules.filter((elem) => {
-              if (elem.id != event.id) return elem;
-            });
-          })
-          .catch((err) => console.log(err));
-      }
-    },
-    updateEvent(event) {
-      // Reset validate
-
-      let uri = "/data/schedules/" + event.id;
-      let newItem = {
-        memo: event.memo,
-      };
-      axios
-        .patch(uri, newItem)
-        .then((res) => {
-          let foundIndex = this.schedules.findIndex((x) => x.id == event.id);
-          this.schedules[foundIndex].title =
-            this.schedules[foundIndex].title_not_memo + "\n" + event.memo;
-          this.schedules = [...this.schedules];
-        })
-        .catch((err) => {});
-    },
-    clickEvent(info) {
-      this.currentEvent = info.event;
-      let titleArray = this.currentEvent.title.split("\n");
-      this.currentEvent.title_not_memo = titleArray[0];
-      this.currentEvent.memo = titleArray[1];
-      $("#editEvent").modal("show");
-    },
-    resizeEvent(info) {
-      this.editable = false;
-      this.droppable = false;
-
-      if (!confirm(this.$ml.with("VueJS").get("msgConfirmChange"))) {
-        info.revert();
-        this.editable = true;
-        this.droppable = true;
-      } else {
-        let { event } = info;
-        let { id, start, end } = event;
-        let uri = "/data/schedules/" + id;
-        let newItem = {
-          start_time: this.hourFormatter(start),
-          end_time: this.hourFormatter(end),
-        };
-        axios
-          .patch(uri, newItem)
-          .then((res) => {
-            let foundIndex = this.schedules.findIndex((x) => x.id == id);
-            this.schedules[foundIndex].start = moment(start).format();
-            this.schedules[foundIndex].end = moment(end).format();
-            this.schedules = [...this.schedules];
-
-            this.editable = true;
-            this.droppable = true;
-          })
-          .catch((err) => {
-            console.log(err);
-            this.editable = true;
-            this.droppable = true;
-          });
-      }
-    },
-    dropEvent(info) {
-      this.editable = false;
-      this.droppable = false;
-
-      if (!confirm(this.$ml.with("VueJS").get("msgConfirmChange"))) {
-        info.revert();
-        this.editable = true;
-        this.droppable = true;
-      } else {
-        let { event } = info;
-        let { id, start, end } = event;
-        let uri = "/data/schedules/" + id;
-        let newItem = {
-          date: this.customFormatter(start),
-          start_time: this.hourFormatter(start),
-          end_time: this.hourFormatter(end),
-        };
-        axios
-          .patch(uri, newItem)
-          .then((res) => {
-            let foundIndex = this.schedules.findIndex((x) => x.id == id);
-            this.schedules[foundIndex].start = moment(start).format();
-            this.schedules[foundIndex].end = moment(end).format();
-            this.schedules = [...this.schedules];
-
-            this.editable = true;
-            this.droppable = true;
-          })
-          .catch((err) => {
-            console.log(err);
-            this.editable = true;
-            this.droppable = true;
-          });
-      }
-    },
-    addEvent(info) {
-      this.editable = false;
-      this.droppable = false;
-
-      let { event } = info;
-      let { id, start, end, title, borderColor, backgroundColor } = event;
-      let uri = "/data/schedules";
-      let newItem = {
-        issue_id: id,
-        title: title,
-        borderColor: borderColor,
-        backgroundColor: backgroundColor,
-        date: this.customFormatter(start),
-        start_time: this.hourFormatter(start),
-        end_time: this.hourFormatter(end),
-      };
-      axios
-        .post(uri, newItem)
-        .then((res) => {
-          this.schedules = [...this.schedules, res.data.event];
-          info.event.remove();
-          this.editable = true;
-          this.droppable = true;
-        })
-        .catch((err) => {
-          console.log(err);
-          this.editable = true;
-          this.droppable = true;
-        });
     },
   },
 
@@ -423,8 +262,6 @@ export default {
   width: 200px;
   right: 15%;
 }
-
-
 
 .fc-unthemed th,
 .fc-unthemed td,

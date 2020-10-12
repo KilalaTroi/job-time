@@ -104,7 +104,8 @@ class SchedulesController extends Controller
                 'backgroundColor' => $request->get('backgroundColor'),
                 'start' => date('Y-m-d\TH:i:s', $start_date),
                 'end' => date('Y-m-d\TH:i:s', $end_date),
-                'title_not_memo' => $request->get('title')
+                'title_not_memo' => $request->get('title'),
+                'team_id' => $request->get('team_id'),
             ),
             'message' => 'Successfully.'
         ), 200);
