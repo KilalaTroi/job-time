@@ -54,12 +54,13 @@
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label class>{{ $ml.with("VueJS").get("txtLineRoom") }}</label>
+          <label class>{{ $ml.with("VueJS").get("txtLineRoom") }} <input class="ml-2" v-model="c_lineroom" type="checkbox"> FINISH MESSAGE</label>
           <input
             v-model="selectedItem.line_room"
             type="text"
             name="line_room"
             class="form-control"
+            :disabled="!c_lineroom"
           />
         </div>
       </div>
@@ -100,6 +101,7 @@ export default {
   data() {
     return {
       modalLg: "modal-lg",
+      c_lineroom: false
     };
   },
 
