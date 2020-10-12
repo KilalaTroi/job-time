@@ -15,8 +15,8 @@ class DepartmentsController extends Controller
      */
     public function index(Request $request)
     {
-        if ( $request->input('page') !== null && $request->input('page') ) $department = Department::where('id', '<>', 1)->paginate(20);
-        else $department = Department::where('id', '<>', 1)->get();
+        if ( $request->input('page') !== null && $request->input('page') ) $department = Department::paginate(20);
+        else $department = Department::get();
 
         return response()->json($department);
     }

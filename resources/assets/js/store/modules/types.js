@@ -47,15 +47,16 @@ export default {
 
 	actions: {
 		async getAll({ rootState, rootGetters, commit, dispatch }, page = 1) {
-			const uri = rootState.queryTeam ? '/data/types?page=' + page+ '&' + rootState.queryTeam : '/data/types?page=' + page
+			const uri = '/data/types?page=' + page
 
 			await axios.get(uri).then(response => {
 				if (response.data.data.length) {
                     response.data.data = response.data.data.map((item, index) => {
+						const dept = rootGetters['getObjectByID'](rootState.departments.options, item.dept_id)
 						return Object.assign({}, {
 							html_value: '<span class="type-color" style="background: ' + item.value + '"></span>',
-							htmldept_vi: rootGetters['getObjectByID'](rootState.departments.data.data, item.dept_id).name_vi,
-							htmldept_ja: rootGetters['getObjectByID'](rootState.departments.data.data, item.dept_id).name_ja,
+							htmldept_vi: dept.name_vi ? dept.name_vi : dept.text,
+							htmldept_ja: dept.name_ja ? dept.name_ja : dept.text,
 						}, item)
                     });
 				}
@@ -65,8 +66,8 @@ export default {
 			})
 		},
 
-		async getOptions({ rootState, commit, rootGetters }, dafaultValue = false) {
-			const uri = rootState.queryTeam ? '/data/types?page=0&' + rootState.queryTeam : '/data/types?page=0'
+		async getOptions({ commit, rootGetters }, dafaultValue = false) {
+			const uri = '/data/types?page=0'
 
 			await axios.get(uri).then(response => {
 				let dataOptions = dafaultValue ? [{id: 0, text: '<div>' + rootGetters['getTranslate']('txtSelectOne') + '<div>'}] : []
@@ -77,15 +78,16 @@ export default {
 						text: '<div><span class="type-color" style="background: ' + item.value + '"></span>' + item.slug + '</div>',
 						slug: item.slug,
 						value: item.value,
+						dept_id: item.dept_id
 					}
 				})]
 				commit('SET_OPTIONS', dataOptions)
 			})
 		},
 
-		deleteItem({ rootState, dispatch }, type) {
+		deleteItem({ dispatch }, type) {
 			if (confirm(type.msgText)) {
-				const uri = rootState.queryTeam ? '/data/types/' + type.id + '?' + rootState.queryTeam : '/data/types/' + type.id
+				const uri = '/data/types/' + type.id
 
 				axios.delete(uri)
 					.then(res => {
@@ -104,10 +106,10 @@ export default {
 			commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 })
 		},
 
-		updateItem({ rootState, commit }, type) {
+		updateItem({ commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const uri = rootState.queryTeam ? '/data/types/' + type.id + '?' + rootState.queryTeam : '/data/types/' + type.id
+			const uri = '/data/types/' + type.id
 
 			axios
 				.patch(uri, type)
@@ -120,10 +122,10 @@ export default {
 				});
 		},
 
-		createItem({ rootState, commit }, type) {
+		createItem({ commit }, type) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const uri = rootState.queryTeam ? '/data/types' + '?' + rootState.queryTeam : '/data/types'
+			const uri = '/data/types'
 
 			axios
 				.post(uri, type)

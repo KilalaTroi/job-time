@@ -38,13 +38,6 @@ export default {
         }
     },
 
-    setQueryTeam({ state, commit }) {
-        const paramTeam = state.currentTeam ? state.currentTeam.text.toLowerCase() : ''
-        const paramTeamID = state.currentTeam ? state.currentTeam.id : ''
-        const queryTeam = paramTeam && paramTeamID ? 'team=' + paramTeam + '&team_id=' + paramTeamID : ''
-        commit('SET_QUERY_TEAM', queryTeam)
-    },
-
     setReportNotify({ state, commit }) { 
         const uri = "/data/notify?user_id=" + state.loginUser.id
         axios.get(uri).then((response) => {

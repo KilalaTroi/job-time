@@ -4,6 +4,5 @@ export default {
     currentLang: '',
     currentTeamOption: [],
     currentTeam: {},
-    queryTeam: '',
     reportNotify: 0
 }

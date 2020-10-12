@@ -53,7 +53,7 @@
         <div class="col-md-6">
           <label class="">{{ $ml.with("VueJS").get("txtLang") }}</label>
           <select-2 v-model="loginUser.language" class="select2">
-            <option value="vi">English</option>
+            <option value="vi">Vietnamese</option>
             <option value="ja">Japanese</option>
           </select-2>
         </div>
@@ -91,14 +91,15 @@
     </form>
   </card>
 </template>
+
 <script>
 import Card from "../../components/Cards/Card.vue";
 import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import Multiselect from "vue-multiselect";
-
 import { mapGetters, mapActions } from "vuex";
+
 export default {
   name: "edit-profile",
 
@@ -129,9 +130,6 @@ export default {
     }),
   },
 
-  mounted() {
-  },
-
   methods: {
     ...mapActions({
       resetValidate: "users/resetValidate",
@@ -145,6 +143,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
 </style>

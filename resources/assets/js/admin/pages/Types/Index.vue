@@ -71,7 +71,7 @@ export default {
 
   methods: {
     ...mapActions("departments", {
-      getAllDept: "getAll",
+      getOtionsDept: "getOptions",
     }),
 
     ...mapActions("types", {
@@ -83,7 +83,7 @@ export default {
   async created(){
     const _this = this;
     _this.setColumns();
-    if ( !_this.deptOptions.length ) await _this.getAllDept();
+    if ( !_this.deptOptions.length ) await _this.getOtionsDept(true);
     await _this.getAll();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();

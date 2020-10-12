@@ -7,7 +7,6 @@ export default {
     currentLang: state => state.currentLang,
     currentTeam: state => state.currentTeam,
     currentTeamOption: state => state.currentTeamOption,
-    queryTeam: state => state.queryTeam,
     reportNotify: state => state.reportNotify,
 
     getTranslate(state) {
@@ -28,6 +27,12 @@ export default {
             if ( moment(date).format() === 'Invalid date' ) return '--'
             if ( string ) return moment(date).format(string)
             return moment(date).format()
+        }
+    },
+
+    customFormatter() {
+        return (date) => {
+            return moment(date).format('YYYY/MM/DD');
         }
     },
 

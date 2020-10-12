@@ -98,6 +98,10 @@ export default {
 			})
 		},
 
+		setSelectedItem ({ commit }, item) {
+			commit('SET_SELECTED_ITEM', item)
+		},
+
 		getItem({ state, commit, getters, rootGetters, rootState }, id) {
 			const item = getters['getProjectByIssueID'](state.data.data, id)
             if ( item.team ) {
@@ -108,80 +112,99 @@ export default {
             }
 			commit('SET_SELECTED_ITEM', item)
 		},
+
+		archiveItem({ dispatch }, data) {
+            const uri = '/data/issues/archive/' + data.id + '/' + data.status;
+            axios.get(uri).then((res) => {
+                dispatch('getAll')
+            }).catch(err => console.log(err));
+		},
 		
-		updateItem({ commit }, item) {
+		deleteItem({ dispatch }, issue) {
+            if (confirm(issue.msgText)) {
+                let uri = '/data/issues/' + issue.id;
+                axios.delete(uri).then((res) => {
+                    dispatch('getAll')
+                }).catch(err => console.log(err));
+            }
+        },
+
+		updateItem({ commit, rootGetters, rootState }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const data = Object.assign({}, item)
-            data.team = data.team.map((item, index) => { return item.id }).toString()
+			data.team = data.team.map((item, index) => { return item.id }).toString()
+			
+			if ( data.type_id ) {
+				data.dept_id = rootGetters['getObjectByID'](rootState.types.options, +data.type_id).dept_id
+			}
 
             const uri = '/data/projects/' + data.id;
             axios.patch(uri, data).then((res) => {
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
                 })
                 .catch(err => {
-                    if (err.response.status == 422) {
+                    if (err.response.status === 422) {
 						commit('SET_VALIDATE', { error: err.response.data, success: '' })
                     }
                 });
 		},
+
+		updateIssue({ commit }, item) {
+			commit('SET_VALIDATE', { error: '', success: '' })
+
+            // Update issue
+            const uri_issue = '/data/issues/' + item.issue_id;
+            axios.patch(uri_issue, item).then((res) => {
+                commit('SET_VALIDATE', { error: '', success: res.data.message })
+            })
+            .catch(err => {
+                if (err.response.status === 422) {
+                    commit('SET_VALIDATE', { error: err.response.data, success: '' })
+                }
+            });
+		},
 		
-		resetSelectedItem({ commit }) {
-			commit('SET_SELECTED_ITEM', {})
-		},
-
-		resetValidate({ dispatch, commit }) {
-			dispatch('getAll')
+		addProject({ commit, rootState, rootGetters }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
-		},
 
-		deleteItem({ rootState, dispatch }, department) {
-			if (confirm(department.msgText)) {
-				const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
+			const data = Object.assign({}, item)
 
-				axios.delete(uri)
-					.then(res => {
-						dispatch('getAll')
-					})
-					.catch(err => console.log(err))
+			if ( data.team ) {
+				data.team = data.team.map((item, index) => { return item.id }).toString()
 			}
-		},
+			
+			if ( data.type_id ) {
+				data.dept_id = rootGetters['getObjectByID'](rootState.types.options, +data.type_id).dept_id
+			}
 
-		resetSelectedDepartment({ commit }) {
-			commit('SET_SELECTED_DEPARTMENT', {})
-		},
+            let uri = '/data/projects';
+            axios.post(uri, data)
+                .then(res => {
+                    commit('SET_SELECTED_ITEM', {type_id: 0})
+					commit('SET_VALIDATE', { error: '', success: res.data.message })
+                })
+                .catch(err => {
+                    if (err.response.status === 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
+                });
+        },
 
-		updateDepartment({ rootState, commit }, department) {
+		addIssue({ commit }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const uri = rootState.queryTeam ? '/data/departments/' + department.id + '?' + rootState.queryTeam : '/data/departments/' + department.id
-
-			axios
-				.patch(uri, department)
+			const uri = '/data/issues';
+			axios.post(uri, item)
 				.then(res => {
+					commit('SET_SELECTED_ITEM', {project_id: 0, type_id: 0})
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {
-					console.log(err);
-					if (err.response.status == 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
+					if (err.response.status === 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
 				});
 		},
 
-		createDepartment({ rootState, commit }, department) {
-			commit('SET_VALIDATE', { error: '', success: '' })
-
-			const uri = rootState.queryTeam ? '/data/departments?' + rootState.queryTeam : '/data/departments'
-
-			axios
-				.post(uri, department)
-				.then(res => {
-					commit('SET_SELECTED_DEPARTMENT', {})
-					commit('SET_VALIDATE', { error: '', success: res.data.message })
-				})
-				.catch(err => {
-					console.log(err);
-					if (err.response.status == 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
-				});
+		resetSelectedItem({ commit }) {
+			commit('SET_SELECTED_ITEM', {type_id: 0})
 		},
 
 		resetValidate({ dispatch, commit }) {

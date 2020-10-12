@@ -19,10 +19,6 @@ export default {
         state.currentTeamOption = currentTeamOption
     },
 
-    SET_QUERY_TEAM: (state, queryTeam) => {
-        state.queryTeam = queryTeam
-    },
-
     SET_REPORT_NOTIFY: (state, reportNotify) => {
         state.reportNotify = reportNotify
     },
