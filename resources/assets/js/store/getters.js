@@ -24,8 +24,8 @@ export default {
 
     dateFormat() {
         return (date, string = null) => {
-            if ( moment(date).format() === 'Invalid date' ) return '--'
-            if ( string ) return moment(date).format(string)
+            if (moment(date).format() === 'Invalid date') return '--'
+            if (string) return moment(date).format(string)
             return moment(date).format()
         }
     },
@@ -55,6 +55,8 @@ export default {
             }
         }
     },
+
+
 
     getTeamText(state, getters) {
         return (team) => {

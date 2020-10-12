@@ -8,8 +8,10 @@ export default {
       currentEnd: '',
       team: '',
     },
-    search: '',
-    searchResults: [],
+    fullCalendar: {
+      editable: true,
+      droppable: true
+    },
     selectedItem: {},
     validationErrors: '',
     validationSuccess: ''
@@ -18,7 +20,7 @@ export default {
   getters: {
     data: state => state.data,
     search: state => state.search,
-    searchResults: state => state.searchResults,
+    fullCalendar: state => state.fullCalendar,
     filters: state => state.filters,
     selectedItem: state => state.selectedItem,
     validationErrors: state => state.validationErrors,
@@ -34,6 +36,10 @@ export default {
       }
     },
 
+    SET_SELECTED_ITEM: (state, selectedItem) => {
+      state.selectedItem = selectedItem
+    },
+
     SET_FILTER: (state, data) => {
       if (data.view) state.filters.currentStart = data.view.currentStart
       if (data.view) state.filters.currentEnd = data.view.currentEnd
@@ -41,7 +47,7 @@ export default {
     },
 
     SET_DATA_SEARCH: (state, data) => {
-      state.searchResults = data
+      state.data.projects = data
     },
 
     SET_VALIDATE: (state, data) => {
@@ -101,15 +107,144 @@ export default {
       dispatch('getAll')
       commit('SET_VALIDATE', { error: '', success: '' })
     },
-    searchItem(commit, state) {
-      // let value = state.search;
-      // if (value) {
-      //   dataSearchResults = (state.data.projects).filter((item) => {
-      //     let title = item.project + " " + item.issue;
-      //     return title.toLowerCase().includes(value.toLowerCase());
-      //   });
-      // } else dataSearchResults = state.data.projects;
-      // commit('SET_DATA_SEARCH', dataSearchResults)
-    }
+    searchItem({ commit, state }, value) {
+      let dataSearchResults = state.data.projects
+      dataSearchResults = (state.data.projects).filter((item) => {
+        let title = item.project + " " + item.issue;
+        return title.toLowerCase().includes(value.toLowerCase());
+      });
+      commit('SET_DATA_SEARCH', dataSearchResults)
+    },
+
+    addSchedule({ commit, state, rootGetters, dispatch }, data) {
+      commit('SET_VALIDATE', { error: '', success: '' })
+      state.fullCalendar.editable = state.fullCalendar.droppable = false
+      const { event } = data;
+      const request = {
+        method: "post",
+        uri: "/data/schedules",
+        data: {
+          issue_id: event.id,
+          title: event.title,
+          borderColor: event.borderColor,
+          backgroundColor: event.backgroundColor,
+          date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+          start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
+          end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+          team_id: state.filters.team
+        },
+        event: event,
+      }
+      dispatch('functionFullCalendar', request)
+    },
+
+    dropSchedule({ commit, state, rootGetters, dispatch }, data) {
+      commit('SET_VALIDATE', { error: '', success: '' })
+      state.fullCalendar.editable = state.fullCalendar.droppable = false
+      if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
+        data.revert();
+        state.fullCalendar.editable = state.fullCalendar.droppable = true
+      } else {
+        const { event } = data;
+        const request = {
+          method: "patch",
+          uri: "/data/schedules/" + event.id,
+          data: {
+            date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+            start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
+            end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+          }
+        }
+        dispatch('functionFullCalendar', request)
+      }
+    },
+
+    resetSelectedItem({ commit }) {
+      commit('SET_SELECTED_ITEM', {})
+    },
+
+    resizeSchedule({ commit, state, rootGetters, dispatch }, data) {
+      commit('SET_VALIDATE', { error: '', success: '' })
+      state.fullCalendar.editable = state.fullCalendar.droppable = false
+      if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
+        data.revert();
+        state.fullCalendar.editable = state.fullCalendar.droppable = true
+      } else {
+        const { event } = data;
+        const request = {
+          method: "patch",
+          uri: "/data/schedules/" + event.id,
+          data: {
+            start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
+            end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+          }
+        }
+        dispatch('functionFullCalendar', request)
+      }
+    },
+
+    functionFullCalendar({ commit, state, dispatch }, request) {
+      const event = request.event;
+      axios({
+        method: request.method,
+        url: request.uri,
+        data: request.data
+      }).then((res) => {
+        state.fullCalendar.editable = state.fullCalendar.droppable = true
+        if (event) event.remove();
+        commit('SET_VALIDATE', { error: '', success: res.data.message })
+      }).catch((err) => {
+        console.log(err);
+        state.fullCalendar.editable = state.fullCalendar.droppable = true
+        if (err.response) {
+          if (err.response.status == 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
+        }
+      });
+      dispatch('getAll')
+
+    },
+
+    getItem({ commit, rootGetters }, data) {
+      commit('SET_VALIDATE', { error: '', success: '' })
+      const titleArray = (data.event).title.split("\n");
+      const item = {
+        id: data.event.id,
+        title_not_memo: titleArray[0],
+        memo: titleArray[1],
+        start_time: rootGetters['dateFormat'](data.start, 'HH:mm'),
+        end_time: rootGetters['dateFormat'](data.end, 'HH:mm'),
+      }
+      $("#itemDetail").modal("show");
+      commit('SET_SELECTED_ITEM', item)
+    },
+
+    updateItem({ state, commit }, item) {
+      commit('SET_VALIDATE', { error: '', success: '' })
+      const uri = "/data/schedules/" + state.selectedItem.id;
+      const newItem = {
+        memo: item.memo,
+      };
+      axios
+        .patch(uri, newItem)
+        .then((res) => {
+          commit('SET_VALIDATE', { error: '', success: res.data.message })
+        })
+        .catch((err) => {
+          console.log(err);
+          if (err.response.status == 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
+        });
+    },
+
+    deleteItem({ dispatch, state }, data) {
+      $("#itemDetail").modal("hide");
+      if (confirm(data.msgText)) {
+        const uri = "/data/schedules/" + state.selectedItem.id
+        axios.delete(uri)
+          .then(res => {
+            dispatch('getAll')
+          })
+          .catch(err => console.log(err))
+      }
+    },
   }
 }

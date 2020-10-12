@@ -12,6 +12,6 @@ class Schedule extends Model
      * @var array
      */
     protected $fillable = [
-        'issue_id', 'start_time', 'end_time', 'date' , 'memo'
+        'issue_id', 'start_time', 'end_time', 'date', 'team_id' , 'memo'
     ];
 }
