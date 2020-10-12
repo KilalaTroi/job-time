@@ -42,12 +42,12 @@
     </div>
   </modal>
 </template>
+
 <script>
-import moment from "moment";
-import Modal from "../../components/Modals/Modal";
-import { mapGetters, mapActions } from "vuex";
-import ErrorItem from "../../components/Validations/Error";
-import SuccessItem from "../../components/Validations/Success";
+import Modal from "../../components/Modals/Modal"
+import { mapGetters, mapActions } from "vuex"
+import ErrorItem from "../../components/Validations/Error"
+import SuccessItem from "../../components/Validations/Success"
 
 export default {
   name: "edit-item",
@@ -74,8 +74,8 @@ export default {
     }),
 
     resetValidation() {
-      this.resetValidate();
-      this.resetSelectedItem();
+      this.resetValidate()
+      this.resetSelectedItem()
     },
   },
 };

@@ -27,12 +27,9 @@
                   :start="item.start_date"
                   :end="item.end_date"
                   :color="item.value"
-                  :style="{
-                    backgroundColor: item.value,
-                    borderColor: item.value,
-                  }"
+                  :style="setBackground(item.value)"
                 >
-                  <span>{{ item.p_name }} {{ item.issue_id }}</span>
+                  <span>{{ item.project }} {{ item.issue }}</span>
                 </div>
               </div>
             </div>
@@ -81,18 +78,16 @@
   </div>
 </template>
 
-
 <script>
-import FullCalendar from "@fullcalendar/vue";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timeGrid";
-import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
-import Card from "../../components/Cards/Card";
-import EditItem from "./Edit";
-import moment from "moment";
-import Select2 from "../../components/SelectTwo/SelectTwo.vue";
-import { mapGetters, mapActions } from "vuex";
+import FullCalendar from "@fullcalendar/vue"
+import dayGridPlugin from "@fullcalendar/daygrid"
+import timeGridPlugin from "@fullcalendar/timeGrid"
+import interactionPlugin, { Draggable } from "@fullcalendar/interaction"
+import listPlugin from "@fullcalendar/list"
+import Card from "../../components/Cards/Card"
+import EditItem from "./Edit"
+import Select2 from "../../components/SelectTwo/SelectTwo.vue"
+import { mapGetters, mapActions } from "vuex"
 
 export default {
   components: {
@@ -103,9 +98,6 @@ export default {
   },
   data() {
     return {
-      memo: "",
-      schedules: [],
-
       calendarPlugins: [
         dayGridPlugin,
         listPlugin,
@@ -145,11 +137,10 @@ export default {
       fullCalendar: "fullCalendar",
     }),
     ...mapGetters({
+      setBackground: "setBackground",
       currentTeamOption: "currentTeamOption",
-      getLangCode: "getLangCode",
       currentTeam: "currentTeam",
       typeOptions: "types/options",
-      deptOptions: "departments/options",
     }),
   },
 
@@ -168,16 +159,12 @@ export default {
       getOptionType: "getOptions",
     }),
 
-    ...mapActions("departments", {
-      getOptionDept: "getOptions",
-    }),
-
     getLanguage(data) {
       return data.current;
     },
 
     makeDraggable() {
-      let draggableEl = document.getElementById("external-events-list");
+      let draggableEl = document.getElementById("external-events-list")
       new Draggable(draggableEl, {
         itemSelector: ".fc-event",
         eventData: (eventEl) => {
@@ -200,9 +187,8 @@ export default {
 
   async created() {
     let _this = this;
-    if (!_this.deptOptions.length) await _this.getOptionDept();
-    if (!_this.typeOptions.length) await _this.getOptionType();
-    _this.filters.team = await _this.currentTeam.id;
+    if (!_this.typeOptions.length) await _this.getOptionType()
+    _this.filters.team = await _this.currentTeam.id
   },
 
   mounted() {
@@ -225,6 +211,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss">
 @import "~@fullcalendar/core/main.css";
 @import "~@fullcalendar/daygrid/main.css";

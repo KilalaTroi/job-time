@@ -31,8 +31,7 @@ export default {
     SET_DATA: (state, data) => {
       state.data = {
         projects: data.projects,
-        schedules: data.schedules,
-        types: data.types
+        schedules: data.schedules
       }
     },
 
@@ -41,8 +40,10 @@ export default {
     },
 
     SET_FILTER: (state, data) => {
-      if (data.view) state.filters.currentStart = data.view.currentStart
-      if (data.view) state.filters.currentEnd = data.view.currentEnd
+      if (data.view) {
+        state.filters.currentStart = data.view.currentStart
+        state.filters.currentEnd = data.view.currentEnd
+      }
       if (data.team_id) state.filters.team_id = data.team_id
     },
 
@@ -58,11 +59,15 @@ export default {
 
   actions: {
     async getAll({ commit, state, rootGetters, rootState }) {
-      const uri = '/data/schedules?startDate=' + rootGetters['dateFormat'](state.filters.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.filters.currentEnd, 'YYYY-MM-DD') + '&team_id=' + state.filters.team
+      const currentStart = rootGetters['dateFormat'](state.filters.currentStart, 'YYYY-MM-DD')
+      const currentEnd = rootGetters['dateFormat'](state.filters.currentEnd, 'YYYY-MM-DD')
+      const uri = '/data/schedules?startDate=' + currentStart + '&endDate=' + currentEnd + '&team_id=' + state.filters.team
+
       await axios.get(uri).then(response => {
         if (response.data.schedules.length) {
           response.data.schedules = response.data.schedules.map((item, index) => {
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
+            
             return Object.assign({}, {
               title:
                 (item.i_name
@@ -99,14 +104,17 @@ export default {
         commit('SET_DATA', response.data)
       })
     },
+
     handleMonthChange({ commit, dispatch, state }, data) {
-      commit('SET_FILTER', data)
+      commit('SET_FILTER', data) 
       if (state.filters.currentStart && state.filters.currentEnd && state.filters.team) dispatch('getAll')
     },
+    
     resetValidate({ dispatch, commit }) {
       dispatch('getAll')
       commit('SET_VALIDATE', { error: '', success: '' })
     },
+
     searchItem({ commit, state }, value) {
       let dataSearchResults = state.data.projects
       dataSearchResults = (state.data.projects).filter((item) => {

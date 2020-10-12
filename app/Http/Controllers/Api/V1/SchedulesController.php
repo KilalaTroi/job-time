@@ -20,8 +20,6 @@ class SchedulesController extends Controller
         $endDate = $_GET['endDate'];
         $teamID = $_GET['team_id'];
 
-        $types = DB::table('types')->select('id', 'value')->get()->toArray();
-
         $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
@@ -77,7 +75,6 @@ class SchedulesController extends Controller
             ->get()->toArray();
 
         return response()->json([
-            'types' => $types,
             'projects' => $projects,
             'schedules' => $schedules
         ]);
