@@ -61,7 +61,7 @@
 				</div>
 				<div class="col-sm-6">
 					<div class="form-group">
-						<label class="">Team</label>
+						<label class="">{{$ml.with('VueJS').get('txtTeam')}}</label>
 						<div>
 							<multiselect
                             :multiple="true"

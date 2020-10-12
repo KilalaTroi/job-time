@@ -60,6 +60,7 @@ class StatisticsController extends Controller
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
+        $teamFilter = $request->get('team');
 
         $user_id = $request->get('user_id');
         $userArr = array();
@@ -116,6 +117,12 @@ class StatisticsController extends Controller
         ->when($issueFilter, function ($query, $issueFilter) {
             return $query->where('i.name', 'like', '%'.$issueFilter.'%');
         })
+        ->where(function ($query) use ($teamFilter) {
+            $query->where('p.team', '=', $teamFilter . '')
+                  ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+        })
         ->where('i.status', 'publish')
         ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
@@ -132,9 +139,11 @@ class StatisticsController extends Controller
                 'd.name as department',
                 'p.name as project',
                 'i.name as issue',
-                't.slug as job_type'
+                't.slug as job_type',
+                'p.team as team'
             )
             ->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
+            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
@@ -153,6 +162,18 @@ class StatisticsController extends Controller
             ->when($issueFilter, function ($query, $issueFilter) {
                 return $query->where('i.name', 'like', '%'.$issueFilter.'%');
             })
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('p.team', '=', $teamFilter . '')
+                      ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+            })
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('u.team', '=', $teamFilter . '')
+                      ->orWhere('u.team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('u.team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('u.team', 'LIKE', '%,' . $teamFilter);
+            })
             ->where('j.date', '>=', $start_time)
             ->where('j.date', '<=', $end_time)
             ->orderBy('j.user_id', 'asc')
@@ -161,7 +182,7 @@ class StatisticsController extends Controller
             ->paginate(20);
         // dd(DB::getQueryLog());
 
-        $users = DB::connection('mysql')->table('role_user as ru')
+        $users = DB::table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -170,11 +191,11 @@ class StatisticsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
-            ->where(function ($query) {
-                $query->where('team', '=', $this->teamIDs)
-                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('team', '=', $teamFilter . '')
+                      ->orWhere('team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter);
             })
             ->get()->toArray();
 

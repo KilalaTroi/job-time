@@ -19,7 +19,7 @@ export default {
     stCrurrentJobs: 'Current jobs',
     stNewUsers: 'New users',
     txtChartAllocation: 'Kilala time allocation',
-    txtTimeRecord: 'Time record',
+    txtTimeRecord: 'Totaling',
     txtDepartment: 'Department',
     txtProject: 'Project',
     txtIssue: 'Issue',

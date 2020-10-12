@@ -18,9 +18,9 @@
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label class="">Team</label>
+                                    <label class="">{{$ml.with('VueJS').get('txtTeam')}}</label>
                                     <div>
-                                        <select-2 :options="currentTeamOption" v-model="filters.team" class="select2"></select-2>
+                                        <select-2 :options="currentTeamOption" v-model="filters.team" class="select2" />
                                     </div>
                                 </div>
                             </div>
