@@ -31,7 +31,19 @@ export default {
     SET_DATA: (state, data) => {
       state.data = {
         projects: data.projects,
-        schedules: data.schedules
+        schedules: data.schedules,
+        projectsFilter: data.projects
+      }
+    },
+
+    SET_DATA_SCHEDULE: (state, data) => {
+      state.data.schedules = data.schedules
+    },
+
+    SET_DATA_CALENDAR: (state, data) => {
+      state.fullCalendar = {
+        editable: data.editable,
+        droppable: data.droppable
       }
     },
 
@@ -48,7 +60,7 @@ export default {
     },
 
     SET_DATA_SEARCH: (state, data) => {
-      state.data.projects = data
+      state.data.projectsFilter = data
     },
 
     SET_VALIDATE: (state, data) => {
@@ -58,10 +70,10 @@ export default {
   },
 
   actions: {
-    async getAll({ commit, state, rootGetters, rootState }) {
+    async getAll({ commit, state, rootGetters, rootState }, onlyEvent = false) {
       const currentStart = rootGetters['dateFormat'](state.filters.currentStart, 'YYYY-MM-DD')
       const currentEnd = rootGetters['dateFormat'](state.filters.currentEnd, 'YYYY-MM-DD')
-      const uri = '/data/schedules?startDate=' + currentStart + '&endDate=' + currentEnd + '&team_id=' + state.filters.team
+      const uri = '/data/schedules?startDate=' + currentStart + '&endDate=' + currentEnd + '&team_id=' + state.filters.team + '&only_event=' + onlyEvent
 
       await axios.get(uri).then(response => {
         if (response.data.schedules.length) {
@@ -87,7 +99,7 @@ export default {
           });
         }
 
-        if (response.data.projects.length) {
+        if (!onlyEvent && response.data.projects.length) {
           response.data.projects = response.data.projects.map((item, index) => {
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
 
@@ -101,21 +113,17 @@ export default {
           });
         }
 
-        commit('SET_DATA', response.data)
+        if ( !onlyEvent ) commit('SET_DATA', response.data)
+        if ( onlyEvent ) commit('SET_DATA_SCHEDULE', response.data)
       })
     },
 
-    handleMonthChange({ commit, dispatch, state }, data) {
-      commit('SET_FILTER', data) 
-      if (state.filters.currentStart && state.filters.currentEnd && state.filters.team) dispatch('getAll')
-    },
-
-    setFilter({ commit }, data) {
+    handleMonthChange({ commit }, data) {
       commit('SET_FILTER', data) 
     },
     
     resetValidate({ dispatch, commit }) {
-      dispatch('getAll')
+      dispatch('getAll', true)
       commit('SET_VALIDATE', { error: '', success: '' })
     },
 
@@ -130,7 +138,8 @@ export default {
 
     addSchedule({ commit, state, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      state.fullCalendar.editable = state.fullCalendar.droppable = false
+      commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
+
       const { event } = data;
       const request = {
         method: "post",
@@ -152,10 +161,11 @@ export default {
 
     dropSchedule({ commit, state, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      state.fullCalendar.editable = state.fullCalendar.droppable = false
+      commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
+
       if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
         data.revert();
-        state.fullCalendar.editable = state.fullCalendar.droppable = true
+        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
       } else {
         const { event } = data;
         const request = {
@@ -175,12 +185,13 @@ export default {
       commit('SET_SELECTED_ITEM', {})
     },
 
-    resizeSchedule({ commit, state, rootGetters, dispatch }, data) {
+    resizeSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      state.fullCalendar.editable = state.fullCalendar.droppable = false
+      commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
+
       if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
         data.revert();
-        state.fullCalendar.editable = state.fullCalendar.droppable = true
+        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
       } else {
         const { event } = data;
         const request = {
@@ -195,25 +206,23 @@ export default {
       }
     },
 
-    functionFullCalendar({ commit, state, dispatch }, request) {
-      const event = request.event;
+    functionFullCalendar({ commit, dispatch }, request) {
       axios({
         method: request.method,
         url: request.uri,
         data: request.data
       }).then((res) => {
-        state.fullCalendar.editable = state.fullCalendar.droppable = true
-        if (event) event.remove();
+        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
         commit('SET_VALIDATE', { error: '', success: res.data.message })
+        if ( request.event ) request.event.remove()
       }).catch((err) => {
         console.log(err);
-        state.fullCalendar.editable = state.fullCalendar.droppable = true
+        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
         if (err.response) {
           if (err.response.status == 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
         }
       });
-      dispatch('getAll')
-
+      dispatch('getAll', true)
     },
 
     getItem({ commit, rootGetters }, data) {
@@ -253,7 +262,7 @@ export default {
         const uri = "/data/schedules/" + state.selectedItem.id
         axios.delete(uri)
           .then(res => {
-            dispatch('getAll')
+            dispatch('getAll', true)
           })
           .catch(err => console.log(err))
       }

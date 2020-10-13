@@ -62,7 +62,7 @@ export default {
         return (team) => {
             if (typeof team === 'string' || team instanceof String) {
                 return team.split(',').map((item, index) => {
-                    return '<span>' + getters['getObjectByID'](state.teams.options, +item).text + '</span>'
+                    return '<span>' + getters['getObjectByID'](state.currentTeamOption, +item).text + '</span>'
                 }).toString()
             }
         }

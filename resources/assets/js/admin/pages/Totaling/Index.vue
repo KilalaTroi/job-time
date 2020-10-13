@@ -237,7 +237,6 @@ export default {
 		let _this = this
 		_this.team = _this.currentTeam ? _this.currentTeam.id : ""
 		if ( _this.team ) _this.fetchData()
-		console.log('1111111111', _this.team)
 		$(document).on('click', '.languages button', function() {
 			_this.txtAll = _this.$ml.with('VueJS').get('txtSelectAll')
 			_this.columns = [
@@ -345,28 +344,13 @@ export default {
 			});
 		},
 		getUserOptions() {
-			// let data = this.users;
-			// if (data.length) {
-			// 	let obj = {
-			// 		id: 0,
-			// 		text: this.txtAll
-			// 	};
-			// 	this.userOptions = [obj].concat(data);
-			// }
 			this.userOptions = this.users;
-		},
-		getObjectValue(data, id) {
-			let obj = data.filter(elem => {
-				if (elem.id === id) return elem;
-			});
-
-			if (obj.length > 0) return obj[0];
 		},
 		getDataLogTime(logTimeData) {
 			if (logTimeData.data.length) {
 				this.logTime = logTimeData.data.map((item, index) => {
 					return {
-						username: this.getObjectValue(this.users, item.user_id).text,
+						username: this.getObjectByID(this.users, +item.user_id).text,
 						date: this.customFormatter2(item.date),
 						start_time: item.start_time,
 						end_time: item.end_time,
@@ -489,13 +473,7 @@ watch: {
 			}
 		}
 	}
-	],
-	currentTeamOption: {
-		handler: function() {
-			this.setTeam()
-			this.fetchData()
-		}
-	}
+	]
 }
 };
 </script>

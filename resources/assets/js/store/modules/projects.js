@@ -107,7 +107,7 @@ export default {
             if ( item.team ) {
                 const arrTeam = item.team.split(',')
                 item.team = arrTeam.map((item, index) => {
-                    return rootGetters['getObjectByID'](rootState.teams.options, +item)
+                    return rootGetters['getObjectByID'](rootState.currentTeamOption, +item)
                 })
             }
 			commit('SET_SELECTED_ITEM', item)

@@ -47,7 +47,6 @@ export default {
             getTeamText: 'getTeamText',
             columns: 'users/columns',
             users: 'users/items',
-            teamOptions: 'teams/options',
             itemValue: 'table/itemValue',
             archiveClass: 'table/archiveClass',
         })

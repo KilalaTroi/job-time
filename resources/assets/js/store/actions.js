@@ -8,22 +8,7 @@ export default {
         const uri = '/data/users/' + id
         axios.get(uri).then((response) => {
             let _user = response.data.user;
-            if (typeof _user.team === 'string' || _user.team instanceof String) {
-                const arrTeam = _user.team.split(',')
-                _user.team = arrTeam.map((item, index) => {
-                    return getters['getObjectByID'](state.teams.options, +item)
-                })
-
-                const teamOptions = state.teams.options
-            
-                if ( arrTeam.length > 0 ) {
-                    const currentTeamOption = [...arrTeam.map(item => {
-                        return getters['getObjectByID'](teamOptions, +item)
-                    })]
-                    commit('SET_CURRENT_TEAM_OPTION', currentTeamOption)
-                    commit('SET_CURRENT_TEAM', currentTeamOption[0])
-                }
-            }
+            _user.team = getters['getObjectByID'](state.currentTeamOption, +_user.team)
             commit('SET_LOGIN_USER', _user)
         });
     },
@@ -34,7 +19,7 @@ export default {
 
     setCurrentTeam({ state, commit, getters }, data) {
         if ( data ) {
-            commit('SET_CURRENT_TEAM', getters['getObjectByID'](state.teams.options, +data))
+            commit('SET_CURRENT_TEAM', getters['getObjectByID'](state.currentTeamOption, +data))
         }
     },
 

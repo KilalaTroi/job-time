@@ -26,12 +26,12 @@
                         <label class>{{$ml.with('VueJS').get('txtTeam')}}</label>
                         <div>
                             <multiselect
-                            :multiple="true"
+                            :multiple="false"
                             v-model="selectedUser.team"
-                            :options="teamOptions"
+                            :options="currentTeamOption"
                             :clear-on-select="false"
                             :preserve-search="false"
-                            :placeholder="$ml.with('VueJS').get('txtPickSome')"
+                            :placeholder="$ml.with('VueJS').get('txtSelectOne')"
                             label="text"
                             track-by="text"
                             :preselect-first="true"
@@ -122,7 +122,7 @@ export default {
         ...mapGetters({
             roleOptions: 'users/roleOptions',
             selectedUser: 'users/selectedUser',
-            teamOptions: 'teams/options',
+            currentTeamOption: 'currentTeamOption',
             validationErrors: 'users/validationErrors',
             validationSuccess: 'users/validationSuccess',
             dateFormat: 'dateFormat',

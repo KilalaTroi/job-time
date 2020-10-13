@@ -63,6 +63,7 @@ export default {
 					}
 				})]
 				commit('SET_OPTIONS', dataOptions)
+				// commit('SET_CURRENT_TEAM_OPTION', dataOptions)
 			})
 		},
 

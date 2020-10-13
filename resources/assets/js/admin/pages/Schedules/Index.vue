@@ -21,7 +21,7 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
-                  v-for="(item, index) in scheduleData.projects"
+                  v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
                   :start="item.start_date"
@@ -44,7 +44,6 @@
                   :options="currentTeamOption"
                   v-model="filters.team"
                   class="select2"
-                  @input="handleMonthChange"
                 ></select-2>
               </div>
             </div>
@@ -155,7 +154,7 @@ export default {
       dropSchedule: "dropSchedule",
       resizeSchedule: "resizeSchedule",
       getItem: "getItem",
-      setFilter: "setFilter"
+      getAll: "getAll"
     }),
 
     ...mapActions("types", {
@@ -190,8 +189,8 @@ export default {
 
   async created() {
     const _this = this;
-    if (!_this.typeOptions.length) await _this.getOptionType()
     _this.filters.team = _this.currentTeam.id
+    if (!_this.typeOptions.length) await _this.getOptionType()
   },
 
   mounted() {
@@ -205,12 +204,15 @@ export default {
         handler: "searchItem",
       },
     ],
-    // filters: [
-    //   {
-    //     handler: "handleMonthChange",
-    //     deep: true,
-    //   },
-    // ],
+    filters: [
+      {
+        handler: function() {
+          this.search = ''
+          this.getAll()
+        },
+        deep: true,
+      },
+    ],
   },
 };
 </script>

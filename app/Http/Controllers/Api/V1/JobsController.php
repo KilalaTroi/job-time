@@ -21,6 +21,7 @@ class JobsController extends Controller
         $selectDate = $_GET['date'];
         $userID = $_GET['user_id'];
         $showBy = $_GET['show'];
+        $teamID = $_GET['team_id'];
 
         // DB::enableQueryLog();
         if ( $showBy == 'showSchedule' ) {
@@ -33,13 +34,19 @@ class JobsController extends Controller
                     't.slug as type',
                     'i.name as i_name'
                 )
-                ->join('projects as p', 'p.id', '=', 'i.project_id')
-                ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+                ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+                ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
                 ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where('s.date', '=', $selectDate)
                 ->where('i.status', '=', 'publish')
+                ->where(function ($query) use ($teamID) {
+                    $query->where('p.team', '=', $teamID)
+                        ->orWhere('p.team', 'LIKE', $teamID . ',%')
+                        ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+                        ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+                })
                 ->orderBy('p_name', 'desc')
-                ->groupBy('i.id')
+                ->groupBy('i.id', 's.memo')
                 ->paginate(10);
         } else {
             $jobs = DB::table('issues as i')
@@ -51,8 +58,8 @@ class JobsController extends Controller
                     't.slug as type',
                     'i.name as i_name'
                 )
-                ->join('projects as p', 'p.id', '=', 'i.project_id')
-                ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+                ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+                ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
                 ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where(function ($query) use ($selectDate) {
                     $query->where('start_date', '<=',  $selectDate)
@@ -63,8 +70,14 @@ class JobsController extends Controller
                           ->orWhere('end_date', '=',  NULL);
                 })
                 ->where('i.status', '=', 'publish')
+                ->where(function ($query) use ($teamID) {
+                    $query->where('p.team', '=', $teamID)
+                        ->orWhere('p.team', 'LIKE', $teamID . ',%')
+                        ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+                        ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+                })
                 ->orderBy('p_name', 'desc')
-                ->groupBy('i.id')
+                ->groupBy('i.id', 's.memo')
                 ->paginate(10);
         }
         // dd(DB::getQueryLog());
@@ -88,6 +101,12 @@ class JobsController extends Controller
                       ->orWhere('end_date', '=',  NULL);
             })
             ->where('i.status', '=', 'publish')
+            ->where(function ($query) use ($teamID) {
+                $query->where('p.team', '=', $teamID)
+                    ->orWhere('p.team', 'LIKE', $teamID . ',%')
+                    ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+                    ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+            })
             ->get()->toArray();
         
         // $schedules = DB::table('issues as i')
@@ -112,16 +131,24 @@ class JobsController extends Controller
 
         $logTime = DB::table('jobs')
             ->select(
-                'id',
-                'issue_id',
-                DB::raw('TIME_FORMAT(start_time,"%H:%i") as start_time'),
-                DB::raw('TIME_FORMAT(end_time,"%H:%i") as end_time'),
-                DB::raw('(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total')
+                'jobs.id',
+                'jobs.issue_id',
+                // 's.memo as phase',
+                DB::raw('TIME_FORMAT(jobs.start_time,"%H:%i") as start_time'),
+                DB::raw('TIME_FORMAT(jobs.end_time,"%H:%i") as end_time'),
+                DB::raw('(TIME_TO_SEC(jobs.end_time) - TIME_TO_SEC(jobs.start_time)) as total')
             )
-            ->where('user_id', '=', $userID)
-            ->where('date', '=', $selectDate)
-            ->orderBy('start_time', 'asc')
-            ->get()->toArray();
+            // ->leftJoin('schedules as s', 'jobs.issue_id', '=', 's.issue_id')
+            // ->leftJoin('schedules as s', function($join) {
+            //     $join->on('jobs.issue_id', '=', 's.issue_id')
+            //         ->on('jobs.date', '=', 's.date');
+            // })
+            ->where('jobs.user_id', '=', $userID)
+            ->where('jobs.date', '=', $selectDate)
+            ->orderBy('jobs.start_time', 'asc')
+            ->get()->toArray(); 
+
+            // dd($logTime);
 
         return response()->json([
             'departments' => $departments,

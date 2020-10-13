@@ -26,6 +26,18 @@
           </card>
         </div>
         <div class="col-sm-12 col-lg-9 col-xl-10">
+          <div class="filter_search">
+            <div class="form-group d-flex align-items-center">
+              <label class="mb-0" :style="{paddingRight: '10px'}">{{$ml.with('VueJS').get('txtTeam')}}</label>
+              <div class="w-100">
+                <select-2
+                  :options="currentTeamOption"
+                  v-model="selectTeam"
+                  class="select2"
+                ></select-2>
+              </div>
+            </div>
+          </div>
           <FullCalendar
             defaultView="timeGridWeek"
             :scroll-time="scrollTime"
@@ -56,19 +68,23 @@ import timeGridPlugin from "@fullcalendar/timeGrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import Card from "../../components/Cards/Card";
+import Select2 from "../../components/SelectTwo/SelectTwo.vue"
 import { mapGetters, mapActions } from "vuex"
 import moment from "moment";
 
 export default {
   components: {
     FullCalendar, // make the <FullCalendar> tag available
-    Card
+    Card,
+    Select2
   },
-  ...mapGetters({
-    currentTeamOption: "currentTeamOption",
-    currentTeam: "currentTeam",
-    typeOptions: "types/options",
-  }),
+  computed: { 
+    ...mapGetters({
+      currentTeamOption: "currentTeamOption",
+      currentTeam: "currentTeam",
+      typeOptions: "types/options",
+    }),
+  },
   data() {
     return {
       types: [],
@@ -114,19 +130,23 @@ export default {
       hiddenDays: [0],
 
       currentStart: '',
-      currentEnd: ''
+      currentEnd: '',
+      selectTeam: ''
     };
   },
   created() {
     const _this = this;
     _this.getOptionType()
   },
+  mounted() {
+    this.selectTeam = this.currentTeam.id
+  },
   methods: {
     ...mapActions("types", {
       getOptionType: "getOptions",
     }),
     fetchItems() {
-      let uri = '/data/schedules?startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD') + '&team_id=' + this.currentTeam.id;
+      let uri = '/data/schedules?startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD') + '&team_id=' + this.selectTeam + '&only_event=false';
       axios
         .get(uri)
         .then(res => {
@@ -200,7 +220,7 @@ export default {
     handleMonthChange(arg) {
         this.currentStart = arg.view.currentStart;
         this.currentEnd = arg.view.currentEnd;
-        if ( this.currentTeam && this.currentTeam.id ) this.fetchItems();
+        this.fetchItems();
     }
   },
   watch: {
@@ -212,6 +232,13 @@ export default {
     scheduleData: [
       {
         handler: "getDataSchedules"
+      }
+    ],
+    selectTeam: [
+      {
+        handler: function() {
+          this.fetchItems();
+        }
       }
     ]
   }
@@ -247,6 +274,12 @@ export default {
 
 .fc .fc-view-container .fc-head .fc-today {
   background-color: #ffd05b;
+}
+
+.filter_search {
+  position: absolute;
+  width: 200px;
+  right: 15%;
 }
 
 .fc-unthemed th,

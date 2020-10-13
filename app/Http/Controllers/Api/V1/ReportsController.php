@@ -288,6 +288,14 @@ class ReportsController extends Controller
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
+            ->where('u.team', '=', $teamFilter)
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('p.team', '=', $teamFilter)
+                      ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+            })
             ->when($deptArr, function ($query, $deptArr) {
                 return $query->whereIn('p.dept_id', $deptArr);
             })
@@ -339,7 +347,9 @@ class ReportsController extends Controller
         }
 
         $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){
-            if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
+            if ( property_exists($x, 'user_id') ) {
+                $x->user_id =  $userArrName[$x->user_id];
+            }
             return (array) $x;
         })->toArray();
         $totalTime = 0;

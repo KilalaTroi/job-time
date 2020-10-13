@@ -16,12 +16,13 @@
                         <template slot="header">
                             <div class="d-flex justify-content-between">
                                 <h4 class="card-title">{{$ml.with('VueJS').get('txtJobsList')}}</h4>
-                                <div class="form-group mb-0" style="min-width: 160px;">
+                                <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 160px;">
                                     <select-2
                                         :options="currentTeamOption"
-                                        v-model="currentTeam.id"
+                                        v-model="selectTeam"
                                         class="select2"
                                     ></select-2>
+                                    <div class="ml-3"></div>
                                     <select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
                                 </div>
                             </div>
@@ -83,10 +84,12 @@ export default {
         EditTime,
         Select2
     },
-     ...mapGetters({
-        currentTeamOption: "currentTeamOption", 
-        currentTeam: "currentTeam"
-    }),
+    computed: {
+        ...mapGetters({
+            currentTeamOption: "currentTeamOption", 
+            currentTeam: "currentTeam"
+        })
+    },
     data() {
         return {
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
@@ -101,6 +104,7 @@ export default {
             logColumns: [
                 { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'phase', value: this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'start_time', value: this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
                 { id: 'total', value: this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
@@ -133,11 +137,13 @@ export default {
                 vi: vi,
                 ja: ja,
                 en: en
-            }
+            },
+            selectTeam: ''
         }
     },
     mounted() {
         let _this = this;
+        this.selectTeam = this.currentTeam.id
         _this.fetchItems();
         _this.getOptions();
         
@@ -156,6 +162,7 @@ export default {
             _this.logColumns = [
                 { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'phase', value: _this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'start_time', value: _this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: _this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
                 { id: 'total', value: _this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
@@ -164,7 +171,7 @@ export default {
     },
     methods: {
         fetchItems() {
-            let uri = '/data/jobs?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
+            let uri = '/data/jobs?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter + '&team_id=' + this.selectTeam;
             axios.get(uri)
                 .then(res => {
                     this.departments = res.data.departments;
@@ -187,7 +194,7 @@ export default {
             this.optionsFilter = [...arr];
         },
         changeShowFilter() {
-            let uri = '/data/jobs?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter;
+            let uri = '/data/jobs?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter + '&team_id=' + this.selectTeam;
             axios.get(uri)
                 .then(res => {
                     this.jobData = res.data.jobs;
@@ -198,7 +205,7 @@ export default {
                 });
         },
         getResults(page = 1) {
-            axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter)
+            axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter + '&team_id=' + this.selectTeam)
                 .then(response => {
                     this.jobData = response.data.jobs; 
                 });
@@ -219,13 +226,12 @@ export default {
                 this.jobs = jobData.data.map((item, index) => {
                     let time = typeof(this.getObjectValue(this.jobsTime, item.id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, item.id).total : false;
                     let checkTR = item.type.includes("_tr") ? " (TR)" : "";
-                    return {
-                        id: item.id,
+                    return Object.assign({}, item, {
                         department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
                         project: item.p_name + checkTR,
                         issue: item.i_name,
                         time: time ? this.hourFormatter(time) : '00:00'
-                    };
+                    })
                 });
             } else {
                 this.jobs = [];
@@ -238,14 +244,11 @@ export default {
                 }).map((item, index) => {
                     let issue = this.getObjectValue(this.allJobs, item.issue_id);
                     let checkTR = issue.type.includes("_tr") ? " (TR)" : "";
-                    return {
-                            id: item.id,
-                            project: issue.p_name + checkTR,
-                            issue: issue.i_name,
-                            start_time: item.start_time,
-                            end_time: item.end_time,
-                            total: item.total ? this.hourFormatter(item.total) : '00:00'
-                        };
+                    return Object.assign({}, item, {
+                        project: issue.p_name + checkTR,
+                        issue: issue.i_name,
+                        total: item.total ? this.hourFormatter(item.total) : '00:00'
+                    })
                 });
 
                 if ( dataTimes.length ) {
@@ -394,6 +397,9 @@ export default {
             handler: 'fetchItems'
         }],
         showFilter: [{
+            handler: 'changeShowFilter'
+        }],
+        selectTeam: [{
             handler: 'changeShowFilter'
         }]
     }

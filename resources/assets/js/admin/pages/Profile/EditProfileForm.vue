@@ -36,12 +36,12 @@
 
           <div>
             <multiselect
-              :multiple="true"
+              :multiple="false"
               v-model="loginUser.team"
-              :options="teamOptions"
+              :options="currentTeamOption"
               :clear-on-select="false"
               :preserve-search="false"
-              :placeholder="$ml.with('VueJS').get('txtContactAdmin')"
+              :placeholder="$ml.with('VueJS').get('txtSelectOne')"
               label="text"
               track-by="text"
               :preselect-first="true"
@@ -121,7 +121,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      teamOptions: "teams/options",
+      currentTeamOption: "currentTeamOption",
       validationErrors: "users/validationErrors",
       validationSuccess: "users/validationSuccess",
       dateFormat: "dateFormat",
