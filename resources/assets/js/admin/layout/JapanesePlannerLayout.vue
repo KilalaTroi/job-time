@@ -24,7 +24,7 @@
             <sidebar-link to="/reports">
                 <i class="nc-icon nc-single-copy-04"></i>
                 <p v-text="$ml.with('VueJS').get('sbReports')" />
-                <span class="report-notify" v-if="notify">{{ notify }}</span>
+                <span class="report-notify" v-if="reportNotify">{{ reportNotify }}</span>
             </sidebar-link>
             <!-- <sidebar-link to="/upload">
                 <i class="nc-icon nc-cloud-upload-94"></i>
@@ -39,7 +39,7 @@
         </side-bar>
         <div class="main-panel">
             <top-navbar></top-navbar>
-            <dashboard-content @click="toggleSidebar" v-on:update-seen="updateSeen">
+            <dashboard-content @click="toggleSidebar">
             </dashboard-content>
             <content-footer></content-footer>
         </div>
@@ -65,42 +65,26 @@
 import TopNavbar from './TopNavbar.vue'
 import ContentFooter from './ContentFooter.vue'
 import DashboardContent from './Content.vue'
+import { mapGetters, mapActions } from "vuex"
+
 export default {
     components: {
         TopNavbar,
         ContentFooter,
         DashboardContent
     },
-    data() {
-        return {
-            userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
-            notify: 0
-        }
+
+    computed: {
+        ...mapGetters({
+            reportNotify: 'reportNotify'
+        })
     },
-    mounted() {
-		let _this = this;
-		_this.getNotify();
-    },
+
     methods: {
         toggleSidebar() {
             if (this.$sidebar.showSidebar) {
                 this.$sidebar.displaySidebar(false)
             }
-        },
-        getNotify() {
-			let uri = "/data/notify?user_id=" + this.userID;
-			axios
-			.get(uri)
-			.then(res => {
-                this.notify = res.data.notify;
-			})
-			.catch(err => {
-				console.log(err);
-				alert("Could not load data");
-			});
-        },
-        updateSeen() {
-            this.getNotify()
         }
     }
 }

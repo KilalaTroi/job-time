@@ -44,6 +44,7 @@
                   :options="currentTeamOption"
                   v-model="filters.team"
                   class="select2"
+                  @input="handleMonthChange"
                 ></select-2>
               </div>
             </div>
@@ -137,6 +138,7 @@ export default {
       fullCalendar: "fullCalendar",
     }),
     ...mapGetters({
+      dateFormat: "dateFormat",
       setBackground: "setBackground",
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
@@ -153,6 +155,7 @@ export default {
       dropSchedule: "dropSchedule",
       resizeSchedule: "resizeSchedule",
       getItem: "getItem",
+      setFilter: "setFilter"
     }),
 
     ...mapActions("types", {
@@ -174,8 +177,8 @@ export default {
             borderColor: eventEl.getAttribute("color"),
             backgroundColor: eventEl.getAttribute("color"),
             constraint: {
-              start: moment(eventEl.getAttribute("start") + " " + "08:00").format(),
-              end: moment(eventEl.getAttribute("end") + " " + "17:00").format(),
+              start: this.dateFormat(eventEl.getAttribute("start") + " " + "08:00"),
+              end: this.dateFormat(eventEl.getAttribute("end") + " " + "17:00"),
             },
             overlap: true,
             duration: "1:00:00",
@@ -186,9 +189,9 @@ export default {
   },
 
   async created() {
-    let _this = this;
+    const _this = this;
     if (!_this.typeOptions.length) await _this.getOptionType()
-    _this.filters.team = await _this.currentTeam.id
+    _this.filters.team = _this.currentTeam.id
   },
 
   mounted() {
@@ -202,12 +205,12 @@ export default {
         handler: "searchItem",
       },
     ],
-    filters: [
-      {
-        handler: "handleMonthChange",
-        deep: true,
-      },
-    ],
+    // filters: [
+    //   {
+    //     handler: "handleMonthChange",
+    //     deep: true,
+    //   },
+    // ],
   },
 };
 </script>

@@ -56,6 +56,7 @@ import timeGridPlugin from "@fullcalendar/timeGrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import Card from "../../components/Cards/Card";
+import { mapGetters, mapActions } from "vuex"
 import moment from "moment";
 
 export default {
@@ -63,6 +64,11 @@ export default {
     FullCalendar, // make the <FullCalendar> tag available
     Card
   },
+  ...mapGetters({
+    currentTeamOption: "currentTeamOption",
+    currentTeam: "currentTeam",
+    typeOptions: "types/options",
+  }),
   data() {
     return {
       types: [],
@@ -111,13 +117,20 @@ export default {
       currentEnd: ''
     };
   },
+  created() {
+    const _this = this;
+    _this.getOptionType()
+  },
   methods: {
+    ...mapActions("types", {
+      getOptionType: "getOptions",
+    }),
     fetchItems() {
-      let uri = '/data/schedules?startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD');
+      let uri = '/data/schedules?startDate=' + moment(this.currentStart).format('YYYY-MM-DD') + '&endDate=' + moment(this.currentEnd).format('YYYY-MM-DD') + '&team_id=' + this.currentTeam.id;
       axios
         .get(uri)
         .then(res => {
-          this.types = res.data.types;
+          this.types = this.typeOptions;
           this.projectData = res.data.projects;
           this.scheduleData = res.data.schedules;
         })
@@ -187,7 +200,7 @@ export default {
     handleMonthChange(arg) {
         this.currentStart = arg.view.currentStart;
         this.currentEnd = arg.view.currentEnd;
-        this.fetchItems();
+        if ( this.currentTeam && this.currentTeam.id ) this.fetchItems();
     }
   },
   watch: {

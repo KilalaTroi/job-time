@@ -17,6 +17,11 @@
                             <div class="d-flex justify-content-between">
                                 <h4 class="card-title">{{$ml.with('VueJS').get('txtJobsList')}}</h4>
                                 <div class="form-group mb-0" style="min-width: 160px;">
+                                    <select-2
+                                        :options="currentTeamOption"
+                                        v-model="currentTeam.id"
+                                        class="select2"
+                                    ></select-2>
                                     <select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
                                 </div>
                             </div>
@@ -66,6 +71,7 @@ import TableAction from '../../components/TableAction'
 import AddTime from './AddTime'
 import EditTime from './EditTime'
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+import { mapGetters, mapActions } from "vuex"
 
 export default {
     components: {
@@ -77,6 +83,10 @@ export default {
         EditTime,
         Select2
     },
+     ...mapGetters({
+        currentTeamOption: "currentTeamOption", 
+        currentTeam: "currentTeam"
+    }),
     data() {
         return {
             userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
@@ -85,11 +95,12 @@ export default {
                 { id: 'department', value: this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
                 { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'phase', value: this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'time', value: this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
             ],
             logColumns: [
                 { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
-                { id: 'issue', value: this.$ml.with('VueJS').get('txtProject'), width: '60', class: 'text-center' },
+                { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
                 { id: 'start_time', value: this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
                 { id: 'total', value: this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
@@ -138,12 +149,13 @@ export default {
                 { id: 'department', value: _this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
                 { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'phase', value: _this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'time', value: _this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
             ];
 
             _this.logColumns = [
                 { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
-                { id: 'issue', value: _this.$ml.with('VueJS').get('txtProject'), width: '60', class: 'text-center' },
+                { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
                 { id: 'start_time', value: _this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: _this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
                 { id: 'total', value: _this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }

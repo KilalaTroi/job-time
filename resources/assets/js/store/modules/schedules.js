@@ -109,6 +109,10 @@ export default {
       commit('SET_FILTER', data) 
       if (state.filters.currentStart && state.filters.currentEnd && state.filters.team) dispatch('getAll')
     },
+
+    setFilter({ commit }, data) {
+      commit('SET_FILTER', data) 
+    },
     
     resetValidate({ dispatch, commit }) {
       dispatch('getAll')

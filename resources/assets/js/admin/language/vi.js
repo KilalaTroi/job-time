@@ -67,7 +67,7 @@ export default {
     txtUpdateTime: 'Edit Time',
     txtEditIssue: 'Edit issue',
     txtEditProject: 'Edit Project',
-    txtPhase: 'Info',
+    txtPhase: 'Phase',
     txtJobTypeList: 'Job type List',
     txtCreateType: 'Create new job type',
     txtColor: 'Color',
