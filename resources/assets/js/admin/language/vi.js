@@ -4,6 +4,7 @@ export default {
     sbStatistics: 'Statistics',
     sbTotaling: 'Totaling',
     sbUsers: 'Users',
+    sbTeams: 'TEAMS',
     sbDepartments: 'Departments',
     sbJobTypes: 'Job Types',
     sbProjects: 'Projects',
@@ -157,5 +158,6 @@ export default {
     txtCreateTeam: 'Create new team',
     txtEditTeam: 'Edit team',
     txtTeam: 'Team',
-    txtContactAdmin: 'Contact Admin'
+    txtContactAdmin: 'Contact Admin',
+    txtImportProject: 'Import Excel'
 }

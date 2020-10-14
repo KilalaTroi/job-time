@@ -277,9 +277,21 @@ export default {
 }
 
 .filter_search {
-  position: absolute;
-  width: 200px;
-  right: 15%;
+  @media screen and (min-width: 1550px) {
+    position: absolute;
+    width: 200px;
+    right: 210px;
+  }
+
+  &:after {
+    content: "";
+    clear: both;
+    display: block;
+  }
+
+  .form-group {
+    float: right;
+  }
 }
 
 .fc-unthemed th,

@@ -70,6 +70,7 @@ export default {
 
             const newTime = {
                 issue_id: this.currentJob.id,
+                schedule_id: this.currentJob.schedule_id,
                 start_time: this.start_time,
                 end_time: this.end_time,
                 showLunchBreak: this.showLunchBreak,

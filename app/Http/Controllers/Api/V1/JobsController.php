@@ -30,12 +30,13 @@ class JobsController extends Controller
                     'i.id as id',
                     't.dept_id',
                     'p.name as p_name',
+                    's.id as schedule_id',
                     's.memo as phase',
                     't.slug as type',
                     'i.name as i_name'
                 )
                 ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-                ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+                ->join('schedules as s', 'i.id', '=', 's.issue_id')
                 ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where('s.date', '=', $selectDate)
                 ->where('i.status', '=', 'publish')
@@ -54,12 +55,13 @@ class JobsController extends Controller
                     'i.id as id',
                     't.dept_id',
                     'p.name as p_name',
+                    's.id as schedule_id',
                     's.memo as phase',
                     't.slug as type',
                     'i.name as i_name'
                 )
                 ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-                ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+                ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
                 ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where(function ($query) use ($selectDate) {
                     $query->where('start_date', '<=',  $selectDate)
@@ -119,26 +121,28 @@ class JobsController extends Controller
         //     ->where('s.date', '=',  $selectDate)
         //     ->get()->toArray();
 
-        $jobsTime = DB::table('jobs')
+        $jobsTime = DB::table('jobs as j')
             ->select(
-                'issue_id as id',
-                DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total')
+                'j.issue_id as id',
+                's.id as schedule_id',
+                DB::raw('SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total')
             )
-            ->where('user_id', '=', $userID)
-            ->where('date', '=', $selectDate)
-            ->groupBy('issue_id')
+            ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
+            ->where('j.user_id', '=', $userID)
+            ->where('j.date', '=', $selectDate)
+            ->groupBy('j.issue_id', 's.id')
             ->get()->toArray();
 
         $logTime = DB::table('jobs')
             ->select(
                 'jobs.id',
                 'jobs.issue_id',
-                // 's.memo as phase',
+                's.memo as phase',
                 DB::raw('TIME_FORMAT(jobs.start_time,"%H:%i") as start_time'),
                 DB::raw('TIME_FORMAT(jobs.end_time,"%H:%i") as end_time'),
                 DB::raw('(TIME_TO_SEC(jobs.end_time) - TIME_TO_SEC(jobs.start_time)) as total')
             )
-            // ->leftJoin('schedules as s', 'jobs.issue_id', '=', 's.issue_id')
+            ->leftJoin('schedules as s', 'jobs.schedule_id', '=', 's.id')
             // ->leftJoin('schedules as s', function($join) {
             //     $join->on('jobs.issue_id', '=', 's.issue_id')
             //         ->on('jobs.date', '=', 's.date');
@@ -177,6 +181,8 @@ class JobsController extends Controller
             $job = Job::create([
                 'issue_id' => $request->get('issue_id'),
                 'user_id' => $request->get('user_id'),
+                'schedule_id' => $request->get('schedule_id'),
+                'team_id' => $request->get('team_id'),
                 'date' => $request->get('date'),
                 'start_time' => $request->get('start_time'),
                 'end_time' => '12:00',
@@ -185,6 +191,8 @@ class JobsController extends Controller
             $job = Job::create([
                 'issue_id' => $request->get('issue_id'),
                 'user_id' => $request->get('user_id'),
+                'schedule_id' => $request->get('schedule_id'),
+                'team_id' => $request->get('team_id'),
                 'date' => $request->get('date'),
                 'start_time' => '13:00',
                 'end_time' => $request->get('end_time'),
@@ -218,6 +226,8 @@ class JobsController extends Controller
             $job2 = Job::create([
                 'issue_id' => $job->issue_id,
                 'user_id' => $job->user_id,
+                'schedule_id' => $job->schedule_id,
+                'team_id' => $job->team_id,
                 'date' => $job->date,
                 'start_time' => '13:00',
                 'end_time' => $request->get('end_time'),

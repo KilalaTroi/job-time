@@ -218,13 +218,21 @@ export default {
             if (obj.length > 0)
                 return obj[0];
         },
+         getJobObjectValue(data, id, schedule_id) {
+            let obj = data.filter((elem) => {
+                if (elem.id === id && elem.schedule_id === schedule_id) return elem;
+            });
+
+            if (obj.length > 0)
+                return obj[0];
+        },
         checkTimeTotal() {
             return this.timeTotal > 28800 ? true : false;
         },
         getDataJobs(jobData) {
             if (jobData.data.length) {
                 this.jobs = jobData.data.map((item, index) => {
-                    let time = typeof(this.getObjectValue(this.jobsTime, item.id)) !== 'undefined' ? this.getObjectValue(this.jobsTime, item.id).total : false;
+                    let time = typeof(this.getJobObjectValue(this.jobsTime, item.id, item.schedule_id)) !== 'undefined' ? this.getJobObjectValue(this.jobsTime, item.id, item.schedule_id).total : false;
                     let checkTR = item.type.includes("_tr") ? " (TR)" : "";
                     return Object.assign({}, item, {
                         department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
@@ -269,10 +277,11 @@ export default {
                 this.logTime = [];
             }
         },
-        getJob(id) {
-            let job = this.getObjectValue(this.jobs, id);
+        getJob(id, schedule_id) {
+            let job = this.getJobObjectValue(this.jobs, id, schedule_id);
             let obj = {
                 id: job.id,
+                schedule_id: job.schedule_id,
                 p_name: job.project,
                 i_name: job.issue,
                 date: this.start_date
@@ -288,6 +297,7 @@ export default {
                 id: time.id,
                 p_name: time.project,
                 i_name: time.issue,
+                phase: time.phase,
                 start_time: time.start_time,
                 end_time: time.end_time,
                 date: this.start_date
@@ -301,6 +311,7 @@ export default {
 
             let uri = '/data/jobs';
             newTime.user_id = this.userID;
+            newTime.team_id = this.selectTeam;
             newTime.date = this.dateFormatter(this.start_date);
 
             axios.post(uri, newTime)

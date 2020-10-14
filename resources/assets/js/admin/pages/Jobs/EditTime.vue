@@ -3,7 +3,7 @@
         <template slot="title">{{$ml.with('VueJS').get('txtUpdateTime')}}</template>
         <form v-if="currentTimeLog" @submit="emitUpdateTime">
             <div class="form-group">
-                <h4 class="text-center mb-1"><b>{{ currentTimeLog.p_name }} {{ currentTimeLog.i_name }}</b></h4>
+                <h4 class="text-center mb-1"><b>{{ currentTimeLog.p_name }} {{ currentTimeLog.i_name }} {{ currentTimeLog.phase }}</b></h4>
                 <h5 class="text-center mt-1">{{ this.customFormatter(currentTimeLog.date) }}</h5>
             </div>
             <hr>

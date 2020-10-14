@@ -15,7 +15,7 @@
             </sidebar-link>
                <sidebar-link to="/teams">
                 <i class="nc-icon nc-vector"></i>
-                <p v-text="'teams'" />
+                <p v-text="$ml.with('VueJS').get('sbTeams')" />
             </sidebar-link>
             <sidebar-link to="/departments">
                 <i class="nc-icon nc-bank"></i>
