@@ -74,6 +74,7 @@ class ReportsController extends Controller
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
+        $teamFilter = $request->get('team');
         if ( $issueFilter ) $filenameExcel[] = str_slug($issueFilter, '-');
 
         $user_id = $request->get('user_id');
@@ -114,7 +115,7 @@ class ReportsController extends Controller
         }
         // End POST data
 
-        $dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
+        $dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter);
 
         if( empty($userArr) ) {
             $filenameExcel[] = "all-users";
@@ -279,7 +280,7 @@ class ReportsController extends Controller
         return url('data/exports/' . $results->filename) . '.' . $results->ext;
     }
 
-    public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
+    public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter) {
         $dataDetail = '';
         $dataTotal = '';
         $data = DB::table('types as t')
@@ -287,6 +288,14 @@ class ReportsController extends Controller
             ->leftJoin('issues as i', 'i.project_id', '=', 'p.id')
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
+            ->where('u.team', '=', $teamFilter)
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('p.team', '=', $teamFilter)
+                      ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+            })
             ->when($deptArr, function ($query, $deptArr) {
                 return $query->whereIn('p.dept_id', $deptArr);
             })
@@ -324,11 +333,11 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
-            ->where(function ($query) {
-                $query->where('team', '=', $this->teamIDs)
-                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('team', '=', $teamFilter)
+                      ->orWhere('team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter);
             })
             ->get()->toArray();
 
@@ -338,7 +347,9 @@ class ReportsController extends Controller
         }
 
         $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){
-            if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
+            if ( property_exists($x, 'user_id') ) {
+                $x->user_id =  $userArrName[$x->user_id];
+            }
             return (array) $x;
         })->toArray();
         $totalTime = 0;
@@ -487,12 +498,6 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
-            ->where(function ($query) {
-                $query->where('team', '=', $this->teamIDs)
-                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
-            })
             ->whereNotIn('user.email', [$from->email])
             ->where('user.disable_date', null)
             ->get()->toArray();
@@ -572,12 +577,6 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
-            ->where(function ($query) {
-                $query->where('team', '=', $this->teamIDs)
-                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
-                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
-            })
             ->get()->toArray() : [];
 
         //DB::enableQueryLog();

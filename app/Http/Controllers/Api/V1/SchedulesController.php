@@ -19,10 +19,9 @@ class SchedulesController extends Controller
         $startDate = $_GET['startDate'];
         $endDate = $_GET['endDate'];
         $teamID = $_GET['team_id'];
+        $onlyEvent = $_GET['only_event'];
 
-        $types = DB::table('types')->select('id', 'value')->get()->toArray();
-
-        $projects = DB::table('projects as p')
+        if ( $onlyEvent === "false" ) $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
                 'i.id as issue_id',
@@ -77,8 +76,7 @@ class SchedulesController extends Controller
             ->get()->toArray();
 
         return response()->json([
-            'types' => $types,
-            'projects' => $projects,
+            'projects' => $onlyEvent === "false" ? $projects : [],
             'schedules' => $schedules
         ]);
     }

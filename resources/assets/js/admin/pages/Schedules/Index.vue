@@ -21,18 +21,15 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
-                  v-for="(item, index) in scheduleData.projects"
+                  v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
                   :start="item.start_date"
                   :end="item.end_date"
                   :color="item.value"
-                  :style="{
-                    backgroundColor: item.value,
-                    borderColor: item.value,
-                  }"
+                  :style="setBackground(item.value)"
                 >
-                  <span>{{ item.p_name }} {{ item.issue_id }}</span>
+                  <span>{{ item.project }} {{ item.issue }}</span>
                 </div>
               </div>
             </div>
@@ -83,18 +80,16 @@
   </div>
 </template>
 
-
 <script>
-import FullCalendar from "@fullcalendar/vue";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timeGrid";
-import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
-import Card from "../../components/Cards/Card";
-import EditItem from "./Edit";
-import moment from "moment";
-import Select2 from "../../components/SelectTwo/SelectTwo.vue";
-import { mapGetters, mapActions } from "vuex";
+import FullCalendar from "@fullcalendar/vue"
+import dayGridPlugin from "@fullcalendar/daygrid"
+import timeGridPlugin from "@fullcalendar/timeGrid"
+import interactionPlugin, { Draggable } from "@fullcalendar/interaction"
+import listPlugin from "@fullcalendar/list"
+import Card from "../../components/Cards/Card"
+import EditItem from "./Edit"
+import Select2 from "../../components/SelectTwo/SelectTwo.vue"
+import { mapGetters, mapActions } from "vuex"
 
 export default {
   components: {
@@ -105,9 +100,6 @@ export default {
   },
   data() {
     return {
-      memo: "",
-      schedules: [],
-
       calendarPlugins: [
         dayGridPlugin,
         listPlugin,
@@ -147,11 +139,11 @@ export default {
       fullCalendar: "fullCalendar",
     }),
     ...mapGetters({
+      dateFormat: "dateFormat",
+      setBackground: "setBackground",
       currentTeamOption: "currentTeamOption",
-      getLangCode: "getLangCode",
       currentTeam: "currentTeam",
       typeOptions: "types/options",
-      deptOptions: "departments/options",
     }),
   },
 
@@ -164,14 +156,11 @@ export default {
       dropSchedule: "dropSchedule",
       resizeSchedule: "resizeSchedule",
       getItem: "getItem",
+      getAll: "getAll"
     }),
 
     ...mapActions("types", {
       getOptionType: "getOptions",
-    }),
-
-    ...mapActions("departments", {
-      getOptionDept: "getOptions",
     }),
 
     getLanguage(data) {
@@ -179,7 +168,7 @@ export default {
     },
 
     makeDraggable() {
-      let draggableEl = document.getElementById("external-events-list");
+      let draggableEl = document.getElementById("external-events-list")
       new Draggable(draggableEl, {
         itemSelector: ".fc-event",
         eventData: (eventEl) => {
@@ -189,10 +178,8 @@ export default {
             borderColor: eventEl.getAttribute("color"),
             backgroundColor: eventEl.getAttribute("color"),
             constraint: {
-              start: moment(
-                eventEl.getAttribute("start") + " " + "08:00"
-              ).format(),
-              end: moment(eventEl.getAttribute("end") + " " + "17:00").format(),
+              start: this.dateFormat(eventEl.getAttribute("start") + " " + "08:00"),
+              end: this.dateFormat(eventEl.getAttribute("end") + " " + "17:00"),
             },
             overlap: true,
             duration: "1:00:00",
@@ -203,10 +190,9 @@ export default {
   },
 
   async created() {
-    let _this = this;
-    if (!_this.deptOptions.length) await _this.getOptionDept();
-    if (!_this.typeOptions.length) await _this.getOptionType();
-    _this.filters.team = await _this.currentTeam.id;
+    const _this = this;
+    _this.filters.team = _this.currentTeam.id
+    if (!_this.typeOptions.length) await _this.getOptionType()
   },
 
   mounted() {
@@ -222,13 +208,17 @@ export default {
     ],
     filters: [
       {
-        handler: "handleMonthChange",
+        handler: function() {
+          this.search = ''
+          this.getAll()
+        },
         deep: true,
       },
     ],
   },
 };
 </script>
+
 <style lang="scss">
 @import "~@fullcalendar/core/main.css";
 @import "~@fullcalendar/daygrid/main.css";

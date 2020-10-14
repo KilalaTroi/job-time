@@ -72,7 +72,6 @@ export default {
             setCurrentLang: 'setCurrentLang',
             setCurrentTeam: 'setCurrentTeam',
             setReportNotify: 'setReportNotify',
-            getTeamsOptions: "teams/getOptions",
         }),
 
         activeLanguage(language) {
@@ -100,10 +99,11 @@ export default {
         const _this = this;
         _this.setCurrentLang(_this.$ml.current)
 
+        const teamDefault = document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0]
+        _this.setCurrentTeam(teamDefault)
+
         const _translateTexts = _this.$ml.with("VueJS")
         _this.setTranslateTexts(_translateTexts)
-
-        await _this.getTeamsOptions()
 
         const userID = document.querySelector("meta[name='user-id']").getAttribute('content')
         await _this.setLoginUser(userID)
