@@ -74,6 +74,12 @@
                                 </div>
                                 <div>
                                     <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center mr-3" style="min-width: 100px;">
+                                            <label class="mr-2">{{$ml.with('VueJS').get('txtTeam')}}</label>
+                                            <div>
+                                                <select-2 :options="currentTeamOption" v-model="team" class="select2" />
+                                            </div>
+                                        </div>
                                         <div style="width: 200px;">
                                             <select2 :options="userOptions" v-model="user_id" class="select2 form-control no-disable-first-value">
                                                 <option disabled value="0">All</option>
@@ -114,6 +120,7 @@
     import Select2 from '../components/SelectTwo/SelectTwo.vue'
     import AllOffDays from './OffDays/AllOffDays.vue'
     import moment from 'moment'
+    import { mapGetters, mapActions } from "vuex"
 
     export default {
         components: {
@@ -123,6 +130,12 @@
             StatsCard,
             Select2,
             AllOffDays
+        },
+        computed: {
+            ...mapGetters({
+                currentTeamOption: 'currentTeamOption',
+                currentTeam: 'currentTeam'
+            }),
         },
         data() {
             return {
@@ -185,11 +198,14 @@
                     vi: vi,
                     ja: ja,
                     en: en
-                }
+                },
+
+                team: "",
             }
         },
         mounted() {
             let _this = this;
+            _this.team = _this.currentTeam ? _this.currentTeam.id : ""
             _this.fetch();
 
             $(document).on('mouseenter', '.ct-bar', function() {
