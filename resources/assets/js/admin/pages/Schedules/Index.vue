@@ -38,7 +38,9 @@
         <div class="col-sm-12 col-lg-9 col-xl-10">
           <div class="filter_search">
             <div class="form-group d-flex align-items-center">
-              <label class="mb-0" :style="{paddingRight: '10px'}">{{$ml.with('VueJS').get('txtTeam')}}</label>
+              <label class="mb-0" :style="{ paddingRight: '10px',whiteSpace:'nowrap' }">{{
+                $ml.with("VueJS").get("txtTeam")
+              }}</label>
               <div class="w-100">
                 <select-2
                   :options="currentTeamOption"
@@ -250,9 +252,11 @@ export default {
 }
 
 .filter_search {
-  position: absolute;
-  width: 200px;
-  right: 15%;
+  @media screen and (min-width: 1550px) {
+    position: absolute;
+    width: 200px;
+    right: 210px;
+  }
 }
 
 .fc-unthemed th,
