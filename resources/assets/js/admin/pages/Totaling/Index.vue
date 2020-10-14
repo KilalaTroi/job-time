@@ -118,6 +118,14 @@
 							</div>
 						</div>
 					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class="">{{$ml.with('VueJS').get('txtTeam')}}</label>
+							<div>
+								<select-2 :options="currentTeamOption" v-model="team" class="select2" />
+							</div>
+						</div>
+					</div>
 				</div>
 			</card>
 
@@ -137,6 +145,9 @@
 				</template>
 				<div class="table-responsive">
 					<table-no-action class="table-hover table-striped" :columns="columns" :data="logTime"></table-no-action>
+					<div v-if="!logTimeData.data" class="text-center mt-3">
+                        <img src="https://i.imgur.com/JfPpwOA.gif">
+                    </div>
 				</div>
 				<pagination
 				:data="logTimeData"
@@ -153,18 +164,30 @@
 <script>
 import TableNoAction from "../../components/TableNoAction";
 import Card from "../../components/Cards/Card";
+import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
+import { mapGetters, mapActions } from "vuex"
 
 export default {
 	components: {
 		TableNoAction,
 		Card,
 		Datepicker,
+		Select2,
 		Multiselect
 	},
+
+	computed: {
+        ...mapGetters({
+			currentTeamOption: 'currentTeamOption',
+			currentTeam: 'currentTeam',
+			getObjectByID: 'getObjectByID',
+			getTeamText: 'getTeamText'
+        }),
+    },
 
 	data() {
 		return {
@@ -178,7 +201,8 @@ export default {
 				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" }
+				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
+				{ id: 'html_team', value: this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
 			],
 			users: [],
 			userOptions: [],
@@ -188,6 +212,7 @@ export default {
 			typeSelects: [],
 			projectSelects: [],
 			issue: "",
+			team: "",
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
 			departments: [],
@@ -204,12 +229,14 @@ export default {
                 vi: vi,
                 ja: ja,
                 en: en
-            }
+			},
+			firstLoad: 0
 		};
 	},
 	mounted() {
-		let _this = this;
-		_this.fetchData();
+		let _this = this
+		_this.team = _this.currentTeam ? _this.currentTeam.id : ""
+		if ( _this.team ) _this.fetchData()
 		$(document).on('click', '.languages button', function() {
 			_this.txtAll = _this.$ml.with('VueJS').get('txtSelectAll')
 			_this.columns = [
@@ -221,7 +248,8 @@ export default {
 				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" }
+				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
+				{ id: 'html_team', value: _this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
 			];
 		});
 	},
@@ -236,7 +264,8 @@ export default {
 				deptSelects: this.deptSelects,
 				typeSelects: this.typeSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueFilter: this.issue,
+				team: this.team
 			})
 			.then(res => {
 				this.users = res.data.users;
@@ -244,6 +273,7 @@ export default {
 				this.departments = res.data.departments;
 				this.types = res.data.types;
 				this.projects = res.data.projects;
+				this.firstLoad++;
 			})
 			.catch(err => {
 				console.log(err);
@@ -265,7 +295,8 @@ export default {
 				deptSelects: this.deptSelects,
 				typeSelects: this.typeSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueFilter: this.issue,
+				team: this.team
 			})
 			.then(res => {
 				this.logTimeData = res.data.dataLogTime;
@@ -285,7 +316,8 @@ export default {
 				deptSelects: this.deptSelects,
 				typeSelects: this.typeSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueFilter: this.issue,
+				team: this.team
 			})
 			.then(res => {
 				this.logTimeData = res.data.dataLogTime;
@@ -301,7 +333,8 @@ export default {
 				deptSelects: this.deptSelects,
 				typeSelects: this.typeSelects,
 				projectSelects: this.projectSelects,
-				issueFilter: this.issue
+				issueFilter: this.issue,
+				team: this.team
 			})
 			.then(res => {
 				window.open(res.data, "_blank");
@@ -311,28 +344,13 @@ export default {
 			});
 		},
 		getUserOptions() {
-			// let data = this.users;
-			// if (data.length) {
-			// 	let obj = {
-			// 		id: 0,
-			// 		text: this.txtAll
-			// 	};
-			// 	this.userOptions = [obj].concat(data);
-			// }
 			this.userOptions = this.users;
-		},
-		getObjectValue(data, id) {
-			let obj = data.filter(elem => {
-				if (elem.id === id) return elem;
-			});
-
-			if (obj.length > 0) return obj[0];
 		},
 		getDataLogTime(logTimeData) {
 			if (logTimeData.data.length) {
 				this.logTime = logTimeData.data.map((item, index) => {
 					return {
-						username: item.username,
+						username: this.getObjectByID(this.users, +item.user_id).text,
 						date: this.customFormatter2(item.date),
 						start_time: item.start_time,
 						end_time: item.end_time,
@@ -340,7 +358,8 @@ export default {
 						d_name: item.department === "All" ? "" : item.department,
 						p_name: item.project,
 						i_name: item.issue,
-						t_name: item.job_type
+						t_name: item.job_type,
+						html_team: this.getTeamText('' + item.team)
 					};
 				});
 			} else {
@@ -388,6 +407,9 @@ resetValidate() {
 },
 getLanguage(data) {
 	return this.dataLang[data.current]
+},
+setTeam() {
+	this.team = this.currentTeam.id
 }
 },
 watch: {
@@ -439,6 +461,17 @@ watch: {
 	issue: [
 	{
 		handler: "fetchDataFilter"
+	}
+	],
+	team: [
+	{
+		handler: function() {
+			if ( this.team ) {
+				if ( this.firstLoad >= 1 && this.team ) {
+					this.fetchData()
+				}
+			}
+		}
 	}
 	]
 }

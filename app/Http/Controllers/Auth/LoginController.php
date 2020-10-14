@@ -55,4 +55,23 @@ class LoginController extends Controller
             'password' => $request->password,
         ];
     }
+
+    protected function authenticated(Request $request, $user)
+	{
+		$request->session()->push('Auth', $user->toArray());
+	}
+
+	/**
+	 * Log the user out of the application.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
+	protected function logout(Request $request)
+	{
+		$this->guard()->logout();
+		$request->session()->invalidate();
+		$request->session()->forget('Auth');
+        return redirect('/login');
+	}
 }

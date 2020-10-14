@@ -1,46 +1,70 @@
 <template>
-    <modal id="itemDetail" v-on:reset-validation="$emit('reset-validation')">
-        <template slot="title">{{$ml.with('VueJS').get('txtEditDept')}}</template>
-        <div v-if="currentItem">
-            <div class="form-group">
-                <label class>{{$ml.with('VueJS').get('txtName')}}</label>
-                <input v-model="currentItem.name" type="text" name="name" class="form-control" required/>
-            </div>
-            <div class="form-group">
-                <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
-                <input v-model="currentItem.name_vi" type="text" name="name_vi" class="form-control"/>
-            </div>
-            <div class="form-group">
-                <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
-                <input v-model="currentItem.name_ja" type="text" name="name_ja" class="form-control"/>
-            </div>
-            <error-item :errors="errors"></error-item>
-            <success-item :success="success"></success-item>
-            <hr/>
-            <div class="form-group text-right">
-                <button
-                        @click="$emit('update-item', currentItem)"
-                        type="button"
-                        class="btn btn-primary"
-                >{{$ml.with('VueJS').get('txtUpdate')}}
-                </button>
-            </div>
-        </div>
-    </modal>
+  <modal id="itemDetail" v-on:reset-validation="resetValidation">
+    <template slot="title">{{$ml.with('VueJS').get('txtEditDept')}}</template>
+    <div v-if="selectedItem">
+      <div class="form-group">
+        <label class>{{$ml.with('VueJS').get('txtName')}}</label>
+        <input
+          v-model="selectedItem.name"
+          type="text"
+          name="name"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
+        <input v-model="selectedItem.name_vi" type="text" name="name_vi" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
+        <input v-model="selectedItem.name_ja" type="text" name="name_ja" class="form-control" />
+      </div>
+      <error-item :errors="validationErrors"></error-item>
+      <success-item :success="validationSuccess"></success-item>
+      <hr />
+      <div class="form-group text-right">
+        <button
+          @click="updateItem(selectedItem)"
+          type="button"
+          class="btn btn-primary"
+        >{{$ml.with('VueJS').get('txtUpdate')}}</button>
+      </div>
+    </div>
+  </modal>
 </template>
 
 <script>
-    import ErrorItem from "../../components/Validations/Error";
-    import SuccessItem from "../../components/Validations/Success";
-    import Modal from "../../components/Modals/Modal";
+import ErrorItem from "../../components/Validations/Error";
+import SuccessItem from "../../components/Validations/Success";
+import Modal from "../../components/Modals/Modal";
+import { mapGetters, mapActions } from "vuex";
 
-    export default {
-        name: "edit-item",
-        components: {
-            Modal,
-            ErrorItem,
-            SuccessItem,
-        },
-        props: ["currentItem", "errors", "success"]
-    };
+export default {
+  name: "edit-item",
+  components: {
+    Modal,
+    ErrorItem,
+    SuccessItem,
+  },
+  computed: {
+    ...mapGetters('departments', {
+      selectedItem: "selectedItem",
+      validationErrors: "validationErrors",
+      validationSuccess: "validationSuccess",
+    }),
+  },
+  methods: {
+    ...mapActions('departments', {
+      resetValidate: "resetValidate",
+      resetSelectedItem: "resetSelectedItem",
+      updateItem: "updateItem",
+    }),
+
+    resetValidation() {
+      this.resetValidate()
+      this.resetSelectedItem()
+    },
+  },
+};
 </script>

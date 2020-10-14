@@ -11,20 +11,23 @@ class CreateReportsTable extends Migration
      *
      * @return void
      */
+
     public function up()
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
+            $table->string('title_ja')->nullable();
             $table->dateTime('date_time');
             $table->string('author');
             $table->string('issue')->nullable();
             $table->string('attend_person')->nullable();
             $table->string('attend_other_person')->nullable();
             $table->string('language', 2);
-            $table->integer('translate_id')->unsigned();
+            $table->boolean('translatable')->nullable();
             $table->string('type');
             $table->longText('content');
+            $table->longText('content_ja')->nullable();
             $table->string('seen');
             $table->timestamps();
         });

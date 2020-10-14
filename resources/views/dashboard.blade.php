@@ -9,6 +9,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ Auth::user()->id }}">
     <meta name="user-language" content="{{ Auth::user()->language ? Auth::user()->language : 'en' }}">
+    <meta name="teams" content="{{ json_encode($teamOptions) }}">
+    <meta name="team-default" content="{{ Auth::user()->team }}">
 
     <title>{{ config('app.name', 'Job Time') }}</title>
 

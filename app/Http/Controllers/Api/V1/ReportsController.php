@@ -74,6 +74,7 @@ class ReportsController extends Controller
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
+        $teamFilter = $request->get('team');
         if ( $issueFilter ) $filenameExcel[] = str_slug($issueFilter, '-');
 
         $user_id = $request->get('user_id');
@@ -114,7 +115,7 @@ class ReportsController extends Controller
         }
         // End POST data
 
-        $dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter);
+        $dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter);
 
         if( empty($userArr) ) {
             $filenameExcel[] = "all-users";
@@ -279,7 +280,7 @@ class ReportsController extends Controller
         return url('data/exports/' . $results->filename) . '.' . $results->ext;
     }
 
-    public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter) {
+    public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter) {
         $dataDetail = '';
         $dataTotal = '';
         $data = DB::table('types as t')
@@ -288,6 +289,13 @@ class ReportsController extends Controller
             ->leftJoin('jobs as j', 'j.issue_id', '=', 'i.id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
+            ->where('u.team', '=', $teamFilter)
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('p.team', '=', $teamFilter)
+                      ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+            })
             ->when($deptArr, function ($query, $deptArr) {
                 return $query->whereIn('p.dept_id', $deptArr);
             })
@@ -308,15 +316,42 @@ class ReportsController extends Controller
 
         if ( count($userArr) == 1 ) {
             $dataDetail = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
         } else {
-            $dataDetail = $data->select( "u.name" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("u.name")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            $dataDetail = $data->select( "j.user_id" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
+            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
 
-            $dataTotal = $data->select( "u.name" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('u.id')->get();
+            $dataTotal = $data->select( "j.user_id" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('j.user_id')->get();
         }
 
-        $dataDetail = collect($dataDetail)->map(function($x){ return (array) $x; })->toArray();
+        $users = DB::connection('mysql')->table('role_user as ru')
+            ->select(
+                'user.id as id',
+                'user.name as text'
+            )
+            ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+            ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+            ->whereNotIn('role.name', ['admin','japanese_planner'])
+            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('team', '=', $teamFilter)
+                      ->orWhere('team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter);
+            })
+            ->get()->toArray();
+
+        $userArrName = array();
+        foreach ($users as $key => $value) {
+            $userArrName[$value->id] = $value->text;
+        }
+
+        $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){
+            if ( property_exists($x, 'user_id') ) {
+                $x->user_id =  $userArrName[$x->user_id];
+            }
+            return (array) $x;
+        })->toArray();
         $totalTime = 0;
 
         if ( $dataTotal ) {
@@ -324,7 +359,10 @@ class ReportsController extends Controller
                 return $item->total*1;
             });
 
-            $dataTotal = collect($dataTotal)->map(function($x){ return (array) $x; })->toArray();
+            $dataTotal = collect($dataTotal)->map(function($x) use ($userArrName){
+                if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
+                return (array) $x;
+            })->toArray();
 
             foreach ($dataTotal as $key => $item) {
                 $hoursminsandsecs = $this->getHoursMinutes($item['total']*1, '%02dh %02dm');
@@ -382,6 +420,7 @@ class ReportsController extends Controller
     }
 
     function getNotify() {
+
         $user_id = $_GET['user_id'];
         $count_notify = 0;
 
@@ -427,7 +466,7 @@ class ReportsController extends Controller
             'key' => env('GOOGLE_TRANSLATE_KEY', ''),
             'format' => 'html'
         ]);
-        
+
         # The text to translate
         $text = $request->get('text');
 
@@ -447,11 +486,11 @@ class ReportsController extends Controller
     function sendReport(Request $request) {
         $userID = $request->get('userID');
 
-        $from = DB::table('users')
+        $from = DB::connection('mysql')->table('users')
             ->where('id', $userID)
             ->get()->toArray()[0];
 
-        $users = DB::table('role_user as ru')
+        $users = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.email as email'
             )
@@ -462,7 +501,7 @@ class ReportsController extends Controller
             ->whereNotIn('user.email', [$from->email])
             ->where('user.disable_date', null)
             ->get()->toArray();
-        
+
         $emails = array_map(function($obj) {
             return $obj->email;
         }, $users);
@@ -470,12 +509,12 @@ class ReportsController extends Controller
         $emails[] = 'troi.hoang@kilala.vn';
 
         Mail::send('emails.report', [], function($message) use ($emails, $from)
-        {    
+        {
             $message->from($from->email, $from->name);
-            $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System'); 
-            $message->to($emails)->subject('Jobtime Report');  
+            $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
+            $message->to($emails)->subject('Jobtime Report');
         });
-        
+
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
@@ -517,7 +556,7 @@ class ReportsController extends Controller
                 return $query->where('p.dept_id', $deptArr);
             return $query;
         })
-        ->orderBy('p.id', 'desc')
+        ->orderBy('text', 'asc')
         ->get()->toArray() : array();
 
         $issues = $projectArr ? DB::table('issues as i')
@@ -529,7 +568,7 @@ class ReportsController extends Controller
         ->orderBy('id', 'desc')
         ->get()->toArray() : array();
 
-        $users = $indexPage ? DB::table('role_user as ru')
+        $users = $indexPage ? DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -548,6 +587,7 @@ class ReportsController extends Controller
                 'title',
                 'title_ja',
                 'date_time',
+                'r.updated_at as update_date',
                 'type',
                 'p.name as project_name',
                 'd.name as dept_name',

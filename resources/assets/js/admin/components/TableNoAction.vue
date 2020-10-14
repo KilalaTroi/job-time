@@ -11,7 +11,7 @@
             <tr v-for="(item, index) in data" :key="index">
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
-                        <span v-html="itemValue(item, column)"></span>
+                        <span v-html="itemValue(item, column)" :class="'cl-' + column.id"></span>
                     </td>
                 </slot>
             </tr>

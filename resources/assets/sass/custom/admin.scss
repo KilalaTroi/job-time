@@ -832,7 +832,7 @@ td button .fa {
   font-size: 16px;
 }
 
-// Table 
+// Table
 table {
   @media (max-width: 575px) {
     .btn,
@@ -903,5 +903,23 @@ table {
     cursor: pointer;
     background-color: #fff;
     color: #565656;
+  }
+}
+
+// Team
+.team-list-text, .cl-html_team {
+  font-size: 0;
+
+  > span {
+    background: #41b883;
+    color: #fff;
+    display: inline-block;
+    padding: 0 5px;
+    font-size: 14px;
+    border-radius: 3px;
+
+    &:not(:first-child) {
+      margin-left: 5px;
+    }
   }
 }

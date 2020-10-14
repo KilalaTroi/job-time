@@ -60,6 +60,7 @@ class StatisticsController extends Controller
         $start_time = $request->get('start_date');
         $end_time = $request->get('end_date');
         $issueFilter = $request->get('issueFilter');
+        $teamFilter = $request->get('team');
 
         $user_id = $request->get('user_id');
         $userArr = array();
@@ -116,6 +117,12 @@ class StatisticsController extends Controller
         ->when($issueFilter, function ($query, $issueFilter) {
             return $query->where('i.name', 'like', '%'.$issueFilter.'%');
         })
+        ->where(function ($query) use ($teamFilter) {
+            $query->where('p.team', '=', $teamFilter . '')
+                  ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+        })
         ->where('i.status', 'publish')
         ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
@@ -124,7 +131,7 @@ class StatisticsController extends Controller
         // DB::enableQueryLog();
         $dataLogTime = DB::table('jobs as j')
             ->select(
-                'u.name as username',
+                'j.user_id',
                 'j.date as date',
                 DB::raw('TIME_FORMAT(j.start_time,"%H:%i") as start_time'),
                 DB::raw('TIME_FORMAT(j.end_time,"%H:%i") as end_time'),
@@ -132,15 +139,16 @@ class StatisticsController extends Controller
                 'd.name as department',
                 'p.name as project',
                 'i.name as issue',
-                't.slug as job_type'
+                't.slug as job_type',
+                'p.team as team'
             )
-            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
             ->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
+            ->leftJoin('users as u', 'u.id', '=', 'j.user_id')
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->when($userArr, function ($query, $userArr) {
-                return $query->whereIn('u.id', $userArr);
+                return $query->whereIn('j.user_id', $userArr);
             })
             ->when($deptArr, function ($query, $deptArr) {
                 return $query->whereIn('p.dept_id', $deptArr);
@@ -154,9 +162,21 @@ class StatisticsController extends Controller
             ->when($issueFilter, function ($query, $issueFilter) {
                 return $query->where('i.name', 'like', '%'.$issueFilter.'%');
             })
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('p.team', '=', $teamFilter . '')
+                      ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+            })
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('u.team', '=', $teamFilter . '')
+                      ->orWhere('u.team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('u.team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('u.team', 'LIKE', '%,' . $teamFilter);
+            })
             ->where('j.date', '>=', $start_time)
             ->where('j.date', '<=', $end_time)
-            ->orderBy('u.name', 'asc')
+            ->orderBy('j.user_id', 'asc')
             ->orderBy('j.date', 'asc')
             ->orderBy('j.start_time', 'asc')
             ->paginate(20);
@@ -171,6 +191,12 @@ class StatisticsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) use ($teamFilter) {
+                $query->where('team', '=', $teamFilter . '')
+                      ->orWhere('team', 'LIKE', $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $teamFilter);
+            })
             ->get()->toArray();
 
         return response()->json([
@@ -262,7 +288,7 @@ class StatisticsController extends Controller
         $mainTable['other'][''] = "  ";
         $mainTable['other']['Total'] = $otherTotal ? round($otherTotal/$numberWork, 1) . '%' : $otherTotal . '%';
 
-        $year = $nameFile = $startMonth . '-' . $endMonth;
+        $year = $nameFile = str_replace('/', '-', $startMonth) . '_' . str_replace('/', '-', $endMonth);
         if ( $infoUser ) $nameFile .= '-'.$infoUser[0]->text;
 
         // Excel
@@ -271,8 +297,9 @@ class StatisticsController extends Controller
         $startRow = $infoUser ? 5 : 4;
         $numberRows = count($mainTable) + $startRow;
         $curentTimestampe = Carbon::now()->timestamp;
-
-        return Excel::create('Report_'. $nameFile. "_" . $curentTimestampe, function($excel) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
+        
+        return Excel::create("Report_" . $nameFile . "_" . $curentTimestampe, function($excel) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
+            
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
@@ -369,25 +396,39 @@ class StatisticsController extends Controller
 
             $monthsText[] = $getM->format('M');
             $daysOfMonth[$inYearMonth] = array(
-                 'start' => $startM,
-                 'end' => $endM
+                'start' => $startM,
+                'end' => $endM
             );
 
             // Full day off
-            $data['off_days'][$inYearMonth]['full'] = DB::table('off_days')
+            $data['off_days'][$inYearMonth]['full'] = DB::connection('mysql')->table('off_days')
+            ->leftJoin('users', 'users.id', '=', 'off_days.user_id')
             ->where('type', '=', 'all_day')
             ->where('date', '<=', $endM)
             ->where('date', '>=',  $startM)
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
             ->count();
 
             // Half day off
-            $data['off_days'][$inYearMonth]['half'] = DB::table('off_days')
+            $data['off_days'][$inYearMonth]['half'] = DB::connection('mysql')->table('off_days')
+            ->leftJoin('users', 'users.id', '=', 'off_days.user_id')
             ->where('type', '<>', 'all_day')
             ->where('date', '<=', $endM)
             ->where('date', '>=',  $startM)
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
@@ -421,7 +462,7 @@ class StatisticsController extends Controller
     }
 
     function getUsers($startMonth, $endMonth, $user_id = 0) {
-        $users['all'] = DB::table('role_user as ru')
+        $users['all'] = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -430,12 +471,24 @@ class StatisticsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->get()->toArray();
 
-        $users['old'] = DB::table('role_user')
+        $users['old'] = DB::connection('mysql')->table('role_user')
             ->select('users.id')
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('users.id', $user_id);
             })
@@ -447,9 +500,32 @@ class StatisticsController extends Controller
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
             ->where('users.created_at', "<", str_replace('/', '-', $startMonth))
             ->count();
+        
+
+        $userDisableArr = array();
+
+        $users['disable'] = DB::connection('mysql')->table('users')
+            ->select(
+                'id'
+            )
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
+            ->where('disable_date', ">=", str_replace('/', '-', $startMonth))
+            ->where('disable_date', "<=", str_replace('/', '-', $endMonth))
+            ->get()->toArray();
+        
+        if ( is_array($users['disable']) && count($users['disable']) > 0 ) {
+            $userDisableArr = array_map(function($obj) {
+                return $obj->id;
+            }, $users['disable']);
+        }
 
         // Return newUsersInMonth
-        $newUsersPerMonth = DB::table('role_user')
+        $newUsersPerMonth = DB::connection('mysql')->table('role_user')
             ->select(
                 DB::raw('concat(year(users.created_at),"", LPAD(month(users.created_at), 2, "0")) as yearMonth'),
                 DB::raw('COUNT(users.id) as number')
@@ -461,6 +537,12 @@ class StatisticsController extends Controller
             })
             ->whereNotIn('roles.name', ['admin','japanese_planner'])
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->where('users.created_at', ">=", str_replace('/', '-', $startMonth))
             ->where('users.created_at', "<=", str_replace('/', '-', $endMonth))
             ->orderBy('yearMonth', 'desc')
@@ -476,7 +558,7 @@ class StatisticsController extends Controller
         $users['newUsersPerMonth'] = $convertUserMonth;
 
         // Return disableUsersInMonth
-        $disableUsersInMonth = !$user_id ? DB::table('role_user')
+        $disableUsersInMonth = !$user_id ? DB::connection('mysql')->table('role_user')
             ->select(
                 DB::raw('concat(year(users.disable_date),"", LPAD(month(users.disable_date), 2, "0")) as yearMonth'),
                 DB::raw('COUNT(users.id) as number')
@@ -488,6 +570,12 @@ class StatisticsController extends Controller
             })
             ->whereNotIn('roles.name', ['admin','japanese_planner'])
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->where('users.disable_date', ">=", str_replace('/', '-', $startMonth))
             ->where('users.disable_date', "<=", str_replace('/', '-', $endMonth))
             ->orderBy('yearMonth', 'desc')
@@ -509,11 +597,9 @@ class StatisticsController extends Controller
                 DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
             )
             ->join('issues', 'issues.id', '=', 'jobs.issue_id')
-            ->join('users', 'users.id', '=', 'jobs.user_id')
             ->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
             ->where('jobs.date', "<", str_replace('/', '-', $endMonth))
-            ->where('users.disable_date', ">=", str_replace('/', '-', $startMonth))
-            ->where('users.disable_date', "<=", str_replace('/', '-', $endMonth))
+            ->whereIn('jobs.user_id', $userDisableArr)
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('jobs.user_id', $user_id);
             })
@@ -544,26 +630,46 @@ class StatisticsController extends Controller
         $endDate = $currentDate->endOfMonth()->format('Y-m-d');
 
         // Full day off
-        $off_days['full'] = DB::table('off_days')
+        $off_days['full'] = DB::connection('mysql')->table('off_days')
+        ->join('users', 'users.id', '=', 'off_days.user_id')
+        ->where(function ($query) {
+            $query->where('team', '=', $this->teamIDs)
+                  ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+        })
         ->where('type', '=', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
         ->count();
 
         // Half day off
-        $off_days['half'] = DB::table('off_days')
+        $off_days['half'] = DB::connection('mysql')->table('off_days')
+        ->join('users', 'users.id', '=', 'off_days.user_id')
+        ->where(function ($query) {
+            $query->where('team', '=', $this->teamIDs)
+                  ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                  ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+        })
         ->where('type', '<>', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
         ->count();
 
         // Return disableUsersInMonth
-        $disableUsersInMonth = DB::table('role_user')
+        $disableUsersInMonth = DB::connection('mysql')->table('role_user')
             ->select('users.id')
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
             ->whereNotIn('roles.name', ['admin','japanese_planner'])
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->where(function ($query) {
+                $query->where('team', '=', $this->teamIDs)
+                      ->orWhere('team', 'LIKE', $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs . ',%')
+                      ->orWhere('team', 'LIKE', '%,' . $this->teamIDs);
+            })
             ->where('users.disable_date', "<>", NULL)
             ->count();
 

@@ -13,9 +13,11 @@ class DepartmentsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $department = Department::where('id','<>', 1)->get();
+        if ( $request->input('page') !== null && $request->input('page') ) $department = Department::paginate(20);
+        else $department = Department::get();
+
         return response()->json($department);
     }
 
@@ -60,7 +62,7 @@ class DepartmentsController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'name' => 'required|unique:departments,name,'.$id.'|max:255'
+            'name' => 'required|unique:departments,name,' . $id . '|max:255'
         ]);
 
         $department = Department::findOrFail($id);
@@ -69,7 +71,6 @@ class DepartmentsController extends Controller
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
-
     }
 
     /**
@@ -82,7 +83,6 @@ class DepartmentsController extends Controller
     {
         $department = Department::findOrFail($id);
         $department->delete();
-
         return response()->json('Successfully');
     }
 }

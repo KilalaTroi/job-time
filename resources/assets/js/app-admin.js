@@ -10,6 +10,7 @@ require('select2');
 window.Vue = require('vue');
 import VueRouter from 'vue-router';
 import App from './admin/App.vue';
+import store from './store/index'
 import './admin/ml';
 
 // component
@@ -30,7 +31,8 @@ import NotFound from './admin/pages/NotFoundPage'
 
 // Admin pages
 import Overview from './admin/pages/Overview';
-import UserProfile from './admin/pages/UserProfile/Index.vue';
+import UserProfile from './admin/pages/UserProfile/';
+import Teams from './admin/pages/Teams';
 import TableList from './admin/pages/TableList';
 import Typography from './admin/pages/Typography';
 import Icons from './admin/pages/Icons';
@@ -43,7 +45,6 @@ import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
 import Ckeditor from './admin/pages/Ckeditor';
 import Reports from './admin/pages/Reports';
-// import Upload from './admin/pages/Upload';
 
 const routes = [{
         path: '/',
@@ -63,6 +64,11 @@ const routes = [{
                 path: 'user',
                 name: 'User',
                 component: UserProfile
+            },
+            {
+                path: 'teams',
+                name: 'Teams',
+                component: Teams
             },
             {
                 path: 'table-list',
@@ -124,11 +130,6 @@ const routes = [{
                 name: 'Reports',
                 component: Reports
             },
-            // {
-            //     path: 'upload',
-            //     name: 'Upload',
-            //     component: Upload
-            // },
             {
                 path: '*',
                 component: NotFound
@@ -149,25 +150,9 @@ const router = new VueRouter({
     }
 });
 
-// passport
-// Vue.component(
-//     'passport-clients',
-//     require('./components/passport/Clients.vue')
-// );
-//
-// Vue.component(
-//     'passport-authorized-clients',
-//     require('./components/passport/AuthorizedClients.vue')
-// );
-//
-// Vue.component(
-//     'passport-personal-access-tokens',
-//     require('./components/passport/PersonalAccessTokens.vue')
-// );
-// end passport
-
 const app = new Vue({
     el: '#app',
+    store,
     render: h => h(App),
     router
 });

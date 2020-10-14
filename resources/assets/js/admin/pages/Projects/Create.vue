@@ -1,47 +1,12 @@
 <template>
-    <modal id="itemCreate" :sizeClasses="modalLg" v-on:reset-validation="$emit('reset-validation')">
+    <modal id="itemCreate" :sizeClasses="modalLg" v-on:reset-validation="resetValidation">
         <template slot="title">{{$ml.with('VueJS').get('txtCreateProject')}}</template>
-        <form @submit="emitCreateItem">
+        
             <div class="row">
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">{{$ml.with('VueJS').get('txtTypes')}}</label>
-                        <div>
-                            <select2-type :options="types" v-model="type_id" class="select2">
-                                <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
-                            </select2-type>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label class="">{{$ml.with('VueJS').get('txtDepartments')}}</label>
-                        <div>
-                            <select-2 :options="departments" v-model="dept_id" class="select2">
-                                <option disabled value="0">{{$ml.with('VueJS').get('txtSelectOne')}}</option>
-                            </select-2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-12">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtName')}}</label>
-                        <input v-model="p_name" type="text" name="p_name" class="form-control" required>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label class="">{{$ml.with('VueJS').get('txtNameVi')}}</label>
-                        <input v-model="p_name_vi" type="text" name="p_name_vi" class="form-control">
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label class="">{{$ml.with('VueJS').get('txtNameJa')}}</label>
-                        <input v-model="p_name_ja" type="text" name="p_name_ja" class="form-control">
+                        <input v-model="selectedItem.project_name" type="text" class="form-control" required>
                     </div>
                 </div>
             </div>
@@ -50,19 +15,19 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtIssue')}}</label>
-                        <input v-model="i_name" type="text" name="i_name" class="form-control">
+                        <input v-model="selectedItem.issue_name" type="text" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtPage')}}</label>
-                        <input v-model="page" type="number" name="page" class="form-control">
+                        <input v-model="selectedItem.page" type="number" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtNoPeriod')}}</label>
-                        <input v-model="no_period" type="checkbox" name="no_period" class="form-control">
+                        <input v-model="selectedItem.no_period" type="checkbox" @change="updatePeriod" class="form-control">
                     </div>
                 </div>
             </div>
@@ -70,25 +35,56 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtStartDate')}}</label>
-                        <datepicker name="startDate" input-class="form-control" placeholder="Select Date" v-model="start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
+                        <datepicker input-class="form-control" placeholder="Select Date" v-model="selectedItem.start_date" :format="customFormatter" :disabled-dates="disabledEndDates()" :language="getLangCode(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="">{{$ml.with('VueJS').get('txtEndDate')}}</label>
-                        <datepicker name="endDate" input-class="form-control" placeholder="Select Date" v-model="end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLanguage(this.$ml)">
+                        <datepicker input-class="form-control" placeholder="Select Date" v-model="selectedItem.end_date" :format="customFormatter" :disabled-dates="disabledStartDates()" :language="getLangCode(this.$ml)">
                         </datepicker>
                     </div>
                 </div>
             </div>
-            <error-item :errors="errors"></error-item>
-            <success-item :success="success"></success-item>
+            <hr>
+            <div class="row">
+                <div class="col-sm-6">
+					<div class="form-group">
+						<label class>
+							{{$ml.with('VueJS').get('txtTypes')}}              
+						</label>
+						<div>
+							<select2-type :options="typeOptions" v-model="selectedItem.type_id" class="select2" />
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="">{{$ml.with('VueJS').get('txtTeam')}}</label>
+						<div>
+							<multiselect
+                            :multiple="true"
+                            v-model="selectedItem.team"
+                            :options="currentTeamOption"
+                            :clear-on-select="false"
+                            :preserve-search="false"
+                            :placeholder="$ml.with('VueJS').get('txtPickSome')"
+                            label="text"
+                            track-by="text"
+                            :preselect-first="true"
+                            ></multiselect>
+						</div>
+					</div>
+				</div>
+            </div>
+            <error-item :errors="validationErrors"></error-item>
+            <success-item :success="validationSuccess"></success-item>
             <hr>
             <div class="form-group text-right">
-                <button type="submit" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}</button>
+                <button type="button" @click="addProject(selectedItem)" class="btn btn-primary">{{$ml.with('VueJS').get('txtCreate')}}</button>
             </div>
-        </form>
+        
     </modal>
 </template>
 <script>
@@ -97,119 +93,79 @@ import Select2Type from '../../components/SelectTwo/SelectTwoType.vue'
 import Modal from '../../components/Modals/Modal'
 import ErrorItem from '../../components/Validations/Error'
 import SuccessItem from '../../components/Validations/Success'
-import Datepicker from 'vuejs-datepicker';
-import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
-import moment from 'moment'
+import Datepicker from 'vuejs-datepicker'
+import Multiselect from "vue-multiselect"
+import { mapGetters, mapActions } from "vuex"
 
 export default {
-    name: 'CreateItem',
+    name: 'create-item',
     components: {
         Select2,
         Select2Type,
         datepicker: Datepicker,
         ErrorItem,
         SuccessItem,
-        Modal
+        Modal,
+        Multiselect
     },
-    props: ['departments', 'types', 'errors', 'success'],
+    computed: {
+        ...mapGetters({
+            typeOptions: 'types/options',
+            selectedItem: "projects/selectedItem",
+            currentTeamOption: 'currentTeamOption',
+            validationErrors: "projects/validationErrors",
+            validationSuccess: "projects/validationSuccess",
+            customFormatter: "customFormatter",
+            getLangCode: "getLangCode",
+        }),
+    },
     data() {
         return {
-            dept_id: 1,
-            type_id: 0,
-            p_name: '',
-            p_name_vi: '',
-            p_name_ja: '',
-            no_period: false,
             has_period: true,
-            i_name: '',
-            page: '',
-            start_date: '',
-            end_date: '',
-            modalLg: 'modal-lg',
-            dataLang: {
-                vi: vi,
-                ja: ja,
-                en: en
-            }
+            modalLg: 'modal-lg'
         }
     },
-    mounted() {
-    },
     methods: {
-        getLanguage(data) {
-            return this.dataLang[data.current]
-        },
-        updatePeriod(data) {
-            if ( data ) {
-                this.start_date = '';
-                this.end_date = '';
+        ...mapActions({
+			addProject: 'projects/addProject',
+			resetValidate: 'projects/resetValidate',
+			resetSelectedItem: 'projects/resetSelectedItem',
+        }),
+        resetValidation() {
+			this.resetValidate();
+			this.resetSelectedItem();
+		},
+        updatePeriod() {
+            if (this.selectedItem.no_period) {
+                this.selectedItem.start_date = '';
+                this.selectedItem.end_date = '';
                 this.has_period = false;
             } else {
                 this.has_period = true;
             }
         },
-        emitCreateItem(e) {
-            e.preventDefault();
-
-            const newItem = {
-                dept_id: this.dept_id,
-                type_id: this.type_id,
-                p_name: this.p_name,
-                p_name_vi: this.p_name_vi,
-                p_name_ja: this.p_name_ja,
-                i_name: this.i_name,
-                page: this.page,
-                start_date: this.start_date,
-                end_date: this.end_date,
-            };
-
-            this.$emit('create-item', newItem);
-        },
-        customFormatter(date) {
-            return moment(date).format('YYYY/MM/DD');
-        },
         disabledStartDates() {
-            let obj = {
-                to: new Date(this.start_date), // Disable all dates after specific date
-                // days: [0], // Disable Saturday's and Sunday's
-            };
-            return obj;
+            if (this.selectedItem.start_date) {
+                let obj = {
+                    to: new Date(this.selectedItem.start_date), // Disable all dates after specific date
+                    // days: [0], // Disable Saturday's and Sunday's
+                };
+                return obj;
+            }
         },
         disabledEndDates() {
-            let obj = {
-                from: new Date(this.end_date), // Disable all dates after specific date
-                // days: [0], // Disable Saturday's and Sunday's
-            };
-            return obj;
-        },
-        resetData(data) {
-            // Reset
-            if (data.length) {
-                this.dept_id = 1;
-                this.type_id = 0;
-                this.p_name = '';
-                this.p_name_vi = '';
-                this.p_name_ja = '';
-                this.no_period = false;
-                this.i_name = '';
-                this.page = '';
-                this.start_date = '';
-                this.end_date = '';
+            if (this.selectedItem.end_date) {
+                let obj = {
+                    from: new Date(this.selectedItem.end_date), // Disable all dates after specific date
+                    // days: [0], // Disable Saturday's and Sunday's
+                };
+                return obj;
             }
         }
     },
     watch: {
-        no_period: [{
+        selectedItem: [{
             handler: 'updatePeriod'
-        }],
-        start_date: [{
-            handler: 'disabledStartDates'
-        }],
-        end_date: [{
-            handler: 'disabledEndDates'
-        }],
-        success: [{
-            handler: 'resetData'
         }]
     }
 }

@@ -20,7 +20,7 @@ import ErrorItem from '../../components/Validations/Error'
 import SuccessList from '../../components/Validations/SuccessList'
 
 export default {
-    name: 'ImportIssue',
+    name: 'import-issue',
     components: {
         Modal,
         ErrorItem,

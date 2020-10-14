@@ -6,7 +6,7 @@
                     <img width="50" src="/images/logo.png" :alt="$ml.with('VueJS').get('siteName')">
                 </div>
             </router-link>
-            <p class="navbar-brand d-none d-sm-block">{{$ml.with('VueJS').get('txtWelcome')}} {{ currentUser.name }}</p>
+            <p class="navbar-brand d-none d-sm-block">{{$ml.with('VueJS').get('txtWelcome')}} {{ loginUser.name }}</p>
             <div class="languages nav-item d-block d-sm-none ml-auto mr-3">
                 <button
                     v-for="lang in $ml.list"
@@ -22,8 +22,8 @@
                 <span class="navbar-toggler-bar burger-lines"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end">
-                <ul class="navbar-nav ml-auto">
-                    <li class="languages nav-item mr-3">
+                <ul class="navbar-nav">
+                    <li class="languages ml-auto nav-item mr-3">
                         <button
                             v-for="lang in $ml.list"
                             :key="lang"
@@ -39,7 +39,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="/logout" class="nav-link">
-                            <i class="nc-icon nc-button-power mr-2 ic-custom-2"></i> 
+                            <i class="nc-icon nc-button-power mr-2 ic-custom-2"></i>
                             {{$ml.with('VueJS').get('txtLogOut')}}
                         </a>
                     </li>
@@ -48,55 +48,75 @@
         </div>
     </nav>
 </template>
+
 <script>
+import { mapGetters, mapActions } from "vuex"
+
 export default {
     computed: {
+        ...mapGetters({
+            loginUser: 'loginUser',
+            currentLang: 'currentLang'
+        }),
+
         routeName() {
             const { name } = this.$route
             return this.capitalizeFirstLetter(name)
         }
     },
-    data() {
-        return {
-            activeNotifications: false,
-            userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
-            currentUser: {}
-        }
-    },
-    mounted() {
-        this.fetch();
-    },
+
     methods: {
-        fetch() {
-            let uri = '/data/users/' + this.userID;
-            axios.get(uri).then((response) => {
-                this.currentUser = response.data.user;
-            });
-        },
+        ...mapActions({
+            setTranslateTexts: 'setTranslateTexts',
+            setLoginUser: 'setLoginUser',
+            setCurrentLang: 'setCurrentLang',
+            setCurrentTeam: 'setCurrentTeam',
+            setReportNotify: 'setReportNotify',
+        }),
+
         activeLanguage(language) {
-            $('body').attr('class', '').addClass('language-'+this.$ml.current);
-            if ( this.$ml.current === language )
+            $('body').attr('class', '').addClass('language-' + this.currentLang);
+
+            if ( this.currentLang === language )
                 return 'bg-success';
             return 'bg-secondary';
         },
+
         capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1)
         },
-        toggleNotificationDropDown() {
-            this.activeNotifications = !this.activeNotifications
-        },
-        closeDropDown() {
-            this.activeNotifications = false
-        },
+
         toggleSidebar() {
             this.$sidebar.displaySidebar(!this.$sidebar.showSidebar)
         },
+
         hideSidebar() {
             this.$sidebar.displaySidebar(false)
         }
+    },
+
+    async created(){
+        const _this = this;
+        _this.setCurrentLang(_this.$ml.current)
+
+        const teamDefault = document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0]
+        _this.setCurrentTeam(teamDefault)
+
+        const _translateTexts = _this.$ml.with("VueJS")
+        _this.setTranslateTexts(_translateTexts)
+
+        const userID = document.querySelector("meta[name='user-id']").getAttribute('content')
+        await _this.setLoginUser(userID)
+
+        _this.setReportNotify()
+
+        $(document).on("click", ".languages button", function () {
+            _this.setCurrentLang(_this.$ml.current)
+        });
     }
 }
 </script>
+
 <style lang="scss">
 .ic-custom {
     font-size: 24px;
@@ -107,4 +127,5 @@ export default {
     font-size: 18px;
     vertical-align: text-top;
 }
+
 </style>

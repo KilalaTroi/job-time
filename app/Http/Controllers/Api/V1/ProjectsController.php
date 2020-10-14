@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Team;
 use App\Department;
 use App\Imports\ProjectsImport;
 use App\Type;
@@ -21,114 +22,137 @@ class ProjectsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $search = isset($_GET['search']) ? json_decode($_GET['search']) : array();
-        $keyword = isset($search->keyword) && $search->keyword !== '' ? $search->keyword : false;
-        $type_id = isset($search->type_id) && $search->type_id != '-1' ? $search->type_id : false;
-        $dept_id = isset($search->dept_id) && $search->dept_id != '1' ? $search->dept_id : false;
-        $status = (isset($_GET['archive']) && $_GET['archive'] === "true") ? array('archive') : array('publish');
-        $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
-        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+        $filters = json_decode($_GET['filters']);
+        $keyword = $filters->keyword !== '' ? $filters->keyword : false;
+        $type_id = $filters->type_id != '0' ? $filters->type_id : false;
+        $dept_id = $filters->dept_id != '0' ? $filters->dept_id : false;
+        $team = $filters->team ? $filters->team : false;
 
-        $projectOptions = DB::table('projects as p')
-        ->select(
-            'p.id', 
-            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
-            DB::raw('max(i.id) as issue_id')
-        )
-        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-        ->whereIn('i.status', $status)
-        ->groupBy('p.id')
-        ->orderBy('p.id', 'desc')
-        ->get()->toArray();
+        if ($request->input('page') !== null && $request->input('page')) {
 
-        $projects = DB::table('projects as p')
-            ->select(
-                'p.id as id',
-                'i.id as issue_id',
-                'p.name as p_name',
-                'p.name_vi as p_name_vi',
-                'p.name_vi as p_name_ja',
-                'i.name as i_name',
-                'i.page as page',
-                'status',
-                'dept_id',
-                'type_id',
-                'start_date',
-                'end_date'
-            )
-            ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-            ->whereIn('i.status', $status)
-            ->when($keyword, function ($query, $keyword) {
-                return $query->where(function ($query) use ($keyword) {
-                    $query->where('p.name', 'like', '%'. $keyword .'%')
-                          ->orWhere('i.name', 'like', '%'. $keyword .'%');
-                });
-            })
-            ->when($type_id, function ($query, $type_id) {
-                return $query->where('type_id', '=', $type_id);
-            })
-            ->when($dept_id, function ($query, $dept_id) {
-                return $query->where('dept_id', '=', $dept_id);
-            })
-            ->orderBy('issue_id', 'desc')
-            ->paginate(20);
-            // ->take(100)->get()->toArray();
+            $status = $filters->showArchive ? array('archive') : array('publish');
+            $projects = DB::table('projects as p')
+                ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+                ->when($keyword, function ($query, $keyword) {
+                    return $query->where(function ($query) use ($keyword) {
+                        $query->where('p.name', 'like', '%' . $keyword . '%')
+                            ->orWhere('i.name', 'like', '%' . $keyword . '%');
+                    });
+                })
+                ->when($type_id, function ($query, $type_id) {
+                    return $query->where('type_id', '=', $type_id);
+                })
+                ->when($dept_id, function ($query, $dept_id) {
+                    return $query->where('dept_id', '=', $dept_id);
+                })
+                ->whereIn('i.status', $status)
+                ->where(function ($query) use ($team) {
+                    $query->where('team', '=', $team)
+                        ->orWhere('team', 'LIKE', $team . ',%')
+                        ->orWhere('team', 'LIKE', '%,' . $team . ',%')
+                        ->orWhere('team', 'LIKE', '%,' . $team);
+                })
+                ->select(
+                    'p.id as id',
+                    'i.id as issue_id',
+                    'p.name as p_name',
+                    'p.name_vi as p_name_vi',
+                    'p.name_ja as p_name_ja',
+                    'p.team as team',
+                    'i.name as i_name',
+                    'i.page as page',
+                    'status',
+                    'dept_id',
+                    'type_id',
+                    'start_date',
+                    'end_date'
+                )
+                ->orderBy('issue_id', 'desc')
+                ->paginate(20);
 
-        return response()->json([
-            'departments' => $departments,
-            'projectOptions' => $projectOptions,
-            'types' => $types,
-            'projects' => $projects
-        ]);
+        } else {
+
+            $projects = DB::table('projects as p')
+                ->leftJoin('issues as i', 'p.id', '=', 'i.project_id')
+                ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+                ->when($keyword, function ($query, $keyword) {
+                    return $query->where(function ($query) use ($keyword) {
+                        $query->where('p.name', 'like', '%'. $keyword .'%')
+                            ->orWhere('i.name', 'like', '%'. $keyword .'%');
+                    });
+                })
+                ->when($type_id, function ($query, $type_id) {
+                    return $query->where('p.type_id', '=', $type_id);
+                })
+                ->when($dept_id, function ($query, $dept_id) {
+                    return $query->where('p.dept_id', '=', $dept_id);
+                })
+                ->where(function ($query) use ($team) {
+                    $query->where('team', '=', $team)
+                        ->orWhere('team', 'LIKE', $team . ',%')
+                        ->orWhere('team', 'LIKE', '%,' . $team . ',%')
+                        ->orWhere('team', 'LIKE', '%,' . $team);
+                })
+                ->select(
+                    'p.id',
+                    DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'),
+                    DB::raw('max(i.id) as issue_id')
+                )
+                ->groupBy('p.id')
+                ->orderBy('p.id', 'desc')
+                ->get()->toArray();
+
+        }
+
+        return response()->json($projects);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        $request->merge(['name' => $request->get('p_name')]);
-        
+        $request->merge(['name' => $request->get('project_name')]);
+
         $this->validate($request, [
             'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
             'type_id' => 'required|numeric|min:0|not_in:0',
+            'team' => 'required',
             'page' => 'numeric|nullable',
         ]);
 
         $project = Project::create([
             'name' => $request->get('name'),
-            'name_vi' => $request->get('p_name_vi'),
-            'name_ja' => $request->get('p_name_ja'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
+            'team' => $request->get('team'),
         ]);
 
         $issue = array();
         $start_date = $request->get('start_date');
-        if ( strpos($start_date, 'T') !== false ) {
+        if (strpos($start_date, 'T') !== false) {
             $start_date = explode('T', $start_date);
             $start_date = $start_date[0];
         } else {
             $start_date = null;
         }
         $end_date = $request->get('end_date');
-        if ( strpos($end_date, 'T') !== false ) {
+        if (strpos($end_date, 'T') !== false) {
             $end_date = explode('T', $end_date);
             $end_date = $end_date[0];
         } else {
             $end_date = null;
         }
 
-        if ( isset($project->id) ) {
+        if (isset($project->id)) {
             $issue = Issue::create([
                 'project_id' => $project->id,
-                'name' => $request->get('i_name'),
+                'name' => $request->get('issue_name'),
                 'page' => $request->get('page'),
                 'start_date' => $start_date,
                 'end_date' => $end_date,
@@ -147,38 +171,38 @@ class ProjectsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id, Request $request)
     {
-        $issue_id = $request->get('issue_id');
-        $projects = DB::table('projects as p')
-            ->select(
-                'p.id as id',
-                'i.id as issue_id',
-                'p.name as p_name',
-                'p.name_vi as p_name_vi',
-                'p.name_vi as p_name_ja',
-                'i.name as i_name',
-                'i.page as page',
-                'status',
-                'dept_id',
-                'type_id',
-                'start_date',
-                'end_date'
-            )
-            ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-            ->where('i.id', '=', $issue_id)
-            ->get()->toArray();
-        return response()->json($projects[0]);
+        // $issue_id = $request->get('issue_id');
+        // $projects = DB::table('projects as p')
+        //     ->select(
+        //         'p.id as id',
+        //         'i.id as issue_id',
+        //         'p.name as p_name',
+        //         'p.name_vi as p_name_vi',
+        //         'p.name_ja as p_name_ja',
+        //         'i.name as i_name',
+        //         'i.page as page',
+        //         'status',
+        //         'dept_id',
+        //         'type_id',
+        //         'start_date',
+        //         'end_date'
+        //     )
+        //     ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
+        //     ->where('i.id', '=', $issue_id)
+        //     ->get()->toArray();
+        // return response()->json($projects[0]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function update($id, Request $request)
@@ -192,23 +216,23 @@ class ProjectsController extends Controller
             ['name', '=', $request->get('p_name')],
             ['id', '<>', $project->id],
         ])->count();
-        
-        if ( $sameProject > 0 ) {
+
+        if ($sameProject > 0) {
             $this->validate($request, [
                 'name' => 'required|max:255|unique:projects,name,NULL,NULL,type_id,' . $request->get('type_id'),
             ]);
         }
-        
+
         $this->validate($request, [
             'type_id' => 'required|numeric|min:0|not_in:0',
+            'team' => 'required'
         ]);
 
         $project->update([
             'name' => $request->get('p_name'),
-            'name_vi' => $request->get('p_name_vi'),
-            'name_ja' => $request->get('p_name_ja'),
             'dept_id' => $request->get('dept_id'),
             'type_id' => $request->get('type_id'),
+            'team' => $request->get('team'),
         ]);
 
         return response()->json(array(
@@ -219,7 +243,7 @@ class ProjectsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
@@ -232,30 +256,31 @@ class ProjectsController extends Controller
         ), 200);
     }
 
-    public function importProjects(Request $request) {
+    public function importProjects(Request $request)
+    {
 
         $this->validate($request, [
             'file' => 'required'
         ]);
 
         $path = $request->file('file')->getRealPath();
-        $data = Excel::selectSheetsByIndex(0)->load($path, function($reader) {
+        $data = Excel::selectSheetsByIndex(0)->load($path, function ($reader) {
             $reader->setHeaderRow(3);
 
         });
-            $dataList = $data->select(array('department', 'project', 'issue', 'page', 'type', 'start_date', 'end_date'))->get();
-            $dataList = $data->toArray();
-            foreach ($dataList as $keyItem =>$item) {
-                foreach ($item as $key => $value) {
-                    if($key != "start_date" && $key != "end_date" && $key != "page" && $key != "issue") {
-                        if (empty($value)) {
-                            unset($dataList[$keyItem]);
-                            break;
-                        }
+        $dataList = $data->select(array('department', 'project', 'issue', 'page', 'type', 'team', 'start_date', 'end_date'))->get();
+        $dataList = $data->toArray();
+        foreach ($dataList as $keyItem => $item) {
+            foreach ($item as $key => $value) {
+                if ($key != "start_date" && $key != "end_date" && $key != "page" && $key != "issue") {
+                    if (empty($value)) {
+                        unset($dataList[$keyItem]);
+                        break;
                     }
                 }
             }
-            if(count($dataList)){
+        }
+        if (count($dataList)) {
             $validator = \Illuminate\Support\Facades\Validator::make($dataList, $this->rules());
             if ($validator->fails()) {
                 throw new \Exception(
@@ -268,21 +293,41 @@ class ProjectsController extends Controller
                 $dept = Department::where('name', trim($value['department']))->first();
                 $type = Type::where('slug', trim($value['type']))->first();
 
-                $start_time =    $value['start_date'];
-                $end_time =     $value['end_date'];
-                $page = $value['page'];
+                $teamArr = array();
+                $teamArrText = explode(",", strtoupper(trim($value['team'])));
+                $teamArrText = array_map(function($item) {
+                    return trim($item);
+                }, $teamArrText);
+                $teamData = Team::whereIn('name', $teamArrText)->select(
+                    'id'
+                )->get()->toArray();
 
-                if(empty($dept)) {
-                    $listnote['errors'][$key][] = 'Row '.($key+4).': Incorrect Department '. $value['department'];
+                if ( is_array($teamData) && count($teamData) > 0 ) {
+                    $teamArr = array_map(function($item) {
+                        return $item['id'];
+                    }, $teamData);
                 }
 
-                if(empty($type)) {
-                    $listnote['errors'][$key][] = 'Row '.($key+4).': Incorrect Type ' . $value['type'];
+                $start_time = $value['start_date'];
+                $end_time = $value['end_date'];
+                $page = $value['page'];
+
+                if (empty($dept)) {
+                    $listnote['errors'][$key][] = 'Row ' . ($key + 4) . ': Incorrect Department ' . $value['department'];
+                }
+
+                if (empty($type)) {
+                    $listnote['errors'][$key][] = 'Row ' . ($key + 4) . ': Incorrect Type ' . $value['type'];
+                }
+
+                if (empty($teamArr)) {
+                    $listnote['errors'][$key][] = 'Row ' . ($key + 4) . ': Incorrect Team ' . $value['team'];
                 }
 
                 $deptId = $dept->id;
                 $typeId = $type->id;
-                if ($deptId && $typeId) {
+                $teamText = implode(",", $teamArr);
+                if ($deptId && $typeId && $teamText) {
                     $project = Project::where('name', trim($value['project']))->where('type_id', $typeId)->first();
                     if (empty($project)) {
                         $project = Project::create([
@@ -291,29 +336,30 @@ class ProjectsController extends Controller
                             'name_ja' => '',
                             'dept_id' => $deptId,
                             'type_id' => $typeId,
+                            'team' => $teamText
                         ]);
                     }
 
-                    $issue = Issue::where('name', trim(trim($value['issue']),'"'))->where('project_id', $project->id)->first();
+                    $issue = Issue::where('name', trim(trim($value['issue']), '"'))->where('project_id', $project->id)->first();
                     if (empty($issue)) {
                         $issue = Issue::create([
                             'project_id' => $project->id,
-                            'name' => trim(trim($value['issue']),'"'),
+                            'name' => trim(trim($value['issue']), '"'),
                             'start_date' => $start_time,
                             'end_date' => $end_time,
                             'page' => $page,
                             'status' => 'publish',
                         ]);
-                        $listnote['success'][$key][] =  'Row '.($key+4).': is success';
-                    } else if (!empty($issue)){
+                        $listnote['success'][$key][] = 'Row ' . ($key + 4) . ': is success';
+                    } else if (!empty($issue)) {
 
-                        $listnote['errors'][$key][] = 'Row '.($key+4).': ' . $value['project'] . ' or ' . $value['issue'] . ' have exsited in the system';
+                        $listnote['errors'][$key][] = 'Row ' . ($key + 4) . ': ' . $value['project'] . ' or ' . $value['issue'] . ' have exsited in the system';
                     }
 
                 }
             }
 
-            if(!empty($listnote['errors'])) {
+            if (!empty($listnote['errors'])) {
                 return response()->json($listnote, 403);
             }
         }
@@ -326,6 +372,7 @@ class ProjectsController extends Controller
     {
         return [
             '*.department' => 'required|max:255',
+            '*.team' => 'required',
             '*.project' => 'required|max:255',
             '*.issue' => 'max:255',
             '*.page' => 'numeric|nullable',

@@ -31,10 +31,7 @@ Route::get('/clear-cache', function() {
     return "Cache is cleared";
 });
 
-Route::get('/logout', function () {
-    Auth::logout();
-    return redirect('/login');
-})->name('quick.logout');
+Route::get('/logout', 'Auth\LoginController@logout')->name('quick.logout');
 
 Auth::routes();
 
@@ -45,6 +42,7 @@ Route::post('/pdf/report', 'pdfController@index')->name('report');
 Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
     Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
+    Route::resource('teams', 'TeamsController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
     Route::get('issues/getpage/{id}', 'IssuesController@getpage');

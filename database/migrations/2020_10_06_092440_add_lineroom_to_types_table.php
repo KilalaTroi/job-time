@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddDescriptionToJobType extends Migration
+class AddLineroomToTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,7 @@ class AddDescriptionToJobType extends Migration
     public function up()
     {
         Schema::table('types', function (Blueprint $table) {
-            $table->string('description_vi')->nullable()->after('slug_vi');
-            $table->string('description_ja')->nullable()->after('slug_ja');
+            $table->string('line_room')->nullable()->after('dept_id');
         });
     }
 
@@ -27,8 +26,7 @@ class AddDescriptionToJobType extends Migration
     public function down()
     {
         Schema::table('types', function (Blueprint $table) {
-            $table->dropColumn('description_vi');
-            $table->dropColumn('description_ja');
+            $table->dropColumn('line_room');
         });
     }
 }

@@ -76,7 +76,6 @@ class IssuesController extends Controller
      */
     public function update($id, Request $request)
     {
-        
         $request->merge(['name' => $request->get('i_name')]);
         $issue = Issue::findOrFail($id);
 

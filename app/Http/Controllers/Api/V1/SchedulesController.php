@@ -18,10 +18,10 @@ class SchedulesController extends Controller
     {
         $startDate = $_GET['startDate'];
         $endDate = $_GET['endDate'];
+        $teamID = $_GET['team_id'];
+        $onlyEvent = $_GET['only_event'];
 
-        $types = DB::table('types')->select('id', 'value')->get()->toArray();
-        
-        $projects = DB::table('projects as p')
+        if ( $onlyEvent === "false" ) $projects = DB::table('projects as p')
             ->select(
                 'p.id as id',
                 'i.id as issue_id',
@@ -43,6 +43,12 @@ class SchedulesController extends Controller
                 $query->where('end_date', '>=', $startDate)
                       ->orWhere('end_date', '=', NULL);
             })
+            ->where(function ($query) use ($teamID) {
+                $query->where('team', '=', $teamID)
+                    ->orWhere('team', 'LIKE', $teamID . ',%')
+                    ->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
+                    ->orWhere('team', 'LIKE', '%,' . $teamID);
+            })
             ->orderBy('p.name', 'asc')
             ->orderBy('i.name', 'asc')
             ->get()->toArray();
@@ -63,13 +69,14 @@ class SchedulesController extends Controller
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('i.status', '=', 'publish')
+            ->where('i.status', '=', 'publish')
+            ->where('s.team_id', '=', $teamID)
             ->where('s.date', '>=',  $startDate)
             ->where('s.date', '<',  $endDate)
             ->get()->toArray();
 
         return response()->json([
-            'types' => $types,
-            'projects' => $projects,
+            'projects' => $onlyEvent === "false" ? $projects : [],
             'schedules' => $schedules
         ]);
     }
@@ -95,7 +102,8 @@ class SchedulesController extends Controller
                 'backgroundColor' => $request->get('backgroundColor'),
                 'start' => date('Y-m-d\TH:i:s', $start_date),
                 'end' => date('Y-m-d\TH:i:s', $end_date),
-                'title_not_memo' => $request->get('title')
+                'title_not_memo' => $request->get('title'),
+                'team_id' => $request->get('team_id'),
             ),
             'message' => 'Successfully.'
         ), 200);

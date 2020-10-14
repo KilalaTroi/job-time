@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddUserNameToUserTable extends Migration
+class AddDepartmentToTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,10 @@ class AddUserNameToUserTable extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('username', 100)->unique()->after('name');
+        Schema::table('types', function (Blueprint $table) {
+            $table->integer('dept_id')->unsigned()->after('id');
+            $table->dropColumn('description_vi');
+            $table->dropColumn('description_ja');
         });
     }
 
@@ -25,8 +27,8 @@ class AddUserNameToUserTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('username');
+        Schema::table('types', function (Blueprint $table) {
+            $table->dropColumn('dept_id');
         });
     }
 }
