@@ -144,7 +144,6 @@ export default {
     mounted() {
         let _this = this;
         this.selectTeam = this.currentTeam.id
-        _this.fetchItems();
         _this.getOptions();
         
         $(document).on('click', '.languages button', function() {
@@ -411,7 +410,9 @@ export default {
             handler: 'changeShowFilter'
         }],
         selectTeam: [{
-            handler: 'changeShowFilter'
+            handler: function(value, oldValue) {
+                if ( value != oldValue ) this.fetchItems()
+            }
         }]
     }
 }

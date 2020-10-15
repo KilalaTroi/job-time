@@ -105,7 +105,7 @@
             </div>
         </div>
         <div class="container ml-0">
-            <all-off-days></all-off-days>
+            <all-off-days :team="team"></all-off-days>
         </div>
     </div>
 </template>
@@ -206,15 +206,12 @@
         mounted() {
             let _this = this;
             _this.team = _this.currentTeam ? _this.currentTeam.id : ""
-            _this.fetch();
 
             $(document).on('mouseenter', '.ct-bar', function() {
                 var seriesDesc = $(this).attr('ct:meta'),
                 value = $(this).attr('ct:value');
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
             });
-
-            _this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + _this.user_id + '&startMonth=' + _this.customFormatterStr(_this.startMonth) + '&endMonth=' + _this.customFormatterEnd(_this.endMonth);
             
             $(document).on('click', '.languages button', function() {
                 _this.fetch();
@@ -222,7 +219,9 @@
         },
         methods: {
             fetch() {
-                let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth);
+                let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+
+                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 axios.get(uri)
                     .then(res => {
@@ -244,9 +243,9 @@
                     });
             },
             getFilterData() {
-                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth);
+                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
-                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth);
+                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 axios.get(uri)
                     .then(res => {
@@ -354,6 +353,13 @@
             }],
             endMonth: [{
                 handler: 'getFilterData'
+            }],
+            team: [{
+                handler: function(value, oldValue) {
+                    if ( value != oldValue ) {
+                        this.fetch()
+                    }
+                }
             }]
         }
     }

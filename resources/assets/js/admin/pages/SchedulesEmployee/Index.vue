@@ -220,7 +220,7 @@ export default {
     handleMonthChange(arg) {
         this.currentStart = arg.view.currentStart;
         this.currentEnd = arg.view.currentEnd;
-        this.fetchItems();
+        if ( this.selectTeam ) this.fetchItems();
     }
   },
   watch: {
@@ -236,8 +236,8 @@ export default {
     ],
     selectTeam: [
       {
-        handler: function() {
-          this.fetchItems();
+        handler: function(value, oldValue) {
+          if ( value != oldValue ) this.fetchItems();
         }
       }
     ]

@@ -923,3 +923,7 @@ table {
     }
   }
 }
+
+span[class^="ct-series"] {
+  display: inline-block;
+}
