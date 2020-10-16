@@ -11,7 +11,7 @@
             </div>
         </template>
         <div class="row">
-            <div class="col-sm-9">
+            <div class="col-sm-6">
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtTitle')}}</strong></label>
                     <input v-if="preLanguage=='vi'" :value="currentReport.title" type="text" class="form-control" :disabled="true">
@@ -23,6 +23,13 @@
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtReportType')}}</strong></label>
                     <input :value="currentReport.type" type="text" class="form-control" :disabled="true">
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtTeam')}}</strong></label>
+                    <input :value="currentReport.team_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
         </div>

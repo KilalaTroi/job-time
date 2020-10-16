@@ -144,7 +144,7 @@ export default {
     txtBack: 'Back ',
     txtMeeting: 'Meeting',
     txtTrouble: 'Trouble',
-    txtAttendPerson: 'Attendee',
+    txtAttendPerson: 'Attend Person',
     txtEdit: 'Edit',
     txtReporter: 'Reporter',
     txtPreview: 'Preview',
@@ -159,5 +159,6 @@ export default {
     txtEditTeam: 'Edit team',
     txtTeam: 'Team',
     txtContactAdmin: 'Contact Admin',
-    txtImportProject: 'Import Excel'
+    txtImportProject: 'Import Excel',
+    txtUpdateDate: 'Update Date'
 }

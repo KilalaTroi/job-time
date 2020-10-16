@@ -526,6 +526,7 @@ class ReportsController extends Controller
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
         $deptSelects = $request->get('deptSelects');
+        $teamID = $request->get('team_id');
         $deptArr = false;
         if ( $deptSelects ) {
             $deptArr = $deptSelects['id'];
@@ -543,7 +544,7 @@ class ReportsController extends Controller
             $issueArr = $issueSelects['id'];
         }
 
-        $departments = $indexPage ? DB::table('departments')->select('id', 'name as text')->get()->toArray() : [];
+        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
 
         $projects = $deptArr ? DB::table('projects as p')
         ->select(
@@ -555,6 +556,14 @@ class ReportsController extends Controller
             if ( $deptArr > 1 )
                 return $query->where('p.dept_id', $deptArr);
             return $query;
+        })
+        ->when($teamID, function ($query, $teamID) {
+            return $query->where(function ($query) use ($teamID) {
+                $query->where('p.team', '=', $teamID)
+                      ->orWhere('p.team', 'LIKE', $teamID . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+            });
         })
         ->orderBy('text', 'asc')
         ->get()->toArray() : array();
@@ -568,7 +577,7 @@ class ReportsController extends Controller
         ->orderBy('id', 'desc')
         ->get()->toArray() : array();
 
-        $users = $indexPage ? DB::connection('mysql')->table('role_user as ru')
+        $users = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -577,13 +586,18 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
-            ->get()->toArray() : [];
+            ->when($teamID, function ($query, $teamID) {
+                return $query->where('user.team', $teamID);
+            })
+            ->get()->toArray();
 
         //DB::enableQueryLog();
         $dataReports = $indexPage ? DB::table('reports as r')
             ->select(
                 'r.id as id',
                 DB::raw('IFNULL(i.name, "--") AS issue_name'),
+                'r.team_id as team_id',
+                't.name as team_name',
                 'title',
                 'title_ja',
                 'date_time',
@@ -603,6 +617,7 @@ class ReportsController extends Controller
                 'i.project_id',
                 'p.dept_id'
             )
+            ->leftJoin('teams as t', 't.id', '=', 'r.team_id')
             ->leftJoin('issues as i', 'i.id', '=', 'r.issue')
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
@@ -619,6 +634,9 @@ class ReportsController extends Controller
                 if ( $deptArr > 1 )
                     return $query->where('d.id', $deptArr);
                 return $query;
+            })
+            ->when($teamID, function ($query, $teamID) {
+                return $query->where('r.team_id', $teamID);
             })
             ->where('r.date_time', '>=', $startDate)
             ->where('r.date_time', '<=', $endDate)

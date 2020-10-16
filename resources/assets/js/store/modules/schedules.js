@@ -232,8 +232,8 @@ export default {
         id: data.event.id,
         title_not_memo: titleArray[0],
         memo: titleArray[1],
-        start_time: rootGetters['dateFormat'](data.start, 'HH:mm'),
-        end_time: rootGetters['dateFormat'](data.end, 'HH:mm'),
+        start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
+        end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
       }
       $("#itemDetail").modal("show");
       commit('SET_SELECTED_ITEM', item)

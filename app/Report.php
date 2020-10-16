@@ -12,6 +12,6 @@ class Report extends Model
      * @var array
      */
     protected $fillable = [
-        'title', 'title_ja', 'date_time', 'author', 'issue', 'attend_person', 'attend_other_person', 'type', 'content', 'content_ja', 'language', 'translatable', 'seen'
+        'team_id', 'title', 'title_ja', 'date_time', 'author', 'issue', 'attend_person', 'attend_other_person', 'type', 'content', 'content_ja', 'language', 'translatable', 'seen'
     ];
 }

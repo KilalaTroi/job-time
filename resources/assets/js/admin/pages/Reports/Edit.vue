@@ -11,7 +11,7 @@
             </div>
         </template>
         <div class="row">
-            <div class="col-sm-9">
+            <div class="col-sm-6">
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtTitle')}}</strong></label>
                     <input v-if="editLanguage=='vi'" v-model="title" type="text" class="form-control">
@@ -26,6 +26,13 @@
                         <option value="Trouble">{{$ml.with('VueJS').get('txtTrouble')}}</option>
                         <option value="Meeting">{{$ml.with('VueJS').get('txtMeeting')}}</option>
                     </select-2>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtTeam')}}</strong></label>
+                    <select-2 :options="currentTeamOption" v-model="team" class="select2" />
                 </div>
             </div>
         </div>
@@ -71,7 +78,7 @@
 
             <div class="col-sm-12" v-if="isMeeting()">
                 <div class="form-group">
-                    <label class><strong>{{$ml.with('VueJS').get('txtAttendee')}} (KILALA)</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (KILALA)</strong></label>
                     <div>
                         <multiselect
                         :multiple="true"
@@ -90,7 +97,7 @@
 
             <div class="col-sm-9" v-if="isMeeting()">
                 <div class="form-group">
-                    <label class><strong>{{$ml.with('VueJS').get('txtAttendee')}} (Other)</strong></label>
+                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (Other)</strong></label>
                     <input v-model="attendPersonOther" type="text" class="form-control">
                 </div>
             </div>
@@ -185,6 +192,7 @@ import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import Card from "../../components/Cards/Card";
 import Select2 from '../../components/SelectTwo/SelectTwo.vue';
 import ErrorItem from "../../components/Validations/Error";
+import { mapGetters, mapActions } from "vuex";
 
 class MyUploadAdapter {
     constructor( loader ) {
@@ -301,12 +309,18 @@ export default {
         ErrorItem,
         VueTimepicker
     },
-    props: ['currentReport', 'userOptions', 'departments', 'userID'],
+    computed: {
+        ...mapGetters({
+			currentTeamOption: 'currentTeamOption'
+        }),
+    },
+    props: ['currentReport', 'userOptionsParent', 'departmentsParent', 'projectsParent', 'issuesParent', 'userID'],
     data() {
         return {
             countLoad: 0,
             title: this.currentReport.title,
             titleJA: this.currentReport.title_ja,
+            team: this.currentReport.team_id,
             date: this.currentReport.date_time,
             time: this.currentReport.date_time.split(' ')[1],
             HourRange: [[8, 17]],
@@ -315,16 +329,18 @@ export default {
                 vi: vi,
                 ja: ja
             },
-            user_id: this.getReporter(this.currentReport.reporter),
-            attendPerson: this.getReporter(this.currentReport.attend_person),
+            user_id: '',
+            attendPerson: '',
             attendPersonOther: this.currentReport.attend_other_person,
-            deptSelects: null,
-			projectSelects: null,
-			issueSelects: null,
+            deptSelects: this.getDepartment(this.currentReport),
+			projectSelects: this.getProject(this.currentReport),
+			issueSelects: this.getIssue(this.currentReport),
             reportType: this.currentReport.type,
-			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
-            projects: [],
-            issues: [],
+            txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
+            userOptions: this.userOptionsParent,
+            departments: this.departmentsParent,
+            projects: this.projectsParent,
+            issues: this.issuesParent,
 
             isEditing: false,
             editor: DecoupledEditor,
@@ -343,7 +359,8 @@ export default {
     },
     mounted() {
         let _this = this;
-        _this.deptSelects = _this.getDepartment(_this.currentReport);
+        _this.user_id = this.getReporter(this.currentReport.reporter);
+        _this.attendPerson = this.getReporter(this.currentReport.attend_person);
         if ( _this.currentReport.isSeen ) _this.updateSeen();
     },
     beforeMount() {
@@ -450,16 +467,19 @@ export default {
             };
         },
         fetchDataFilter() {
-			let uri = "/data/reports";
+			let uri = "/data/reports?team_id=" + this.team;
 			axios
 			.post(uri, {
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueSelects: this.issueSelects
+                issueSelects: this.issueSelects,
+                team_id: this.team
 			})
 			.then(res => {
+                this.departments = res.data.departments;
 				this.projects = res.data.projects;
                 this.issues = res.data.issues;
+                this.userOptions = res.data.users;
                 this.countLoad += 1;
 
                 if ( this.countLoad === 1 ) {
@@ -555,6 +575,7 @@ export default {
                 let uri = '/data/reports-action/' + this.currentReport.id;
                 let newItem = {
                     type: this.reportType,
+                    team_id: this.team,
                     seen: this.userID.toString(),
                     author: this.user_id.map((item, index) => { return item.id }).toString(),
                 };
@@ -587,6 +608,7 @@ export default {
                     .then(res => {
                         console.log(res.data.message);
                         this.title = '';
+                        this.titleJA = '';
                         this.date = '';
                         this.time = '';
                         this.attendPerson = [];
@@ -608,6 +630,9 @@ export default {
                     });
             }
         },
+        resetDepartment() {
+			this.deptSelects = null;
+		},
 		resetProject() {
 			this.projectSelects = null;
 		},
@@ -629,13 +654,30 @@ export default {
             handler: 'contentChange' 
         }],
         deptSelects: [
-			{ handler: "fetchDataFilter" },
-			{ handler: "resetProject" }
+			{ handler: function(value, oldValue) {
+                console.log(value, oldValue)
+                if ( value != oldValue ) {
+                    this.fetchDataFilter()
+                    this.resetProject()
+                }
+            } }
 		],
 		projectSelects: [
-			{ handler: "fetchDataFilter" },
-			{ handler: "resetIssue" }
-		]
+			{ handler: function(value, oldValue) {
+                if ( value != oldValue ) {
+                    this.fetchDataFilter()
+                    this.resetIssue()
+                }
+            } }
+        ],
+        team: [{
+            handler: function(value, oldValue) {
+                if ( value != oldValue ) {
+                    this.resetDepartment()
+                    this.fetchDataFilter()
+                }
+            }
+        }]
     }
 }
 </script>
