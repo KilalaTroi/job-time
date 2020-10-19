@@ -256,6 +256,7 @@ export default {
 	methods: {
 		...mapActions({
 			updateReportNotify: "updateReportNotify",
+			setReportNotify: "setReportNotify"
 		}),
         customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
@@ -451,6 +452,7 @@ export default {
 				handler: function(value, oldValue) {
 					if ( value != oldValue ) {
 						this.fetchData()
+						this.setReportNotify(this.team)
 					}
 				}
 			}

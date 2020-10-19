@@ -23,8 +23,8 @@ export default {
         }
     },
 
-    setReportNotify({ state, commit }) { 
-        const uri = "/data/notify?user_id=" + state.loginUser.id
+    setReportNotify({ state, commit }, teamID) { 
+        const uri = "/data/notify?user_id=" + state.loginUser.id + "&team_id=" + teamID
         axios.get(uri).then((response) => {
             commit('SET_REPORT_NOTIFY', response.data.notify)
         });

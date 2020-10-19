@@ -422,9 +422,11 @@ class ReportsController extends Controller
     function getNotify() {
 
         $user_id = $_GET['user_id'];
+        $team_id = $_GET['team_id'];
         $count_notify = 0;
 
         $notify = DB::table('reports')
+            ->where('team_id', $team_id)
             ->select( 'seen' )
             ->get()->toArray();
 
