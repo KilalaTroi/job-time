@@ -713,6 +713,34 @@ class StatisticsController extends Controller
         return $data;
     }
 
+    function getPageReport() {
+        $teamID = isset($_GET['team_id']) && $_GET['team_id'] ? $_GET['team_id'] : 0;
+        $startMonth = $_GET['startMonth'];
+        $endMonth = $_GET['endMonth'];
+
+        $data = DB::table('issues as i')
+            ->select(
+                't.id as id',
+                DB::raw('concat(year(i.created_at),"", LPAD(month(i.created_at), 2, "0")) as yearMonth'),
+                DB::raw('SUM(page) as page')
+            )
+            ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+            ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+            ->where('page', '>', 0)
+            ->where('i.created_at', ">=", str_replace('/', '-', $startMonth))
+            ->where('i.created_at', "<", str_replace('/', '-', $endMonth))
+            ->when($teamID, function ($query, $teamID) {
+                return $query->where(function ($query) use ($teamID) {
+                    $query->where('team', '=', $teamID)
+                          ->orWhere('team', 'LIKE', $teamID . ',%')
+                          ->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
+                          ->orWhere('team', 'LIKE', '%,' . $teamID);
+                });
+            })->groupBy('t.id', 'yearMonth')->get()->toArray();
+
+        return response()->json($data);
+    }
+
     function columnLetter($c){
         $c = intval($c);
         if ($c <= 0) return '';

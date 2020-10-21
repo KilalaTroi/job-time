@@ -101,6 +101,13 @@
                             </div>
                         </template>
                     </chart-card>
+                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id">
+                        <template slot="footer">
+                            <div class="legend">
+                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i> {{ type.slug }}</span>
+                            </div>
+                        </template>
+                    </chart-card>
                 </div>
             </div>
         </div>
@@ -146,6 +153,7 @@
                 newUsersPerMonth: {},
                 totalHoursPerMonth: {},
                 hoursPerProject: [],
+                pageData: [],
                 jobs: 0,
 
                 startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
@@ -194,6 +202,25 @@
                     ]
                 },
 
+                pageChart: {
+                    id: 'page-chart',
+                    data: {
+                        labels: [],
+                        series: []
+                    },
+                    options: {
+                        seriesBarDistance: 30,
+                        stackBars: false,
+                        axisX: {
+                            showGrid: true
+                        },
+                        height: '360px',
+                        plugins: [
+                            Chartist.plugins.tooltip()
+                        ]
+                    }
+                },
+
                 dataLang: {
                     vi: vi,
                     ja: ja,
@@ -207,7 +234,7 @@
             let _this = this;
             _this.team = _this.currentTeam ? _this.currentTeam.id : ""
 
-            $(document).on('mouseenter', '.ct-bar', function() {
+            $(document).on('mouseenter', '#time-allocation .ct-bar', function() {
                 var seriesDesc = $(this).attr('ct:meta'),
                 value = $(this).attr('ct:value');
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
@@ -220,8 +247,18 @@
         methods: {
             fetch() {
                 let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                let uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+
+                axios.get(uriPage)
+                    .then(res => {
+                        this.pageData = res.data;
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        alert("Could not load data");
+                    });
 
                 axios.get(uri)
                     .then(res => {
@@ -234,8 +271,9 @@
                         this.currentMonth = res.data.currentMonth;
                         this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
-                        this.monthsText = this.barChart.data.labels = res.data.monthsText;
+                        this.monthsText = this.pageChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
+                        this.getPageSeries(this.types, this.pageData, this.totalHoursPerMonth);
                     })
                     .catch(err => {
                         console.log(err);
@@ -243,16 +281,27 @@
                     });
             },
             getFilterData() {
+                let uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
                 let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
+                axios.get(uriPage)
+                    .then(res => {
+                        this.pageData = res.data;
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        alert("Could not load data");
+                    });
+                
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 axios.get(uri)
                     .then(res => {
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
                         this.hoursPerProject = res.data.totals.hoursPerProject;
-                        this.monthsText = this.barChart.data.labels = res.data.monthsText;
+                        this.monthsText = this.pageChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
+                        this.getPageSeries(this.types, this.pageData, this.totalHoursPerMonth);
                     })
                     .catch(err => {
                         console.log(err);
@@ -311,6 +360,27 @@
                     return row;
                 });
                 this.series = this.barChart.data.series = series;
+            },
+            getPageSeries(type, pageData, totalHoursPerMonth) {
+                let _this = this;
+                let series = type.map((item, index) => {
+                    let _item = item;
+                    let row = Object.keys(totalHoursPerMonth).map((key, index) => {
+                        if ( _this.hasObjectValue(pageData, _item.id, key) ) {
+                            return {
+                                value: _this.hasObjectValue(pageData, _item.id, key).page,
+                                meta: _item.slug
+                            };
+                        } else {
+                            return {
+                                value: 0,
+                                meta: _item.slug
+                            };
+                        }
+                    })
+                    return row;
+                });
+                this.pageChart.data.series = series;
             },
             dateFormatter(date) {
                 return moment(date).format('YYYY-MM-DD');

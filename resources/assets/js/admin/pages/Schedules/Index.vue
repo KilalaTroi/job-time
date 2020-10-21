@@ -182,7 +182,7 @@ export default {
               end: this.dateFormat(eventEl.getAttribute("end") + " " + "17:00"),
             },
             overlap: true,
-            duration: "1:00:00",
+            duration: "00:30:00",
           };
         },
       });
@@ -240,7 +240,7 @@ export default {
 }
 
 .fc-time-grid .fc-slats td {
-  height: 2em;
+  height: 3em;
 }
 
 .fc-unthemed td.fc-today {

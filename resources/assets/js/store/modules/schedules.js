@@ -163,10 +163,10 @@ export default {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
 
-      if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-        data.revert();
-        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      } else {
+      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
+      //   data.revert();
+      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
+      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -178,7 +178,7 @@ export default {
           }
         }
         dispatch('functionFullCalendar', request)
-      }
+      // }
     },
 
     resetSelectedItem({ commit }) {
@@ -189,10 +189,10 @@ export default {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
 
-      if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-        data.revert();
-        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      } else {
+      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
+      //   data.revert();
+      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
+      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -203,7 +203,7 @@ export default {
           }
         }
         dispatch('functionFullCalendar', request)
-      }
+      // }
     },
 
     functionFullCalendar({ commit, dispatch }, request) {
