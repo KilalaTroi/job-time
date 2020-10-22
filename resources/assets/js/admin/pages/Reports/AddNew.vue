@@ -23,6 +23,7 @@
                     <select-2 v-model="reportType" class="select2">
                         <option value="Trouble">{{$ml.with('VueJS').get('txtTrouble')}}</option>
                         <option value="Meeting">{{$ml.with('VueJS').get('txtMeeting')}}</option>
+                        <option value="Notice">{{$ml.with('VueJS').get('txtNotice')}}</option>
                     </select-2>
                 </div>
             </div>
@@ -50,14 +51,14 @@
                 </div>
             </div>
 
-            <div class="col-sm-3" v-if="isMeeting()">
+            <div class="col-sm-3" v-if="isMeeting() || isNotice()">
                 <label><strong>{{$ml.with('VueJS').get('lblTime')}}</strong></label>
                 <vue-timepicker input-class="form-control" v-model="time" hide-disabled-items :minute-range="MinuteRange" :hour-range="HourRange"  input-width="100%" close-on-complete required></vue-timepicker>
             </div>
 
-            <div :class="[{'col-sm-6' : isMeeting()}, {'col-sm-9' : !isMeeting()}]">
+            <div :class="[{'col-sm-6' : isMeeting() || isNotice()}, {'col-sm-9' : !isMeeting() && !isNotice()}]">
                 <div class="form-group">
-                    <label class><strong>{{$ml.with('VueJS').get('txtReporter')}}</strong></label>
+                    <label><strong>{{$ml.with('VueJS').get('txtReporter')}}</strong></label>
                     <div>
                         <multiselect
                         :multiple="true"
@@ -74,9 +75,10 @@
                 </div>
             </div>
 
-            <div class="col-sm-12" v-if="isMeeting()">
+            <div class="col-sm-12" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
-                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (KILALA)</strong></label>
+                    <label v-if="isNotice()"><strong>{{$ml.with('VueJS').get('txtDestination')}}</strong></label>
+                    <label v-else><strong>{{$ml.with('VueJS').get('txtAttendPerson')}}</strong></label>
                     <div>
                         <multiselect
                         :multiple="true"
@@ -93,14 +95,14 @@
                 </div>
             </div>
 
-            <div class="col-sm-9" v-if="isMeeting()">
+            <div class="col-sm-9" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (Other)</strong></label>
                     <input v-model="attendPersonOther" type="text" class="form-control">
                 </div>
             </div>
 
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtDepts')}}</strong></label>
                     <div>
@@ -118,7 +120,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtProjects')}}</strong></label>
                     <div>
@@ -136,7 +138,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
                     <div>
@@ -441,7 +443,7 @@ export default {
                 this.errors = [['Please choosing the user report'], ...this.errors];
             }
 
-            if ( this.isMeeting() ) {
+            if ( this.isMeeting() || this.isNotice() ) {
                 if ( !this.attendPerson.length ) {
                     this.errors = [['Please choosing the user attend'], ...this.errors];
                 }
@@ -486,7 +488,7 @@ export default {
                     newItem.content_ja = this.editorDataJA;
                 }
 
-                if ( this.isMeeting() ) {
+                if ( this.isMeeting() || this.isNotice() ) {
                     newItem.attend_person = this.attendPerson.map((item, index) => { return item.id }).toString();
                     newItem.attend_other_person = this.attendPersonOther;
                     newItem.date_time = moment(this.date).format("YYYY-MM-DD") + " " + this.time;
@@ -536,19 +538,27 @@ export default {
                 this.editorData = '<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>';
                 this.editorDataJA = '<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>';
             } else {
-                this.editorData = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
-                this.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
+                if (this.isNotice()) {
+                    this.editorData = '<h4>お知らせ</h4>';
+                    this.editorDataJA = '<h4>お知らせ</h4>';
+                } else {
+                    this.editorData = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
+                    this.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
+                }
             }
         },
         isMeeting() {
             return this.reportType == 'Meeting';
+        },
+        isNotice() {
+            return this.reportType == 'Notice';
         },
         typeReportChange() {
             this.errors = [];
 
             this.defaultContent();
 
-            if ( this.isMeeting() ) {
+            if ( this.isMeeting() || this.isNotice() ) {
                 this.deptSelects = [];
             } else {
                 this.attendPerson = [];

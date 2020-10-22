@@ -727,8 +727,8 @@ class StatisticsController extends Controller
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('page', '>', 0)
-            ->where('i.created_at', ">=", str_replace('/', '-', $startMonth))
-            ->where('i.created_at', "<", str_replace('/', '-', $endMonth))
+            // ->where('i.created_at', ">=", str_replace('/', '-', $startMonth))
+            // ->where('i.created_at', "<", str_replace('/', '-', $endMonth))
             ->when($teamID, function ($query, $teamID) {
                 return $query->where(function ($query) use ($teamID) {
                     $query->where('team', '=', $teamID)

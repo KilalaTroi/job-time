@@ -102,6 +102,9 @@
                         </template>
                     </chart-card>
                     <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id">
+                        <template slot="header">
+                            <h4 class="card-title">Total pages</h4>
+                        </template>
                         <template slot="footer">
                             <div class="legend">
                                 <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i> {{ type.slug }}</span>
@@ -210,7 +213,7 @@
                     },
                     options: {
                         seriesBarDistance: 30,
-                        stackBars: false,
+                        stackBars: true,
                         axisX: {
                             showGrid: true
                         },
@@ -238,6 +241,13 @@
                 var seriesDesc = $(this).attr('ct:meta'),
                 value = $(this).attr('ct:value');
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + "%</span>");
+            });
+
+            $(document).on('mouseenter', '#page-chart .ct-bar', function() {
+                var seriesDesc = $(this).attr('ct:meta'),
+                value = $(this).attr('ct:value');
+                var pages = value > 1 ? 'pages' : 'page';
+                $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + " " + pages + "</span>");
             });
             
             $(document).on('click', '.languages button', function() {
@@ -439,7 +449,7 @@ $chart-tooltip-bg: rgba(40, 40, 40, 0.75) ;
 $chart-tooltip-color: #fff;
 .ct-tooltip {
     position: absolute;
-    margin-top: 100px;
+    margin-top: 150px;
     display: inline-block;
     opacity: 0.75;
     min-width: 130px;
@@ -458,6 +468,10 @@ $chart-tooltip-color: #fff;
     -o-transition: opacity .2s linear;
     transition: opacity .2s linear;
     text-transform: uppercase;
+
+    #page-chart & {
+        margin-top: 100px;
+    }
 
     &:before {
         content: "";

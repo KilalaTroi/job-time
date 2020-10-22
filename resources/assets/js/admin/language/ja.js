@@ -31,7 +31,7 @@ export default {
     lblDate: '日',
     lblStartTime: '開始時刻',
     lblEndTime: '終了時刻',
-    lblTime: '稼働時間',
+    lblTime: '時間',
     btExportExcel: 'Excel書き出し',
     txtScheduleTitle: '案件スケジュール',
     txtScheduleSearch: '検索...',
@@ -160,5 +160,7 @@ export default {
     txtTeam: 'チーム',
     txtContactAdmin: '連絡管理',
     txtImportProject: 'Excel読み込み',
-    txtUpdateDate: '更新日'
+    txtUpdateDate: '更新日',
+    txtNotice: "お知らせ",
+    txtDestination: "宛先"
 }

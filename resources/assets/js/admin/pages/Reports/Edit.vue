@@ -25,6 +25,7 @@
                     <select-2 v-model="reportType" class="select2">
                         <option value="Trouble">{{$ml.with('VueJS').get('txtTrouble')}}</option>
                         <option value="Meeting">{{$ml.with('VueJS').get('txtMeeting')}}</option>
+                        <option value="Notice">{{$ml.with('VueJS').get('txtNotice')}}</option>
                     </select-2>
                 </div>
             </div>
@@ -52,12 +53,12 @@
                 </div>
             </div>
 
-            <div class="col-sm-3" v-if="isMeeting()">
+            <div class="col-sm-3" v-if="isMeeting() || isNotice()">
                 <label><strong>{{$ml.with('VueJS').get('lblTime')}}</strong></label>
                 <vue-timepicker input-class="form-control" v-model="time" hide-disabled-items :minute-range="MinuteRange" :hour-range="HourRange"  input-width="100%" close-on-complete required></vue-timepicker>
             </div>
 
-            <div :class="[{'col-sm-6' : isMeeting()}, {'col-sm-9' : !isMeeting()}]">
+            <div :class="[{'col-sm-6' : isMeeting() || isNotice()}, {'col-sm-9' : !isMeeting() && !isNotice()}]">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtReporter')}}</strong></label>
                     <div>
@@ -76,9 +77,10 @@
                 </div>
             </div>
 
-            <div class="col-sm-12" v-if="isMeeting()">
+            <div class="col-sm-12" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
-                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (KILALA)</strong></label>
+                    <label v-if="isNotice()"><strong>{{$ml.with('VueJS').get('txtDestination')}}</strong></label>
+                    <label v-else><strong>{{$ml.with('VueJS').get('txtAttendPerson')}}</strong></label>
                     <div>
                         <multiselect
                         :multiple="true"
@@ -95,14 +97,14 @@
                 </div>
             </div>
 
-            <div class="col-sm-9" v-if="isMeeting()">
+            <div class="col-sm-9" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (Other)</strong></label>
                     <input v-model="attendPersonOther" type="text" class="form-control">
                 </div>
             </div>
 
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtDepts')}}</strong></label>
                     <div>
@@ -120,7 +122,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtProjects')}}</strong></label>
                     <div>
@@ -138,7 +140,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
                     <div>
@@ -545,7 +547,7 @@ export default {
                 this.errors = [['Please choosing the user report'], ...this.errors];
             }
 
-            if ( this.isMeeting() ) {
+            if ( this.isMeeting() || this.isNotice() ) {
                 if ( !this.attendPerson.length ) {
                     this.errors = [['Please choosing the user attend'], ...this.errors];
                 }
@@ -592,7 +594,7 @@ export default {
                     newItem.translatable = this.translatable;
                 }
 
-                if ( this.isMeeting() ) {
+                if ( this.isMeeting() || this.isNotice() ) {
                     newItem.attend_person = this.attendPerson.map((item, index) => { return item.id }).toString();
                     newItem.attend_other_person = this.attendPersonOther;
                     newItem.date_time = moment(this.date).format("YYYY-MM-DD") + " " + this.time;
@@ -641,6 +643,9 @@ export default {
         },
         isMeeting() {
             return this.reportType == 'Meeting';
+        },
+        isNotice() {
+            return this.reportType == 'Notice';
         },
         updateSeen() {
             this.$emit('update-seen');

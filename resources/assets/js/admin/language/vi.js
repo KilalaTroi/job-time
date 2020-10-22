@@ -160,5 +160,7 @@ export default {
     txtTeam: 'Team',
     txtContactAdmin: 'Contact Admin',
     txtImportProject: 'Import Excel',
-    txtUpdateDate: 'Update Date'
+    txtUpdateDate: 'Update Date',
+    txtNotice: "Notice",
+    txtDestination: "Destination"
 }

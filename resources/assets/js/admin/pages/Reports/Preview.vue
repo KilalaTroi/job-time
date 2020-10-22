@@ -48,33 +48,34 @@
                 </div>
             </div>
 
-            <div class="col-sm-12" v-if="isMeeting()">
+            <div class="col-sm-12" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
-                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (KILALA)</strong></label>
+                    <label v-if="isNotice()"><strong>{{$ml.with('VueJS').get('txtDestination')}}</strong></label>
+                    <label v-else><strong>{{$ml.with('VueJS').get('txtAttendPerson')}}</strong></label>
                     <input :value="getReporter(currentReport.attend_person)" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
-            <div class="col-sm-9" v-if="isMeeting()">
+            <div class="col-sm-9" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} ({{$ml.with('VueJS').get('txtOther')}} )</strong></label>
                     <input :value="currentReport.attend_other_person" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtDepts')}}</strong></label>
                     <input :value="currentReport.dept_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtProjects')}}</strong></label>
                     <input :value="currentReport.project_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
                     <input :value="currentReport.issue_name" type="text" class="form-control" :disabled="true">
@@ -136,6 +137,9 @@ export default {
         isMeeting() {
             return this.currentReport.type == 'Meeting';
         },
+        isNotice() {
+            return this.currentReport.type == 'Notice';
+        },
         getReporter(data) {
             let result = [];
             let arrData = data.split(',');
@@ -150,11 +154,11 @@ export default {
         exportPDF() {
             let uri = "/pdf/report";
             let data = {
-                is_metting: this.isMeeting() ? 1 : 0,
+                is_metting: this.isMeeting() || this.isNotice() ? 1 : 0,
                 title: this.preLanguage=='vi' ? this.currentReport.title : this.currentReport.title_ja,
                 date_time: this.currentReport.date_time,
                 reporter: this.getReporter(this.currentReport.reporter),
-                attend_person: this.isMeeting() ? this.getReporter(this.currentReport.attend_person) : '',
+                attend_person: this.isMeeting() || this.isNotice() ? this.getReporter(this.currentReport.attend_person) : '',
                 attend_other_person: this.currentReport.attend_other_person,
                 dept_name: this.currentReport.dept_name,
                 project_name: this.currentReport.project_name,
