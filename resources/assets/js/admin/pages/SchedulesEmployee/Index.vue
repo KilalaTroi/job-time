@@ -265,7 +265,7 @@ export default {
 }
 
 .fc-time-grid .fc-slats td {
-  height: 2em;
+  height: 3em;
 }
 
 .fc-unthemed td.fc-today {

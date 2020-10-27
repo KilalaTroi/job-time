@@ -68,7 +68,7 @@ export default {
     txtUpdateTime: '時間を編集',
     txtEditIssue: '号の編集',
     txtEditProject: 'プロジェクトを修正',
-    txtPhase: '段階',
+    txtPhase: '情報',
     txtJobTypeList: 'ジョブタイプ一覧',
     txtCreateType: '新規ジョブタイプの作成',
     txtColor: '色',

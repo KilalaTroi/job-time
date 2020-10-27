@@ -68,8 +68,6 @@ class SchedulesController extends Controller
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-            ->where('i.status', '=', 'publish')
-            ->where('i.status', '=', 'publish')
             ->where('s.team_id', '=', $teamID)
             ->where('s.date', '>=',  $startDate)
             ->where('s.date', '<',  $endDate)
