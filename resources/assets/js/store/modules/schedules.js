@@ -32,12 +32,14 @@ export default {
       state.data = {
         projects: data.projects,
         schedules: data.schedules,
+        schedulesDetail: data.schedulesDetail,
         projectsFilter: data.projects
       }
     },
 
     SET_DATA_SCHEDULE: (state, data) => {
-      state.data.schedules = data.schedules
+      state.data.schedules = data.schedules;
+      state.data.schedulesDetail = data.schedulesDetail;
     },
 
     SET_DATA_CALENDAR: (state, data) => {
@@ -79,14 +81,32 @@ export default {
         if (response.data.schedules.length) {
           response.data.schedules = response.data.schedules.map((item, index) => {
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
+            let sDetail = [];
+            let description = '';
+
+            if ( response.data.schedulesDetail.length ) {
+              sDetail = rootGetters['getArrObjectByID'](response.data.schedulesDetail, item.id);
+            }
+
+            const textTime = sDetail.length ? sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '\n' : '';
+
+            if ( sDetail.length ) {
+              sDetail.map((item, index) => function() {
+                description += index > 0 ? '\n' : '';
+                description += (item.start_time + ' - ' + item.end_time)
+              })
+            }
             
             return Object.assign({}, {
               title:
+                textTime +
                 (item.i_name
                   ? item.p_name + checkTR + " " + item.i_name
                   : item.p_name + checkTR) +
                 "\n" +
                 (item.memo ? item.memo : ""),
+              description: description,
+              className: textTime ? 'has-log-time' : '',
               borderColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
               backgroundColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
               start: rootGetters['dateFormat'](item.date + " " + item.start_time),

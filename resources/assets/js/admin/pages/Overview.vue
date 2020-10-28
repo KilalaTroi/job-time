@@ -114,7 +114,7 @@
                 </div>
             </div>
         </div>
-        <div class="container ml-0">
+        <div class="container-fluid">
             <all-off-days :team="team"></all-off-days>
         </div>
     </div>

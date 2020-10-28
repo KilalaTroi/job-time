@@ -349,6 +349,7 @@ export default {
 		getDataLogTime(logTimeData) {
 			if (logTimeData.data.length) {
 				this.logTime = logTimeData.data.map((item, index) => {
+					const folder = this.team == 2 && item.note ? ' (' + item.note + ')' : ''
 					return {
 						username: this.getObjectByID(this.users, +item.user_id).text,
 						date: this.customFormatter2(item.date),
@@ -356,7 +357,7 @@ export default {
 						end_time: item.end_time,
 						total: this.hourFormatter(item.total),
 						d_name: item.department === "All" ? "" : item.department,
-						p_name: item.project,
+						p_name: item.project + folder,
 						i_name: item.issue,
 						t_name: item.job_type,
 						html_team: this.getTeamText('' + item.team)

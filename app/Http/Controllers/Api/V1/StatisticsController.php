@@ -141,6 +141,7 @@ class StatisticsController extends Controller
                 'd.name as department',
                 'p.name as project',
                 'i.name as issue',
+                'j.note as note',
                 't.slug as job_type',
                 'p.team as team'
             )

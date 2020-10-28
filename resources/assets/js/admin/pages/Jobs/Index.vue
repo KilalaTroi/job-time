@@ -1,6 +1,6 @@
 <template>
     <div class="content">
-        <div class="container-fluid max-width-1170">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col col-sm-auto">
                     <card>
@@ -41,7 +41,7 @@
                         <template slot="header">
                             <h4 class="card-title">{{$ml.with('VueJS').get('txtTimeRecord')}}</h4>
                         </template>
-                        <div class="table-responsive">
+                        <div class="table-responsive" :class="{'path-team': selectTeam == 2}">
                             <table-action
                                 class="table-hover table-striped time-record"
                                 :columns="logColumns"
@@ -57,8 +57,8 @@
                 </div>
             </div>
 
-            <AddTime :currentJob="currentJob" :logTimeData="logTimeData" :errors="validationErrors" :success="validationSuccess" v-on:overlap-time="overlapTime" v-on:add-time="addTime" v-on:reset-validation="resetValidate"></AddTime>
-            <EditTime :currentTimeLog="currentTimeLog" :logTimeData="logTimeData" :errors="validationErrors" :success="validationSuccess"  v-on:overlap-time="overlapTime" v-on:update-time="updateTime" v-on:reset-validation="resetValidate"></EditTime>
+            <AddTime :team="selectTeam" :currentJob="currentJob" :logTimeData="logTimeData" :errors="validationErrors" :success="validationSuccess" v-on:overlap-time="overlapTime" v-on:add-time="addTime" v-on:reset-validation="resetValidate"></AddTime>
+            <EditTime :team="selectTeam" :currentTimeLog="currentTimeLog" :logTimeData="logTimeData" :errors="validationErrors" :success="validationSuccess"  v-on:overlap-time="overlapTime" v-on:update-time="updateTime" v-on:reset-validation="resetValidate"></EditTime>
         </div>
     </div>
 </template>
@@ -251,8 +251,10 @@ export default {
                 }).map((item, index) => {
                     let issue = this.getObjectValue(this.allJobs, item.issue_id);
                     let checkTR = issue.type.includes("_tr") ? " (TR)" : "";
+                    let folder = this.selectTeam == 2 && item.note ? ' (' + item.note + ')' : ''
                     return Object.assign({}, item, {
-                        project: issue.p_name + checkTR,
+                        project: issue.p_name + checkTR + folder,
+                        projectWithoutFolder: issue.p_name + checkTR,
                         issue: issue.i_name,
                         total: item.total ? this.hourFormatter(item.total) : '00:00'
                     })
@@ -294,9 +296,10 @@ export default {
             let time = this.getObjectValue(this.logTime, id);
             let obj = {
                 id: time.id,
-                p_name: time.project,
+                p_name: time.projectWithoutFolder,
                 i_name: time.issue,
                 phase: time.phase,
+                note: time.note,
                 start_time: time.start_time,
                 end_time: time.end_time,
                 date: this.start_date
@@ -420,5 +423,10 @@ export default {
 <style lang="scss">
 .time-record tr:last-child button {
     display: none;
+}
+.table-responsive:not(.path-team) {
+    .note {
+        display: none;
+    }
 }
 </style>

@@ -229,6 +229,12 @@ export default {
   padding: 5px;
 }
 
+.fc-event.has-log-time {
+  .fc-time {
+    display: none;
+  }
+}
+
 .fc-event {
   cursor: move;
   color: rgba(0, 0, 0, 0.8);

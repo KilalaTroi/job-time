@@ -103,12 +103,12 @@ class JobsController extends Controller
                       ->orWhere('end_date', '=',  NULL);
             })
             ->where('i.status', '=', 'publish')
-            ->where(function ($query) use ($teamID) {
-                $query->where('p.team', '=', $teamID)
-                    ->orWhere('p.team', 'LIKE', $teamID . ',%')
-                    ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
-                    ->orWhere('p.team', 'LIKE', '%,' . $teamID);
-            })
+            // ->where(function ($query) use ($teamID) {
+            //     $query->where('p.team', '=', $teamID)
+            //         ->orWhere('p.team', 'LIKE', $teamID . ',%')
+            //         ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+            //         ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+            // })
             ->get()->toArray();
         
         // $schedules = DB::table('issues as i')
@@ -138,6 +138,7 @@ class JobsController extends Controller
                 'jobs.id',
                 'jobs.issue_id',
                 's.memo as phase',
+                'jobs.note as note',
                 DB::raw('TIME_FORMAT(jobs.start_time,"%H:%i") as start_time'),
                 DB::raw('TIME_FORMAT(jobs.end_time,"%H:%i") as end_time'),
                 DB::raw('(TIME_TO_SEC(jobs.end_time) - TIME_TO_SEC(jobs.start_time)) as total')
@@ -151,8 +152,6 @@ class JobsController extends Controller
             ->where('jobs.date', '=', $selectDate)
             ->orderBy('jobs.start_time', 'asc')
             ->get()->toArray(); 
-
-            // dd($logTime);
 
         return response()->json([
             'departments' => $departments,
@@ -182,6 +181,7 @@ class JobsController extends Controller
                 'issue_id' => $request->get('issue_id'),
                 'user_id' => $request->get('user_id'),
                 'schedule_id' => $request->get('schedule_id'),
+                'note' => $request->get('note'),
                 'team_id' => $request->get('team_id'),
                 'date' => $request->get('date'),
                 'start_time' => $request->get('start_time'),
@@ -192,6 +192,7 @@ class JobsController extends Controller
                 'issue_id' => $request->get('issue_id'),
                 'user_id' => $request->get('user_id'),
                 'schedule_id' => $request->get('schedule_id'),
+                'note' => $request->get('note'),
                 'team_id' => $request->get('team_id'),
                 'date' => $request->get('date'),
                 'start_time' => '13:00',
@@ -219,6 +220,7 @@ class JobsController extends Controller
 
         if ( $request->get('showLunchBreak') && $request->get('exceptLunchBreak') ) {
             $job->update([
+                'note' => $request->get('note'),
                 'start_time' => $request->get('start_time'),
                 'end_time' => '12:00',
             ]);
@@ -227,6 +229,7 @@ class JobsController extends Controller
                 'issue_id' => $job->issue_id,
                 'user_id' => $job->user_id,
                 'schedule_id' => $job->schedule_id,
+                'note' => $job->note,
                 'team_id' => $job->team_id,
                 'date' => $job->date,
                 'start_time' => '13:00',

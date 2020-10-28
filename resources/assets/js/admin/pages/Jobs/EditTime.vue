@@ -22,6 +22,14 @@
             <div class="form-group" v-if="showLunchBreak">
                 <base-checkbox v-model="exceptLunchBreak" class="align-self-end">{{$ml.with('VueJS').get('txtExcludeLunchBreak')}}</base-checkbox>
             </div>
+            <div class="form-group" v-if="team == 2">
+                <label>Folder</label>
+                <input
+                    type="text"
+                    v-model="currentTimeLog.note"
+                    class="form-control"
+                />
+            </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
@@ -46,7 +54,7 @@ export default {
         Modal,
         VueTimepicker
     },
-    props: ['currentTimeLog', 'logTimeData', 'errors', 'success'],
+    props: ['team', 'currentTimeLog', 'logTimeData', 'errors', 'success'],
     data() {
         return {
             startHourRange: [[7, 19]],
@@ -67,6 +75,7 @@ export default {
             e.preventDefault();
 
             const newTime = {
+                note: this.currentTimeLog.note,
                 start_time: this.currentTimeLog.start_time,
                 end_time: this.currentTimeLog.end_time,
                 showLunchBreak: this.showLunchBreak,

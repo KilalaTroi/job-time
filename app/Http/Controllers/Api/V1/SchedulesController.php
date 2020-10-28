@@ -73,9 +73,24 @@ class SchedulesController extends Controller
             ->where('s.date', '<',  $endDate)
             ->get()->toArray();
 
+        $schedulesDetail = DB::table('jobs as j')
+            ->select(
+                's.id as id',
+                DB::raw('TIME_FORMAT(j.start_time,"%H:%i") as start_time'),
+                DB::raw('TIME_FORMAT(j.end_time,"%H:%i") as end_time')
+            )
+            ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
+            ->where('s.team_id', '=', $teamID)
+            ->where('s.date', '>=',  $startDate)
+            ->where('s.date', '<',  $endDate)
+            ->orderBy('s.id', 'asc')
+            ->orderBy('j.start_time', 'asc')
+            ->get()->toArray();
+
         return response()->json([
             'projects' => $onlyEvent === "false" ? $projects : [],
-            'schedules' => $schedules
+            'schedules' => $schedules,
+            'schedulesDetail' => $schedulesDetail
         ]);
     }
 
