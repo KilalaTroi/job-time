@@ -102,7 +102,7 @@ class JobsController extends Controller
                 $query->where('end_date', '>=',  $selectDate)
                       ->orWhere('end_date', '=',  NULL);
             })
-            ->where('i.status', '=', 'publish')
+            // ->where('i.status', '=', 'publish')
             // ->where(function ($query) use ($teamID) {
             //     $query->where('p.team', '=', $teamID)
             //         ->orWhere('p.team', 'LIKE', $teamID . ',%')

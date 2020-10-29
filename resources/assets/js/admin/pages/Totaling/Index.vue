@@ -143,7 +143,7 @@
 						</div>
 					</div>
 				</template>
-				<div class="table-responsive">
+				<div class="table-responsive" :class="{'path-team': team == 2}">
 					<table-no-action class="table-hover table-striped" :columns="columns" :data="logTime"></table-no-action>
 					<div v-if="!logTimeData.data" class="text-center mt-3">
                         <img src="https://i.imgur.com/JfPpwOA.gif">
@@ -201,6 +201,7 @@ export default {
 				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
+				{ id: "note", value: this.$ml.with('VueJS').get('txtWork'), width: "", class: "" },
 				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: 'html_team', value: this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
 			],
@@ -248,6 +249,7 @@ export default {
 				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
+				{ id: "note", value: _this.$ml.with('VueJS').get('txtWork'), width: "", class: "" },
 				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: 'html_team', value: _this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
 			];
@@ -349,7 +351,6 @@ export default {
 		getDataLogTime(logTimeData) {
 			if (logTimeData.data.length) {
 				this.logTime = logTimeData.data.map((item, index) => {
-					const folder = this.team == 2 && item.note ? ' (' + item.note + ')' : ''
 					return {
 						username: this.getObjectByID(this.users, +item.user_id).text,
 						date: this.customFormatter2(item.date),
@@ -357,8 +358,9 @@ export default {
 						end_time: item.end_time,
 						total: this.hourFormatter(item.total),
 						d_name: item.department === "All" ? "" : item.department,
-						p_name: item.project + folder,
+						p_name: item.project,
 						i_name: item.issue,
+						note: item.note,
 						t_name: item.job_type,
 						html_team: this.getTeamText('' + item.team)
 					};
@@ -486,5 +488,10 @@ watch: {
 	margin-right: 5px;
 	display: inline-block;
 	vertical-align: middle;
+}
+.table-responsive:not(.path-team) {
+    .note {
+        display: none;
+    }
 }
 </style>

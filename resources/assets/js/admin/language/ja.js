@@ -162,5 +162,6 @@ export default {
     txtImportProject: 'Excel読み込み',
     txtUpdateDate: '更新日',
     txtNotice: "お知らせ",
-    txtDestination: "宛先"
+    txtDestination: "宛先",
+    txtWork: "作業"
 }

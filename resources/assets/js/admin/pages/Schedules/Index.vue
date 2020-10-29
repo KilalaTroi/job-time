@@ -52,7 +52,7 @@
           </div>
           <FullCalendar
             defaultView="timeGridWeek"
-            scroll-time="8:00:00"
+            scroll-time="7:00:00"
             :plugins="calendarPlugins"
             :header="calendarHeader"
             :business-hours="businessHours"
@@ -61,7 +61,7 @@
             :events="scheduleData.schedules"
             :event-overlap="true"
             :all-day-slot="false"
-            min-time="08:00:00"
+            min-time="07:00:00"
             max-time="17:00:00"
             height="auto"
             :hidden-days="hiddenDays"
@@ -70,6 +70,7 @@
             @eventDrop="dropSchedule"
             @eventResize="resizeSchedule"
             @eventClick="getItem"
+            @eventRender="tooltipFunc"
             :locale="getLanguage(this.$ml)"
           />
         </div>
@@ -82,6 +83,7 @@
 
 <script>
 import FullCalendar from "@fullcalendar/vue"
+import Tooltip from "tooltip.js"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timeGrid"
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction"
@@ -116,14 +118,14 @@ export default {
           // days of week. an array of zero-based day of week integers (0=Sunday)
           daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
 
-          startTime: "08:00", // a start time (10am in this example)
+          startTime: "07:00", // a start time (10am in this example)
           endTime: "17:00", // an end time (6pm in this example)
         },
         {
           // days of week. an array of zero-based day of week integers (0=Sunday)
           daysOfWeek: [6], // Monday - Thursday
 
-          startTime: "08:00", // a start time (10am in this example)
+          startTime: "07:00", // a start time (10am in this example)
           endTime: "12:00", // an end time (6pm in this example)
         },
       ],
@@ -178,7 +180,7 @@ export default {
             borderColor: eventEl.getAttribute("color"),
             backgroundColor: eventEl.getAttribute("color"),
             constraint: {
-              start: this.dateFormat(eventEl.getAttribute("start") + " " + "08:00"),
+              start: this.dateFormat(eventEl.getAttribute("start") + " " + "07:00"),
               end: this.dateFormat(eventEl.getAttribute("end") + " " + "17:00"),
             },
             overlap: true,
@@ -187,6 +189,23 @@ export default {
         },
       });
     },
+
+    tooltipFunc(info) {
+      var tooltip = new Tooltip(info.el, {
+        title: info.event.extendedProps.description,
+        placement: 'top',
+        trigger: 'hover',
+        container: 'body'
+      });
+
+      $('.has-log-time').mouseover(function() {
+        $('.tooltip-inner').each(function() {
+          const text = $(this).html();
+          console.log(text);
+          $(this).html(text);
+        });
+      });
+    }
   },
 
   async created() {

@@ -76,6 +76,7 @@ class SchedulesController extends Controller
         $schedulesDetail = DB::table('jobs as j')
             ->select(
                 's.id as id',
+                'j.note as note',
                 DB::raw('TIME_FORMAT(j.start_time,"%H:%i") as start_time'),
                 DB::raw('TIME_FORMAT(j.end_time,"%H:%i") as end_time')
             )

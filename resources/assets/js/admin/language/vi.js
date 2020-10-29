@@ -162,5 +162,6 @@ export default {
     txtImportProject: 'Import Excel',
     txtUpdateDate: 'Update Date',
     txtNotice: "Notice",
-    txtDestination: "Destination"
+    txtDestination: "Destination",
+    txtWork: "Work"
 }

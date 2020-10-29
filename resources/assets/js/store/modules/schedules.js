@@ -81,6 +81,7 @@ export default {
         if (response.data.schedules.length) {
           response.data.schedules = response.data.schedules.map((item, index) => {
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
+            const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
             let sDetail = [];
             let description = '';
 
@@ -88,13 +89,16 @@ export default {
               sDetail = rootGetters['getArrObjectByID'](response.data.schedulesDetail, item.id);
             }
 
-            const textTime = sDetail.length ? sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '\n' : '';
+            const codition = sDetail.length && state.filters.team == 2 && type.slug != 'yuidea_image';
+            const textTime = codition ? sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '\n' : '';
+            const startTime = codition ? sDetail[0].start_time : item.start_time;
+            const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
 
-            if ( sDetail.length ) {
-              sDetail.map((item, index) => function() {
-                description += index > 0 ? '\n' : '';
-                description += (item.start_time + ' - ' + item.end_time)
-              })
+            if ( sDetail.length && state.filters.team == 2 ) {
+              description = sDetail.map((item) => {
+                const note = item.note ? ' (' + item.note + ')' : '';
+                return (item.start_time + ' - ' + item.end_time + note)
+              }).join('<br>')
             }
             
             return Object.assign({}, {
@@ -107,10 +111,10 @@ export default {
                 (item.memo ? item.memo : ""),
               description: description,
               className: textTime ? 'has-log-time' : '',
-              borderColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
-              backgroundColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
-              start: rootGetters['dateFormat'](item.date + " " + item.start_time),
-              end: rootGetters['dateFormat'](item.date + " " + item.end_time),
+              borderColor: type.value,
+              backgroundColor: type.value,
+              start: rootGetters['dateFormat'](item.date + " " + startTime),
+              end: rootGetters['dateFormat'](item.date + " " + endTime),
               memo: item.memo,
               title_not_memo: item.i_name
                 ? item.p_name + checkTR + " " + item.i_name

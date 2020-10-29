@@ -104,6 +104,7 @@ export default {
             logColumns: [
                 { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'note', value: this.$ml.with('VueJS').get('txtWork'), width: '', class: '' },
                 { id: 'phase', value: this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'start_time', value: this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
@@ -161,6 +162,7 @@ export default {
             _this.logColumns = [
                 { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
+                { id: 'note', value: _this.$ml.with('VueJS').get('txtWork'), width: '', class: '' },
                 { id: 'phase', value: _this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'start_time', value: _this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: _this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
@@ -251,10 +253,8 @@ export default {
                 }).map((item, index) => {
                     let issue = this.getObjectValue(this.allJobs, item.issue_id);
                     let checkTR = issue.type.includes("_tr") ? " (TR)" : "";
-                    let folder = this.selectTeam == 2 && item.note ? ' (' + item.note + ')' : ''
                     return Object.assign({}, item, {
-                        project: issue.p_name + checkTR + folder,
-                        projectWithoutFolder: issue.p_name + checkTR,
+                        project: issue.p_name + checkTR,
                         issue: issue.i_name,
                         total: item.total ? this.hourFormatter(item.total) : '00:00'
                     })
@@ -266,6 +266,7 @@ export default {
                         id: '',
                         project: '',
                         issue: '',
+                        note: '',
                         start_time: '',
                         end_time: 'Total:',
                         total: this.timeTotal ? this.hourFormatter(this.timeTotal) : '00:00'
@@ -296,7 +297,7 @@ export default {
             let time = this.getObjectValue(this.logTime, id);
             let obj = {
                 id: time.id,
-                p_name: time.projectWithoutFolder,
+                p_name: time.project,
                 i_name: time.issue,
                 phase: time.phase,
                 note: time.note,

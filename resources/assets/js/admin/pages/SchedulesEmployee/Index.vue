@@ -80,6 +80,7 @@ export default {
   },
   computed: { 
     ...mapGetters({
+      getArrObjectByID: "getArrObjectByID",
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       typeOptions: "types/options",
@@ -92,8 +93,9 @@ export default {
       projectData: [],
       schedules: [],
       scheduleData: [],
+      schedulesDetail: [],
 
-      scrollTime: "8:00:00",
+      scrollTime: "7:00:00",
       calendarPlugins: [
         dayGridPlugin,
         listPlugin,
@@ -110,20 +112,20 @@ export default {
           // days of week. an array of zero-based day of week integers (0=Sunday)
           daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
 
-          startTime: "08:00", // a start time (10am in this example)
+          startTime: "07:00", // a start time (10am in this example)
           endTime: "17:00" // an end time (6pm in this example)
         },
         {
           // days of week. an array of zero-based day of week integers (0=Sunday)
           daysOfWeek: [6], // Monday - Thursday
 
-          startTime: "08:00", // a start time (10am in this example)
+          startTime: "07:00", // a start time (10am in this example)
           endTime: "12:00" // an end time (6pm in this example)
         }
       ],
       editable: false,
       droppable: false,
-      minTime: "08:00:00",
+      minTime: "07:00:00",
       maxTime: "17:00:00",
       allDaySlot: false,
       height: "auto",
@@ -153,6 +155,7 @@ export default {
           this.types = this.typeOptions;
           this.projectData = res.data.projects;
           this.scheduleData = res.data.schedules;
+          this.schedulesDetail = res.data.schedulesDetail;
         })
         .catch(err => {
           console.log(err);
@@ -182,23 +185,44 @@ export default {
         });
       }
     },
-    getDataSchedules(data) {
-      if (data.length) {
+    getDataSchedules(data) { 
+      if (data.length) { 
         this.schedules = data.map((item, index) => {
           let checkTR = item.type.includes("_tr") ? " (TR)" : "";
+          const type =  this.getObjectValue(this.types, item.type_id);
+          let sDetail = [];
+          let description = '';
+
+          if ( this.schedulesDetail.length ) {
+            sDetail = this.getArrObjectByID(this.schedulesDetail, item.id);
+          }
+
+          const codition = sDetail.length && this.selectTeam == 2 && type.slug != 'yuidea_image';
+          const textTime = codition ? sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '\n' : '';
+          const startTime = codition ? sDetail[0].start_time : item.start_time;
+          const endTime = codition ? sDetail[0].end_time : item.end_time;
+
+          if ( sDetail.length ) {
+            sDetail.map((item, index) => function() {
+              description += index > 0 ? '\n' : '';
+              description += (item.start_time + ' - ' + item.end_time)
+            })
+          }
+
           return {
             id: item.id,
             title:
+              textTime +
               (item.i_name
                 ? item.p_name + checkTR + " " + item.i_name
                 : item.p_name + checkTR) +
               "\n" +
               (item.memo ? item.memo : ""),
-            borderColor: this.getObjectValue(this.types, item.type_id).value,
-            backgroundColor: this.getObjectValue(this.types, item.type_id)
-              .value,
-            start: moment(item.date + " " + item.start_time).format(),
-            end: moment(item.date + " " + item.end_time).format()
+            description: description,
+            borderColor: type.value,
+            backgroundColor: type.value,
+            start: moment(item.date + " " + startTime).format(),
+            end: moment(item.date + " " + endTime).format()
           };
         });
       }
