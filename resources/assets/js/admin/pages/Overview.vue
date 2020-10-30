@@ -160,7 +160,7 @@
                 jobs: 0,
 
                 startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
-                endMonth: new Date(moment().subtract(1, 'months').endOf('month').format('YYYY/MM/DD')),
+                endMonth: new Date(moment().subtract(0, 'months').endOf('month').format('YYYY/MM/DD')),
                 currentMonth: {}, 
 
                 users: [],

@@ -281,6 +281,7 @@ export default {
 .fc-event {
     cursor: move;
     color: rgba(0,0,0,0.8);
+    min-height: 50px;
 }
 
 .fc-time-grid-event .fc-time,

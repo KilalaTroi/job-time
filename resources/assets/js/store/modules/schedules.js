@@ -80,6 +80,7 @@ export default {
       await axios.get(uri).then(response => {
         if (response.data.schedules.length) {
           response.data.schedules = response.data.schedules.map((item, index) => {
+            const arrProjects = [58, 59];
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
             const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
             let sDetail = [];
@@ -93,6 +94,7 @@ export default {
             const textTime = codition ? sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '\n' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
+            const classHideTime = arrProjects.includes(item.p_id) ? ' hide-fc-time' : '';
 
             if ( sDetail.length && state.filters.team == 2 && type.slug === 'yuidea_image' ) {
               description = sDetail.map((item) => {
@@ -110,7 +112,7 @@ export default {
                 "\n" +
                 (item.memo ? item.memo : ""),
               description: description,
-              className: textTime ? 'has-log-time' : '',
+              className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
               borderColor: type.value,
               backgroundColor: type.value,
               start: rootGetters['dateFormat'](item.date + " " + startTime),

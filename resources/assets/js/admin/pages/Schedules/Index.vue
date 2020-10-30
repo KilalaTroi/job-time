@@ -251,7 +251,7 @@ export default {
   padding: 5px;
 }
 
-.fc-event.has-log-time {
+.fc-event.has-log-time, .fc-event.hide-fc-time {
   .fc-time {
     display: none;
   }
@@ -260,6 +260,7 @@ export default {
 .fc-event {
   cursor: move;
   color: rgba(0, 0, 0, 0.8);
+  min-height: 50px;
 }
 
 .fc-time-grid-event .fc-time,

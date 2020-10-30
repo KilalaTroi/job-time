@@ -81,11 +81,12 @@ table {
 .tooltip {
   position: absolute;
   z-index: 9999;
-  background: #FFC107;
+  background: #fff;
   color: black;
-  width: 200px;
+  width: 300px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0,0,0,0.5);
+  border: 1px solid #b3aeae;
   padding: 10px;
   text-align: left;
   opacity: 1;
@@ -109,7 +110,7 @@ table {
 
 .tooltip .tooltip-arrow,
 .popper .popper__arrow {
-  border-color: #FFC107;
+  border-color: #fff;
 }
 .style5 .tooltip .tooltip-arrow {
   border-color: #1E252B;
@@ -179,4 +180,5 @@ table {
   color: #000;
   background-color: transparent;
   text-align: left;
+  max-width: 280px;
 }

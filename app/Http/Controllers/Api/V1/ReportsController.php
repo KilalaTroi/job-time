@@ -316,10 +316,10 @@ class ReportsController extends Controller
 
         if ( count($userArr) == 1 ) {
             $dataDetail = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            ->orderBy("j.user_id")->orderBy("j.date", "DESC")->orderBy("j.start_time", "DESC")->orderBy("j.end_time")->get();
         } else {
             $dataDetail = $data->select( "j.user_id" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            ->orderBy("j.user_id")->orderBy("j.date", "DESC")->orderBy("j.start_time", "DESC")->orderBy("j.end_time")->get();
 
             $dataTotal = $data->select( "j.user_id" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('j.user_id')->get();
         }
