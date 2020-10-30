@@ -347,8 +347,8 @@ class ReportsController extends Controller
         }
 
         $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){
-            if ( property_exists($x, 'user_id') ) {
-                $x->user_id =  $userArrName[$x->user_id];
+            if ( property_exists($x, 'user_id') && isset($userArrName[$x->user_id]) ) {
+                $x->user_id = $userArrName[$x->user_id];
             }
             return (array) $x;
         })->toArray();
@@ -360,7 +360,7 @@ class ReportsController extends Controller
             });
 
             $dataTotal = collect($dataTotal)->map(function($x) use ($userArrName){
-                if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
+                if ( property_exists($x, 'user_id') && isset($userArrName[$x->user_id]) ) $x->user_id = $userArrName[$x->user_id];
                 return (array) $x;
             })->toArray();
 

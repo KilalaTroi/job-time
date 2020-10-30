@@ -83,11 +83,11 @@ table {
   z-index: 9999;
   background: #FFC107;
   color: black;
-  width: 150px;
+  width: 200px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0,0,0,0.5);
   padding: 10px;
-  text-align: center;
+  text-align: left;
   opacity: 1;
 }
 .style5 .tooltip {
@@ -178,4 +178,5 @@ table {
 .tooltip-inner {
   color: #000;
   background-color: transparent;
+  text-align: left;
 }

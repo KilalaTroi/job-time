@@ -94,11 +94,11 @@ export default {
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
 
-            if ( sDetail.length && state.filters.team == 2 ) {
+            if ( sDetail.length && state.filters.team == 2 && type.slug === 'yuidea_image' ) {
               description = sDetail.map((item) => {
                 const note = item.note ? ' (' + item.note + ')' : '';
                 return (item.start_time + ' - ' + item.end_time + note)
-              }).join('<br>')
+              }).join(', ')
             }
             
             return Object.assign({}, {
@@ -254,8 +254,8 @@ export default {
       const titleArray = (data.event).title.split("\n");
       const item = {
         id: data.event.id,
-        title_not_memo: titleArray[0],
-        memo: titleArray[1],
+        title_not_memo: titleArray.length > 2 ? titleArray[1] : titleArray[0],
+        memo: titleArray.length > 2 ? titleArray[2] : titleArray[1],
         start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
         end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
       }

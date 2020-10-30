@@ -104,7 +104,7 @@ export default {
             logColumns: [
                 { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
-                { id: 'note', value: this.$ml.with('VueJS').get('txtWork'), width: '', class: '' },
+                { id: 'note', value: this.$ml.with('VueJS').get('txtWork'), width: '', class: 'note' },
                 { id: 'phase', value: this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'start_time', value: this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },
@@ -162,7 +162,7 @@ export default {
             _this.logColumns = [
                 { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
                 { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
-                { id: 'note', value: _this.$ml.with('VueJS').get('txtWork'), width: '', class: '' },
+                { id: 'note', value: _this.$ml.with('VueJS').get('txtWork'), width: '', class: 'note' },
                 { id: 'phase', value: _this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'start_time', value: _this.$ml.with('VueJS').get('lblStartTime'), width: '110', class: 'text-center' },
                 { id: 'end_time', value: _this.$ml.with('VueJS').get('lblEndTime'), width: '110', class: 'text-center' },

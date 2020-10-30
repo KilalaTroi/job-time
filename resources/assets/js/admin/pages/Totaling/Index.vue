@@ -201,7 +201,7 @@ export default {
 				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "note", value: this.$ml.with('VueJS').get('txtWork'), width: "", class: "" },
+				{ id: "note", value: this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
 				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: 'html_team', value: this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
 			],
@@ -249,7 +249,7 @@ export default {
 				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "note", value: _this.$ml.with('VueJS').get('txtWork'), width: "", class: "" },
+				{ id: "note", value: _this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
 				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: 'html_team', value: _this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
 			];

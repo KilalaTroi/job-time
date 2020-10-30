@@ -71,6 +71,7 @@
             @eventResize="resizeSchedule"
             @eventClick="getItem"
             @eventRender="tooltipFunc"
+            @eventMouseover="hoverEvent"
             :locale="getLanguage(this.$ml)"
           />
         </div>
@@ -197,14 +198,16 @@ export default {
         trigger: 'hover',
         container: 'body'
       });
+    },
 
-      $('.has-log-time').mouseover(function() {
-        $('.tooltip-inner').each(function() {
-          const text = $(this).html();
-          console.log(text);
-          $(this).html(text);
-        });
-      });
+    hoverEvent( event, jsEvent, view ) {
+      // console.log('abc');
+      // $('.tooltip-inner:not(.convert-html)').each(function(){
+      //   const text = $(this).text();
+      //   console.log(text);
+      //   $(this).html(text);
+      //   $(this).addClass('convert-html');
+      // });
     }
   },
 
