@@ -452,6 +452,7 @@ class ReportsController extends Controller
         if ( ! in_array($userID, $seenArr) ) $seenData = $report->seen . ',' . $userID;
 
         if ( $seenData ) {
+            $report->timestamps = false;
             $report->update([
                 'seen' => $seenData
             ]);
