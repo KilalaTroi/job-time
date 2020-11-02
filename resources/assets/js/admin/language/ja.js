@@ -141,7 +141,7 @@ export default {
     txtReportCreate: '新規レポートの作成',
     txtReportDate: '作成日',
     txtTitle: 'タイトル',
-    txtBack: '戻り',
+    txtBack: '戻る',
     txtMeeting: 'ミーティング',
     txtTrouble: 'トラブル',
     txtAttendPerson: '参加者',

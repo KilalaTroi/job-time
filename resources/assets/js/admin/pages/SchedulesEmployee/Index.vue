@@ -113,7 +113,7 @@ export default {
           daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
 
           startTime: "07:00", // a start time (10am in this example)
-          endTime: "17:00" // an end time (6pm in this example)
+          endTime: "19:00" // an end time (6pm in this example)
         },
         {
           // days of week. an array of zero-based day of week integers (0=Sunday)
@@ -126,7 +126,7 @@ export default {
       editable: false,
       droppable: false,
       minTime: "07:00:00",
-      maxTime: "17:00:00",
+      maxTime: "19:00:00",
       allDaySlot: false,
       height: "auto",
       hiddenDays: [0],

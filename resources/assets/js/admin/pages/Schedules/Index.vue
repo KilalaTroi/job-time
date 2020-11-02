@@ -62,7 +62,7 @@
             :event-overlap="true"
             :all-day-slot="false"
             min-time="07:00:00"
-            max-time="17:00:00"
+            max-time="19:00:00"
             height="auto"
             :hidden-days="hiddenDays"
             @eventReceive="addSchedule"
@@ -120,7 +120,7 @@ export default {
           daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
 
           startTime: "07:00", // a start time (10am in this example)
-          endTime: "17:00", // an end time (6pm in this example)
+          endTime: "19:00", // an end time (6pm in this example)
         },
         {
           // days of week. an array of zero-based day of week integers (0=Sunday)
@@ -182,7 +182,7 @@ export default {
             backgroundColor: eventEl.getAttribute("color"),
             constraint: {
               start: this.dateFormat(eventEl.getAttribute("start") + " " + "07:00"),
-              end: this.dateFormat(eventEl.getAttribute("end") + " " + "17:00"),
+              end: this.dateFormat(eventEl.getAttribute("end") + " " + "19:00"),
             },
             overlap: true,
             duration: "00:30:00",
