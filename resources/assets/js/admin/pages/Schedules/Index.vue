@@ -71,7 +71,6 @@
             @eventResize="resizeSchedule"
             @eventClick="getItem"
             @eventRender="tooltipFunc"
-            @eventMouseover="hoverEvent"
             :locale="getLanguage(this.$ml)"
           />
         </div>
@@ -192,23 +191,23 @@ export default {
     },
 
     tooltipFunc(info) {
+      info.el.querySelector('.fc-title').innerHTML = info.event.title;
+
       var tooltip = new Tooltip(info.el, {
         title: info.event.extendedProps.description,
         placement: 'top',
         trigger: 'hover',
-        container: 'body'
+        container: 'body',
+      });
+
+      info.el.querySelector('.fc-content').addEventListener("mouseover", function(event) {
+        $('.tooltip-inner:not(.convert-html)').each(function(){
+          const text = $(this).text();
+          $(this).html(text);
+          $(this).addClass('convert-html');
+        });
       });
     },
-
-    hoverEvent( event, jsEvent, view ) {
-      // console.log('abc');
-      // $('.tooltip-inner:not(.convert-html)').each(function(){
-      //   const text = $(this).text();
-      //   console.log(text);
-      //   $(this).html(text);
-      //   $(this).addClass('convert-html');
-      // });
-    }
   },
 
   async created() {
@@ -241,73 +240,6 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import "~@fullcalendar/core/main.css";
-@import "~@fullcalendar/daygrid/main.css";
-@import "~@fullcalendar/timegrid/main.css";
-@import "~@fullcalendar/list/main.css";
-
-.fc-time-grid .fc-event {
-  padding: 5px;
-}
-
-.fc-event.has-log-time, .fc-event.hide-fc-time {
-  .fc-time {
-    display: none;
-  }
-}
-
-.fc-event {
-  cursor: move;
-  color: rgba(0, 0, 0, 0.8);
-  min-height: 38px;
-}
-
-.fc-time-grid-event .fc-time,
-.fc-time-grid-event .fc-title {
-  color: rgba(0, 0, 0, 0.8);
-}
-
-.fc-time-grid .fc-slats td {
-  height: 3em;
-}
-
-.fc-unthemed td.fc-today {
-  background-color: transparent;
-}
-
-.fc .fc-view-container .fc-head .fc-today {
-  background-color: #ffd05b;
-}
-
-.filter_search {
-  @media screen and (min-width: 1550px) {
-    position: absolute;
-    width: 200px;
-    right: 210px;
-  }
-
-  &:after {
-    content: "";
-    clear: both;
-    display: block;
-  }
-
-  .form-group {
-    float: right;
-  }
-}
-
-.fc-unthemed th,
-.fc-unthemed td,
-.fc-unthemed thead,
-.fc-unthemed tbody,
-.fc-unthemed .fc-divider,
-.fc-unthemed .fc-row,
-.fc-unthemed .fc-content,
-.fc-unthemed .fc-popover,
-.fc-unthemed .fc-list-view,
-.fc-unthemed .fc-list-heading td {
-  border-color: #b3aeae;
-}
+<style lang="scss" scope>
+@import "custom.scss";
 </style>

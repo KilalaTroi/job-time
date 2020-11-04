@@ -79,7 +79,8 @@ class JobsController extends Controller
                         ->orWhere('p.team', 'LIKE', '%,' . $teamID);
                 })
                 ->orderBy('p_name', 'desc')
-                ->groupBy('i.id', 's.memo')
+                ->orderBy('s.id', 'desc')
+                ->groupBy('i.id')
                 ->paginate(10);
         }
         // dd(DB::getQueryLog());

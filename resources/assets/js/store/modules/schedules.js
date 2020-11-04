@@ -81,6 +81,7 @@ export default {
         if (response.data.schedules.length) {
           response.data.schedules = response.data.schedules.map((item, index) => {
             const arrProjects = [58, 59];
+            const arrProjectsAL = [66];
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
             const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
             let sDetail = [];
@@ -91,16 +92,16 @@ export default {
             }
 
             const codition = sDetail.length && state.filters.team == 2 && type.slug != 'yuidea_image';
-            const textTime = codition ? sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '\n' : '';
+            const textTime = sDetail.length && state.filters.team == 2 && !arrProjectsAL.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
             const classHideTime = arrProjects.includes(item.p_id) ? ' hide-fc-time' : '';
 
-            if ( sDetail.length && state.filters.team == 2 && type.slug === 'yuidea_image' ) {
+            if ( sDetail.length && state.filters.team == 2 && arrProjects.includes(item.p_id) ) {
               description = sDetail.map((item) => {
                 const note = item.note ? ' (' + item.note + ')' : '';
                 return (item.start_time + ' - ' + item.end_time + note)
-              }).join(', ')
+              }).join('<br>')
             }
             
             return Object.assign({}, {
@@ -109,7 +110,7 @@ export default {
                 (item.i_name
                   ? item.p_name + checkTR + " " + item.i_name
                   : item.p_name + checkTR) +
-                "\n" +
+                "<br>" +
                 (item.memo ? item.memo : ""),
               description: description,
               className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
@@ -253,7 +254,7 @@ export default {
 
     getItem({ commit, rootGetters }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      const titleArray = (data.event).title.split("\n");
+      const titleArray = (data.event).title.split("<br>");
       const item = {
         id: data.event.id,
         title_not_memo: titleArray.length > 2 ? titleArray[1] : titleArray[0],

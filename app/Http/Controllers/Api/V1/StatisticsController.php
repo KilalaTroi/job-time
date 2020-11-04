@@ -30,7 +30,7 @@ class StatisticsController extends Controller
         $data['users'] = $this->getUsers($startMonth, $endMonth, $teamID);
 
         // info current month
-        $data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $endMonth, $teamID);
+        $data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID);
 
         // Return totals
         $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['users']['disableUsersInMonth'], $data['users']['hoursOfDisableUser'], $data['off_days'], $startMonth, $endMonth, 0, $teamID);
@@ -50,6 +50,9 @@ class StatisticsController extends Controller
 
         // Get users
         $data['users'] = $this->getUsers($startMonth, $endMonth, $teamID, $user_id);
+
+        // info current month
+        $data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID, $user_id);
 
         // Return totals
         $data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['users']['disableUsersInMonth'], $data['users']['hoursOfDisableUser'], $data['off_days'], $startMonth, $endMonth, $user_id, $teamID);
@@ -591,7 +594,7 @@ class StatisticsController extends Controller
         return $users;
     }
 
-    function currentMonth($usersTotal, $endMonth, $teamID = 0) {
+    function currentMonth($usersTotal, $teamID = 0, $user_id = 0) {
         $currentDate = Carbon::now();
 
         $hoursCurrentMonth = DB::table('jobs')
@@ -601,7 +604,10 @@ class StatisticsController extends Controller
             ->when($teamID, function ($query, $teamID) {
                 return $query->where('team_id', $teamID);
             })
-            ->where('jobs.date', ">", str_replace('/', '-', $endMonth))
+            ->when($user_id, function ($query, $user_id) {
+                return $query->where('user_id', $user_id);
+            })
+            ->where('jobs.date', ">=", $currentDate->startOfMonth()->format('Y-m-d'))
             ->get();
 
         $daysCurrentMonth = 0;
@@ -619,6 +625,9 @@ class StatisticsController extends Controller
         ->when($teamID, function ($query, $teamID) {
             return $query->where('team', $teamID);
         })
+        ->when($user_id, function ($query, $user_id) {
+            return $query->where('user_id', $user_id);
+        })
         ->where('type', '=', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
@@ -629,6 +638,9 @@ class StatisticsController extends Controller
         ->join('users', 'users.id', '=', 'off_days.user_id')
         ->when($teamID, function ($query, $teamID) {
             return $query->where('team', $teamID);
+        })
+        ->when($user_id, function ($query, $user_id) {
+            return $query->where('user_id', $user_id);
         })
         ->where('type', '<>', 'all_day')
         ->where('date', '<=', $endDate)
@@ -645,13 +657,22 @@ class StatisticsController extends Controller
             ->when($teamID, function ($query, $teamID) {
                 return $query->where('team', $teamID);
             })
+            ->when($user_id, function ($query, $user_id) {
+                return $query->where('user_id', $user_id);
+            })
             ->where('users.disable_date', "<>", NULL)
             ->count();
 
         $data['totalUsers'] = $usersTotal - $disableUsersInMonth;
         $data['off_days'] = $off_days;
         $data['hours'] = $hoursCurrentMonth;
-        $data['total'] = ($usersTotal - $disableUsersInMonth) * (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
+
+        if ( !$user_id ) {
+            $data['total'] = ($usersTotal - $disableUsersInMonth) * (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
+        } else {
+            $data['total'] = (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
+        }
+        
 
         return $data;
     }
@@ -722,7 +743,7 @@ class StatisticsController extends Controller
         $data = DB::table('issues as i')
             ->select(
                 't.id as id',
-                DB::raw('concat(year(i.created_at),"", LPAD(month(i.created_at), 2, "0")) as yearMonth'),
+                DB::raw('IF( i.start_date != "", concat(year(i.start_date),"", LPAD(month(i.start_date), 2, "0")), concat(year(i.created_at),"", LPAD(month(i.created_at), 2, "0")) ) as yearMonth'),
                 DB::raw('SUM(page) as page')
             )
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')

@@ -9,7 +9,7 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtWorkedTime')}}</p>
-                            <h4 class="card-title">{{ totalArrayObject(hoursPerProject) }}/{{ totalObject(totalHoursPerMonth) }} {{$ml.with('VueJS').get('txtHour')}}</h4>
+                            <h4 class="card-title">{{ totalArrayObject(hoursPerProject) | numeral('0,0') }}/{{ totalObject(totalHoursPerMonth) | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
@@ -23,7 +23,7 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtWorkingTime')}}</p>
-                            <h4 class="card-title"> {{ getCurrentMonth(currentMonth) }} {{$ml.with('VueJS').get('txtHour')}}</h4>
+                            <h4 class="card-title" v-if="getCurrentMonth(currentMonth)"> {{ getCurrentMonth(currentMonth).hours | numeral('0,0') }}/{{ getCurrentMonth(currentMonth).total | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ currentMonth.startDate }} - {{ currentMonth.currentDate }}
@@ -309,6 +309,9 @@
                     .then(res => {
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
                         this.hoursPerProject = res.data.totals.hoursPerProject;
+                        this.currentMonth = res.data.currentMonth;
+                        this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
+                        this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
                         this.getPageSeries(this.types, this.pageData, this.totalHoursPerMonth);
@@ -347,7 +350,11 @@
                 return arr.reduce((total, item) => { return total + (item.total*1).toFixed(2)*1 }, 0).toFixed(2);
             },
             getCurrentMonth(data) {
-                if (typeof(data.hours) !== 'undefined') return (data.hours[0].total*1).toFixed(2) + '/' + data.total;
+                if (typeof(data.hours) !== 'undefined') return {
+                    hours: (data.hours[0].total*1).toFixed(2),
+                    total:  data.total
+                };
+                return false;
             },
             getSeries(projectTypes, totalHoursPerMonth, hoursPerProject) {
                 let _this = this;

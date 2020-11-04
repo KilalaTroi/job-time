@@ -25,6 +25,10 @@ import LightBootstrap from './admin/light-bootstrap-main'
 window.Vue.use(VueRouter);
 window.Vue.use(LightBootstrap);
 
+// Numeral plugin
+import vueNumeralFilterInstaller from 'vue-numeral-filter';
+Vue.use(vueNumeralFilterInstaller, { locale: 'en-gb' });
+
 import DashboardLayout from './admin/layout/DashboardLayout'
 // GeneralViews
 import NotFound from './admin/pages/NotFoundPage'

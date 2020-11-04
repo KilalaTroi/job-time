@@ -57,8 +57,8 @@ export default {
     props: ['team', 'currentJob', 'logTimeData', 'errors', 'success'],
     data() {
         return {
-            startHourRange: [[7, 19]],
-            endHourRange: [[7, 19]],
+            startHourRange: [[7, 22]],
+            endHourRange: [[7, 22]],
             startMinuteRange: [0, 10, 20, 30, 40, 50],
             endMinuteRange: [0, 10, 20, 30, 40, 50],
             startHour: '',
@@ -95,7 +95,7 @@ export default {
         changeStartTime(eventData) {
             this.startMinute = eventData.data.m*1;
             this.startHour = this.startMinute === 50 ? eventData.data.H*1 + 1 : eventData.data.H*1;
-            this.endHourRange = [[this.startHour, 19]];
+            this.endHourRange = [[this.startHour, 22]];
             this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
             this.end_time = 'HH:mm';
             
