@@ -12,6 +12,6 @@ class Job extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'issue_id', 'start_time', 'end_time', 'date'
+        'team_id', 'user_id', 'issue_id', 'schedule_id', 'note', 'start_time', 'end_time', 'date'
     ];
 }

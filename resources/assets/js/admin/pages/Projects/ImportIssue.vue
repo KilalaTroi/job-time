@@ -1,6 +1,6 @@
 <template>
     <modal id="issueImport" v-on:reset-validation="resetValidate">
-        <template slot="title">Import Issues</template>
+        <template slot="title">{{$ml.with('VueJS').get('txtImportProject')}}</template>
             <div class="form-group">
                 <label class="">File</label>
                 <input ref="fileInput" type="file" name="file" v-on:change="handleFileUpload()" required>

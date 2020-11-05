@@ -57,6 +57,7 @@ class SchedulesController extends Controller
             ->select(
                 's.id as id',
                 'p.name as p_name',
+                'p.id as p_id',
                 't.slug as type',
                 'i.name as i_name',
                 'type_id',
@@ -68,16 +69,30 @@ class SchedulesController extends Controller
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-            ->where('i.status', '=', 'publish')
-            ->where('i.status', '=', 'publish')
             ->where('s.team_id', '=', $teamID)
             ->where('s.date', '>=',  $startDate)
             ->where('s.date', '<',  $endDate)
             ->get()->toArray();
 
+        $schedulesDetail = DB::table('jobs as j')
+            ->select(
+                's.id as id',
+                'j.note as note',
+                DB::raw('TIME_FORMAT(j.start_time,"%H:%i") as start_time'),
+                DB::raw('TIME_FORMAT(j.end_time,"%H:%i") as end_time')
+            )
+            ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
+            ->where('s.team_id', '=', $teamID)
+            ->where('s.date', '>=',  $startDate)
+            ->where('s.date', '<',  $endDate)
+            ->orderBy('s.id', 'asc')
+            ->orderBy('j.start_time', 'asc')
+            ->get()->toArray();
+
         return response()->json([
             'projects' => $onlyEvent === "false" ? $projects : [],
-            'schedules' => $schedules
+            'schedules' => $schedules,
+            'schedulesDetail' => $schedulesDetail
         ]);
     }
 

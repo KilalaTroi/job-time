@@ -46,6 +46,7 @@ class OffDaysController extends Controller
     {
         $startDate = $_GET['startDate'];
         $endDate = $_GET['endDate'];
+        $teamID = $_GET['team_id'];
 
         $offDays = DB::table('off_days')
             ->select(
@@ -55,6 +56,9 @@ class OffDaysController extends Controller
                 'off_days.date as date'
             )
             ->leftJoin('users', 'users.id', '=', 'off_days.user_id')
+            ->when($teamID, function ($query, $teamID) {
+                return $query->where('users.team', $teamID);
+            })
             ->where('off_days.status', '=', 'approved')
             ->where('off_days.date', '>=',  $startDate)
             ->where('off_days.date', '<',  $endDate)

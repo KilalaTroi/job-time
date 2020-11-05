@@ -58,6 +58,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::get('statistic/filter-allocation', 'StatisticsController@filterAllocation');
     Route::get('statistic/export-report/{file_extension}', 'StatisticsController@exportReport');
     Route::post('statistic/datatotaling', 'StatisticsController@getDataTotaling');
+    Route::get('statistic/get-page-report', 'StatisticsController@getPageReport');
 
     Route::get('notify', 'ReportsController@getNotify');
     Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');

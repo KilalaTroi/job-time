@@ -13,6 +13,7 @@ export default {
             dept_id: 0,
             showArchive: false
         },
+		paged: 1,
 		validationErrors: '',
 		validationSuccess: ''
 	},
@@ -23,6 +24,7 @@ export default {
 		options: state => state.options,
         selectedItem: state => state.selectedItem,
         filters: state => state.filters,
+		paged: state => state.paged,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess,
 		getProjectByIssueID() {
@@ -46,6 +48,10 @@ export default {
 			state.selectedItem = selectedItem
 		},
 
+		SET_PAGED: (state, paged) => {
+			state.paged = paged
+		},
+
 		SET_VALIDATE: (state, data) => {
 			state.validationErrors = data.error
 			state.validationSuccess = data.success
@@ -58,6 +64,8 @@ export default {
 
 	actions: {
 		async getAll({ commit, state, rootState, rootGetters, dispatch }, page = 1) {
+			commit('SET_PAGED', page)
+
             const uri = '/data/projects?page=' + page + '&filters=' + JSON.stringify(state.filters)
 
 			await axios.get(uri).then(response => {
@@ -113,18 +121,28 @@ export default {
 			commit('SET_SELECTED_ITEM', item)
 		},
 
-		archiveItem({ dispatch }, data) {
+		archiveItem({ state, dispatch }, data) {
             const uri = '/data/issues/archive/' + data.id + '/' + data.status;
             axios.get(uri).then((res) => {
-                dispatch('getAll')
+				if ( (state.paged - 1) * state.data.per_page < (state.data.total - 1) ) {
+					dispatch('getAll', state.paged);
+				} else {
+					let page = state.paged > 1 ? state.paged - 1 : 1;
+					dispatch('getAll', page);
+				}
             }).catch(err => console.log(err));
 		},
 		
-		deleteItem({ dispatch }, issue) {
+		deleteItem({ state, dispatch }, issue) {
             if (confirm(issue.msgText)) {
                 let uri = '/data/issues/' + issue.id;
                 axios.delete(uri).then((res) => {
-                    dispatch('getAll')
+                    if ( (state.paged - 1) * state.data.per_page < (state.data.total - 1) ) {
+						dispatch('getAll', state.paged);
+					} else {
+						let page = state.paged > 1 ? state.paged - 1 : 1;
+						dispatch('getAll', page);
+					}
                 }).catch(err => console.log(err));
             }
         },
@@ -207,8 +225,13 @@ export default {
 			commit('SET_SELECTED_ITEM', {type_id: 0})
 		},
 
-		resetValidate({ dispatch, commit }) {
-			dispatch('getAll')
+		resetValidate({ state, dispatch, commit }) {
+			if ( (state.paged - 1) * state.data.per_page < state.data.total ) {
+				dispatch('getAll', state.paged);
+			} else {
+				let page = state.paged > 1 ? state.paged - 1 : 1;
+				dispatch('getAll', page);
+			}
 			commit('SET_VALIDATE', { error: '', success: '' })
 		},
 

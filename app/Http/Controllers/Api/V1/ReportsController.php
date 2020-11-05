@@ -316,10 +316,10 @@ class ReportsController extends Controller
 
         if ( count($userArr) == 1 ) {
             $dataDetail = $data->select( "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            ->orderBy("j.user_id")->orderBy("j.date", "DESC")->orderBy("j.start_time", "DESC")->orderBy("j.end_time")->get();
         } else {
             $dataDetail = $data->select( "j.user_id" , "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"),DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"),"d.name as department", "p.name as project","i.name as issue", "t.slug as job type")
-            ->orderBy("j.user_id")->orderBy("j.date")->orderBy("j.start_time")->orderBy("j.end_time")->get();
+            ->orderBy("j.user_id")->orderBy("j.date", "DESC")->orderBy("j.start_time", "DESC")->orderBy("j.end_time")->get();
 
             $dataTotal = $data->select( "j.user_id" , DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total") )->groupBy('j.user_id')->get();
         }
@@ -347,8 +347,8 @@ class ReportsController extends Controller
         }
 
         $dataDetail = collect($dataDetail)->map(function($x) use ($userArrName){
-            if ( property_exists($x, 'user_id') ) {
-                $x->user_id =  $userArrName[$x->user_id];
+            if ( property_exists($x, 'user_id') && isset($userArrName[$x->user_id]) ) {
+                $x->user_id = $userArrName[$x->user_id];
             }
             return (array) $x;
         })->toArray();
@@ -360,7 +360,7 @@ class ReportsController extends Controller
             });
 
             $dataTotal = collect($dataTotal)->map(function($x) use ($userArrName){
-                if ( property_exists($x, 'user_id') ) $x->user_id =  $userArrName[$x->user_id];
+                if ( property_exists($x, 'user_id') && isset($userArrName[$x->user_id]) ) $x->user_id = $userArrName[$x->user_id];
                 return (array) $x;
             })->toArray();
 
@@ -422,9 +422,11 @@ class ReportsController extends Controller
     function getNotify() {
 
         $user_id = $_GET['user_id'];
+        $team_id = $_GET['team_id'];
         $count_notify = 0;
 
         $notify = DB::table('reports')
+            ->where('team_id', $team_id)
             ->select( 'seen' )
             ->get()->toArray();
 
@@ -450,6 +452,7 @@ class ReportsController extends Controller
         if ( ! in_array($userID, $seenArr) ) $seenData = $report->seen . ',' . $userID;
 
         if ( $seenData ) {
+            $report->timestamps = false;
             $report->update([
                 'seen' => $seenData
             ]);
@@ -526,6 +529,7 @@ class ReportsController extends Controller
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
         $deptSelects = $request->get('deptSelects');
+        $teamID = $request->get('team_id');
         $deptArr = false;
         if ( $deptSelects ) {
             $deptArr = $deptSelects['id'];
@@ -543,7 +547,7 @@ class ReportsController extends Controller
             $issueArr = $issueSelects['id'];
         }
 
-        $departments = $indexPage ? DB::table('departments')->select('id', 'name as text')->get()->toArray() : [];
+        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
 
         $projects = $deptArr ? DB::table('projects as p')
         ->select(
@@ -555,6 +559,14 @@ class ReportsController extends Controller
             if ( $deptArr > 1 )
                 return $query->where('p.dept_id', $deptArr);
             return $query;
+        })
+        ->when($teamID, function ($query, $teamID) {
+            return $query->where(function ($query) use ($teamID) {
+                $query->where('p.team', '=', $teamID)
+                      ->orWhere('p.team', 'LIKE', $teamID . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+                      ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+            });
         })
         ->orderBy('text', 'asc')
         ->get()->toArray() : array();
@@ -568,7 +580,7 @@ class ReportsController extends Controller
         ->orderBy('id', 'desc')
         ->get()->toArray() : array();
 
-        $users = $indexPage ? DB::connection('mysql')->table('role_user as ru')
+        $users = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
                 'user.name as text'
@@ -577,13 +589,18 @@ class ReportsController extends Controller
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin'])
             ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
-            ->get()->toArray() : [];
+            ->when($teamID, function ($query, $teamID) {
+                return $query->where('user.team', $teamID);
+            })
+            ->get()->toArray();
 
         //DB::enableQueryLog();
         $dataReports = $indexPage ? DB::table('reports as r')
             ->select(
                 'r.id as id',
                 DB::raw('IFNULL(i.name, "--") AS issue_name'),
+                'r.team_id as team_id',
+                't.name as team_name',
                 'title',
                 'title_ja',
                 'date_time',
@@ -603,6 +620,7 @@ class ReportsController extends Controller
                 'i.project_id',
                 'p.dept_id'
             )
+            ->leftJoin('teams as t', 't.id', '=', 'r.team_id')
             ->leftJoin('issues as i', 'i.id', '=', 'r.issue')
             ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
@@ -619,6 +637,9 @@ class ReportsController extends Controller
                 if ( $deptArr > 1 )
                     return $query->where('d.id', $deptArr);
                 return $query;
+            })
+            ->when($teamID, function ($query, $teamID) {
+                return $query->where('r.team_id', $teamID);
             })
             ->where('r.date_time', '>=', $startDate)
             ->where('r.date_time', '<=', $endDate)

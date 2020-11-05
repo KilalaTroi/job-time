@@ -3,7 +3,7 @@
         <template slot="title">{{$ml.with('VueJS').get('txtUpdateTime')}}</template>
         <form v-if="currentTimeLog" @submit="emitUpdateTime">
             <div class="form-group">
-                <h4 class="text-center mb-1"><b>{{ currentTimeLog.p_name }} {{ currentTimeLog.i_name }}</b></h4>
+                <h4 class="text-center mb-1"><b>{{ currentTimeLog.p_name }} {{ currentTimeLog.i_name }} {{ currentTimeLog.phase }}</b></h4>
                 <h5 class="text-center mt-1">{{ this.customFormatter(currentTimeLog.date) }}</h5>
             </div>
             <hr>
@@ -21,6 +21,14 @@
             </div>
             <div class="form-group" v-if="showLunchBreak">
                 <base-checkbox v-model="exceptLunchBreak" class="align-self-end">{{$ml.with('VueJS').get('txtExcludeLunchBreak')}}</base-checkbox>
+            </div>
+            <div class="form-group" v-if="team == 2">
+                <label>Folder</label>
+                <input
+                    type="text"
+                    v-model="currentTimeLog.note"
+                    class="form-control"
+                />
             </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
@@ -46,11 +54,11 @@ export default {
         Modal,
         VueTimepicker
     },
-    props: ['currentTimeLog', 'logTimeData', 'errors', 'success'],
+    props: ['team', 'currentTimeLog', 'logTimeData', 'errors', 'success'],
     data() {
         return {
-            startHourRange: [[7, 19]],
-            endHourRange: [[7, 19]],
+            startHourRange: [[7, 22]],
+            endHourRange: [[7, 22]],
             startMinuteRange: [0, 10, 20, 30, 40, 50],
             endMinuteRange: [0, 10, 20, 30, 40, 50],
             startHour: '',
@@ -67,6 +75,7 @@ export default {
             e.preventDefault();
 
             const newTime = {
+                note: this.currentTimeLog.note,
                 start_time: this.currentTimeLog.start_time,
                 end_time: this.currentTimeLog.end_time,
                 showLunchBreak: this.showLunchBreak,
@@ -81,7 +90,7 @@ export default {
         changeStartTime(eventData) {
             this.startMinute = eventData.data.m*1;
             this.startHour = this.startMinute === 50 ? eventData.data.H*1 + 1 : eventData.data.H*1;
-            this.endHourRange = [[this.startHour, 19]];
+            this.endHourRange = [[this.startHour, 22]];
             this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
 
             let overlap = false;

@@ -4,6 +4,7 @@ export default {
     sbStatistics: 'Statistics',
     sbTotaling: 'Totaling',
     sbUsers: 'Users',
+    sbTeams: 'TEAMS',
     sbDepartments: 'Departments',
     sbJobTypes: 'Job Types',
     sbProjects: 'Projects',
@@ -67,7 +68,7 @@ export default {
     txtUpdateTime: 'Edit Time',
     txtEditIssue: 'Edit issue',
     txtEditProject: 'Edit Project',
-    txtPhase: 'Phase',
+    txtPhase: 'Info',
     txtJobTypeList: 'Job type List',
     txtCreateType: 'Create new job type',
     txtColor: 'Color',
@@ -143,7 +144,7 @@ export default {
     txtBack: 'Back ',
     txtMeeting: 'Meeting',
     txtTrouble: 'Trouble',
-    txtAttendPerson: 'Attendee',
+    txtAttendPerson: 'Attend Person',
     txtEdit: 'Edit',
     txtReporter: 'Reporter',
     txtPreview: 'Preview',
@@ -157,5 +158,10 @@ export default {
     txtCreateTeam: 'Create new team',
     txtEditTeam: 'Edit team',
     txtTeam: 'Team',
-    txtContactAdmin: 'Contact Admin'
+    txtContactAdmin: 'Contact Admin',
+    txtImportProject: 'Import Excel',
+    txtUpdateDate: 'Update Date',
+    txtNotice: "Notice",
+    txtDestination: "Destination",
+    txtWork: "Work"
 }
