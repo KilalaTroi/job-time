@@ -30,6 +30,10 @@
                 <p v-text="$ml.with('VueJS').get('sbReports')" />
                 <span class="report-notify" v-if="reportNotify">{{ reportNotify }}</span>
             </sidebar-link>
+            <sidebar-link to="/upload">
+                <i class="fa fa-flag fa-side-menu"></i>
+                <p v-text="$ml.with('VueJS').get('txtFinish')" />
+            </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">
                     <i class="nc-icon nc-button-power"></i>

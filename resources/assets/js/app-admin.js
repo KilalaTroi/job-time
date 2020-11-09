@@ -49,6 +49,7 @@ import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
 import Ckeditor from './admin/pages/Ckeditor';
 import Reports from './admin/pages/Reports';
+import Upload from './admin/pages/Upload';
 
 const routes = [{
         path: '/',
@@ -133,6 +134,11 @@ const routes = [{
                 path: 'reports',
                 name: 'Reports',
                 component: Reports
+            },
+            {
+                path: 'upload',
+                name: 'Upload',
+                component: Upload
             },
             {
                 path: '*',

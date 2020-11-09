@@ -10,51 +10,10 @@ class Uploadcontroller extends Controller
 {
     public function getData(Request $request) {
         // POST data
-        $start_time = $request->get('start_date');
-        $end_time = $request->get('end_date');
-        $issueFilter = $request->get('issueFilter');
+        $selectDate = $request->get('start_date');
         $showFilter = $request->get('showFilter') == 'showSchedule' ? true : false;
-
-        $deptSelects = $request->get('deptSelects');
-        $deptArr = array();
-        if ( $deptSelects ) {
-            $deptArr = array_map(function($obj) {
-                return $obj['id'];
-            }, $deptSelects);
-        }
-
-        $projectSelects = $request->get('projectSelects');
-        $projectArr = array();
-        if ( $projectSelects ) {
-            $projectArr = array_map(function($obj) {
-                return $obj['id'];
-            }, $projectSelects);
-        }
+        $selectTeam = $request->get('selectTeam');
         // End POST data
-
-        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
-
-        $projectOptions = DB::table('projects as p')
-        ->select(
-            'p.id', 
-            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
-            DB::raw('max(i.id) as issue_id')
-        )
-        ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
-        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-        ->when($deptArr, function ($query, $deptArr) {
-            return $query->whereIn('p.dept_id', $deptArr);
-        })
-        ->when($projectArr, function ($query, $projectArr) {
-            return $query->whereIn('p.id', $projectArr);
-        })
-        ->when($issueFilter, function ($query, $issueFilter) {
-            return $query->where('i.name', 'like', '%'.$issueFilter.'%');
-        })
-        ->where('i.status', 'publish')
-        ->groupBy('p.id')
-        ->orderBy('p.id', 'desc')
-        ->get()->toArray();
 
         // DB::enableQueryLog();
         $dataProjects = DB::table('issues as i')
@@ -66,48 +25,36 @@ class Uploadcontroller extends Controller
                 'i.name as issue',
                 'i.page as page',
                 't.slug as job_type',
+                't.line_room as room_id',
                 's.memo as phase',
+                'i.status as i_status',
                 's.status as status'
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
-            ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
+            ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-            ->when($deptArr, function ($query, $deptArr) {
-                return $query->whereIn('p.dept_id', $deptArr);
+            ->where(function ($query) use ($selectTeam) {
+                $query->where('p.team', '=', $selectTeam)
+                    ->orWhere('p.team', 'LIKE', $selectTeam . ',%')
+                    ->orWhere('p.team', 'LIKE', '%,' . $selectTeam . ',%')
+                    ->orWhere('p.team', 'LIKE', '%,' . $selectTeam);
             })
-            ->when($projectArr, function ($query, $projectArr) {
-                return $query->whereIn('p.id', $projectArr);
+            ->when($showFilter, function ($query) use ($selectDate) {
+                return $query->where('s.date', '=', $selectDate);
             })
-            ->when($issueFilter, function ($query, $issueFilter) {
-                return $query->where('i.name', 'like', '%'.$issueFilter.'%');
+            ->when(!$showFilter, function ($query) use ($selectDate) {
+                return $query->where(function ($query) use ($selectDate) {
+                                    $query->where('start_date', '<=',  $selectDate)
+                                          ->orWhere('start_date', '=',  NULL);
+                                })
+                                ->where(function ($query) use ($selectDate) {
+                                    $query->where('end_date', '>=',  $selectDate)
+                                    ->orWhere('end_date', '=',  NULL);
+                                });
             })
-            ->when($showFilter, function ($query) use ($start_time, $end_time) {
-                if ( $start_time && $end_time ) {
-                    return $query ->whereBetween('s.date', [$start_time, $end_time]);
-                }
-                if ( $start_time ) {
-                    return $query ->where('s.date', '>=', $start_time);
-                }
-                if ( $end_time ) {
-                    return $query ->where('s.date', '<=', $end_time);
-                }
-                return $query ->where('s.date', '=', date('Y-m-d'));
-            })
-            ->when($start_time, function ($query, $start_time) {
-                return $query->where(function ($query) use ($start_time) {
-                    $query->where('start_date', '>=',  $start_time)
-                          ->orWhere('start_date', '=',  NULL);
-                });
-            })
-            ->when($end_time, function ($query, $end_time) {
-                return $query->where(function ($query) use ($end_time) {
-                    $query->where('end_date', '<=',  $end_time)
-                          ->orWhere('end_date', '=',  NULL);
-                });
-            })
-            ->where('s.id', '<>', NULL)
-            ->where('i.status', '=', 'publish')
+            ->where('i.created_at', '<=',  $selectDate . ' 23:59:00')
+            ->orderBy('i.created_at', 'desc')
             ->orderBy('p.name', 'desc')
             ->orderBy('i.name', 'desc')
             ->groupBy('i.id', 's.memo')
@@ -116,29 +63,43 @@ class Uploadcontroller extends Controller
 
         return response()->json([
             'dataProjects' => $dataProjects,
-            'departments' => $departments,
-            'projectOptions' => $projectOptions,
         ]);
     }
 
     public function updateStatus(Request $request) {
         $currentProcess = $request->get('currentProcess');
 
+        // get schedules by issue_id
         $listProcess = DB::table('schedules')
             ->where('issue_id', $currentProcess['issue_id'])
             ->where('memo', $currentProcess['phase'])
             ->select('id')
             ->get()->toArray();
 
-        $listArr = array_map(function($value){
+        // convert to array id
+        $listArr = count($listProcess) > 0 ? array_map(function($value){
             return $value->id;
-        }, $listProcess);
+        }, $listProcess) : array();
         
-
-        DB::table('schedules')
-            ->whereIn('id', $listArr)
-            ->update(['status' => $currentProcess['status']]);
-
+        if ( count($listArr) > 0 ) {
+            // update schedules status
+            DB::table('schedules')
+                ->whereIn('id', $listArr)
+                ->update(['status' => $currentProcess['status']]);
+        } else {
+            if ( $currentProcess['status'] ) {
+                // Close issue
+                DB::table('issues')
+                    ->where('id', $currentProcess['issue_id'])
+                    ->update(['status' => 'archive']);
+            } else {
+                // Open issue
+                DB::table('issues')
+                    ->where('id', $currentProcess['issue_id'])
+                    ->update(['status' => 'publish']);
+            }
+        }
+        
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
@@ -172,13 +133,13 @@ class Uploadcontroller extends Controller
             'Access-Control-Allow-Origin: *',
             'Content-Type: application/json',
             'consumerKey: dcn0NgAygjFgGVL584hJ',
-            'Authorization: Bearer AAAA8oj1wfzTSB7JyPRT5wDk7eTZa3aiVjKiqzaASDr1zZSkXDBKO9wBMxCnYa0JTU3vrEuvStuXCghcIpUyOoHAH5K7i4Aer0qXkZVx61gGiH29LUI7VGAXwoh4M2kon1HeQp1oyxuYN9NgCGetA+35gEmQwhkTogGfhd66ct1La4qSjnpDNvKlUdiKPPYIvpcqgaEallHTntXPNOrKfaOLNUCGvd/mmcbpMCZQq/ThRq3vtRFQB4TqAtvWPj1LuD08nbvXZDDlwChstCEE9N/WocfggtvHlzzkmQc7181h7zHFPXT+ybomHJl3pZqpFbsXMcqrFHpkotLEXniyyzjgz6Y=',
+            'Authorization: Bearer AAAA+e5dRuH73M2tJoZjpYQsVssxby429kiSN68VbNsZpdzUwP+vJi8rW1HEIpkzEJ7Q07bCwyAXavkER17PWic6V8Hj9zgoGqzc+UiOhhqJRiWQrC6BzrmRHTZXngf39pbV71ZcwmcfqDs++Nx6Qfx1FBZrA0odCx+Uqne8nTS/0Y1qWLhPVIkw8kT85hWAwvhCmT/k4Mmou5xGeW+isg1/2z/z5SlQioCXDBXU9YzXCe1ecHkFe27Ry/eu5HgrhZWz3JDX3P6eihExFhwVuyNuwrj/tr97krvOENrtjkuU7ZnuPizlE8oJJC98LReEvfKZVkvUpILROgQwt+hkl2cZ/qQ=',
         ));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         // EXECUTE:
         $result = curl_exec($curl);
-        dd($curl);
+        // dd($curl);
         if(!$result){die("Connection Failure");}
         curl_close($curl);
         return $result;

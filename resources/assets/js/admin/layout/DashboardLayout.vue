@@ -38,6 +38,10 @@
                 <p v-text="$ml.with('VueJS').get('sbReports')" />
                 <span class="report-notify" v-if="reportNotify">{{ reportNotify }}</span>
             </sidebar-link>
+            <sidebar-link to="/upload">
+                <i class="fa fa-flag fa-side-menu"></i>
+                <p v-text="$ml.with('VueJS').get('txtFinish')" />
+            </sidebar-link>
             <sidebar-link to="/profile" class="d-block d-lg-none">
                 <i class="nc-icon nc-circle-09"></i>
                 <p v-text="$ml.with('VueJS').get('mnProfile')" />

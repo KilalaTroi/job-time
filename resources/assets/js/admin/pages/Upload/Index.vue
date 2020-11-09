@@ -1,114 +1,48 @@
 <template>
 	<div class="content">
-		<div class="container">
-			<card>
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="form-group">
-							<label class>{{$ml.with('VueJS').get('txtShowBy')}}</label>
-							<div>
-								<select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
-							</div>
+		<div class="container-fluid">
+            <div class="row">
+                <div class="col col-sm-auto">
+                    <card>
+                        <template slot="header">
+                            <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
+                        </template>
+                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
+                        </datepicker>
+                    </card>
+                </div>
+                <div class="col">
+                    <card>
+                        <template slot="header">
+                            <div class="d-flex justify-content-between">
+                                <h4 class="card-title">{{$ml.with('VueJS').get('txtFinish')}} List</h4>
+                                <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 160px;">
+                                    <select-2
+                                        :options="currentTeamOption"
+                                        v-model="selectTeam"
+                                        class="select2"
+                                    ></select-2>
+                                    <div class="ml-3"></div>
+                                    <select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
+                                </div>
+                            </div>
+                        </template>
+                        <div class="table-responsive">
+							<table-upload class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></table-upload>
 						</div>
-					</div>
-					<div class="col-sm-4">
-						<div class="form-group">
-							<label class>{{$ml.with('VueJS').get('txtStartDate')}}</label>
-							<datepicker
-							name="startDate"
-							input-class="form-control"
-							placeholder="Select Date"
-							v-model="start_date"
-							:format="customFormatter"
-							:disabled-dates="disabledEndDates()"
-							:language="getLanguage(this.$ml)"
-							></datepicker>
-						</div>
-					</div>
-					<div class="col-sm-4">
-						<div class="form-group">
-							<label class>{{$ml.with('VueJS').get('txtEndDate')}}</label>
-							<datepicker
-							name="endDate"
-							input-class="form-control"
-							placeholder="Select Date"
-							v-model="end_date"
-							:format="customFormatter"
-							:disabled-dates="disabledStartDates()"
-							:language="getLanguage(this.$ml)"
-							></datepicker>
-						</div>
-					</div>
-					<div class="col-sm-4">
-						<div class="form-group">
-							<label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
-							<div>
-								<multiselect
-								:multiple="true"
-								v-model="deptSelects"
-								:options="departments"
-								:clear-on-select="false"
-								:preserve-search="true"
-								:placeholder="$ml.with('VueJS').get('txtPickSome')"
-								label="text"
-								track-by="text"
-								:preselect-first="true"
-								></multiselect>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-4">
-						<div class="form-group">
-							<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
-							<div>
-								<multiselect
-								:multiple="true"
-								v-model="projectSelects"
-								:options="projectOptions"
-								:clear-on-select="false"
-								:preserve-search="true"
-								:placeholder="$ml.with('VueJS').get('txtPickSome')"
-								label="text"
-								track-by="text"
-								:preselect-first="true"
-								></multiselect>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-4">
-						<div class="form-group">
-							<label class>
-								{{$ml.with('VueJS').get('txtIssue')}}
-							</label>
-							<input v-model="issue" type="text" name="issue" class="form-control" />
-						</div>
-					</div>
-				</div>
-			</card>
-
-			<card class="strpied-tabled-with-hover">
-				<template slot="header">
-					<div class="d-flex justify-content-between">
-						<h4 class="card-title">
-							{{$ml.with('VueJS').get('txtUploadList')}}           
-						</h4>
-					</div>
-				</template>
-				<div class="table-responsive">
-					<table-upload class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></table-upload>
-				</div>
-				<process-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></process-modal>
-				<comments-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></comments-modal>
-				<pagination
-				:data="dataProjects"
-				:show-disabled="jShowDisabled"
-				:limit="jLimit"
-				:align="jAlign"
-				:size="jSize"
-				@pagination-change-page="getResults"
-				></pagination>
-			</card>
-		</div>
+						<process-modal :currentProcess="currentProcess" v-on:change-status-process="changeStatusProcess" v-on:reset-validation="resetValidate"></process-modal>
+						<pagination
+						:data="dataProjects"
+						:show-disabled="jShowDisabled"
+						:limit="jLimit"
+						:align="jAlign"
+						:size="jSize"
+						@pagination-change-page="fetchData"
+						></pagination>
+					</card>
+                </div>
+            </div>
+        </div>
 	</div>
 </template>
 <script>
@@ -116,43 +50,43 @@ import TableUpload from "../../components/TableUpload";
 import ProcessModal from './ProcessModal';
 import CommentsModal from './CommentsModal';
 import Card from "../../components/Cards/Card";
-import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
+import { mapGetters, mapActions } from "vuex"
 
 export default {
 	components: {
 		TableUpload,
 		Card,
 		Datepicker,
-		Multiselect,
 		Select2,
-		ProcessModal,
-		CommentsModal
+		ProcessModal
 	},
+
+	computed: {
+        ...mapGetters({
+            currentTeamOption: "currentTeamOption", 
+            currentTeam: "currentTeam"
+        })
+    },
 
 	data() {
 		return {
 			columns: [
 				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
+				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" }
 			],
-			start_date: "",
-			end_date: "",
-			deptSelects: [],
-			projectSelects: [],
-			issue: "",
+			start_date: new Date(),
+			selectTeam: '',
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
-			departments: [],
 			dataProjects: {},
 			projects: [],
-			projectOptions: [],
 
 			jLimit: 2,
 			jShowDisabled: true,
@@ -167,45 +101,58 @@ export default {
                 vi: vi,
                 ja: ja,
                 en: en
-            }
+			},
+			
+			page: 1
 		};
 	},
 	mounted() {
 		let _this = this;
-		_this.fetchData();
+		_this.selectTeam = _this.currentTeam.id
 		_this.getOptions();
 		$(document).on('click', '.languages button', function() {
 			_this.txtAll = _this.$ml.with('VueJS').get('txtSelectAll')
 			_this.columns = [
 				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
+				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" }
 			];
 			_this.getOptions();
             _this.showFilter = 'showSchedule';
 		});
-		$(document).on('click', '.show-more', function() {
-			$(this).closest('.message-content').toggleClass('active');
-		});
 	},
 	methods: {
-		fetchData() {
-			let uri = "/data/upload/data";
+		fetchData(page = 1) {
+			this.page = page;
+			let uri = "/data/upload/data?page=" + page;
 			axios
 			.post(uri, {
 				start_date: this.dateFormatter(this.start_date),
-				end_date: this.dateFormatter(this.end_date),
-				deptSelects: this.deptSelects,
-				projectSelects: this.projectSelects,
-				issueFilter: this.issue,
+				selectTeam: this.selectTeam,
 				showFilter: this.showFilter
 			})
 			.then(res => {
-				this.departments = res.data.departments;
-				this.projectOptions = res.data.projectOptions;
 				this.dataProjects = res.data.dataProjects;
+
+				if (res.data.dataProjects.data.length) {
+					this.projects = res.data.dataProjects.data.map((item, index) => {
+						const i_status = item.i_status === "archive" ? true : false;
+						const status = item.status ? true : false;
+						return Object.assign({}, item, {
+							d_name: item.department === "All" ? "" : item.department,
+							p_name: item.project,
+							i_name: item.issue,
+							t_name: item.job_type,
+							room_id: item.room_id,
+							phase: item.phase,
+							status: item.id ? status : i_status
+						});
+					});
+				} else {
+					this.projects = [];
+				}
 			})
 			.catch(err => {
 				console.log(err);
@@ -219,81 +166,18 @@ export default {
             ];
             this.optionsFilter = [...arr];
         },
-		fetchDataFilter() {
-			let uri = "/data/upload/data";
-			axios
-			.post(uri, {
-				start_date: this.dateFormatter(this.start_date),
-				end_date: this.dateFormatter(this.end_date),
-				deptSelects: this.deptSelects,
-				projectSelects: this.projectSelects,
-				issueFilter: this.issue,
-				showFilter: this.showFilter
-			})
-			.then(res => {
-				this.dataProjects = res.data.dataProjects;
-			})
-			.catch(err => {
-				console.log(err);
-				alert("Could not load data");
-			});
+		getProcess(item) {
+			this.currentProcess = item;
 		},
-		getResults(page = 1) {
-			axios
-			.post("/data/upload/data?page=" + page, {
-				start_date: this.dateFormatter(this.start_date),
-				end_date: this.dateFormatter(this.end_date),
-				deptSelects: this.deptSelects,
-				projectSelects: this.projectSelects,
-				issueFilter: this.issue,
-				showFilter: this.showFilter
-			})
-			.then(res => {
-				this.dataProjects = res.data.dataProjects;
-			});
-		},
-		getObjectValue(data, id) {
-			let obj = data.filter(elem => {
-				if (elem.id === id) return elem;
-			});
-
-			if (obj.length > 0) return obj[0];
-		},
-		getDataProjects(dataProjects) {
-			if (dataProjects.data.length) {
-				this.projects = dataProjects.data.map((item, index) => {
-					return {
-						id: item.id,
-						d_name: item.department === "All" ? "" : item.department,
-						p_name: item.project,
-						i_name: item.issue,
-						t_name: item.job_type,
-						room_id: item.room_id,
-						room_name: item.room_name,
-						box_url: item.box_url,
-						phase: item.phase,
-						status: item.status ? true : false
-					};
-				});
-			} else {
-				this.projects = [];
-			}
-		},
-		getProcess(id) {
-			this.currentProcess = this.getObjectValue(this.dataProjects.data, id);
-			this.currentProcess.status = this.currentProcess.status ? true : false;
-		},
-		changeStatusProcess(id) {
-			let foundIndex = this.dataProjects.data.findIndex(x => x.id == id);
-			this.dataProjects.data[foundIndex].status = this.dataProjects.data[foundIndex].status ? 0 : 1;
+		changeStatusProcess(item) {
+			item.status = item.status ? 0 : 1;
 			
-			let uri = "/data/upload/update-status";
+			const uri = "/data/upload/update-status";
 			axios.post(uri, {
-					currentProcess: this.dataProjects.data[foundIndex]
+					currentProcess: item
 				})
 				.then(res => {
-					console.log(res.data.message);
-					this.dataProjects.data = [...this.dataProjects.data];
+					this.fetchData(this.page)
 				})
 				.catch(err => {
 					console.log(err);
@@ -303,18 +187,9 @@ export default {
 		customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
 		},
-		disabledStartDates() {
-			let obj = {
-				to: new Date(this.start_date), // Disable all dates after specific date
-				from: new Date() // Disable all dates after specific date
-				// days: [0], // Disable Saturday's and Sunday's
-			};
-			return obj;
-		},
 		disabledEndDates() {
 			let obj = {
-				from: this.end_date ? new Date(this.end_date) : new Date() // Disable all dates after specific date
-				// days: [0], // Disable Saturday's and Sunday's
+				from: new Date()
 			};
 			return obj;
 		},
@@ -323,52 +198,26 @@ export default {
 		},
 		resetValidate() {
 			this.currentProcess = {};
-			this.fetchDataFilter();
+			this.fetchData(this.page)
 		},
 		getLanguage(data) {
 			return this.dataLang[data.current]
 		}
 	},
 	watch: {
-		dataProjects: [
-		{
-			handler: "getDataProjects",
-            deep: true
-		}
-		],
-		txtAll: [
-		{
-			handler: "getUserOptions"
-		}
-		],
+		selectTeam: [{
+            handler: function(value, oldValue) {
+                if ( value != oldValue ) this.fetchData()
+            }
+        }],
 		start_date: [
 		{
-			handler: "fetchDataFilter"
-		}
-		],
-		end_date: [
-		{
-			handler: "fetchDataFilter"
-		}
-		],
-		deptSelects: [
-		{
-			handler: "fetchDataFilter"
-		}
-		],
-		projectSelects: [
-		{
-			handler: "fetchDataFilter"
-		}
-		],
-		issue: [
-		{
-			handler: "fetchDataFilter"
+			handler: "fetchData"
 		}
 		],
 		showFilter: [
 		{
-			handler: "fetchDataFilter"
+			handler: "fetchData"
 		}
 		]
 	}

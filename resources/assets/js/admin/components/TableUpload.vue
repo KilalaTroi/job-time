@@ -3,24 +3,23 @@
         <thead>
             <slot name="columns">
                 <tr>
-                    <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
-                    <th width="110" class="text-center">{{$ml.with('VueJS').get('txtProcess')}}</th>
                     <th width="110" class="text-center">{{$ml.with('VueJS').get('txtFinish')}}</th>
+                    <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
+                    <th width="110" class="text-center">{{$ml.with('VueJS').get('txtAction')}}</th>
                 </tr>
             </slot>
         </thead>
         <tbody>
             <tr v-for="(item, index) in data" :key="index">
+                <td class="text-center"><i @click="$emit('change-status-process', item)" :class="itemClassActive(item)"></i></td>
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
                         <span v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
                 <td class="text-center">
-                    <i @click="$emit('get-process', item.id)" class="fa fa-plus-circle btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i>  
-                    <i @click="$emit('get-process', item.id)" class="ml-1 fa fa-eye btn-process" data-toggle="modal" data-target="#commentsModal" data-backdrop="static" data-keyboard="false"></i>  
+                    <i @click="$emit('get-process', item)" class="fa fa-paper-plane btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i> 
                 </td>
-                <td class="text-center"><i @click="$emit('change-status-process', item.id)" :class="itemClassActive(item)"></i></td>
             </tr>
         </tbody>
     </table>

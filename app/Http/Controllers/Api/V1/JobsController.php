@@ -52,6 +52,7 @@ class JobsController extends Controller
                 ->orWhere(function ($query) use ($defaultProjects) {
                     $query->whereIn('p.id', $defaultProjects);
                 })
+                ->orderBy('i.created_at', 'desc')
                 ->orderBy('p_name', 'desc')
                 ->groupBy('i.id', 's.memo')
                 ->paginate(10);
