@@ -173,9 +173,9 @@ class StatisticsController extends Controller
             })
             ->where('j.date', '>=', $start_time)
             ->where('j.date', '<=', $end_time)
-            ->orderBy('j.user_id', 'asc')
             ->orderBy('j.date', 'desc')
             ->orderBy('j.start_time', 'desc')
+            ->orderBy('j.user_id', 'asc')
             ->paginate(20);
         // dd(DB::getQueryLog());
 
