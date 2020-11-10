@@ -49,8 +49,14 @@ class JobsController extends Controller
                                 ->orWhere('p.team', 'LIKE', '%,' . $teamID);
                         });
                 })
-                ->orWhere(function ($query) use ($defaultProjects) {
-                    $query->whereIn('p.id', $defaultProjects);
+                ->orWhere(function ($query) use ($defaultProjects, $teamID) {
+                    $query->whereIn('p.id', $defaultProjects)
+                    ->where(function ($query) use ($teamID) {
+                        $query->where('p.team', '=', $teamID)
+                            ->orWhere('p.team', 'LIKE', $teamID . ',%')
+                            ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+                            ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+                    });
                 })
                 ->orderBy('i.created_at', 'desc')
                 ->orderBy('p_name', 'desc')
@@ -85,6 +91,7 @@ class JobsController extends Controller
                         ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
                         ->orWhere('p.team', 'LIKE', '%,' . $teamID);
                 })
+                ->orderBy('i.created_at', 'desc')
                 ->orderBy('p_name', 'desc')
                 ->orderBy('s.id', 'desc')
                 ->groupBy('i.id')

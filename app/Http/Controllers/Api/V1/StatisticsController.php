@@ -18,7 +18,7 @@ class StatisticsController extends Controller
         $teamID = $_GET['team_id'];
 
         // Return project type
-        $data['types'] = $this->typeWithClass();
+        $data['types'] = $this->typeWithClass($teamID);
 
         // Return months, monthsText, startEndYear, off days
         $data = array_merge($data, $this->handleMonthYear($startMonth, $endMonth, $teamID));
@@ -362,9 +362,28 @@ class StatisticsController extends Controller
         })->download($file_extension);
     }
 
-    function typeWithClass() {
+    function typeWithClass($teamFilter) {
         $aplabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'];
-        $type_work = Type::all();
+        $type_work = DB::table('types as t')->select(
+            't.id',
+            't.dept_id',
+            't.line_room',
+            't.slug',
+            't.slug_vi',
+            't.slug_ja',
+            't.value'
+        )
+        ->rightJoin('projects as p', 't.id', '=', 'p.type_id')
+        ->where(function ($query) use ($teamFilter) {
+            $query->where('p.team', '=', $teamFilter . '')
+                  ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+        })
+        ->orderBy('t.id', 'ASC')
+        ->groupBy('t.id')
+        ->get()->toArray();
+
         foreach ($type_work as $key => $value) {
             $type_work[$key]->class = 'ct-series-' . $aplabet[$key];
         }

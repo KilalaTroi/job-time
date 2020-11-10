@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use GuzzleHttp\Client;
 
 class Uploadcontroller extends Controller
 {
@@ -106,20 +107,28 @@ class Uploadcontroller extends Controller
     }
 
     public function submitMessage(Request $request) {
-        $data_array =  array(
-            "botNo" => 763699,
-            "roomId" => $request->get('roomId'),
-            "content" => array(
-                "type" => "text",
-                "text" => $request->get('content')
-            ),
-        );
-        $make_call = $this->sendMessage('https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', json_encode($data_array));
-        $response = json_decode($make_call, true);
 
-        return response()->json(array(
-            'data' => $response,
-        ), 200);
+        $client = new Client([
+            'headers' => [
+                'Access-Control-Allow-Origin' => '*',
+                'Content-Type'     => 'application/json',
+                'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
+                'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
+            ]
+        ]);
+
+        $response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
+            'json' => [
+                "botNo" => 763699,
+                "roomId" => $request->get('roomId'),
+                "content" => array(
+                    "type" => "text",
+                    "text" => $request->get('content')
+                ),
+            ]
+        ]);
+
+        return $response->getBody();;
     }
 
     public function sendMessage($url, $data){

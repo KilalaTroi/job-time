@@ -76,6 +76,13 @@ export default {
 				await axios.post(uri, {
 						roomId: this.currentProcess.room_id,
 						content: content,
+					}).then(res => {
+						console.log(res.data);
+						if ( res.data.code === 200 ) {
+							this.success = "Successfully."
+						} else {
+							this.errors = [[res.data.errorMessage]]
+						}
 					}).catch(err => {
 						console.log(err);
 					});
