@@ -121,6 +121,7 @@ export default {
         },
         chartUpdate() {
             this.chart = this.$Chartist[this.chartType]('#' + this.chartId, this.chartData, this.chartOptions, this.responsiveOptions);
+            this.$emit('chart-loaded', '#' + this.chartId);
         }
     },
     watch: {
