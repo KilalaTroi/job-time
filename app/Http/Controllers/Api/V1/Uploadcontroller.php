@@ -14,6 +14,7 @@ class Uploadcontroller extends Controller
         $selectDate = $request->get('start_date');
         $showFilter = $request->get('showFilter') == 'showSchedule' ? true : false;
         $selectTeam = $request->get('selectTeam');
+        $defaultProjects = array(10, 58, 59, 67, 68, 69);
         // End POST data
 
         // DB::enableQueryLog();
@@ -35,6 +36,7 @@ class Uploadcontroller extends Controller
             ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+            ->whereNotIn('p.id', $defaultProjects)
             ->where(function ($query) use ($selectTeam) {
                 $query->where('p.team', '=', $selectTeam)
                     ->orWhere('p.team', 'LIKE', $selectTeam . ',%')

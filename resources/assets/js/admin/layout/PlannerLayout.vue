@@ -34,7 +34,7 @@
                 <p v-text="$ml.with('VueJS').get('sbReports')" />
                 <span class="report-notify" v-if="reportNotify">{{ reportNotify }}</span>
             </sidebar-link>
-            <sidebar-link to="/upload">
+            <sidebar-link to="/finish">
                 <i class="fa fa-flag fa-side-menu"></i>
                 <p v-text="$ml.with('VueJS').get('txtFinish')" />
             </sidebar-link>

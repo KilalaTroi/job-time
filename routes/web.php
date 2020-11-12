@@ -69,9 +69,9 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('reports-action', 'ReportsController', ['except' => ['create', 'edit']]);
     Route::post('import-projects', 'ProjectsController@importProjects');
 
-    Route::post('upload/data', 'UploadController@getData');
-    Route::post('upload/update-status', 'UploadController@updateStatus');
-    Route::post('upload/submit-message', 'UploadController@submitMessage');
+    Route::post('finish/data', 'UploadController@getData');
+    Route::post('finish/update-status', 'UploadController@updateStatus');
+    Route::post('finish/submit-message', 'UploadController@submitMessage');
 
     Route::post('upload/report', 'UserUploadController@updateReport');
 

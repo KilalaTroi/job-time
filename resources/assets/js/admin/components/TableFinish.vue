@@ -26,7 +26,7 @@
 </template>
 <script>
 export default {
-    name: 'table-upload',
+    name: 'table-finish',
     props: {
         columns: Array,
         data: Array

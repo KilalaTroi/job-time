@@ -88,7 +88,7 @@ export default {
             let description = '';
 
             if ( response.data.schedulesDetail.length ) {
-              sDetail = rootGetters['getArrObjectByID'](response.data.schedulesDetail, item.id);
+              sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
             }
 
             const codition = sDetail.length && state.filters.team == 2 && type.slug != 'yuidea_image';

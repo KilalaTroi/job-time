@@ -28,7 +28,7 @@
                             </div>
                         </template>
                         <div class="table-responsive">
-							<table-upload class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></table-upload>
+							<table-finish class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></table-finish>
 						</div>
 						<process-modal :currentProcess="currentProcess" v-on:change-status-process="changeStatusProcess" v-on:reset-validation="resetValidate"></process-modal>
 						<pagination
@@ -46,7 +46,7 @@
 	</div>
 </template>
 <script>
-import TableUpload from "../../components/TableUpload";
+import TableFinish from "../../components/TableFinish";
 import ProcessModal from './ProcessModal';
 import CommentsModal from './CommentsModal';
 import Card from "../../components/Cards/Card";
@@ -58,7 +58,7 @@ import { mapGetters, mapActions } from "vuex"
 
 export default {
 	components: {
-		TableUpload,
+		TableFinish,
 		Card,
 		Datepicker,
 		Select2,
@@ -126,7 +126,7 @@ export default {
 	methods: {
 		fetchData(page = 1) {
 			this.page = page;
-			let uri = "/data/upload/data?page=" + page;
+			let uri = "/data/finish/data?page=" + page;
 			axios
 			.post(uri, {
 				start_date: this.dateFormatter(this.start_date),
@@ -172,7 +172,7 @@ export default {
 		changeStatusProcess(item) {
 			item.status = item.status ? 0 : 1;
 			
-			const uri = "/data/upload/update-status";
+			const uri = "/data/finish/update-status";
 			axios.post(uri, {
 					currentProcess: item
 				})

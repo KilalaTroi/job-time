@@ -22,7 +22,7 @@ class JobsController extends Controller
         $userID = $_GET['user_id'];
         $showBy = $_GET['show'];
         $teamID = $_GET['team_id'];
-        $defaultProjects = array(58, 59, 68);
+        $defaultProjects = array(58, 59, 67, 68, 69);
 
         // DB::enableQueryLog();
         if ( $showBy == 'showSchedule' ) {
@@ -37,7 +37,7 @@ class JobsController extends Controller
                     'i.name as i_name'
                 )
                 ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-                ->join('schedules as s', 'i.id', '=', 's.issue_id')
+                ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
                 ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where(function ($query) use ($selectDate, $teamID) {
                     $query->where('s.date', '=', $selectDate)
@@ -51,6 +51,7 @@ class JobsController extends Controller
                 })
                 ->orWhere(function ($query) use ($defaultProjects, $teamID) {
                     $query->whereIn('p.id', $defaultProjects)
+                    ->where('i.status', '=', 'publish')
                     ->where(function ($query) use ($teamID) {
                         $query->where('p.team', '=', $teamID)
                             ->orWhere('p.team', 'LIKE', $teamID . ',%')

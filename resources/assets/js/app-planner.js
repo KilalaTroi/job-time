@@ -42,7 +42,7 @@ import OffDays from './admin/pages/OffDays';
 import Overview from './admin/pages/Overview';
 import Totaling from './admin/pages/Totaling';
 import Reports from './admin/pages/Reports';
-import Upload from './admin/pages/Upload';
+import Finish from './admin/pages/Finish';
 
 const routes = [{
         path: '/',
@@ -94,9 +94,9 @@ const routes = [{
                 component: Reports
             },
             {
-                path: 'upload',
-                name: 'Upload',
-                component: Upload
+                path: 'finish',
+                name: 'Finish',
+                component: Finish
             },
             {
                 path: '*',

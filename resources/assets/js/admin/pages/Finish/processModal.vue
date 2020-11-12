@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<modal id="processModal" :sizeClasses="modalLg" v-on:reset-validation="resetValidate">
-			<template slot="title">{{$ml.with('VueJS').get('txtUpload')}}</template>
+			<template slot="title">{{$ml.with('VueJS').get('txtFinish')}}</template>
 			<div v-if="currentProcess">
 				<div class="table-responsive">
 					<table-no-action class="table-hover table-striped" :columns="columns" :data="dataProcess"></table-no-action>
@@ -14,7 +14,7 @@
 				<error-item :errors="errors"></error-item>
 				<success-item :success="success"></success-item>
 				<div class="form-group d-flex justify-content-center">
-					<button v-if="!sendSuccess" type="button" class="btn btn-primary mr-3" @click="uploadProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
+					<button v-if="!sendSuccess" type="button" class="btn btn-primary mr-3" @click="finishProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
 					<button type="button" class="btn btn-second" @click="resetValidate">Cancel</button>
 				</div>
 			</div>
@@ -72,7 +72,7 @@ export default {
 	methods: {
 		async sendMessageLineWork(content) {
 			if ( this.currentProcess.room_id ) {
-				let uri = "/data/upload/submit-message";
+				let uri = "/data/finish/submit-message";
 				await axios.post(uri, {
 						roomId: this.currentProcess.room_id,
 						content: content,
@@ -97,7 +97,7 @@ export default {
 			}
 			];
 		},
-		uploadProcess() {
+		finishProcess() {
 			// Reset validate
 			this.errors = "";
 			this.success = "";

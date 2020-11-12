@@ -210,7 +210,7 @@ class StatisticsController extends Controller
         $teamID = $_GET['team_id'];
 
         // Return project type
-        $types = $this->typeWithClass();
+        $types = $this->typeWithClass($teamID);
 
         // Return months, monthsText, startEndYear, off days
         $data = $this->handleMonthYear($startMonth, $endMonth, $teamID, $user_id, true);
@@ -236,11 +236,12 @@ class StatisticsController extends Controller
         // Return data excel
         $mainTable = array();
         $other = array();
+        $maxRow = count($types) + 5;
+        $maxColumn = count($totals['hoursPerMonth']) + 2;
+        $letterMaxColumn = $this->columnLetter($maxColumn);
 
-        foreach ($types as $type) {
-            $index = 0;
-            $total = 0;
-            $numberWork = 0;
+        foreach ($types as $index => $type) {
+            $childIndex = 0;
 
             foreach ($totals['hoursPerMonth'] as $key => $month) {
                 $hours = array_filter($totals['hoursPerProject'], function($obj) use ($type, $key) {
@@ -251,29 +252,24 @@ class StatisticsController extends Controller
                 });
                 $hours = array_values($hours);
                 $percent = isset($hours[0]) && $month ? round($hours[0]->total/$month*100, 1) : 0;
-                if ( $percent !== 0 ) $numberWork++;
                 $mainTable[$type->slug]['slug'] = $type->slug;
                 $mainTable[$type->slug]['slug_ja'] = $type->slug_ja;
-                $mainTable[$type->slug][$data['monthsText'][$index]] = $percent . '%';
-                $total += $percent;
-                $other[$data['monthsText'][$index]] = isset($other[$data['monthsText'][$index]]) ? $other[$data['monthsText'][$index]] + $percent : $percent;
-                $index++;
+                $mainTable[$type->slug][$data['monthsText'][$childIndex]] = $percent;
+                $other[$data['monthsText'][$childIndex]] = isset($other[$data['monthsText'][$childIndex]]) ? $other[$data['monthsText'][$childIndex]] + $percent : $percent;
+                $childIndex++;
             }
+            $numColumn = $index + 5;
             $mainTable[$type->slug][''] = "  ";
-            $mainTable[$type->slug]['Total'] = $total ? round($total/$numberWork, 1) . '%' : $total . '%';
+            $mainTable[$type->slug]['Total'] = '=SUM(C'. $numColumn .':'. $letterMaxColumn . $numColumn .')/SUM($C$5:$'. $letterMaxColumn .'$'. $maxRow .')*100';
         }
 
-        $otherTotal = 0;
-        $numberWork = 0;
-        $other = array_map(function ($value) use (&$otherTotal, &$numberWork) {
+        $other = array_map(function ($value) {
             if ( $value != 0 ) {
                 $newValue = 100 - $value;
-                $otherTotal += $newValue;
-                $numberWork++;
-                return $newValue . '%';
+                return $newValue;
             }
 
-            return $value . '%';
+            return $value;
         }, $other);
         $otherSlug['slug'] = 'other';
         $otherSlug['slug_ja'] = 'その他';
@@ -281,7 +277,7 @@ class StatisticsController extends Controller
 
         $mainTable['other'] = $other;
         $mainTable['other'][''] = "  ";
-        $mainTable['other']['Total'] = $otherTotal ? round($otherTotal/$numberWork, 1) . '%' : $otherTotal . '%';
+        $mainTable['other']['Total'] = '=SUM(C'. $maxRow .':'. $letterMaxColumn . $maxRow .')/SUM($C$5:$'. $letterMaxColumn .'$'. $maxRow .')*100';
 
         $year = $nameFile = str_replace('/', '-', $startMonth) . '_' . str_replace('/', '-', $endMonth);
         if ( $infoUser ) $nameFile .= '-'.$infoUser[0]->text;
@@ -300,7 +296,7 @@ class StatisticsController extends Controller
                 ->setCompany('Kilala');
             $excel->sheet('sheet1', function($sheet) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
                 $sheet->setCellValue('A1', "Job Time Report ". $year);
-                $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                $sheet->setCellValue('A2', "Date: ". Carbon::now() . " (%)");
                 if ( $infoUser ) $sheet->setCellValue('A3', $infoUser[0]->text);
                 $sheet->fromArray($mainTable, null, 'A'.$startRow, true);
 
