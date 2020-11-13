@@ -53,8 +53,12 @@ export default {
         }
     },
     mounted() {
-        this.$Chartist = Chartist.default || Chartist;
-        this.initChart();
+        const _this = this;
+        _this.$Chartist = Chartist.default || Chartist;
+        _this.initChart();
+        $(window).resize(function () {
+            _this.chartUpdate();
+        });
     },
     methods: {
         /***

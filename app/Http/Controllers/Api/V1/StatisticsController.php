@@ -295,16 +295,23 @@ class StatisticsController extends Controller
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
             $excel->sheet('sheet1', function($sheet) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
+
                 $sheet->setCellValue('A1', "Job Time Report ". $year);
                 $sheet->setCellValue('A2', "Date: ". Carbon::now() . " (%)");
                 if ( $infoUser ) $sheet->setCellValue('A3', $infoUser[0]->text);
                 $sheet->fromArray($mainTable, null, 'A'.$startRow, true);
+
+                // Format Cell - 0.0_
+                $sheet->setColumnFormat(array(
+                    $columnName . '5:' . $columnName . $numberRows => '0.0',
+                )); 
 
                 // Layout Sheet
                 $sheet->setCellValue('A'.$startRow, 'Job type');
                 $sheet->setCellValue('B'.$startRow, 'Japanese');
                 $sheet->mergeCells('A1:'.$columnName.'1');
                 $sheet->mergeCells('A2:'.$columnName.'2');
+
                 if ( $infoUser ) $sheet->mergeCells('A3:'.$columnName.'3');
 
                 // Style Sheet
@@ -317,9 +324,11 @@ class StatisticsController extends Controller
                     $cells->setAlignment('center');
                     $cells->setValignment('middle');
                 });
+
                 $sheet->cell('A2:'.$columnName.'2', function($cells) {
                     $cells->setAlignment('center');
                 });
+
                 if ( $infoUser ) $sheet->cell('A3:'.$columnName.'3', function($cells) {
                     $cells->setFont([
                         'size'       => '14',
@@ -327,6 +336,7 @@ class StatisticsController extends Controller
                     ]);
                     $cells->setAlignment('center');
                 });
+
                 $sheet->cell('A'.$startRow.':'.$columnName.$startRow, function($cells) {
                     // Set black background
                     $cells->setBackground('#ffd05b');
@@ -338,9 +348,11 @@ class StatisticsController extends Controller
                     $cells->setAlignment('center');
                     $cells->setBorder('thin','thin','thin','thin');
                 });
+
                 $sheet->cell('C5:'.$columnName.$numberRows , function($cells) {
                     $cells->setAlignment('center');
                 });
+
                 $sheet->cell('A'. $numberRows.':'.$columnName.$numberRows, function($cells) {
                     // Set font
                     $cells->setFont([
@@ -348,11 +360,13 @@ class StatisticsController extends Controller
                     ]);
                     $cells->setBorder('thin','thin','thin','thin');
                 });
+
                 $sheet->cell('A4:A'.$numberRows , function($cells) {
                     $cells->setFont([
                         'bold'       =>  true
                     ]);
                 });
+
                 $sheet->setBorder('A'.$startRow.':'.$columnNameNext.$numberRows, 'thin');
             });
         })->download($file_extension);

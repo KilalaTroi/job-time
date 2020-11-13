@@ -96,7 +96,7 @@
                             <hr>
                             <div class="row">
                                 <div class="export col-auto ml-auto">
-                                    <a :href="exportLink" target="_blank"><i class="fa fa-download"></i> {{$ml.with('VueJS').get('txtExportExcel')}}</a>
+                                    <a :href="exportLink"><i class="fa fa-download"></i> {{$ml.with('VueJS').get('txtExportExcel')}}</a>
                                 </div>
                             </div>
                         </template>
