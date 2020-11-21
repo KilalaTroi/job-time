@@ -19,18 +19,18 @@
 <body style="background: none;">
 
 <div class="container-fluid">
-    <h2 class="text-center">Report</h2>
-    <h6 class="mt-5">Title: {{ $data['title'] }}</h6>
-    <h6>Date: {{ $data['date_time'] }}</h6>
-    <h6>Reporter: {{ $data['reporter'] }}</h6>
+    <h1 class="text-center"><strong>Report</strong></h1>
+    <h5 class="mt-5"><strong>Title:</strong> {{ $data['title'] }}</h5>
+    <h5><strong>Date:</strong> {{ $data['date_time'] }}</h5>
+    <h5><strong>Reporter:</strong> {{ $data['reporter'] }}</h5>
 
     @if ( $data['is_metting'] == 1 )
-        <h6>Attend Person (KILALA): {{ $data['attend_person'] }}</h6>
-        <h6>Attend Person (OTHER): {{ $data['attend_other_person'] }}</h6>
+        <h5><strong>Attend Person (KILALA):</strong> {{ $data['attend_person'] }}</h5>
+        <h5><strong>Attend Person (OTHER):</strong> {{ $data['attend_other_person'] }}</h5>
     @else
-        <h6>Departments: {{ $data['dept_name'] }}</h6>
-        <h6>Projects: {{ $data['project_name'] }}</h6>
-        <h6>Issue: {{ $data['issue_name'] }}</h6>
+        <h5><strong>Departments:</strong> {{ $data['dept_name'] }}</h5>
+        <h5><strong>Projects:</strong> {{ $data['project_name'] }}</h5>
+        <h5><strong>Issue:</strong> {{ $data['issue_name'] }}</h5>
     @endif
     
     <div class="content mt-5">
