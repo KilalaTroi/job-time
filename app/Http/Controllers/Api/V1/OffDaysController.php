@@ -42,11 +42,15 @@ class OffDaysController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function allOffDays()
+    public function allOffDays(Request $request)
     {
         $startDate = $_GET['startDate'];
         $endDate = $_GET['endDate'];
         $teamID = $_GET['team_id'];
+        $user = $request->session()->get('Auth');
+
+        // Check filter team for user
+        $codition = $teamID && ($user[0]['id'] != 1);
 
         $offDays = DB::table('off_days')
             ->select(
@@ -56,8 +60,10 @@ class OffDaysController extends Controller
                 'off_days.date as date'
             )
             ->leftJoin('users', 'users.id', '=', 'off_days.user_id')
-            ->when($teamID, function ($query, $teamID) {
+            ->when($codition, function ($query) use ($teamID) {
                 return $query->where('users.team', $teamID);
+            }, function ($query) {
+                return $query;
             })
             ->where('off_days.status', '=', 'approved')
             ->where('off_days.date', '>=',  $startDate)
@@ -66,6 +72,7 @@ class OffDaysController extends Controller
 
         return response()->json([
             'offDays' => $offDays,
+            'codition' => $codition
         ]);
     }
 
