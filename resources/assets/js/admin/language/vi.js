@@ -2,7 +2,7 @@
 export default {
     siteName: 'Job Time',
     sbStatistics: 'Statistics',
-    sbTotaling: 'Totaling',
+    sbTotaling: 'JOB TOTALING',
     sbUsers: 'Users',
     sbTeams: 'TEAMS',
     sbDepartments: 'Departments',

@@ -141,6 +141,7 @@ class JobsController extends Controller
             ->select(
                 'j.issue_id as id',
                 's.id as schedule_id',
+                's.memo as phase',
                 DB::raw('SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total')
             )
             ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')

@@ -2,7 +2,7 @@
 export default {
     siteName: 'ジョブタイム',
     sbStatistics: '統計',
-    sbTotaling: '集計',
+    sbTotaling: 'ジョブ集計',
     sbUsers: 'ユーザー',
     sbTeams: 'チーム',
     sbDepartments: '部署',

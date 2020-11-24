@@ -56,6 +56,7 @@ class Uploadcontroller extends Controller
                                     ->orWhere('end_date', '=',  NULL);
                                 });
             })
+            ->where('t.line_room', '!=', NULL)
             ->where('i.created_at', '<=',  $selectDate . ' 23:59:00')
             ->orderBy('i.created_at', 'desc')
             ->orderBy('p.name', 'desc')
