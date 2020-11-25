@@ -128,7 +128,18 @@ class StatisticsController extends Controller
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
         })
-        ->where('i.status', 'publish')
+
+        // Get projects by start time and end time
+        ->where(function ($query) use ($end_time) {
+            $query->where('i.start_date', '<=',  $end_time)
+                  ->orWhere('i.start_date', '=',  NULL);
+        })
+        ->where(function ($query) use ($start_time) {
+            $query->where('i.end_date', '>=',  $start_time)
+                  ->orWhere('i.end_date', '=',  NULL);
+        })
+
+        // ->where('i.status', 'publish')
         ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
         ->get()->toArray();
