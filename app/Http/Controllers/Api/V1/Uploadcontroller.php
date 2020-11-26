@@ -20,29 +20,35 @@ class Uploadcontroller extends Controller
         // DB::enableQueryLog();
         $dataProjects = DB::table('issues as i')
             ->select(
-                'i.id as issue_id',
-                's.id as id',
+                'i.id as id',
+                's.id as schedule_id',
                 'd.name as department',
                 'p.name as project',
                 'i.name as issue',
-                'i.page as page',
                 't.slug as job_type',
                 't.line_room as room_id',
                 's.memo as phase',
-                'i.status as i_status',
-                's.status as status'
+                'u.name as user_name',
+                'pc.date as date',
+                'pc.page as page',
+                'pc.status as status'
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-            ->whereNotIn('p.id', $defaultProjects)
+            ->leftJoin('processes as pc', function($join) {
+                $join->on('i.id', '=', 'pc.issue_id')
+                    ->on('s.memo', '=', 'pc.memo');
+            })
+            ->leftJoin('users as u', 'u.id', '=', 'pc.user_id')
             ->where(function ($query) use ($selectTeam) {
                 $query->where('p.team', '=', $selectTeam)
                     ->orWhere('p.team', 'LIKE', $selectTeam . ',%')
                     ->orWhere('p.team', 'LIKE', '%,' . $selectTeam . ',%')
                     ->orWhere('p.team', 'LIKE', '%,' . $selectTeam);
             })
+            ->whereNotIn('p.id', $defaultProjects)
             ->when($showFilter, function ($query) use ($selectDate) {
                 return $query->where('s.date', '=', $selectDate);
             })
@@ -58,6 +64,7 @@ class Uploadcontroller extends Controller
             })
             ->where('t.line_room', '!=', NULL)
             ->where('i.created_at', '<=',  $selectDate . ' 23:59:00')
+            ->orderBy('s.id', 'desc')
             ->orderBy('i.created_at', 'desc')
             ->orderBy('p.name', 'desc')
             ->orderBy('i.name', 'desc')

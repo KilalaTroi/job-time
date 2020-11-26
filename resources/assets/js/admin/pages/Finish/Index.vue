@@ -79,7 +79,11 @@ export default {
 				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" }
+				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" },
+				{ id: "date", value: this.$ml.with('VueJS').get('txtDate'), width: "", class: "" },
+				{ id: "user_name", value: this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
+				{ id: "page", value: 'Pages Worked', width: "160", class: "" },
+				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "", class: "" }
 			],
 			start_date: new Date(),
 			selectTeam: '',
@@ -117,7 +121,11 @@ export default {
 				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" }
+				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" },
+				{ id: "date", value: _this.$ml.with('VueJS').get('txtDate'), width: "", class: "" },
+				{ id: "user_name", value: _this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
+				{ id: "page", value: 'Pages Worked', width: "160", class: "" },
+				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "", class: "" }
 			];
 			_this.getOptions();
             _this.showFilter = 'showSchedule';
