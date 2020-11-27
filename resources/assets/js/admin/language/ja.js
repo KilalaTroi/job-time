@@ -163,5 +163,8 @@ export default {
     txtUpdateDate: '更新日',
     txtNotice: "お知らせ",
     txtDestination: "宛先",
-    txtWork: "作業"
+    txtWork: "作業",
+    txtStatus: '制作状態',
+    txtPagesWorked: '作業ページ数',
+    txtDetails: '詳細情報'
 }

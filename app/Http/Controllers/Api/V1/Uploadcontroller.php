@@ -21,7 +21,8 @@ class Uploadcontroller extends Controller
         $dataProjects = DB::table('issues as i')
             ->select(
                 'i.id as id',
-                's.id as schedule_id',
+                DB::raw('max(s.id) as schedule_id'),
+                DB::raw('max(pc.id) as pc_id'),
                 'd.name as department',
                 'p.name as project',
                 'i.name as issue',
@@ -39,7 +40,7 @@ class Uploadcontroller extends Controller
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->leftJoin('processes as pc', function($join) {
                 $join->on('i.id', '=', 'pc.issue_id')
-                    ->on('s.memo', '=', 'pc.memo');
+                    ->on('s.id', '=', 'pc.schedule_id');
             })
             ->leftJoin('users as u', 'u.id', '=', 'pc.user_id')
             ->where(function ($query) use ($selectTeam) {

@@ -1,47 +1,20 @@
 <template>
 	<div>
-		<modal id="processModal" :sizeClasses="modalLg" v-on:reset-validation="resetValidate">
+		<modal id="processDetailModal" :sizeClasses="modalLg" v-on:reset-validation="resetValidate">
 			<template slot="title">{{$ml.with('VueJS').get('txtFinish')}}</template>
 			<div v-if="currentProcess">
 				<div class="table-responsive">
 					<table-no-action class="table-hover table-striped" :columns="columns" :data="dataProcess"></table-no-action>
 				</div>
-				<hr>
-				<div class="row">
-					<div class="col">
-						<div class="form-group">
-							<label class="">{{$ml.with('VueJS').get('txtReporter')}}</label>
-							<p>{{ loginUser.name }}</p>
-						</div>
-					</div>
-					<div class="col">
-						<div class="form-group">
-							<label class="">{{$ml.with('VueJS').get('txtStatus')}}</label>
-							<select-2 v-model="currentProcess.status" class="select2">
-								<option value="null" selected>--</option>
-								<option value="Start Working">Start Working</option>
-								<option value="Finished Work">Finished Work</option>
-								<option value="Start Uploading">Start Uploading</option>
-								<option value="Finished Upload">Finished Upload</option>
-							</select-2>
-						</div>
-					</div>
-					<div class="col">
-						<div class="form-group">
-							<label class="">{{$ml.with('VueJS').get('txtPagesWorked')}}</label>
-							<input v-model="currentProcess.page" class="form-control" :disabled="currentProcess.status != 'Finished Work'">
-						</div>
-					</div>
-				</div>
-				<hr>
 				<div v-if="!sendSuccess" class="form-group">
 					<h5>{{$ml.with('VueJS').get('txtMessage')}}</h5>
-					<textarea v-model="newMessage" class="form-control" rows="8"></textarea>
+					<textarea v-model="newMessage" class="form-control" rows="5"></textarea>
+					<base-checkbox class="form-control mt-3" v-model="status">{{$ml.with('VueJS').get('txtFinish')}}</base-checkbox>
 				</div>
 				<error-item :errors="errors"></error-item>
 				<success-item :success="success"></success-item>
 				<div class="form-group d-flex justify-content-center">
-					<button v-if="!sendSuccess" type="button" class="btn btn-primary mr-3" @click="sendProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
+					<button v-if="!sendSuccess" type="button" class="btn btn-primary mr-3" @click="finishProcess">{{$ml.with('VueJS').get('txtSend')}}</button>
 					<button type="button" class="btn btn-second" @click="resetValidate">Cancel</button>
 				</div>
 			</div>
@@ -51,7 +24,6 @@
 </template>
 
 <script>
-import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import TableNoAction from "../../components/TableNoAction";
 import ErrorItem from "../../components/Validations/Error";
 import SuccessItem from "../../components/Validations/Success";
@@ -59,12 +31,10 @@ import Modal from "../../components/Modals/Modal";
 import moment from 'moment';
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
-import { mapGetters } from "vuex"
 
 export default {
-	name: "process-modal",
+	name: "process-detail-modal",
 	components: {
-		Select2,
 		Modal,
 		ErrorItem,
 		SuccessItem,
@@ -72,38 +42,30 @@ export default {
 		Loading
 	},
 	props: ["currentProcess"],
-	computed: {
-        ...mapGetters({
-			loginUser: "loginUser", 
-			dateFormat: "dateFormat"
-        })
-    },
 	data() {
 		return {
 			columns: [
 			{ id: "p_name", value: this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
 			{ id: "i_name", value: this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
-			{ id: "phase", value: this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
-			{ id: "status", value: this.$ml.with("VueJS").get("txtStatus"), width: "", class: "" }
+			{ id: "phase", value: this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" }
 			],
 			dataProcess: [],
-			newMessage: "",
+			newMessage: "[Finish]\nFinished this work.",
 			errors: "",
 			success: "",
 			sendSuccess: false,
 			modalLg: "modal-lg",
 			isLoading: false,
+			status: false
 		};
 	},
 	mounted() {
 		let _this = this;
-
 		$(document).on('click', '.languages button', function() {
 			_this.columns = [
 			{ id: "p_name", value: _this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
 			{ id: "i_name", value: _this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
 			{ id: "phase", value: _this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
-			{ id: "status", value: _this.$ml.with("VueJS").get("txtStatus"), width: "", class: "" }
 			];
 		});
 	},
@@ -127,12 +89,6 @@ export default {
 			}	
 		},
 		getDataProcess() {
-			this.newMessage = '['+ (this.currentProcess.status ? this.currentProcess.status : 'Please select status!') +'] \nReporter:  '
-			+ this.loginUser.name +' \nProject: '+ this.currentProcess.p_name 
-			+' \nIssue: '+ (this.currentProcess.i_name ? this.currentProcess.i_name : '--') 
-			+' \nPhase: '+ (this.currentProcess.phase ? this.currentProcess.phase : '--') 
-			+' \n----------------------------';
-
 			this.dataProcess = [
 			{
 				p_name: this.currentProcess.project,
@@ -141,57 +97,32 @@ export default {
 			}
 			];
 		},
-		async sendProcess() {
+		finishProcess() {
 			// Reset validate
-			this.errors = [];
+			this.errors = "";
 			this.success = "";
 			this.isLoading = true;
 
-            if ( !this.currentProcess.status ) {
-                this.errors = [['Please choosing the status.'], ...this.errors];
+			this.newMessage += '\n----------------------------\n';
+			this.newMessage += 'Project: ' + this.currentProcess.project + '\n';
+			this.newMessage += 'Issue: ' + (this.currentProcess.issue ? this.currentProcess.issue : '--') + '\n';
+			this.newMessage += 'Phase: ' + (this.currentProcess.phase ? this.currentProcess.phase : '--') + '\n';
+
+			if ( this.status != this.currentProcess.status ) {
+				this.$emit('change-status-process', this.currentProcess); 
 			}
-			
-			if ( !this.newMessage ) {
-                this.errors = [['Please typing the massage.'], ...this.errors];
-            }
 
-			if ( !this.errors.length ) {
-				const newProcess = {
-					user_id: this.loginUser.id,
-					issue_id: this.currentProcess.id,
-					schedule_id: this.currentProcess.schedule_id,
-					memo: this.currentProcess.phase,
-					date: this.dateFormat(new Date(), 'YYYY-MM-DD'),
-					page: this.currentProcess.page,
-					status: this.currentProcess.status,
-				};
-
-				const uri = '/data/processes';
-
-				await axios.post(uri, newProcess)
-					.then(res => {
-						this.success = res.data.message;
-					})
-					.catch(err => {
-						console.log(err);
-						if (err.response.status == 422) {
-							this.errors = err.response.data;
-						}
-					});
-
-				await this.sendMessageLineWork(this.newMessage).then(res => {
-					this.isLoading = false;
-					this.newMessage = "";
-					this.currentProcess.status = null;
-				});
-			}
+			this.sendMessageLineWork(this.newMessage).then(res => {
+				this.isLoading = false;
+				this.newMessage = "[Finish]\nFinished this work.";
+			});
 			
 		},
         resetValidate() {
         	$('#processModal').modal('hide');
             this.errors = '';
             this.success = '';
-            this.newMessage = '';
+            this.newMessage = '[Finish]\nFinished this work.';
             this.$emit('reset-validation')
         },
         onCancel() {
@@ -200,10 +131,14 @@ export default {
 	},
 	watch: {
 		currentProcess: [
-			{
-				handler: "getDataProcess",
-				deep: true
+		{
+			handler: "getDataProcess"
+		},
+		{
+			handler: function() {
+				this.status = this.currentProcess.status;
 			}
+		}
 		]
 	}
 };

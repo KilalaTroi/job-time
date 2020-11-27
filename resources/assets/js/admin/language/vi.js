@@ -163,5 +163,8 @@ export default {
     txtUpdateDate: 'Update Date',
     txtNotice: "Notice",
     txtDestination: "Destination",
-    txtWork: "Work"
+    txtWork: "Work",
+    txtStatus: 'Status',
+    txtPagesWorked: 'Pages Worked',
+    txtDetails: 'Details',
 }

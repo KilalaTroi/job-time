@@ -53,6 +53,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
     Route::get('users/archive/{id}/{status}', 'UsersController@archive');
+    Route::resource('processes', 'ProcessesController', ['except' => ['create', 'edit']]);
 
     Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
     Route::get('statistic/filter-allocation', 'StatisticsController@filterAllocation');

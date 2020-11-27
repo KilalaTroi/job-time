@@ -185,7 +185,10 @@ export default {
     },
 
     handleMonthChange({ commit }, data) {
-      commit('SET_FILTER', data) 
+      commit('SET_FILTER', data);
+      setTimeout(function() {
+        $('.fc-event.fc-short').removeClass('fc-short');
+      }, 3000);
     },
     
     resetValidate({ dispatch, commit }) {

@@ -2,21 +2,33 @@
 	<div class="content">
 		<div class="container-fluid">
             <div class="row">
-                <div class="col col-sm-auto">
+                <!-- <div class="col col-sm-auto">
                     <card>
                         <template slot="header">
                             <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
                         </template>
-                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="true" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
+                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="false" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
                         </datepicker>
                     </card>
-                </div>
+                </div> -->
                 <div class="col">
                     <card>
                         <template slot="header">
                             <div class="d-flex justify-content-between">
                                 <h4 class="card-title">{{$ml.with('VueJS').get('txtFinish')}} List</h4>
                                 <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 160px;">
+									<div class="d-flex align-items-stretch mr-3">
+										<label class="mr-2 mb-0 d-flex align-items-center text-dark">{{ $ml.with('VueJS').get('lblDate') }}</label>
+										<div style="min-width: 110px">
+											<datepicker 
+												input-class="form-control" 
+												name="startDate" 
+												v-model="start_date" 
+												:format="customFormatter" 
+												:inline="false" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
+											</datepicker>
+										</div>
+									</div>
                                     <select-2
                                         :options="currentTeamOption"
                                         v-model="selectTeam"
@@ -28,9 +40,9 @@
                             </div>
                         </template>
                         <div class="table-responsive">
-							<table-finish class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:change-status-process="changeStatusProcess"></table-finish>
+							<table-finish class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finish>
 						</div>
-						<process-modal :currentProcess="currentProcess" v-on:change-status-process="changeStatusProcess" v-on:reset-validation="resetValidate"></process-modal>
+						<process-modal :currentProcess="currentProcess" v-on:reset-validation="resetValidate"></process-modal>
 						<pagination
 						:data="dataProjects"
 						:show-disabled="jShowDisabled"
@@ -79,10 +91,10 @@ export default {
 				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" },
-				{ id: "date", value: this.$ml.with('VueJS').get('txtDate'), width: "", class: "" },
+				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
+				{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
 				{ id: "user_name", value: this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
-				{ id: "page", value: 'Pages Worked', width: "160", class: "" },
+				{ id: "page", value: this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "", class: "" }
 			],
 			start_date: new Date(),
@@ -121,10 +133,10 @@ export default {
 				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
-				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "160", class: "" },
-				{ id: "date", value: _this.$ml.with('VueJS').get('txtDate'), width: "", class: "" },
+				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
+				{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
 				{ id: "user_name", value: _this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
-				{ id: "page", value: 'Pages Worked', width: "160", class: "" },
+				{ id: "page", value: _this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "", class: "" }
 			];
 			_this.getOptions();
@@ -146,16 +158,11 @@ export default {
 
 				if (res.data.dataProjects.data.length) {
 					this.projects = res.data.dataProjects.data.map((item, index) => {
-						const i_status = item.i_status === "archive" ? true : false;
-						const status = item.status ? true : false;
 						return Object.assign({}, item, {
 							d_name: item.department === "All" ? "" : item.department,
 							p_name: item.project,
 							i_name: item.issue,
 							t_name: item.job_type,
-							room_id: item.room_id,
-							phase: item.phase,
-							status: item.id ? status : i_status
 						});
 					});
 				} else {
@@ -175,7 +182,7 @@ export default {
             this.optionsFilter = [...arr];
         },
 		getProcess(item) {
-			this.currentProcess = item;
+			this.currentProcess = Object.assign({}, item, {status: null});
 		},
 		changeStatusProcess(item) {
 			item.status = item.status ? 0 : 1;

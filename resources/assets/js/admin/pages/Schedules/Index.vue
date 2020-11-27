@@ -201,11 +201,13 @@ export default {
       });
 
       info.el.querySelector('.fc-content').addEventListener("mouseover", function(event) {
-        $('.tooltip-inner:not(.convert-html)').each(function(){
-          const text = $(this).text();
-          $(this).html(text);
-          $(this).addClass('convert-html');
-        });
+        setTimeout(function() {
+          $('.tooltip-inner:not(.convert-html)').each(function(){
+            const text = $(this).text();
+            $(this).html(text);
+            $(this).addClass('convert-html');
+          }, 1000);
+        })
       });
     },
   },
