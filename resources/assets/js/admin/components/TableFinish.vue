@@ -46,8 +46,8 @@ export default {
             return item.status ? 'fa fa-flag btn-flag active' : 'fa fa-flag btn-flag'
         },
         getStatusClass(item, column) {
-            if ( column.id.toLowerCase() === 'status' ) {
-                return item.toLowerCase().replace(' ', '-');
+            if ( column.id.toLowerCase() === 'status' && item[column.id.toLowerCase()] ) {
+                return item[column.id.toLowerCase()].toLowerCase().replace(' ', '-');
             }
         }
     }
@@ -68,5 +68,21 @@ export default {
     &:hover {
         color: #dc3545;
     }
+}
+.start-working, .finished-work, .start-uploading, .finished-upload {
+    padding: 5px 10px;
+    border: 1px solid #231f20;
+}
+.start-working {
+    background-color: #6dcff6;
+}
+.finished-work {
+    background-color: #a5ce9a;
+}
+.start-uploading {
+    background-color: #fff799;
+}
+.finished-upload {
+    background-color: #f49ac1;
 }
 </style>

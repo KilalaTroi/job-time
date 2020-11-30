@@ -42,6 +42,10 @@
                 <i class="fa fa-flag fa-side-menu"></i>
                 <p v-text="$ml.with('VueJS').get('txtFinish')" />
             </sidebar-link>
+            <sidebar-link to="/finish/uploaded">
+                <i class="fa fa-flag fa-side-menu"></i>
+                <p v-text="uploaded" />
+            </sidebar-link>
             <sidebar-link to="/profile" class="d-block d-lg-none">
                 <i class="nc-icon nc-circle-09"></i>
                 <p v-text="$ml.with('VueJS').get('mnProfile')" />
