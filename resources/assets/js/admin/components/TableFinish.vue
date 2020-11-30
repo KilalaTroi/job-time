@@ -72,6 +72,7 @@ export default {
 .start-working, .finished-work, .start-uploading, .finished-upload {
     padding: 5px 10px;
     border: 1px solid #231f20;
+    font-size: 12px;
 }
 .start-working {
     background-color: #6dcff6;

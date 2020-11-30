@@ -167,4 +167,6 @@ export default {
     txtStatus: 'Status',
     txtPagesWorked: 'Pages Worked',
     txtDetails: 'Details',
+    txtFinishTotaling: 'FINISH TOTALING',
+    txtWorkReport: 'Work report'
 }

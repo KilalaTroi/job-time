@@ -41,10 +41,14 @@
             <sidebar-link to="/finish">
                 <i class="fa fa-flag fa-side-menu"></i>
                 <p v-text="$ml.with('VueJS').get('txtFinish')" />
-            </sidebar-link>
-            <sidebar-link to="/finish/uploaded">
-                <i class="fa fa-flag fa-side-menu"></i>
-                <p v-text="uploaded" />
+
+                <template v-slot:submenu>
+                    <ul>
+                        <sidebar-link to="/uploaded">
+                            <p v-text="$ml.with('VueJS').get('txtFinishTotaling')" />
+                        </sidebar-link>
+                    </ul>
+                </template>
             </sidebar-link>
             <sidebar-link to="/profile" class="d-block d-lg-none">
                 <i class="nc-icon nc-circle-09"></i>

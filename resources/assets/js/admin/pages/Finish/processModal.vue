@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<modal id="processModal" :sizeClasses="modalLg" v-on:reset-validation="resetValidate">
-			<template slot="title">{{$ml.with('VueJS').get('txtFinish')}}</template>
+			<template slot="title">{{$ml.with('VueJS').get('txtWorkReport')}}</template>
 			<div v-if="currentProcess">
 				<div class="table-responsive">
 					<table-no-action class="table-hover table-striped" :columns="columns" :data="dataProcess"></table-no-action>
@@ -71,7 +71,7 @@ export default {
 		TableNoAction,
 		Loading
 	},
-	props: ["currentProcess"],
+	props: ["currentProcess", "arrCurrentProcess"],
 	computed: {
         ...mapGetters({
 			loginUser: "loginUser", 
@@ -84,7 +84,7 @@ export default {
 			{ id: "p_name", value: this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
 			{ id: "i_name", value: this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
 			{ id: "phase", value: this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
-			{ id: "status", value: this.$ml.with("VueJS").get("txtStatus"), width: "", class: "" }
+			{ id: "status", value: this.$ml.with("VueJS").get("txtStatus"), width: "120", class: "" }
 			],
 			dataProcess: [],
 			newMessage: "",
@@ -103,7 +103,7 @@ export default {
 			{ id: "p_name", value: _this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
 			{ id: "i_name", value: _this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
 			{ id: "phase", value: _this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
-			{ id: "status", value: _this.$ml.with("VueJS").get("txtStatus"), width: "", class: "" }
+			{ id: "status", value: _this.$ml.with("VueJS").get("txtStatus"), width: "120", class: "" }
 			];
 		});
 	},
@@ -133,13 +133,26 @@ export default {
 			+' \nPhase: '+ (this.currentProcess.phase ? this.currentProcess.phase : '--') 
 			+' \n----------------------------';
 
-			this.dataProcess = [
-			{
-				p_name: this.currentProcess.project,
-				i_name: this.currentProcess.issue,
-				phase: this.currentProcess.phase
+			if ( this.arrCurrentProcess.length ) {
+				this.dataProcess = this.arrCurrentProcess.map((item, index) => {
+					return {
+						p_name: this.currentProcess.project,
+						i_name: this.currentProcess.issue,
+						phase: this.currentProcess.phase,
+						status: item.status
+					}
+				});
+			} else {
+				this.dataProcess = [
+					{
+						p_name: this.currentProcess.project,
+						i_name: this.currentProcess.issue,
+						phase: this.currentProcess.phase,
+						status: null,
+					}
+				];
 			}
-			];
+			
 		},
 		async sendProcess() {
 			// Reset validate

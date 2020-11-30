@@ -166,5 +166,7 @@ export default {
     txtWork: "作業",
     txtStatus: '制作状態',
     txtPagesWorked: '作業ページ数',
-    txtDetails: '詳細情報'
+    txtDetails: '詳細情報',
+    txtFinishTotaling: '終了集計',
+    txtWorkReport: '作業報告'
 }

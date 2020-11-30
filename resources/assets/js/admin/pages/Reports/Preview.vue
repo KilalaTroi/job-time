@@ -4,7 +4,7 @@
             <div class="d-flex justify-content-between">
                 <h4 class="card-title">{{$ml.with('VueJS').get('txtPreview')}}</h4>
                 <div class="align-self-end">
-                    <button @click="$emit('send-report')" class="btn btn-success btn-process mr-3"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                    <!-- <button @click="$emit('send-report')" class="btn btn-success btn-process mr-3"><i class="fa fa-paper-plane" aria-hidden="true"></i></button> -->
                     <button @click="exportPDF" class="btn btn-danger mr-3">{{$ml.with('VueJS').get('txtExportPDF')}}</button>
                     <button @click="$emit('back-to-list')" class="btn btn-primary">{{$ml.with('VueJS').get('txtBack')}}</button>
                 </div>

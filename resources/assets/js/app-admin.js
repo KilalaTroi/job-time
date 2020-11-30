@@ -139,12 +139,12 @@ const routes = [{
             {
                 path: 'finish',
                 name: 'Finish',
-                component: Finish,
-                children: [{
-                    path: 'uploaded',
-                    name: 'Uploaded',
-                    component: Uploaded
-                }]
+                component: Finish
+            },
+            {
+                path: 'uploaded',
+                name: 'Uploaded',
+                component: Uploaded
             },
             {
                 path: '*',

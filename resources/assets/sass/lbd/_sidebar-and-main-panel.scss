@@ -141,12 +141,12 @@ body > .navbar-collapse{
                 }
             }
 
-            &:hover .nav-link{
+            &:hover > .nav-link{
                 background: rgba(255,255,255,0.13);
                 opacity: 1;
             }
 
-            &.active .nav-link{
+            &.active > .nav-link{
                 color: $white-color;
                 opacity: 1;
                 background: rgba(255,255,255,0.23);
@@ -159,6 +159,33 @@ body > .navbar-collapse{
 
                 & + .nav-item {
                     margin-top: 31px;
+                }
+            }
+
+            > ul {
+                list-style: none;
+                padding-left: 45px;
+
+                li:not(.active) {
+                    display: none;
+                }
+
+                li {
+                    .nav-link {
+                        padding-right: 0;
+
+                        p {
+                            font-size: 10px;
+                        }
+                    }
+                }
+            }
+
+            &.active {
+                > ul {
+                    li {
+                        display: block;
+                    }
                 }
             }
 
