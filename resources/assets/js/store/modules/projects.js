@@ -132,12 +132,43 @@ export default {
 				}
             }).catch(err => console.log(err));
 		},
+
+		archiveAllItem({ state, dispatch }, data) {
+            const uri = '/data/issues/archive-all';
+            axios.post(uri, {
+				issues: data.issues,
+				status: data.status
+			}).then((res) => {
+				if ( (state.paged - 1) * state.data.per_page < (state.data.total - data.issues.length) ) {
+					dispatch('getAll', state.paged);
+				} else {
+					let page = state.paged > 1 ? state.paged - 1 : 1;
+					dispatch('getAll', page);
+				}
+            }).catch(err => console.log(err));
+		},
 		
 		deleteItem({ state, dispatch }, issue) {
             if (confirm(issue.msgText)) {
                 let uri = '/data/issues/' + issue.id;
                 axios.delete(uri).then((res) => {
                     if ( (state.paged - 1) * state.data.per_page < (state.data.total - 1) ) {
+						dispatch('getAll', state.paged);
+					} else {
+						let page = state.paged > 1 ? state.paged - 1 : 1;
+						dispatch('getAll', page);
+					}
+                }).catch(err => console.log(err));
+            }
+		},
+		
+		deleteAllItem({ state, dispatch, rootGetters }, issues) {
+            if (confirm(rootGetters['getTranslate']('msgConfirmDelete'))) {
+                let uri = '/data/issues/delete-all';
+                axios.post(uri, {
+					issues: issues
+				}).then((res) => {
+                    if ( (state.paged - 1) * state.data.per_page < (state.data.total - issues.length) ) {
 						dispatch('getAll', state.paged);
 					} else {
 						let page = state.paged > 1 ? state.paged - 1 : 1;

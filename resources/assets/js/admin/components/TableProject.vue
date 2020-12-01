@@ -155,7 +155,7 @@ export default {
       deleteItem: "projects/deleteItem",
     }),
 
-    checkItem: function () {
+    checkItem() {
       const lengthAll = this.projectData.data.length;
       const lengthChecked = this.itemCheck.length;
       if (lengthAll == lengthChecked) this.allCheck = true;
@@ -163,7 +163,7 @@ export default {
       this.$emit("check-item", this.itemCheck);
     },
 
-    checkAll: function () {
+    checkAll() {
       this.itemCheck = [];
       if (!this.allCheck) {
         for (const k in this.projectData.data) {
@@ -183,6 +183,18 @@ export default {
       return archive === "archive" ? "fa fa-unlock" : "fa fa-archive";
     },
   },
+  watch: {
+		projectData: [
+		{
+      handler: function() {
+        this.allCheck = false;
+        this.itemCheck = [];
+        this.$emit("check-item", this.itemCheck);
+      },
+      deep: true
+		}
+		]
+	}
 };
 </script>
 <style>

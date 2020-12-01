@@ -47,6 +47,8 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
     Route::get('issues/getpage/{id}', 'IssuesController@getpage');
     Route::get('issues/archive/{id}/{status}', 'IssuesController@archive');
+    Route::post('issues/delete-all', 'IssuesController@deleteAll');
+    Route::post('issues/archive-all', 'IssuesController@archiveAll');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
     Route::get('all-off-days', 'OffDaysController@allOffDays');

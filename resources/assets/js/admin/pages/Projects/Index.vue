@@ -139,13 +139,15 @@
                 v-show="flagCheck"
                 type="button"
                 class="btn btn-xs btn-second"
+                @click="archiveAllItem({issues: checkItem, status: !filters.showArchive})"
               >
-                <i aria-hidden="true" title="archive" class="fa fa-archive"></i>
+                <i aria-hidden="true" title="archive" :class="{'fa fa-archive' : !filters.showArchive, 'fa fa-unlock' : filters.showArchive}"></i>
               </button>
               <button
                 v-show="flagCheck"
                 type="button"
-                class="btn btn-xs btn-danger ml-sm-2"
+                class="btn btn-xs btn-danger mx-sm-3"
+                @click="deleteAllItem(checkItem)"
               >
                 <i aria-hidden="true" class="fa fa-trash"></i>
               </button>
@@ -226,6 +228,7 @@ export default {
   data() {
     return {
       flagCheck: false,
+      checkItem: []
     };
   },
   methods: {
@@ -234,11 +237,14 @@ export default {
       getOptionsType: "types/getOptions",
       setColumns: "projects/setColumns",
       getAllProject: "projects/getAll",
+      deleteAllItem: "projects/deleteAllItem",
+      archiveAllItem: "projects/archiveAllItem"
     }),
 
     showhideActionAll(data) {
       this.flagCheck = false;
       if (data.length > 0) this.flagCheck = true;
+      this.checkItem = data;
     },
 
     resetFilter() {
