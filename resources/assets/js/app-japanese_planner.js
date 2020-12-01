@@ -40,7 +40,8 @@ import Profile from './admin/pages/Profile';
 import Overview from './admin/pages/Overview';
 import Totaling from './admin/pages/Totaling';
 import Reports from './admin/pages/Reports';
-// import Upload from './admin/pages/Upload';
+import Finish from './admin/pages/Finish';
+import Uploaded from './admin/pages/Finish/Uploaded';
 
 const routes = [{
         path: '/',
@@ -81,11 +82,16 @@ const routes = [{
                 name: 'Reports',
                 component: Reports
             },
-            // {
-            //     path: 'upload',
-            //     name: 'Upload',
-            //     component: Upload
-            // },
+            {
+                path: 'finish',
+                name: 'Finish',
+                component: Finish
+            },
+            {
+                path: 'uploaded',
+                name: 'Uploaded',
+                component: Uploaded
+            },
             {
                 path: '*',
                 component: NotFound

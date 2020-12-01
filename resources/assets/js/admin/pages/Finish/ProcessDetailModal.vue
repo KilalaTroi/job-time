@@ -66,7 +66,7 @@ export default {
         {
           id: "status",
           value: this.$ml.with("VueJS").get("txtStatus"),
-          width: "120",
+          width: "135",
           class: "",
         },
       ],
@@ -100,7 +100,7 @@ export default {
         {
           id: "status",
           value: _this.$ml.with("VueJS").get("txtStatus"),
-          width: "120",
+          width: "135",
           class: "",
         },
       ];

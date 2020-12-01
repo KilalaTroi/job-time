@@ -37,6 +37,14 @@
             <sidebar-link to="/finish">
                 <i class="fa fa-flag fa-side-menu"></i>
                 <p v-text="$ml.with('VueJS').get('txtFinish')" />
+
+                <template v-slot:submenu>
+                    <ul>
+                        <sidebar-link to="/uploaded">
+                            <p v-text="$ml.with('VueJS').get('txtFinishTotaling')" />
+                        </sidebar-link>
+                    </ul>
+                </template>
             </sidebar-link>
             <li class="nav-item d-block d-lg-none">
                 <a class="nav-link" href="/logout">

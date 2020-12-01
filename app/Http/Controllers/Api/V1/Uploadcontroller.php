@@ -98,66 +98,80 @@ class Uploadcontroller extends Controller
             ->whereIn('issue_id', $issues)
             ->get()->toArray();
         }
-        
-
-        // DB::enableQueryLog();
-        // $dataProjects = DB::table('issues as i')
-        //     ->select(
-        //         'i.id as id',
-        //         // DB::raw('max(s.id) as schedule_id'),
-        //         // DB::raw('max(pc.id) as pc_id'),
-        //         // 'pc.id as pc_id',
-        //         'd.name as department',
-        //         'p.name as project',
-        //         'i.name as issue',
-        //         't.slug as job_type',
-        //         't.line_room as room_id',
-        //         's.memo as phase',
-        //         // 'u.name as user_name',
-        //         // 'pc.date as date',
-        //         // 'pc.page as page',
-        //         // 'pc.status as status'
-        //     )
-        //     ->join('projects as p', 'p.id', '=', 'i.project_id')
-        //     ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
-        //     ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
-        //     ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-        //     // ->leftJoin('processes as pc', function($join) {
-        //     //     $join->on('i.id', '=', 'pc.issue_id')
-        //     //         ->on('s.id', '=', 'pc.schedule_id');
-        //     // })
-        //     // ->leftJoin('users as u', 'u.id', '=', 'pc.user_id')
-        //     ->where(function ($query) use ($selectTeam) {
-        //         $query->where('p.team', '=', $selectTeam)
-        //             ->orWhere('p.team', 'LIKE', $selectTeam . ',%')
-        //             ->orWhere('p.team', 'LIKE', '%,' . $selectTeam . ',%')
-        //             ->orWhere('p.team', 'LIKE', '%,' . $selectTeam);
-        //     })
-        //     ->whereNotIn('p.id', $defaultProjects)
-        //     ->when($showFilter, function ($query) use ($selectDate) {
-        //         return $query->where('s.date', '=', $selectDate);
-        //     })
-        //     ->when(!$showFilter, function ($query) use ($selectDate) {
-        //         return $query->where(function ($query) use ($selectDate) {
-        //                             $query->where('start_date', '<=',  $selectDate)
-        //                                   ->orWhere('start_date', '=',  NULL);
-        //                         })
-        //                         ->where(function ($query) use ($selectDate) {
-        //                             $query->where('end_date', '>=',  $selectDate)
-        //                             ->orWhere('end_date', '=',  NULL);
-        //                         });
-        //     })
-        //     ->where('t.line_room', '!=', NULL)
-        //     ->where('i.created_at', '<=',  $selectDate . ' 23:59:00')
-        //     // ->orderBy('pc.id', 'desc')
-        //     ->orderBy('i.created_at', 'desc')
-        //     // ->groupBy('i.id', 'pc.memo')
-        //     ->paginate(20);
-        //     dd($dataProjects);
-        // dd(DB::getQueryLog());
 
         return response()->json([
             'dataProjects' => $dataProjects,
+            'dataProcesses' => $processes,
+        ]);
+    }
+
+    public function getFinishUploaded(Request $request) {
+        // POST data
+        $selectDate = $request->get('start_date');
+        $showFilter = $request->get('showFilter') == 'showSchedule' ? true : false;
+        $selectTeam = $request->get('selectTeam');
+        $defaultProjects = array(10, 58, 59, 67, 68, 69);
+        // End POST data
+
+        // Get processes
+        $processesUploaded = DB::table('processes as p')
+        ->select(
+            'p.issue_id as id',
+            'p.page as page',
+            'p.memo as phase',
+            'p.date as date',
+            'u.name as user_name',
+            'p.status as status',
+            'd.name as department',
+            'pr.name as project',
+            'i.name as issue',
+            't.slug as job_type'
+        )
+        ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
+        ->join('issues as i', 'i.id', '=', 'p.issue_id')
+        ->join('projects as pr', 'pr.id', '=', 'i.project_id')
+        ->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
+        ->leftJoin('types as t', 't.id', '=', 'pr.type_id')
+        ->where('p.status', 'Finished Upload')
+        ->where(function ($query) use ($selectTeam) {
+            $query->where('pr.team', '=', $selectTeam)
+                ->orWhere('pr.team', 'LIKE', $selectTeam . ',%')
+                ->orWhere('pr.team', 'LIKE', '%,' . $selectTeam . ',%')
+                ->orWhere('pr.team', 'LIKE', '%,' . $selectTeam);
+        })
+        ->whereNotIn('pr.id', $defaultProjects)
+        ->where('t.line_room', '!=', NULL)
+        ->paginate(20);
+
+        // Get issues IDs
+        $data = collect($processesUploaded)->get('data');
+        if ( count($data) ) {
+            $issues = array_map(function($obj) {
+                return $obj->id;
+            }, $data);
+        }
+
+        // Get processes
+        $processes = array();
+        if ( isset($issues) ) {
+            $processes = DB::table('processes as p')
+            ->select(
+                'p.id',
+                'issue_id',
+                'page',
+                'memo as phase',
+                'date',
+                'u.name as user_name',
+                'status as status'
+            )
+            ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
+            ->whereIn('issue_id', $issues)
+            ->get()->toArray();
+        }
+
+        // Return Json
+        return response()->json([
+            'dataProjects' => $processesUploaded,
             'dataProcesses' => $processes,
         ]);
     }

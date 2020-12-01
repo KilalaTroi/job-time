@@ -84,7 +84,7 @@ export default {
 			{ id: "p_name", value: this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
 			{ id: "i_name", value: this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
 			{ id: "phase", value: this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
-			{ id: "status", value: this.$ml.with("VueJS").get("txtStatus"), width: "120", class: "" }
+			{ id: "status", value: this.$ml.with("VueJS").get("txtStatus"), width: "135", class: "" }
 			],
 			dataProcess: [],
 			newMessage: "",
@@ -103,7 +103,7 @@ export default {
 			{ id: "p_name", value: _this.$ml.with("VueJS").get("txtProject"), width: "", class: "" },
 			{ id: "i_name", value: _this.$ml.with("VueJS").get("txtIssue"), width: "", class: "" },
 			{ id: "phase", value: _this.$ml.with("VueJS").get("txtPhase"), width: "", class: "" },
-			{ id: "status", value: _this.$ml.with("VueJS").get("txtStatus"), width: "120", class: "" }
+			{ id: "status", value: _this.$ml.with("VueJS").get("txtStatus"), width: "135", class: "" }
 			];
 		});
 	},
@@ -159,6 +159,7 @@ export default {
 			this.errors = [];
 			this.success = "";
 			this.isLoading = true;
+			const checkStatus = this.currentProcess.status === 'Finished Work' ? true : false;
 
             if ( !this.currentProcess.status ) {
                 this.errors = [['Please choosing the status.'], ...this.errors];
@@ -174,8 +175,8 @@ export default {
 					issue_id: this.currentProcess.id,
 					schedule_id: this.currentProcess.schedule_id,
 					memo: this.currentProcess.phase,
-					date: this.dateFormat(new Date(), 'YYYY-MM-DD'),
-					page: this.currentProcess.page,
+					date: this.dateFormat(new Date(), 'YYYY-MM-DD HH:mm'),
+					page: checkStatus ? this.currentProcess.page : null,
 					status: this.currentProcess.status,
 				};
 

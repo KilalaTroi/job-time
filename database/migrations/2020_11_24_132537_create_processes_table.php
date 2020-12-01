@@ -19,7 +19,7 @@ class CreateProcessesTable extends Migration
             $table->integer('issue_id')->unsigned();
             $table->integer('schedule_id')->unsigned()->nullable();
             $table->string('memo', 255)->nullable();
-            $table->date('date')->nullable();
+            $table->dateTime('date')->nullable();
             $table->smallInteger('page')->nullable();
             $table->string('status', 50)->nullable();
             $table->timestamps();

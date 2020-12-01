@@ -2,6 +2,15 @@
 	<div class="content">
 		<div class="container-fluid">
             <div class="row">
+                <!-- <div class="col col-sm-auto">
+                    <card>
+                        <template slot="header">
+                            <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
+                        </template>
+                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="false" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
+                        </datepicker>
+                    </card>
+                </div> -->
                 <div class="col">
                     <card>
                         <template slot="header">
@@ -74,7 +83,8 @@ export default {
 	computed: {
         ...mapGetters({
             currentTeamOption: "currentTeamOption", 
-            currentTeam: "currentTeam"
+			currentTeam: "currentTeam",
+			dateFormat: "dateFormat"
         })
     },
 
@@ -86,10 +96,10 @@ export default {
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
-				{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
+				{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
 				{ id: "user_name", value: this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
-				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "", class: "" }
+				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
 			],
 			start_date: new Date(),
 			selectTeam: '',
@@ -130,10 +140,10 @@ export default {
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
-				{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "", class: "" },
+				{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
 				{ id: "user_name", value: _this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: _this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
-				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "120", class: "" }
+				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
 			];
 			_this.getOptions();
             _this.showFilter = 'showSchedule';
@@ -149,7 +159,7 @@ export default {
         },
 		fetchData(page = 1) {
 			this.page = page;
-			let uri = "/data/finish/data?page=" + page;
+			let uri = "/data/finish/uploaded?page=" + page;
 			axios
 			.post(uri, {
 				start_date: this.dateFormatter(this.start_date),
@@ -163,15 +173,16 @@ export default {
 				if (res.data.dataProjects.data.length) {
 					this.projects = res.data.dataProjects.data.map((item, index) => {
 						const arrProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, item.id, item.phase) : [];
+						const lastProcess = arrProcess[arrProcess.length - 1];
 						return Object.assign({}, item, {
 							d_name: item.department === "All" ? "" : item.department,
 							p_name: item.project,
 							i_name: item.issue,
 							t_name: item.job_type,
-							status: arrProcess.length ? arrProcess[arrProcess.length - 1].status : '',
-							page: arrProcess.length ? arrProcess[arrProcess.length - 1].page : '',
-							user_name: arrProcess.length ? arrProcess[arrProcess.length - 1].user_name : '',
-							date: arrProcess.length ? arrProcess[arrProcess.length - 1].date : '',
+							status: arrProcess.length ? lastProcess.status : '',
+							page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + (item.page*1) }, 0) : '',
+							user_name: arrProcess.length ? lastProcess.user_name : '',
+							date: arrProcess.length ? this.dateFormat(lastProcess.date, 'MMM DD, YYYY HH:mm') : '',
 						});
 					});
 				} else {

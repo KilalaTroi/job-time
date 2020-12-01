@@ -71,6 +71,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('import-projects', 'ProjectsController@importProjects');
 
     Route::post('finish/data', 'UploadController@getData');
+    Route::post('finish/uploaded', 'UploadController@getFinishUploaded');
     Route::post('finish/update-status', 'UploadController@updateStatus');
     Route::post('finish/submit-message', 'UploadController@submitMessage');
 

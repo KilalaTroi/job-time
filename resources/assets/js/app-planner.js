@@ -43,6 +43,7 @@ import Overview from './admin/pages/Overview';
 import Totaling from './admin/pages/Totaling';
 import Reports from './admin/pages/Reports';
 import Finish from './admin/pages/Finish';
+import Uploaded from './admin/pages/Finish/Uploaded';
 
 const routes = [{
         path: '/',
@@ -97,6 +98,11 @@ const routes = [{
                 path: 'finish',
                 name: 'Finish',
                 component: Finish
+            },
+            {
+                path: 'uploaded',
+                name: 'Uploaded',
+                component: Uploaded
             },
             {
                 path: '*',
