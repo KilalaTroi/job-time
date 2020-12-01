@@ -219,9 +219,17 @@ export default {
             if (obj.length > 0)
                 return obj[0];
         },
-         getJobObjectValue(data, id, schedule_id) {
+        getJobObjectValue(data, id, schedule_id) {
             let obj = data.filter((elem) => {
                 if (elem.id === id && elem.schedule_id === schedule_id) return elem;
+            });
+
+            if (obj.length > 0)
+                return obj[0];
+        },
+        getJobTimeObjectValue(data, id, phase) {
+            let obj = data.filter((elem) => {
+                if (elem.id === id && elem.phase === phase) return elem;
             });
 
             if (obj.length > 0)
@@ -233,7 +241,7 @@ export default {
         getDataJobs(jobData) {
             if (jobData.data.length) {
                 this.jobs = jobData.data.map((item, index) => {
-                    let time = typeof(this.getJobObjectValue(this.jobsTime, item.id, item.schedule_id)) !== 'undefined' ? this.getJobObjectValue(this.jobsTime, item.id, item.schedule_id).total : false;
+                    let time = typeof(this.getJobTimeObjectValue(this.jobsTime, item.id, item.phase)) !== 'undefined' ? this.getJobTimeObjectValue(this.jobsTime, item.id, item.phase).total : false;
                     let checkTR = item.type.includes("_tr") ? " (TR)" : "";
                     return Object.assign({}, item, {
                         department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',

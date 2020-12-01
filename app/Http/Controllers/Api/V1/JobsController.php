@@ -22,7 +22,7 @@ class JobsController extends Controller
         $userID = $_GET['user_id'];
         $showBy = $_GET['show'];
         $teamID = $_GET['team_id'];
-        $defaultProjects = array(58, 59, 68);
+        $defaultProjects = array(58, 59, 67, 68, 69);
 
         // DB::enableQueryLog();
         if ( $showBy == 'showSchedule' ) {
@@ -37,7 +37,7 @@ class JobsController extends Controller
                     'i.name as i_name'
                 )
                 ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-                ->join('schedules as s', 'i.id', '=', 's.issue_id')
+                ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
                 ->leftJoin('types as t', 't.id', '=', 'p.type_id')
                 ->where(function ($query) use ($selectDate, $teamID) {
                     $query->where('s.date', '=', $selectDate)
@@ -49,9 +49,17 @@ class JobsController extends Controller
                                 ->orWhere('p.team', 'LIKE', '%,' . $teamID);
                         });
                 })
-                ->orWhere(function ($query) use ($defaultProjects) {
-                    $query->whereIn('p.id', $defaultProjects);
+                ->orWhere(function ($query) use ($defaultProjects, $teamID) {
+                    $query->whereIn('p.id', $defaultProjects)
+                    ->where('i.status', '=', 'publish')
+                    ->where(function ($query) use ($teamID) {
+                        $query->where('p.team', '=', $teamID)
+                            ->orWhere('p.team', 'LIKE', $teamID . ',%')
+                            ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+                            ->orWhere('p.team', 'LIKE', '%,' . $teamID);
+                    });
                 })
+                ->orderBy('i.created_at', 'desc')
                 ->orderBy('p_name', 'desc')
                 ->groupBy('i.id', 's.memo')
                 ->paginate(10);
@@ -84,6 +92,7 @@ class JobsController extends Controller
                         ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
                         ->orWhere('p.team', 'LIKE', '%,' . $teamID);
                 })
+                ->orderBy('i.created_at', 'desc')
                 ->orderBy('p_name', 'desc')
                 ->orderBy('s.id', 'desc')
                 ->groupBy('i.id')
@@ -132,6 +141,7 @@ class JobsController extends Controller
             ->select(
                 'j.issue_id as id',
                 's.id as schedule_id',
+                's.memo as phase',
                 DB::raw('SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total')
             )
             ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')

@@ -20,6 +20,8 @@ class SchedulesController extends Controller
         $endDate = $_GET['endDate'];
         $teamID = $_GET['team_id'];
         $onlyEvent = $_GET['only_event'];
+        $now = date('Y-m-d');
+        $checkNowInView = $now >= $startDate && $now <= $endDate ? true : false;
 
         if ( $onlyEvent === "false" ) $projects = DB::table('projects as p')
             ->select(
@@ -43,12 +45,19 @@ class SchedulesController extends Controller
                 $query->where('end_date', '>=', $startDate)
                       ->orWhere('end_date', '=', NULL);
             })
+            ->when($checkNowInView, function ($query) use ($now) {
+                return $query->where(function ($query) use ($now) {
+                    $query->where('end_date', '>=', $now)
+                        ->orWhere('end_date', '=',  NULL);
+                });
+            })
             ->where(function ($query) use ($teamID) {
                 $query->where('team', '=', $teamID)
                     ->orWhere('team', 'LIKE', $teamID . ',%')
                     ->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
                     ->orWhere('team', 'LIKE', '%,' . $teamID);
             })
+            ->orderBy('i.created_at', 'desc')
             ->orderBy('p.name', 'asc')
             ->orderBy('i.name', 'asc')
             ->get()->toArray();
@@ -56,6 +65,7 @@ class SchedulesController extends Controller
         $schedules = DB::table('issues as i')
             ->select(
                 's.id as id',
+                'i.id as issue_id',
                 'p.name as p_name',
                 'p.id as p_id',
                 't.slug as type',
@@ -76,16 +86,15 @@ class SchedulesController extends Controller
 
         $schedulesDetail = DB::table('jobs as j')
             ->select(
-                's.id as id',
+                'j.issue_id as id',
                 'j.note as note',
+                'j.date as date',
                 DB::raw('TIME_FORMAT(j.start_time,"%H:%i") as start_time'),
                 DB::raw('TIME_FORMAT(j.end_time,"%H:%i") as end_time')
             )
-            ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
-            ->where('s.team_id', '=', $teamID)
-            ->where('s.date', '>=',  $startDate)
-            ->where('s.date', '<',  $endDate)
-            ->orderBy('s.id', 'asc')
+            ->where('j.team_id', '=', $teamID)
+            ->where('j.date', '>=',  $startDate)
+            ->where('j.date', '<',  $endDate)
             ->orderBy('j.start_time', 'asc')
             ->get()->toArray();
 

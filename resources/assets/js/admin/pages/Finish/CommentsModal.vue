@@ -47,7 +47,7 @@ export default {
 			{ id: "page", value: this.$ml.with("VueJS").get("txtPage"), width: "", class: "" }
 			],
 			columns2: [
-			{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "170", class: "" },
+			{ id: "date", value: this.$ml.with('VueJS').get('txtDateTime'), width: "170", class: "" },
 			{ id: "name", value: this.$ml.with('VueJS').get('txtName'), width: "", class: "" },
 			{ id: "message", value: this.$ml.with('VueJS').get('txtMessage'), width: "", class: "message-content" },
 			{ id: "box", value: 'Box', width: "200", class: "text-center" }
@@ -68,7 +68,7 @@ export default {
 			];
 
 			_this.columns2 = [
-			{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "170", class: "" },
+			{ id: "date", value: _this.$ml.with('VueJS').get('txtDateTime'), width: "170", class: "" },
 			{ id: "name", value: _this.$ml.with('VueJS').get('txtName'), width: "50", class: "" },
 			{ id: "message", value: _this.$ml.with('VueJS').get('txtMessage'), width: "", class: "message-content" },
 			{ id: "box", value: 'Box', width: "200", class: "text-center" }

@@ -29,6 +29,13 @@ export default {
         }
     },
 
+    getLogTime() {
+        return (Arr, id, date) => {
+            const result = Arr.filter(item => item.id === id && item.date === date)
+            return result.length ? result : []
+        }
+    },
+
     dateFormat() {
         return (date, string = null) => {
             if (moment(date).format() === 'Invalid date') return '--'

@@ -61,7 +61,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id">
+                    <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id" v-on:chart-loaded="chartLoaded">
                         <template slot="header">
                             <h4 class="card-title">{{$ml.with('VueJS').get('txtKilalaTimeAllocation')}}</h4>
                             <div class="d-flex mt-2 justify-content-between">
@@ -96,12 +96,12 @@
                             <hr>
                             <div class="row">
                                 <div class="export col-auto ml-auto">
-                                    <a :href="exportLink" target="_blank"><i class="fa fa-download"></i> {{$ml.with('VueJS').get('txtExportExcel')}}</a>
+                                    <a :href="exportLink"><i class="fa fa-download"></i> {{$ml.with('VueJS').get('txtExportExcel')}}</a>
                                 </div>
                             </div>
                         </template>
                     </chart-card>
-                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id">
+                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
                         <template slot="header">
                             <h4 class="card-title">Total pages</h4>
                         </template>
@@ -427,6 +427,19 @@
             getLanguage(data) {
                 return this.dataLang[data.current]
             },
+            chartLoaded(chartID) {
+                const types = this.types;
+                if ( types.length ) {
+                    setTimeout(function(){
+                        types.forEach(function(item, index) {
+                            $(chartID).closest('.card').find('.' + item.class).each(function(){
+                                $(this).find('.ct-legend').css('color', item.value);
+                                $(this).find('.ct-point, .ct-line, .ct-bar, .ct-slice-donut').css('stroke', item.value);
+                            })
+                        });
+                    }, 1000);
+                }
+            }
         },
         watch: {
             users: [{

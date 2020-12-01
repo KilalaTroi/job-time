@@ -53,8 +53,12 @@ export default {
         }
     },
     mounted() {
-        this.$Chartist = Chartist.default || Chartist;
-        this.initChart();
+        const _this = this;
+        _this.$Chartist = Chartist.default || Chartist;
+        _this.initChart();
+        $(window).resize(function () {
+            _this.chartUpdate();
+        });
     },
     methods: {
         /***
@@ -121,6 +125,7 @@ export default {
         },
         chartUpdate() {
             this.chart = this.$Chartist[this.chartType]('#' + this.chartId, this.chartData, this.chartOptions, this.responsiveOptions);
+            this.$emit('chart-loaded', '#' + this.chartId);
         }
     },
     watch: {

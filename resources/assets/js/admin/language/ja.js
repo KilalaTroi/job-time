@@ -2,7 +2,7 @@
 export default {
     siteName: 'ジョブタイム',
     sbStatistics: '統計',
-    sbTotaling: '集計',
+    sbTotaling: 'ジョブ集計',
     sbUsers: 'ユーザー',
     sbTeams: 'チーム',
     sbDepartments: '部署',
@@ -125,7 +125,7 @@ export default {
     txtUploadList: 'アップロードリスト',
     txtNewUpload: '追加アップ',
     txtProjectIssue: '案件・号',
-    txtMessage: '申し送り',
+    txtMessage: 'メッセージ',
     txtBoxDestination: 'BOXアップロード先',
     txtFile: 'ファイル',
     txtSelect: '選択',
@@ -163,5 +163,12 @@ export default {
     txtUpdateDate: '更新日',
     txtNotice: "お知らせ",
     txtDestination: "宛先",
-    txtWork: "作業"
+    txtWork: "作業",
+    txtStatus: '制作状態',
+    txtPagesWorked: '作業ページ数',
+    txtDetails: '詳細情報',
+    txtFinishTotaling: '終了集計',
+    txtWorkReport: '作業報告',
+    txtFinishRecord: '終了レコード',
+    txtDateTime: '日時'
 }

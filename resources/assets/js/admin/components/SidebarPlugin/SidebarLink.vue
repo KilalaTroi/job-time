@@ -9,6 +9,7 @@
         <p>{{link.name}}</p>
       </slot>
     </a>
+    <slot name="submenu"></slot>
   </component>
 </template>
 <script>

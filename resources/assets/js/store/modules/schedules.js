@@ -79,51 +79,90 @@ export default {
 
       await axios.get(uri).then(response => {
         if (response.data.schedules.length) {
+          let schedulesVariation = [];
           response.data.schedules = response.data.schedules.map((item, index) => {
-            const arrProjects = [58, 59];
-            const arrProjectsAL = [66];
+            const arrProjects = [58, 59]; // Project show description and hide fc-time.
+            const arrProjectsHT = [58]; // Project hide fc-time.
+            const arrProjectsPV = [58, 66];  // Project don't have Variation.
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
             const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
             let sDetail = [];
             let description = '';
 
+            // Get log time detail for schedule
             if ( response.data.schedulesDetail.length ) {
-              sDetail = rootGetters['getArrObjectByID'](response.data.schedulesDetail, item.id);
+              sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
             }
 
-            const codition = sDetail.length && state.filters.team == 2 && type.slug != 'yuidea_image';
-            const textTime = sDetail.length && state.filters.team == 2 && !arrProjectsAL.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
+            const codition = sDetail.length && state.filters.team == 2 && ! arrProjectsPV.includes(item.p_id);
+            const textTime = sDetail.length && state.filters.team == 2 && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
-            const classHideTime = arrProjects.includes(item.p_id) ? ' hide-fc-time' : '';
+            const classHideTime = textTime ? ' hide-fc-time' : '';
 
+            // Get description for schedule
             if ( sDetail.length && state.filters.team == 2 && arrProjects.includes(item.p_id) ) {
               description = sDetail.map((item) => {
                 const note = item.note ? ' (' + item.note + ')' : '';
                 return (item.start_time + ' - ' + item.end_time + note)
               }).join('<br>')
             }
+
+            // Function return schedule
+            let getSchedule = (_item, _value, _codition) => {
+              return Object.assign({}, _item, {
+                id: _item.id,
+                title:
+                  textTime +
+                  (_item.i_name
+                    ? _item.p_name + checkTR + " " + _item.i_name
+                    : _item.p_name + checkTR) +
+                  "<br>" +
+                  (_item.memo ? _item.memo : ""),
+                description: description,
+                className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
+                borderColor: type.value,
+                backgroundColor: type.value,
+                start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
+                end: rootGetters['dateFormat'](_item.date + " " + _value.end_time),
+                memo: _item.memo,
+                title_not_memo: _item.i_name
+                  ? _item.p_name + checkTR + " " + _item.i_name
+                  : _item.p_name + checkTR,
+              })
+            }
+
+            // Get schedule variation
+            if ( codition && sDetail.length > 1 ) {
+              let scVariation = [];
+
+              sDetail.forEach((value, index) => {
+                if ( index ) {
+                  if ( sDetail[index].start_time.replace(':', '') * 1 > sDetail[index - 1].end_time.replace(':', '') * 1 ) {
+                    scVariation.push( getSchedule(item, value, codition) );
+                  } else {
+                    if ( sDetail[index].end_time.replace(':', '') * 1 > sDetail[index - 1].end_time.replace(':', '') * 1 ) {
+                      scVariation[scVariation.length - 1].end_time = sDetail[index].end_time;
+                    }
+                  }
+                } else {
+                  scVariation.push( getSchedule(item, value, codition) );
+                }
+              })
+
+              // concat schedules variation
+              schedulesVariation = [...scVariation, ...schedulesVariation];
+
+            } else { // don't have schedule variation
+
+              return getSchedule(item, {start_time: startTime, end_time: endTime}, codition);
+
+            }
             
-            return Object.assign({}, {
-              title:
-                textTime +
-                (item.i_name
-                  ? item.p_name + checkTR + " " + item.i_name
-                  : item.p_name + checkTR) +
-                "<br>" +
-                (item.memo ? item.memo : ""),
-              description: description,
-              className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
-              borderColor: type.value,
-              backgroundColor: type.value,
-              start: rootGetters['dateFormat'](item.date + " " + startTime),
-              end: rootGetters['dateFormat'](item.date + " " + endTime),
-              memo: item.memo,
-              title_not_memo: item.i_name
-                ? item.p_name + checkTR + " " + item.i_name
-                : item.p_name + checkTR,
-            }, item)
           });
+
+          // concat schedules and schedules variation
+          response.data.schedules = [...response.data.schedules.filter(x => x), ...schedulesVariation]
         }
 
         if (!onlyEvent && response.data.projects.length) {
@@ -146,7 +185,10 @@ export default {
     },
 
     handleMonthChange({ commit }, data) {
-      commit('SET_FILTER', data) 
+      commit('SET_FILTER', data);
+      setTimeout(function() {
+        $('.fc-event.fc-short').removeClass('fc-short');
+      }, 3000);
     },
     
     resetValidate({ dispatch, commit }) {

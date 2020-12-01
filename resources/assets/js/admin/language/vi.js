@@ -2,7 +2,7 @@
 export default {
     siteName: 'Job Time',
     sbStatistics: 'Statistics',
-    sbTotaling: 'Totaling',
+    sbTotaling: 'JOB TOTALING',
     sbUsers: 'Users',
     sbTeams: 'TEAMS',
     sbDepartments: 'Departments',
@@ -163,5 +163,12 @@ export default {
     txtUpdateDate: 'Update Date',
     txtNotice: "Notice",
     txtDestination: "Destination",
-    txtWork: "Work"
+    txtWork: "Work",
+    txtStatus: 'Status',
+    txtPagesWorked: 'Pages Worked',
+    txtDetails: 'Details',
+    txtFinishTotaling: 'FINISH TOTALING',
+    txtWorkReport: 'Work report',
+    txtFinishRecord: 'Finish Record',
+    txtDateTime: 'Date'
 }

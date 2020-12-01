@@ -18,7 +18,7 @@ class StatisticsController extends Controller
         $teamID = $_GET['team_id'];
 
         // Return project type
-        $data['types'] = $this->typeWithClass();
+        $data['types'] = $this->typeWithClass($teamID);
 
         // Return months, monthsText, startEndYear, off days
         $data = array_merge($data, $this->handleMonthYear($startMonth, $endMonth, $teamID));
@@ -128,7 +128,18 @@ class StatisticsController extends Controller
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
         })
-        ->where('i.status', 'publish')
+
+        // Get projects by start time and end time
+        ->where(function ($query) use ($end_time) {
+            $query->where('i.start_date', '<=',  $end_time)
+                  ->orWhere('i.start_date', '=',  NULL);
+        })
+        ->where(function ($query) use ($start_time) {
+            $query->where('i.end_date', '>=',  $start_time)
+                  ->orWhere('i.end_date', '=',  NULL);
+        })
+
+        // ->where('i.status', 'publish')
         ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
         ->get()->toArray();
@@ -210,7 +221,7 @@ class StatisticsController extends Controller
         $teamID = $_GET['team_id'];
 
         // Return project type
-        $types = $this->typeWithClass();
+        $types = $this->typeWithClass($teamID);
 
         // Return months, monthsText, startEndYear, off days
         $data = $this->handleMonthYear($startMonth, $endMonth, $teamID, $user_id, true);
@@ -236,11 +247,12 @@ class StatisticsController extends Controller
         // Return data excel
         $mainTable = array();
         $other = array();
+        $maxRow = count($types) + 5;
+        $maxColumn = count($totals['hoursPerMonth']) + 2;
+        $letterMaxColumn = $this->columnLetter($maxColumn);
 
-        foreach ($types as $type) {
-            $index = 0;
-            $total = 0;
-            $numberWork = 0;
+        foreach ($types as $index => $type) {
+            $childIndex = 0;
 
             foreach ($totals['hoursPerMonth'] as $key => $month) {
                 $hours = array_filter($totals['hoursPerProject'], function($obj) use ($type, $key) {
@@ -251,29 +263,24 @@ class StatisticsController extends Controller
                 });
                 $hours = array_values($hours);
                 $percent = isset($hours[0]) && $month ? round($hours[0]->total/$month*100, 1) : 0;
-                if ( $percent !== 0 ) $numberWork++;
                 $mainTable[$type->slug]['slug'] = $type->slug;
                 $mainTable[$type->slug]['slug_ja'] = $type->slug_ja;
-                $mainTable[$type->slug][$data['monthsText'][$index]] = $percent . '%';
-                $total += $percent;
-                $other[$data['monthsText'][$index]] = isset($other[$data['monthsText'][$index]]) ? $other[$data['monthsText'][$index]] + $percent : $percent;
-                $index++;
+                $mainTable[$type->slug][$data['monthsText'][$childIndex]] = $percent;
+                $other[$data['monthsText'][$childIndex]] = isset($other[$data['monthsText'][$childIndex]]) ? $other[$data['monthsText'][$childIndex]] + $percent : $percent;
+                $childIndex++;
             }
+            $numColumn = $index + 5;
             $mainTable[$type->slug][''] = "  ";
-            $mainTable[$type->slug]['Total'] = $total ? round($total/$numberWork, 1) . '%' : $total . '%';
+            $mainTable[$type->slug]['Total'] = '=SUM(C'. $numColumn .':'. $letterMaxColumn . $numColumn .')/SUM($C$5:$'. $letterMaxColumn .'$'. $maxRow .')*100';
         }
 
-        $otherTotal = 0;
-        $numberWork = 0;
-        $other = array_map(function ($value) use (&$otherTotal, &$numberWork) {
+        $other = array_map(function ($value) {
             if ( $value != 0 ) {
                 $newValue = 100 - $value;
-                $otherTotal += $newValue;
-                $numberWork++;
-                return $newValue . '%';
+                return $newValue;
             }
 
-            return $value . '%';
+            return $value;
         }, $other);
         $otherSlug['slug'] = 'other';
         $otherSlug['slug_ja'] = 'その他';
@@ -281,7 +288,7 @@ class StatisticsController extends Controller
 
         $mainTable['other'] = $other;
         $mainTable['other'][''] = "  ";
-        $mainTable['other']['Total'] = $otherTotal ? round($otherTotal/$numberWork, 1) . '%' : $otherTotal . '%';
+        $mainTable['other']['Total'] = '=SUM(C'. $maxRow .':'. $letterMaxColumn . $maxRow .')/SUM($C$5:$'. $letterMaxColumn .'$'. $maxRow .')*100';
 
         $year = $nameFile = str_replace('/', '-', $startMonth) . '_' . str_replace('/', '-', $endMonth);
         if ( $infoUser ) $nameFile .= '-'.$infoUser[0]->text;
@@ -299,16 +306,23 @@ class StatisticsController extends Controller
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
             $excel->sheet('sheet1', function($sheet) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
+
                 $sheet->setCellValue('A1', "Job Time Report ". $year);
-                $sheet->setCellValue('A2', "Date: ". Carbon::now());
+                $sheet->setCellValue('A2', "Date: ". Carbon::now() . " (%)");
                 if ( $infoUser ) $sheet->setCellValue('A3', $infoUser[0]->text);
                 $sheet->fromArray($mainTable, null, 'A'.$startRow, true);
+
+                // Format Cell - 0.0_
+                $sheet->setColumnFormat(array(
+                    $columnName . '5:' . $columnName . $numberRows => '0.0',
+                )); 
 
                 // Layout Sheet
                 $sheet->setCellValue('A'.$startRow, 'Job type');
                 $sheet->setCellValue('B'.$startRow, 'Japanese');
                 $sheet->mergeCells('A1:'.$columnName.'1');
                 $sheet->mergeCells('A2:'.$columnName.'2');
+
                 if ( $infoUser ) $sheet->mergeCells('A3:'.$columnName.'3');
 
                 // Style Sheet
@@ -321,9 +335,11 @@ class StatisticsController extends Controller
                     $cells->setAlignment('center');
                     $cells->setValignment('middle');
                 });
+
                 $sheet->cell('A2:'.$columnName.'2', function($cells) {
                     $cells->setAlignment('center');
                 });
+
                 if ( $infoUser ) $sheet->cell('A3:'.$columnName.'3', function($cells) {
                     $cells->setFont([
                         'size'       => '14',
@@ -331,6 +347,7 @@ class StatisticsController extends Controller
                     ]);
                     $cells->setAlignment('center');
                 });
+
                 $sheet->cell('A'.$startRow.':'.$columnName.$startRow, function($cells) {
                     // Set black background
                     $cells->setBackground('#ffd05b');
@@ -342,9 +359,11 @@ class StatisticsController extends Controller
                     $cells->setAlignment('center');
                     $cells->setBorder('thin','thin','thin','thin');
                 });
+
                 $sheet->cell('C5:'.$columnName.$numberRows , function($cells) {
                     $cells->setAlignment('center');
                 });
+
                 $sheet->cell('A'. $numberRows.':'.$columnName.$numberRows, function($cells) {
                     // Set font
                     $cells->setFont([
@@ -352,19 +371,40 @@ class StatisticsController extends Controller
                     ]);
                     $cells->setBorder('thin','thin','thin','thin');
                 });
+
                 $sheet->cell('A4:A'.$numberRows , function($cells) {
                     $cells->setFont([
                         'bold'       =>  true
                     ]);
                 });
+
                 $sheet->setBorder('A'.$startRow.':'.$columnNameNext.$numberRows, 'thin');
             });
         })->download($file_extension);
     }
 
-    function typeWithClass() {
+    function typeWithClass($teamFilter) {
         $aplabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'];
-        $type_work = Type::all();
+        $type_work = DB::table('types as t')->select(
+            't.id',
+            't.dept_id',
+            't.line_room',
+            't.slug',
+            't.slug_vi',
+            't.slug_ja',
+            't.value'
+        )
+        ->rightJoin('projects as p', 't.id', '=', 'p.type_id')
+        ->where(function ($query) use ($teamFilter) {
+            $query->where('p.team', '=', $teamFilter . '')
+                  ->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+                  ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+        })
+        ->orderBy('t.id', 'ASC')
+        ->groupBy('t.id')
+        ->get()->toArray();
+
         foreach ($type_work as $key => $value) {
             $type_work[$key]->class = 'ct-series-' . $aplabet[$key];
         }

@@ -53,6 +53,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
     Route::get('users/archive/{id}/{status}', 'UsersController@archive');
+    Route::resource('processes', 'ProcessesController', ['except' => ['create', 'edit']]);
 
     Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
     Route::get('statistic/filter-allocation', 'StatisticsController@filterAllocation');
@@ -69,9 +70,11 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('reports-action', 'ReportsController', ['except' => ['create', 'edit']]);
     Route::post('import-projects', 'ProjectsController@importProjects');
 
-    // Route::post('upload/data', 'UploadController@getData');
-    // Route::post('upload/update-status', 'UploadController@updateStatus');
-    // Route::post('upload/submit-message', 'UploadController@submitMessage');
+    Route::post('finish/data', 'UploadController@getData');
+    Route::post('finish/uploaded', 'UploadController@getFinishUploaded');
+    Route::post('finish/export-excel', 'UploadController@exportExcel');
+    Route::post('finish/update-status', 'UploadController@updateStatus');
+    Route::post('finish/submit-message', 'UploadController@submitMessage');
 
     Route::post('upload/report', 'UserUploadController@updateReport');
 

@@ -3,6 +3,10 @@
 @import "~@fullcalendar/timegrid/main.css";
 @import "~@fullcalendar/list/main.css";
 
+.fc .fc-view-container .fc-head .fc-today {
+    background-color: #d2d2d2 !important;
+}
+
 .fc-time-grid .fc-event {
     padding: 5px;
     border: 0;
