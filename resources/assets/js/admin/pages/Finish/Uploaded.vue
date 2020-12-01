@@ -2,45 +2,148 @@
 	<div class="content">
 		<div class="container-fluid">
             <div class="row">
-                <!-- <div class="col col-sm-auto">
-                    <card>
-                        <template slot="header">
-                            <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
-                        </template>
-                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="false" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
-                        </datepicker>
-                    </card>
-                </div> -->
                 <div class="col">
+					<card>
+						<div class="row">
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class>{{$ml.with('VueJS').get('txtUsers')}}</label>
+									<div>
+										<multiselect
+										:multiple="true"
+										v-model="user_id"
+										:options="userOptions"
+										:clear-on-select="false"
+										:preserve-search="true"
+										:placeholder="$ml.with('VueJS').get('txtPickSome')"
+										label="text"
+										track-by="text"
+										:preselect-first="true"
+										></multiselect>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class>{{$ml.with('VueJS').get('txtStartDate')}}</label>
+									<datepicker
+									name="startDate"
+									input-class="form-control"
+									placeholder="Select Date"
+									v-model="start_date"
+									:format="customFormatter"
+									:disabled-dates="disabledEndDates()"
+									:language="getLanguage(this.$ml)"
+									></datepicker>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class>{{$ml.with('VueJS').get('txtEndDate')}}</label>
+									<datepicker
+									name="endDate"
+									input-class="form-control"
+									placeholder="Select Date"
+									v-model="end_date"
+									:format="customFormatter"
+									:disabled-dates="disabledStartDates()"
+									:language="getLanguage(this.$ml)"
+									></datepicker>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
+									<div>
+										<multiselect
+										:multiple="true"
+										v-model="deptSelects"
+										:options="departments"
+										:clear-on-select="false"
+										:preserve-search="true"
+										:placeholder="$ml.with('VueJS').get('txtPickSome')"
+										label="text"
+										track-by="text"
+										:preselect-first="true"
+										></multiselect>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
+									<div>
+										<multiselect
+										:multiple="true"
+										v-model="projectSelects"
+										:options="projectsFilter"
+										:clear-on-select="false"
+										:preserve-search="true"
+										:placeholder="$ml.with('VueJS').get('txtPickSome')"
+										label="text"
+										track-by="text"
+										:preselect-first="true"
+										></multiselect>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class>
+										{{$ml.with('VueJS').get('txtIssue')}}
+									</label>
+									<input v-model="issue" type="text" name="issue" class="form-control" />
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class>{{$ml.with('VueJS').get('txtTypes')}}</label>
+									<div>
+										<multiselect
+										:multiple="true"
+										v-model="typeSelects"
+										:options="types"
+										:clear-on-select="false"
+										:preserve-search="true"
+										:placeholder="$ml.with('VueJS').get('txtPickSome')"
+										label="slug"
+										track-by="slug"
+										:preselect-first="true"
+										>
+											<template slot="option" slot-scope="props">
+												<div>
+													<span class="type-color" :style="optionStyle(props.option.value)"></span>
+													{{ props.option.slug }}
+												</div>
+											</template>
+										</multiselect>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label class="">{{$ml.with('VueJS').get('txtTeam')}}</label>
+									<div>
+										<select-2 :options="currentTeamOption" v-model="team" class="select2" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</card>
                     <card>
                         <template slot="header">
                             <div class="d-flex justify-content-between">
-                                <h4 class="card-title">{{$ml.with('VueJS').get('txtFinish')}} List</h4>
-                                <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 160px;">
-									<div class="d-flex align-items-stretch mr-3">
-										<label class="mr-2 mb-0 d-flex align-items-center text-dark">{{ $ml.with('VueJS').get('lblDate') }}</label>
-										<div style="min-width: 110px">
-											<datepicker 
-												input-class="form-control" 
-												name="startDate" 
-												v-model="start_date" 
-												:format="customFormatter" 
-												:inline="false" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
-											</datepicker>
-										</div>
-									</div>
-                                    <select-2
-                                        :options="currentTeamOption"
-                                        v-model="selectTeam"
-                                        class="select2"
-                                    ></select-2>
-                                    <div class="ml-3"></div>
-                                    <select-2 v-model="showFilter" :options="optionsFilter" class="select2"></select-2>
-                                </div>
+                                <h4 class="card-title">{{$ml.with('VueJS').get('txtFinishRecord')}}</h4>
+                                <div class="align-self-end">
+									<button @click="exportExcel" class="btn btn-primary">
+										<i class="fa fa-download"></i>
+										{{$ml.with('VueJS').get('txtExportExcel')}}
+									</button>
+								</div>
                             </div>
                         </template>
                         <div class="table-responsive">
-							<table-finish class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finish>
+							<table-finished-upload class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finished-upload>
 						</div>
 						<process-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-modal>
 						<process-detail-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-detail-modal>
@@ -59,7 +162,8 @@
 	</div>
 </template>
 <script>
-import TableFinish from "../../components/TableFinish";
+import Multiselect from "vue-multiselect";
+import TableFinishedUpload from "../../components/TableFinishedUpload";
 import ProcessModal from './ProcessModal';
 import ProcessDetailModal from './ProcessDetailModal';
 import CommentsModal from './CommentsModal';
@@ -72,12 +176,13 @@ import { mapGetters, mapActions } from "vuex"
 
 export default {
 	components: {
-		TableFinish,
+		TableFinishedUpload,
 		Card,
 		Datepicker,
 		Select2,
 		ProcessModal,
-		ProcessDetailModal
+		ProcessDetailModal,
+		Multiselect
 	},
 
 	computed: {
@@ -96,7 +201,7 @@ export default {
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
-				{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
+				{ id: "date", value: this.$ml.with('VueJS').get('txtDateTime'), width: "160", class: "" },
 				{ id: "user_name", value: this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
@@ -125,12 +230,29 @@ export default {
                 en: en
 			},
 			
-			page: 1
+			page: 1,
+
+			// New filter
+			user_id: [],
+			users: [],
+			userOptions: [],
+			start_date: new Date(moment().startOf('month').format('YYYY/MM/DD')),
+			end_date: new Date(),
+			deptSelects: [],
+			typeSelects: [],
+			projectSelects: [],
+			issue: "",
+			team: "", 
+			departments: [],
+			types: [],
+			projectsFilter: [],
+			firstLoad: 0
 		};
 	},
 	mounted() {
 		let _this = this;
-		_this.selectTeam = _this.currentTeam.id
+		_this.team = _this.currentTeam ? _this.currentTeam.id : ""
+		if ( _this.team ) _this.fetchData()
 		_this.getOptions();
 		$(document).on('click', '.languages button', function() {
 			_this.txtAll = _this.$ml.with('VueJS').get('txtSelectAll')
@@ -140,7 +262,7 @@ export default {
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
-				{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
+				{ id: "date", value: _this.$ml.with('VueJS').get('txtDateTime'), width: "160", class: "" },
 				{ id: "user_name", value: _this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: _this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
@@ -156,19 +278,49 @@ export default {
             });
 
             return arrProcess;
-        },
+		},
+		exportExcel() {
+			let uri = "/data/finish/export-excel";
+			axios
+			.post(uri, {
+				user_id: this.user_id,
+				start_date: this.dateFormatter(this.start_date),
+				end_date: this.dateFormatter(this.end_date),
+				deptSelects: this.deptSelects,
+				typeSelects: this.typeSelects,
+				projectSelects: this.projectSelects,
+				issueFilter: this.issue,
+				team: this.team
+			})
+			.then(res => {
+				window.open(res.data, "_blank");
+			})
+			.catch(err => {
+				alert("Error!");
+			});
+		},
 		fetchData(page = 1) {
 			this.page = page;
 			let uri = "/data/finish/uploaded?page=" + page;
 			axios
 			.post(uri, {
+				user_id: this.user_id,
 				start_date: this.dateFormatter(this.start_date),
-				selectTeam: this.selectTeam,
-				showFilter: this.showFilter
+				end_date: this.dateFormatter(this.end_date),
+				deptSelects: this.deptSelects,
+				typeSelects: this.typeSelects,
+				projectSelects: this.projectSelects,
+				issueFilter: this.issue,
+				team: this.team
 			})
 			.then(res => {
+				this.users = res.data.users;
+				this.types = res.data.types;
+				this.departments = res.data.departments;
+				this.projectsFilter = res.data.projects;
 				this.dataProjects = res.data.dataProjects;
 				this.dataProcesses = res.data.dataProcesses;
+				this.firstLoad++;
 
 				if (res.data.dataProjects.data.length) {
 					this.projects = res.data.dataProjects.data.map((item, index) => {
@@ -238,22 +390,86 @@ export default {
 		},
 		getLanguage(data) {
 			return this.dataLang[data.current]
-		}
+		},
+		disabledStartDates() {
+			let obj = {
+				to: new Date(this.start_date), // Disable all dates after specific date
+				from: new Date() // Disable all dates after specific date
+				// days: [0], // Disable Saturday's and Sunday's
+			};
+			return obj;
+		},
+		disabledEndDates() {
+			let obj = {
+				from: new Date(this.end_date) // Disable all dates after specific date
+				// days: [0], // Disable Saturday's and Sunday's
+			};
+			return obj;
+		},
+		getUserOptions() {
+			this.userOptions = this.users;
+		},
+		optionStyle(color) {
+			return {
+				backgroundColor: color
+			};
+		},
 	},
 	watch: {
-		selectTeam: [{
-            handler: function(value, oldValue) {
-                if ( value != oldValue ) this.fetchData()
-            }
-        }],
+		users: [
+		{
+			handler: "getUserOptions"
+		}
+		],
+		txtAll: [
+		{
+			handler: "getUserOptions"
+		}
+		],
 		start_date: [
 		{
 			handler: "fetchData"
 		}
 		],
-		showFilter: [
+		end_date: [
 		{
 			handler: "fetchData"
+		}
+		],
+		user_id: [
+		{
+			handler: "fetchData"
+		}
+		],
+		deptSelects: [
+		{
+			handler: "fetchData"
+		}
+		],
+		typeSelects: [
+		{
+			handler: "fetchData"
+		}
+		],
+		projectSelects: [
+		{
+			handler: "fetchData"
+		}
+		],
+		issue: [
+		{
+			handler: "fetchData"
+		}
+		],
+		team: [
+		{
+			handler: function() {
+				if ( this.team ) {
+					if ( this.firstLoad >= 1 && this.team ) {
+						this.fetchData()
+					}
+				}
+			}
 		}
 		]
 	}

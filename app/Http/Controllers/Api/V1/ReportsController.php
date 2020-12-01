@@ -192,6 +192,9 @@ class ReportsController extends Controller
                     $totalLetter . ($numberRows + 1) => '[h]:mm;@',
                 ));
 
+                // Fill array to sheet
+                $sheet->fromArray($dataTimeUser['data'], null, 'A5', true);
+
                 //set title table
                 if ( count($userArr) != 1 ) {
                     $sheet->setCellValue('A5', "NAME");
@@ -213,9 +216,6 @@ class ReportsController extends Controller
                     $sheet->setCellValue('G5', "ISSUE");
                     $sheet->setCellValue('H5', "JOB TYPE");
                 }
-
-                // Fill array to sheet
-                $sheet->fromArray($dataTimeUser['data'], null, 'A5', true);
 
                 // Fill total time to sheet
                 $sheet->setCellValue($endLetter . ($numberRows + 1), 'Total');
@@ -293,13 +293,13 @@ class ReportsController extends Controller
                         $columnName . '6:' . $columnName . $numberRows => '[h]:mm;@',
                         $columnName . ($numberRows + 1) => '[h]:mm;@',
                     ));
-                    
-                    //set title table
-                    $sheet->setCellValue('A5', "NAME");
-                    $sheet->setCellValue('B5', "TOTAL");
 
                     // Fill array to sheet
                     $sheet->fromArray($dataTimeUser['dataTotal'], null, 'A5', true);
+
+                    //set title table
+                    $sheet->setCellValue('A5', "NAME");
+                    $sheet->setCellValue('B5', "TOTAL");
                     
                     // Fill total time to sheet
                     $sheet->setCellValue($columnTotalText . ($numberRows + 1), 'Total');

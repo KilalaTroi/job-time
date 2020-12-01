@@ -15,7 +15,7 @@
                     <card>
                         <template slot="header">
                             <div class="d-flex justify-content-between">
-                                <h4 class="card-title">{{$ml.with('VueJS').get('txtFinish')}} List</h4>
+                                <h4 class="card-title">{{$ml.with('VueJS').get('txtFinish')}}</h4>
                                 <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 160px;">
 									<div class="d-flex align-items-stretch mr-3">
 										<label class="mr-2 mb-0 d-flex align-items-center text-dark">{{ $ml.with('VueJS').get('lblDate') }}</label>
@@ -96,7 +96,7 @@ export default {
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "phase", value: this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
-				{ id: "date", value: this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
+				{ id: "date", value: this.$ml.with('VueJS').get('txtDateTime'), width: "160", class: "" },
 				{ id: "user_name", value: this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
@@ -140,7 +140,7 @@ export default {
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "phase", value: _this.$ml.with('VueJS').get('txtPhase'), width: "", class: "" },
-				{ id: "date", value: _this.$ml.with('VueJS').get('lblDate'), width: "160", class: "" },
+				{ id: "date", value: _this.$ml.with('VueJS').get('txtDateTime'), width: "160", class: "" },
 				{ id: "user_name", value: _this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: _this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }

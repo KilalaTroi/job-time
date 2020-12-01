@@ -72,6 +72,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
 
     Route::post('finish/data', 'UploadController@getData');
     Route::post('finish/uploaded', 'UploadController@getFinishUploaded');
+    Route::post('finish/export-excel', 'UploadController@exportExcel');
     Route::post('finish/update-status', 'UploadController@updateStatus');
     Route::post('finish/submit-message', 'UploadController@submitMessage');
 

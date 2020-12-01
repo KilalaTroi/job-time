@@ -47,7 +47,7 @@ export default {
       columns: [
         {
           id: "date",
-          value: this.$ml.with("VueJS").get("lblDate"),
+          value: this.$ml.with("VueJS").get("txtDateTime"),
           width: "",
           class: "",
         },
@@ -81,7 +81,7 @@ export default {
       _this.columns = [
         {
           id: "date",
-          value: _this.$ml.with("VueJS").get("lblDate"),
+          value: _this.$ml.with("VueJS").get("txtDateTime"),
           width: "",
           class: "",
         },
