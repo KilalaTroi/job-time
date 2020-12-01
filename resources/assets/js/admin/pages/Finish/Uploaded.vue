@@ -143,9 +143,11 @@
                             </div>
                         </template>
                         <div class="table-responsive">
-							<table-finished-upload class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finished-upload>
+							<table-finished-upload v-show="!loading" class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finished-upload>
+							<div v-if="loading" class="text-center mt-3">
+								<img src="https://i.imgur.com/JfPpwOA.gif">
+							</div>
 						</div>
-						<process-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-modal>
 						<process-detail-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-detail-modal>
 						<pagination
 						:data="dataProjects"
@@ -164,9 +166,7 @@
 <script>
 import Multiselect from "vue-multiselect";
 import TableFinishedUpload from "../../components/TableFinishedUpload";
-import ProcessModal from './ProcessModal';
 import ProcessDetailModal from './ProcessDetailModal';
-import CommentsModal from './CommentsModal';
 import Card from "../../components/Cards/Card";
 import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
@@ -180,7 +180,6 @@ export default {
 		Card,
 		Datepicker,
 		Select2,
-		ProcessModal,
 		ProcessDetailModal,
 		Multiselect
 	},
@@ -206,8 +205,7 @@ export default {
 				{ id: "page", value: this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
 			],
-			start_date: new Date(),
-			selectTeam: '',
+			loading: true,
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
 			dataProjects: {},
@@ -218,9 +216,6 @@ export default {
 			jShowDisabled: true,
 			jAlign: "right",
 			jSize: "small",
-
-			showFilter: 'showSchedule',
-			optionsFilter: [],
 
 			currentProcess: {},
 			arrCurrentProcess: [],
@@ -250,10 +245,9 @@ export default {
 		};
 	},
 	mounted() {
-		let _this = this;
+		const _this = this;
 		_this.team = _this.currentTeam ? _this.currentTeam.id : ""
 		if ( _this.team ) _this.fetchData()
-		_this.getOptions();
 		$(document).on('click', '.languages button', function() {
 			_this.txtAll = _this.$ml.with('VueJS').get('txtSelectAll')
 			_this.columns = [
@@ -267,8 +261,6 @@ export default {
 				{ id: "page", value: _this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
 			];
-			_this.getOptions();
-            _this.showFilter = 'showSchedule';
 		});
 	},
 	methods: {
@@ -280,7 +272,7 @@ export default {
             return arrProcess;
 		},
 		exportExcel() {
-			let uri = "/data/finish/export-excel";
+			const uri = "/data/finish/export-excel";
 			axios
 			.post(uri, {
 				user_id: this.user_id,
@@ -299,11 +291,11 @@ export default {
 				alert("Error!");
 			});
 		},
-		fetchData(page = 1) {
+		async fetchData(page = 1, loading = true) {
 			this.page = page;
-			let uri = "/data/finish/uploaded?page=" + page;
-			axios
-			.post(uri, {
+			const uri = "/data/finish/uploaded?page=" + page;
+			this.loading = loading;
+			await axios.post(uri, {
 				user_id: this.user_id,
 				start_date: this.dateFormatter(this.start_date),
 				end_date: this.dateFormatter(this.end_date),
@@ -345,38 +337,18 @@ export default {
 				console.log(err);
 				alert("Could not load data");
 			});
+
+			this.loading = false;
 		},
-		getOptions() {
-            let arr = [
-                {id: 'showSchedule', text: this.$ml.with('VueJS').get('txtShowBySchedule')},
-                {id: 'all', text: this.$ml.with('VueJS').get('txtShowAll')}
-            ];
-            this.optionsFilter = [...arr];
-        },
 		getProcess(item) {
 			this.currentProcess = Object.assign({}, item, {status: null});
 			this.arrCurrentProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, this.currentProcess.id, this.currentProcess.phase) : [];
-		},
-		changeStatusProcess(item) {
-			item.status = item.status ? 0 : 1;
-			
-			const uri = "/data/finish/update-status";
-			axios.post(uri, {
-					currentProcess: item
-				})
-				.then(res => {
-					this.fetchData(this.page)
-				})
-				.catch(err => {
-					console.log(err);
-				});
-            
 		},
 		customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
 		},
 		disabledEndDates() {
-			let obj = {
+			const obj = {
 				from: new Date()
 			};
 			return obj;
@@ -386,13 +358,13 @@ export default {
 		},
 		resetValidate() {
 			this.currentProcess = {};
-			this.fetchData(this.page)
+			this.fetchData(this.page, false)
 		},
 		getLanguage(data) {
 			return this.dataLang[data.current]
 		},
 		disabledStartDates() {
-			let obj = {
+			const obj = {
 				to: new Date(this.start_date), // Disable all dates after specific date
 				from: new Date() // Disable all dates after specific date
 				// days: [0], // Disable Saturday's and Sunday's
@@ -400,7 +372,7 @@ export default {
 			return obj;
 		},
 		disabledEndDates() {
-			let obj = {
+			const obj = {
 				from: new Date(this.end_date) // Disable all dates after specific date
 				// days: [0], // Disable Saturday's and Sunday's
 			};

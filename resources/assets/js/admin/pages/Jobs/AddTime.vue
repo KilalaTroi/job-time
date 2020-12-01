@@ -23,7 +23,7 @@
                 <base-checkbox v-model="exceptLunchBreak" class="align-self-end">{{$ml.with('VueJS').get('txtExcludeLunchBreak')}}</base-checkbox>
             </div>
             <div class="form-group" v-if="team == 2">
-                <label>Folder</label>
+                <label>{{ $ml.with('VueJS').get('txtWork') }}</label>
                 <input
                     type="text"
                     v-model="note"
