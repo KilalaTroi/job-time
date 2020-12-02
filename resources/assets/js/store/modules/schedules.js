@@ -33,13 +33,15 @@ export default {
         projects: data.projects,
         schedules: data.schedules,
         schedulesDetail: data.schedulesDetail,
-        projectsFilter: data.projects
+        projectsFilter: data.projects,
+        issuesNoSC: data.issues
       }
     },
 
     SET_DATA_SCHEDULE: (state, data) => {
       state.data.schedules = data.schedules;
       state.data.schedulesDetail = data.schedulesDetail;
+      state.data.issuesNoSC = data.issues;
     },
 
     SET_DATA_CALENDAR: (state, data) => {

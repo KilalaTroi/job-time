@@ -45,6 +45,7 @@
 <script>
 import TableNoAction from "../../components/TableNoAction";
 import Modal from "../../components/Modals/Modal";
+import { mapGetters } from "vuex"
 
 export default {
   name: "process-modal",
@@ -53,6 +54,11 @@ export default {
     TableNoAction,
   },
   props: ["currentProcess", "arrCurrentProcess"],
+  computed: {
+    ...mapGetters({
+			dateFormat: "dateFormat"
+    })
+  },
   data() {
     return {
       columns: [
@@ -121,6 +127,7 @@ export default {
     getDataProcess() {
       if (this.arrCurrentProcess.length) {
         this.dataProcess = this.arrCurrentProcess.map((item, index) => {
+          item.date = this.dateFormat(item.date, 'MMM DD, YYYY HH:mm')
           return item;
         });
       } else {

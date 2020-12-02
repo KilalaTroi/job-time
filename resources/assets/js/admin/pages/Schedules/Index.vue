@@ -21,6 +21,7 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
+                  :class="{ 'no-schedule' : scheduleData.issuesNoSC.includes(item.issue_id) }"
                   v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
@@ -244,4 +245,23 @@ export default {
 
 <style lang="scss" scope>
 @import "custom.scss";
+.no-schedule {
+  position: relative;
+
+  &:after {
+    content: "N";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 20px;
+    height: 20px;
+    background: red;
+    text-align: center;
+    line-height: 20px;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
 </style>
