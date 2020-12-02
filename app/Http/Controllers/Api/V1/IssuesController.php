@@ -187,6 +187,16 @@ class IssuesController extends Controller
         $ids = $request->get('issues');
         Issue::destroy($ids);
 
+        $projects = Project::has('issues', '=', 0)->get();
+
+        if ( count($projects) ) {
+            $projects = collect($projects)->map(function($x) {
+                return $x->id;
+            })->toArray();
+            
+            Project::destroy($projects);
+        }
+
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
