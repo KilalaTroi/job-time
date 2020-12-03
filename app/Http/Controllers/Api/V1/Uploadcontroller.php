@@ -342,6 +342,8 @@ class Uploadcontroller extends Controller
         // Get processes
         $processesUploaded = DB::table('processes as p')
         ->select(
+            'p.id as id',
+            'p.issue_id as issue_id',
             'd.name as department',
             't.slug as job_type',
             'pr.name as project',
@@ -382,10 +384,25 @@ class Uploadcontroller extends Controller
         ->where('p.date', '<=', $end_time . ' 23:59:59')
         ->where('t.line_room', '!=', NULL)->get();
 
-        $processesUploaded = collect($processesUploaded)->map(function($x) {
+        // get array process ids
+        $issueIds = $processesUploaded->pluck('issue_id')->toArray();
+        
+        // get total page of process
+        $processePage = DB::table('processes')
+        ->select(
+            DB::raw("MAX(id) as id"),
+            DB::raw("SUM(page) as page")
+        )
+        ->whereIn('issue_id', $issueIds)
+        ->groupBy('issue_id', 'memo')
+        ->get()->pluck('page', 'id')->toArray();
+
+        $processesUploaded = collect($processesUploaded)->map(function($x) use($processePage) {
             $x->issue = $x->issue ? $x->issue : '--';
             $x->phase = $x->phase ? $x->phase : '--';
-            $x->page = $x->page ? $x->page : '--';
+            $x->page = isset($processePage[$x->id]) && $processePage[$x->id] ? $processePage[$x->id] : '--';
+            unset($x->id);
+            unset($x->issue_id);
             return (array) $x;
         })->toArray();
 

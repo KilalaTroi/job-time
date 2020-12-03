@@ -327,9 +327,9 @@ export default {
         });
     },
 
-    deleteItem({ dispatch, state }, data) {
+    deleteItem({ dispatch, state }, msgText) {
       $("#itemDetail").modal("hide");
-      if (confirm(data.msgText)) {
+      if (confirm(msgText)) {
         const uri = "/data/schedules/" + state.selectedItem.id
         axios.delete(uri)
           .then(res => {
