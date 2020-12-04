@@ -76,7 +76,7 @@
 										<multiselect
 										:multiple="true"
 										v-model="projectSelects"
-										:options="projectsFilter"
+										:options="projects"
 										:clear-on-select="false"
 										:preserve-search="true"
 										:placeholder="$ml.with('VueJS').get('txtPickSome')"
@@ -143,14 +143,14 @@
                             </div>
                         </template>
                         <div class="table-responsive">
-							<table-finished-upload v-show="!loading" class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finished-upload>
+							<table-finished-upload v-show="!loading" class="table-hover table-striped" :columns="columns" :data="items" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finished-upload>
 							<div v-if="loading" class="text-center mt-3">
 								<img src="https://i.imgur.com/JfPpwOA.gif">
 							</div>
 						</div>
 						<process-detail-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-detail-modal>
 						<pagination
-						:data="dataProjects"
+						:data="processesUploaded"
 						:show-disabled="jShowDisabled"
 						:limit="jLimit"
 						:align="jAlign"
@@ -208,9 +208,9 @@ export default {
 			loading: true,
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
-			dataProjects: {},
-			dataProcesses: [],
-			projects: [],
+			processesUploaded: {},
+			processDetails: [],
+			items: [],
 
 			jLimit: 2,
 			jShowDisabled: true,
@@ -240,7 +240,7 @@ export default {
 			team: "", 
 			departments: [],
 			types: [],
-			projectsFilter: [],
+			projects: [],
 			firstLoad: 0
 		};
 	},
@@ -309,14 +309,14 @@ export default {
 				this.users = res.data.users;
 				this.types = res.data.types;
 				this.departments = res.data.departments;
-				this.projectsFilter = res.data.projects;
-				this.dataProjects = res.data.dataProjects;
-				this.dataProcesses = res.data.dataProcesses;
+				this.projects = res.data.projects;
+				this.processesUploaded = res.data.processesUploaded;
+				this.processDetails = res.data.processDetails;
 				this.firstLoad++;
 
-				if (res.data.dataProjects.data.length) {
-					this.projects = res.data.dataProjects.data.map((item, index) => {
-						const arrProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, item.id, item.phase) : [];
+				if (res.data.processesUploaded.data.length) {
+					this.items = res.data.processesUploaded.data.map((item, index) => {
+						const arrProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, item.id, item.phase) : [];
 						const lastProcess = arrProcess[arrProcess.length - 1];
 						return Object.assign({}, item, {
 							d_name: item.department === "All" ? "" : item.department,
@@ -330,7 +330,7 @@ export default {
 						});
 					});
 				} else {
-					this.projects = [];
+					this.items = [];
 				}
 			})
 			.catch(err => {
@@ -342,7 +342,7 @@ export default {
 		},
 		getProcess(item) {
 			this.currentProcess = Object.assign({}, item, {status: null});
-			this.arrCurrentProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, this.currentProcess.id, this.currentProcess.phase) : [];
+			this.arrCurrentProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, this.currentProcess.id, this.currentProcess.phase) : [];
 		},
 		customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");

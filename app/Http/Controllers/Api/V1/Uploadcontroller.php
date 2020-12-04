@@ -19,22 +19,10 @@ class Uploadcontroller extends Controller
         $defaultProjects = array(10, 58, 59, 67, 68, 69);
         // End POST data
 
-        // Get list max id of process
-        $startDate = Carbon::createFromFormat('Y-m-d', $selectDate)->subMonth()->format('Y-m-d');
-        $maxIDProcess = DB::table('processes as p')
-        ->select(DB::raw('max(id) as d'))
-        ->where(function ($query) use ($startDate) {
-            $query->where('p.date', '>=', $startDate)
-                ->orWhere('p.status', 'Finish Uploaded');
-        })
-        ->groupBy('p.issue_id', 'p.memo')
-        ->get()->toArray();
-
-        // Get Issue and schedule SQl
-        $dataProjects = DB::table('issues as i')
+        // Get Issue with processes
+        $issueProcesses = DB::table('issues as i')
         ->select(
             'i.id as id',
-            DB::raw('max(s.id) as schedule_id'),
             'd.name as department',
             'p.name as project',
             'i.name as issue',
@@ -42,8 +30,8 @@ class Uploadcontroller extends Controller
             't.line_room as room_id',
             's.memo as phase'
         )
-        ->join('projects as p', 'p.id', '=', 'i.project_id')
-        ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+        ->join('schedules as s', 'i.id', '=', 's.issue_id')
+        ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
         ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->where(function ($query) use ($selectTeam) {
@@ -68,41 +56,37 @@ class Uploadcontroller extends Controller
         })
         ->where('t.line_room', '!=', NULL)
         ->where('i.created_at', '<=',  $selectDate . ' 23:59:59')
-        ->orderBy('s.created_at', 'desc')
         ->orderBy('i.created_at', 'desc')
+        ->orderBy('s.created_at', 'desc')
         ->groupBy('i.id', 's.memo')
         ->paginate(20);
 
         // Get issues IDs
-        $data = collect($dataProjects)->get('data');
-        if ( count($data) ) {
-            $issues = array_map(function($obj) {
-                return $obj->id;
-            }, $data);
-        }
+        $issueIds = $issueProcesses->pluck('id')->toArray();
 
-        // Get processes
-        $processes = array();
-        if ( isset($issues) ) {
-            $processes = DB::table('processes as p')
+        // Get process details
+        $processDetails = array();
+        if ( count($issueIds) ) {
+            $processDetails = DB::table('processes as p')
             ->select(
                 'p.id',
-                'issue_id',
-                'schedule_id',
-                'page',
-                'memo as phase',
-                'date',
+                'p.issue_id',
+                'p.page',
+                's.memo as phase',
+                'p.date',
                 'u.name as user_name',
-                'status as status'
+                'p.status as status'
             )
+            ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
             ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-            ->whereIn('issue_id', $issues)
+            ->whereIn('p.issue_id', $issueIds)
             ->get()->toArray();
         }
 
+        // Return Json
         return response()->json([
-            'dataProjects' => $dataProjects,
-            'dataProcesses' => $processes,
+            'issueProcesses' => $issueProcesses,
+            'processDetails' => $processDetails,
         ]);
     }
 
@@ -146,7 +130,10 @@ class Uploadcontroller extends Controller
         }
         // End POST data
 
+        // Get departments
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+
+        // Get types
         $types = DB::table('types as t')->select('t.id', 't.slug', 't.slug_vi', 't.slug_ja', 't.value')
         ->rightJoin('projects as p', 't.id', '=', 'p.type_id')
         ->where(function ($query) use ($teamFilter) {
@@ -158,11 +145,12 @@ class Uploadcontroller extends Controller
         ->orderBy('t.id', 'ASC')
         ->groupBy('t.id')
         ->get()->toArray();
+
+        // Get projects
         $projects = DB::table('projects as p')
         ->select(
             'p.id', 
-            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
-            DB::raw('max(i.id) as issue_id')
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text')
         )
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
@@ -173,9 +161,6 @@ class Uploadcontroller extends Controller
         ->when($typeArr, function ($query, $typeArr) {
             return $query->whereIn('p.type_id', $typeArr);
         })
-        // ->when($projectArr, function ($query, $projectArr) {
-        //     return $query->whereIn('p.id', $projectArr);
-        // })
         ->when($issueFilter, function ($query, $issueFilter) {
             return $query->where('i.name', 'like', '%'.$issueFilter.'%');
         })
@@ -185,7 +170,6 @@ class Uploadcontroller extends Controller
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
         })
-
         // Get projects by start time and end time
         ->where(function ($query) use ($end_time) {
             $query->where('i.start_date', '<=',  $end_time)
@@ -195,19 +179,16 @@ class Uploadcontroller extends Controller
             $query->where('i.end_date', '>=',  $start_time)
                   ->orWhere('i.end_date', '=',  NULL);
         })
-
-        // ->where('i.status', 'publish')
         ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
         ->get()->toArray();
-        // End POST data
 
         // Get processes
         $processesUploaded = DB::table('processes as p')
         ->select(
             'p.issue_id as id',
             'p.page as page',
-            'p.memo as phase',
+            's.memo as phase',
             'p.date as date',
             'u.name as user_name',
             'p.status as status',
@@ -216,9 +197,10 @@ class Uploadcontroller extends Controller
             'i.name as issue',
             't.slug as job_type'
         )
+        ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
         ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-        ->join('issues as i', 'i.id', '=', 'p.issue_id')
-        ->join('projects as pr', 'pr.id', '=', 'i.project_id')
+        ->leftJoin('issues as i', 'i.id', '=', 'p.issue_id')
+        ->leftJoin('projects as pr', 'pr.id', '=', 'i.project_id')
         ->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
         ->leftJoin('types as t', 't.id', '=', 'pr.type_id')
         ->where('p.status', 'Finished Upload')
@@ -249,28 +231,24 @@ class Uploadcontroller extends Controller
         ->paginate(20);
 
         // Get issues IDs
-        $data = collect($processesUploaded)->get('data');
-        if ( count($data) ) {
-            $issues = array_map(function($obj) {
-                return $obj->id;
-            }, $data);
-        }
+        $issueIds = $processesUploaded->pluck('id')->toArray();
 
-        // Get processes
-        $processes = array();
-        if ( isset($issues) ) {
-            $processes = DB::table('processes as p')
+        // Get process details
+        $processDetails = array();
+        if ( isset($issueIds) ) {
+            $processDetails = DB::table('processes as p')
             ->select(
                 'p.id',
-                'issue_id',
-                'page',
-                'memo as phase',
-                'date',
+                'p.issue_id',
+                'p.page',
+                's.memo as phase',
+                'p.date',
                 'u.name as user_name',
-                'status as status'
+                'p.status as status'
             )
+            ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
             ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-            ->whereIn('issue_id', $issues)
+            ->whereIn('p.issue_id', $issueIds)
             ->get()->toArray();
         }
 
@@ -290,8 +268,8 @@ class Uploadcontroller extends Controller
 
         // Return Json
         return response()->json([
-            'dataProjects' => $processesUploaded,
-            'dataProcesses' => $processes,
+            'processesUploaded' => $processesUploaded,
+            'processDetails' => $processDetails,
             'users' => $users,
             'departments' => $departments,
             'types' => $types,

@@ -34,7 +34,7 @@
                         </template>
 
                         <div class="table-responsive">
-							<table-finish v-show="!loading" class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finish>
+							<table-finish v-show="!loading" class="table-hover table-striped" :columns="columns" :data="items" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finish>
 							<div v-if="loading" class="text-center mt-3">
 								<img src="https://i.imgur.com/JfPpwOA.gif">
 							</div>
@@ -45,7 +45,7 @@
 						<process-detail-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-detail-modal>
 						
 						<pagination
-						:data="dataProjects"
+						:data="issueProcesses"
 						:show-disabled="jShowDisabled"
 						:limit="jLimit"
 						:align="jAlign"
@@ -106,9 +106,9 @@ export default {
 			selectTeam: '',
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
-			dataProjects: {},
-			dataProcesses: [],
-			projects: [],
+			issueProcesses: {},
+			processDetails: [],
+			items: [],
 
 			jLimit: 2,
 			jShowDisabled: true,
@@ -169,13 +169,13 @@ export default {
 				showFilter: this.showFilter
 			})
 			.then(res => {
-				this.dataProjects = res.data.dataProjects;
-				this.dataProcesses = res.data.dataProcesses;
+				this.issueProcesses = res.data.issueProcesses;
+				this.processDetails = res.data.processDetails;
 
-				if (res.data.dataProjects.data.length) {
-					this.projects = res.data.dataProjects.data.map((item, index) => {
+				if (res.data.issueProcesses.data.length) {
+					this.items = res.data.issueProcesses.data.map((item, index) => {
 						// Get processes of issue
-						const arrProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, item.id, item.phase) : [];
+						const arrProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, item.id, item.phase) : [];
 						// Get last process of issue
 						const lastProcess = arrProcess[arrProcess.length - 1];
 
@@ -191,7 +191,7 @@ export default {
 						});
 					});
 				} else {
-					this.projects = [];
+					this.items = [];
 				}
 			})
 			.catch(err => {
@@ -210,7 +210,7 @@ export default {
         },
 		getProcess(item) {
 			this.currentProcess = Object.assign({}, item, {status: null});
-			this.arrCurrentProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, this.currentProcess.id, this.currentProcess.phase) : [];
+			this.arrCurrentProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, this.currentProcess.id, this.currentProcess.phase) : [];
 		},
 		customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
