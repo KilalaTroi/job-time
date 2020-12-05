@@ -326,11 +326,12 @@ class Uploadcontroller extends Controller
             't.slug as job_type',
             'pr.name as project',
             'i.name as issue',
-            'p.memo as phase',
+            's.memo as phase',
             'p.date as date',
             'u.name as user_name',
             'p.page as page',
         )
+        ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
         ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
         ->join('issues as i', 'i.id', '=', 'p.issue_id')
         ->join('projects as pr', 'pr.id', '=', 'i.project_id')
@@ -366,21 +367,44 @@ class Uploadcontroller extends Controller
         $issueIds = $processesUploaded->pluck('issue_id')->toArray();
         
         // get total page of process
-        $processePage = DB::table('processes')
+        $processePage = DB::table('processes as p')
         ->select(
-            DB::raw("MAX(id) as id"),
-            DB::raw("SUM(page) as page")
+            DB::raw("MAX(p.id) as id"),
+            DB::raw("SUM(p.page) as page"),
+            'p.issue_id as issue_id',
+            's.memo as phase',
         )
-        ->whereIn('issue_id', $issueIds)
-        ->groupBy('issue_id', 'memo')
-        ->get()->pluck('page', 'id')->toArray();
+        ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
+        ->whereIn('p.issue_id', $issueIds)
+        ->groupBy('p.issue_id', 'memo')
+        ->get()->toArray();
 
+        $processePage = collect($processePage)->map(function($x) {
+            $x->phase = $x->phase ? $x->phase : false;
+            return (array) $x;
+        })->toArray();
+        
+        // Get total page
         $processesUploaded = collect($processesUploaded)->map(function($x) use($processePage) {
+            $pages = 0;
+            $x->phase = $x->phase ? $x->phase : false;
+
+            if ( count($processePage) ) {
+                // Define search list with multiple key=>value pair 
+                $search_items = array('issue_id'=>$x->issue_id, 'phase'=>$x->phase); 
+                
+                // Call search and pass the array and 
+                // the search list 
+                $res = $this->search($processePage, $search_items);
+                $pages = count($res) ? $res[0]['page'] : 0;
+            }
+            
+            $x->page = $pages ? $pages : '--';
             $x->issue = $x->issue ? $x->issue : '--';
             $x->phase = $x->phase ? $x->phase : '--';
-            $x->page = isset($processePage[$x->id]) && $processePage[$x->id] ? $processePage[$x->id] : '--';
             unset($x->id);
             unset($x->issue_id);
+
             return (array) $x;
         })->toArray();
 
@@ -442,8 +466,8 @@ class Uploadcontroller extends Controller
                 $sheet->setCellValue('B5', "JOB TYPE");
                 $sheet->setCellValue('C5', "PROJECT");
                 $sheet->setCellValue('D5', "ISSUE");
-                $sheet->setCellValue('E5', "TIME");
-                $sheet->setCellValue('F5', "INFO");
+                $sheet->setCellValue('E5', "INFO");
+                $sheet->setCellValue('F5', "DATE");
                 $sheet->setCellValue('G5', "REPORTER");
                 $sheet->setCellValue('H5', "PAGES WORK");
             });
@@ -538,4 +562,37 @@ class Uploadcontroller extends Controller
         curl_close($curl);
         return $result;
     }
+
+    // PHP program to search for multiple 
+    // key=>value pairs in array 
+    public function search($array, $search_list) { 
+      
+        // Create the result array 
+        $result = array(); 
+      
+        // Iterate over each array element 
+        foreach ($array as $key => $value) { 
+      
+            // Iterate over each search condition 
+            foreach ($search_list as $k => $v) { 
+          
+                // If the array element does not meet 
+                // the search condition then continue 
+                // to the next element 
+                if (!isset($value[$k]) || $value[$k] != $v) 
+                { 
+                      
+                    // Skip two loops 
+                    continue 2; 
+                } 
+            } 
+          
+            // Append array element's key to the 
+            //result array 
+            $result[] = $value; 
+        } 
+      
+        // Return result  
+        return $result; 
+    } 
 }
