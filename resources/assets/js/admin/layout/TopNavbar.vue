@@ -56,7 +56,8 @@ export default {
     computed: {
         ...mapGetters({
             loginUser: 'loginUser',
-            currentLang: 'currentLang'
+            currentLang: 'currentLang',
+            currentTeam: 'currentTeam'
         }),
 
         routeName() {
@@ -108,7 +109,7 @@ export default {
         const userID = document.querySelector("meta[name='user-id']").getAttribute('content')
         await _this.setLoginUser(userID)
 
-        _this.setReportNotify()
+        _this.setReportNotify(this.currentTeam.id)
 
         $(document).on("click", ".languages button", function () {
             _this.setCurrentLang(_this.$ml.current)

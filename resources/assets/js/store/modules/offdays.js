@@ -19,37 +19,65 @@ export default {
                 color: "#F55555",
             },
         ],
-        offDaysRaw: [],
-        offDaysData: [],
+        allOffDays: [],
+        offDays: [],
         currentEvent: {},
         currentStart: '',
-        currentEnd: ''
+        currentEnd: '',
+        team: ''
     },
 
     getters: {
         offDayTypes: state => state.offDayTypes,
-        offDaysRaw: state => state.offDaysRaw,
-        offDaysData: state => state.offDaysData,
+        allOffDays: state => state.allOffDays,
+        offDays: state => state.offDays,
         currentEvent: state => state.currentEvent,
         currentStart: state => state.currentStart,
-        currentEnd: state => state.currentEnd
+        currentEnd: state => state.currentEnd,
+        recapName() {
+            return (str) => {
+                let words = str.split(" ");
+                let firstName = words[words.length - 1],
+                    middleName = words[words.length - 2]
+                        ? words[words.length - 2] + " "
+                        : "";
+                return middleName + firstName;
+            }
+        },
+        recapTime() {
+            return (type, translateFunc) => {
+                if (type == "all_day") {
+                    return "[" + translateFunc.get("txtRCFullDay") + "] ";
+                }
+                if (type == "morning") {
+                    return "[" + translateFunc.get("txtRCAM") + "] "; 
+                }
+                if (type == "afternoon") {
+                    return "[" + translateFunc.get("txtRCPM") + "] ";
+                }
+            }
+        },
     },
 
     mutations: {
-        GET_OFF_DAYS_RAW: (state, data) => {
-            state.offDaysRaw = data
+        SET_ALL_OFF_DAYS: (state, data) => {
+            state.allOffDays = data
         },
 
-        GET_OFF_DAYS_DATA: (state, data) => {
-            state.offDaysData = data
+        SET_OFF_DAYS: (state, data) => {
+            state.offDays = data
         },
 
-        GET_CURRENT_START: (state, data) => {
+        SET_CURRENT_START: (state, data) => {
             state.currentStart = data
         },
 
-        GET_CURRENT_END: (state, data) => {
+        SET_CURRENT_END: (state, data) => {
             state.currentEnd = data
+        },
+
+        SET_TEAM: (state, data) => {
+            state.team = data
         },
 
         UPDATE_CURRENT_EVENT: (state, data) => {
@@ -57,32 +85,43 @@ export default {
         },
 
         DELETE_EVENT: (state, id) => {
-            state.offDaysData = state.offDaysData.filter((elem) => {
+            state.offDays = state.offDays.filter((elem) => {
                 if (elem.id != id) return elem
             });
         },
 
         ADD_OFF_DAY: (state, data) => {
             if (data.oldOffDays) {
-                state.offDaysData = state.offDaysData.filter((elem) => {
+                state.offDays = state.offDays.filter((elem) => {
                     if (data.oldOffDays.indexOf(elem.id) === -1) {
                         return elem
                     }
                 })
             }
-            state.offDaysData = [...state.offDaysData, data.newOffDay]
+            state.offDays = [...state.offDays, data.newOffDay]
         }
     },
 
     actions: {
-        getOffDaysRaw({ commit, state, rootState, rootGetters, dispatch }) {
-            const uri = '/data/offdays?user_id=' + rootState.loginUser.id + '&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
-            const uriWithTeam = rootState.queryTeam ? uri + '&' + rootState.queryTeam : uri
+        async getAllOffDays({ commit, state, rootGetters, getters, rootState }) {
+            const uri = '/data/all-off-days?team_id=' + state.team + '&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
 
-            axios.get(uriWithTeam)
+            await axios.get(uri)
                 .then(res => {
-                    commit('GET_OFF_DAYS_RAW', res.data.offDays)
-                    dispatch('getDataOffDays', res.data.offDays)
+                    if (res.data.offDays.length) {
+                        res.data.offDays = res.data.offDays.map((item, index) => {
+                            let type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
+
+                            return Object.assign({}, item, {
+                                title: getters['recapTime'](item.type, rootState.translateTexts) + getters['recapName'](item.name),
+                                borderColor: type.color,
+                                backgroundColor: type.color,
+                                start: rootGetters['dateFormat'](item.date),
+                                end: rootGetters['dateFormat'](item.date),
+                            })
+                        });
+                    }
+                    commit('SET_ALL_OFF_DAYS', res.data.offDays)
                 })
                 .catch(err => {
                     console.log(err);
@@ -90,21 +129,32 @@ export default {
                 });
         },
 
-        getDataOffDays({ commit, rootGetters, state }, data) {
-            if (data.length) {
-                const offDays = data.map((item, index) => {
-                    return {
-                        id: item.id,
-                        title: rootGetters['getObjectByID'](state.offDayTypes, item.type).name,
-                        borderColor: rootGetters['getObjectByID'](state.offDayTypes, item.type).color,
-                        backgroundColor: rootGetters['getObjectByID'](state.offDayTypes, item.type).color,
-                        start: rootGetters['dateFormat'](item.date),
-                        end: rootGetters['dateFormat'](item.date)
-                    };
-                });
+        getOffDays({ commit, state, rootState, rootGetters, dispatch }) {
+            const uri = '/data/offdays?user_id=' + rootState.loginUser.id + '&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
 
-                commit('GET_OFF_DAYS_DATA', offDays)
-            }
+            axios.get(uri)
+                .then(res => {
+                    if (res.data.offDays.length) {
+                        res.data.offDays = res.data.offDays.map((item, index) => {
+                            return Object.assign({}, item, {
+                                title: rootGetters['getObjectByID'](state.offDayTypes, item.type).name,
+                                borderColor: rootGetters['getObjectByID'](state.offDayTypes, item.type).color,
+                                backgroundColor: rootGetters['getObjectByID'](state.offDayTypes, item.type).color,
+                                start: rootGetters['dateFormat'](item.date),
+                                end: rootGetters['dateFormat'](item.date)
+                            })
+                        })
+                    }
+                    commit('SET_OFF_DAYS', res.data.offDays)
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load Off days");
+                });
+        },
+
+        setTeam({ commit }, data) {
+            commit('SET_TEAM', data)
         },
 
         deleteEvent({ commit, rootState }, event) {
@@ -154,9 +204,15 @@ export default {
         },
 
         handleMonthChange({ commit, dispatch }, arg) {
-            commit('GET_CURRENT_START', arg.view.currentStart)
-            commit('GET_CURRENT_END', arg.view.currentEnd)
-            dispatch('getOffDaysRaw')
+            commit('SET_CURRENT_START', arg.view.currentStart)
+            commit('SET_CURRENT_END', arg.view.currentEnd)
+            dispatch('getOffDays')
+        },
+
+        handleMonthChangeAll({ commit, dispatch, state }, arg) {
+            commit('SET_CURRENT_START', arg.view.currentStart)
+            commit('SET_CURRENT_END', arg.view.currentEnd)
+            if ( state.team ) dispatch('getAllOffDays')
         }
     }
 }

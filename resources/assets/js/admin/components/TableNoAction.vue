@@ -11,7 +11,7 @@
             <tr v-for="(item, index) in data" :key="index">
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
-                        <span v-html="itemValue(item, column)" :class="'cl-' + column.id"></span>
+                        <span :class="getStatusClass(item, column)" v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
             </tr>
@@ -31,6 +31,13 @@ export default {
         },
         itemValue(item, column) {
             return item[column.id.toLowerCase()] ? item[column.id.toLowerCase()] : '--'
+        },
+        getStatusClass(item, column) {
+            if ( column.id.toLowerCase() === 'status' && item[column.id.toLowerCase()] ) {
+                return item[column.id.toLowerCase()].toLowerCase().replace(' ', '-');
+            }
+
+            return 'cl-' + column.id;
         }
     }
 }

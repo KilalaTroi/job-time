@@ -1,6 +1,6 @@
 <template>
     <div class="content">
-        <div class="container">
+        <div class="container-fluid">
             <card v-show="!actionNewReport && !actionPreview && !actionEdit">
 				<template slot="header">
 					<div class="d-flex justify-content-between">
@@ -18,6 +18,7 @@
 								<option value="0">All</option>
                                 <option value="Trouble">{{$ml.with('VueJS').get('txtTrouble')}}</option>
                                 <option value="Meeting">{{$ml.with('VueJS').get('txtMeeting')}}</option>
+								<option value="Notice">{{$ml.with('VueJS').get('txtNotice')}}</option>
                             </select-2>
 						</div>
 					</div>
@@ -52,7 +53,7 @@
 						</div>
 					</div>
 
-					<div class="col-sm-4">
+					<div class="col-sm-3">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtDepts')}}</label>
 							<div>
@@ -71,7 +72,16 @@
 						</div>
 					</div>
 
-					<div class="col-sm-4">
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label class="">{{$ml.with('VueJS').get('txtTeam')}}</label>
+							<div>
+								<select-2 :options="currentTeamOption" v-model="team" class="select2" />
+							</div>
+						</div>
+					</div>
+
+					<div class="col-sm-3">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtProjects')}}</label>
 							<div>
@@ -90,7 +100,7 @@
 						</div>
 					</div>
 
-					<div class="col-sm-4">
+					<div class="col-sm-3">
 						<div class="form-group">
 							<label class>{{$ml.with('VueJS').get('txtIssue')}}</label>
 							<div>
@@ -112,14 +122,18 @@
 		    </card>
 
             <div class="form-group" v-show="!actionNewReport && !actionPreview && !actionEdit">
-                <button @click="addNewReport" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Report</button>
+                <button @click="addNewReport" class="btn btn-primary"><i class="fa fa-plus"></i> {{ $ml.with('VueJS').get('txtReportCreate') }}</button>
             </div>
 
-            <add-new :actionNewReport="actionNewReport" :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
+            <div class="row">
+				<div class="container">
+					<add-new :actionNewReport="actionNewReport" :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionNewReport" v-on:back-to-list="backToList"></add-new>
 
-			<edit :currentReport="currentReport" :userID="userID" :departments="departments" :userOptions="userOptions" v-if="actionEdit" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:delete-report="deleteReport"></edit>
+					<edit :projectsParent="projects" :issuesParent="issues" :currentReport="currentReport" :userID="userID" :departmentsParent="departments" :userOptionsParent="userOptions" v-if="actionEdit" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:delete-report="deleteReport"></edit>
 
-			<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:send-report="sendReport"></preview>
+					<preview :userOptions="userOptions" :currentReport="currentReport" v-if="actionPreview" v-on:back-to-list="backToList" v-on:update-seen="updateSeen" v-on:send-report="sendReport"></preview>
+				</div>
+			</div>
 
 			<card class="strpied-tabled-with-hover" v-show="!actionNewReport && !actionPreview && !actionEdit">
 				<template slot="header">
@@ -170,17 +184,26 @@ export default {
         Multiselect,
 		Select2,
 		TableReport
+	},
+	computed: {
+        ...mapGetters({
+			currentTeamOption: 'currentTeamOption',
+			currentTeam: 'currentTeam',
+			getObjectByID: 'getObjectByID',
+			getTeamText: 'getTeamText'
+        }),
     },
     data() {
         return {
 			columns: [
-				{ id: "type", value: 'Report Type', width: "120", class: "" },
-				{ id: "date_time", value: 'Report Date', width: "", class: "" },
-				{ id: "update_date", value: 'Update Date', width: "100", class: "" },
-				{ id: "dept_name", value: 'Department', width: "", class: "" },
-				{ id: "project_name", value: 'Project', width: "", class: "" },
-				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
-				{ id: this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "280", class: "" }
+				{ id: "type", value: this.$ml.with('VueJS').get('txtReportType'), width: "120", class: "" },
+				{ id: "date_time", value: this.$ml.with('VueJS').get('txtReportDate'), width: "", class: "" },
+				{ id: "update_date", value: this.$ml.with('VueJS').get('txtUpdateDate'), width: "100", class: "" },
+				{ id: "dept_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "", class: "" },
+				{ id: "team_name", value: this.$ml.with('VueJS').get('txtTeam'), width: "", class: "" },
+				{ id: "project_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
+				{ id: "issue_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "80", class: "" },
+				{ id: this.$ml.current == 'vi' ? "title" : 'title_ja', value: this.$ml.with('VueJS').get('txtTitle'), width: "", class: "" }
 			],
 			userID: document.querySelector("meta[name='user-id']").getAttribute('content'),
 			currentReport: {},
@@ -210,35 +233,32 @@ export default {
 			jShowDisabled: true,
 			jAlign: "right",
 			jSize: "small",
+
+			team: "",
         }
     },
     mounted() {
 		let _this = this;
-		_this.fetchData();
+		_this.team = _this.currentTeam ? _this.currentTeam.id : ""
+		// if ( _this.team ) _this.fetchData();
 		$(document).on('click', '.languages button', function() {
 			_this.columns = [
-				{ id: "type", value: 'Report Type', width: "120", class: "" },
-				{ id: "date_time", value: 'Report Date', width: "100", class: "" },
-				{ id: "update_date", value: 'Update Date', width: "100", class: "" },
-				{ id: "dept_name", value: 'Department', width: "", class: "" },
-				{ id: "project_name", value: 'Project', width: "", class: "" },
-				{ id: "issue_name", value: 'Issue', width: "120", class: "" },
-				{ id: _this.$ml.current == 'vi' ? "title" : 'title_ja', value: 'Title', width: "280", class: "" }
+				{ id: "type", value: _this.$ml.with('VueJS').get('txtReportType'), width: "120", class: "" },
+				{ id: "date_time", value: _this.$ml.with('VueJS').get('txtReportDate'), width: "100", class: "" },
+				{ id: "update_date", value: _this.$ml.with('VueJS').get('txtUpdateDate'), width: "100", class: "" },
+				{ id: "dept_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "100", class: "" },
+				{ id: "team_name", value: _this.$ml.with('VueJS').get('txtTeam'), width: "100", class: "" },
+				{ id: "project_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "100", class: "" },
+				{ id: "issue_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "100", class: "" },
+				{ id: _this.$ml.current == 'vi' ? "title" : 'title_ja', value: _this.$ml.with('VueJS').get('txtTitle'), width: "", class: "" }
 			];
 		});
     },
 	methods: {
 		...mapActions({
 			updateReportNotify: "updateReportNotify",
+			setReportNotify: "setReportNotify"
 		}),
-		getObjectValue(data, id) {
-            let obj = data.filter((elem) => {
-                if (elem.id === id) return elem;
-            });
-
-            if (obj.length > 0)
-                return obj[0];
-        },
         customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
 		},
@@ -269,7 +289,7 @@ export default {
             return this.dataLang[data.current]
         },
         fetchData() {
-			let uri = "/data/reports";
+			let uri = "/data/reports?team_id=" + this.team;
 			axios
 			.post(uri, {
 				indexPage: true,
@@ -278,7 +298,8 @@ export default {
 				endDate: this.dateFormatter(this.end_date),
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueSelects: this.issueSelects
+				issueSelects: this.issueSelects,
+				team_id: this.team
 			})
 			.then(res => {
 				this.departments = res.data.departments;
@@ -293,7 +314,7 @@ export default {
 			});
         },
         fetchDataFilter() {
-			let uri = "/data/reports";
+			let uri = "/data/reports?team_id=" + this.team;
 			axios
 			.post(uri, {
 				indexPage: true,
@@ -302,7 +323,8 @@ export default {
 				endDate: this.dateFormatter(this.end_date),
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueSelects: this.issueSelects
+				issueSelects: this.issueSelects,
+				team_id: this.team
 			})
 			.then(res => {
 				this.projects = res.data.projects;
@@ -319,12 +341,12 @@ export default {
 		},
 		viewReport(id, seen) {
 			this.actionPreview = true;
-			this.currentReport = this.getObjectValue(this.reports.data, id);
+			this.currentReport = this.getObjectByID(this.reports.data, id);
 			this.currentReport.isSeen = seen;
 		},
 		editReport(id, seen) {
 			this.actionEdit = true;
-			this.currentReport = this.getObjectValue(this.reports.data, id);
+			this.currentReport = this.getObjectByID(this.reports.data, id);
 			this.currentReport.isSeen = seen;
         },
         backToList(newData = false) {
@@ -336,12 +358,13 @@ export default {
 			if ( newData ) this.fetchDataFilter();
 		},
 		getResults(page = 1) {
-			let uri = "/data/reports?page=" + page;
+			let uri = "/data/reports?page=" + page + "&team_id=" + this.team;
 			axios
 			.post(uri, {
 				deptSelects: this.deptSelects,
 				projectSelects: this.projectSelects,
-				issueSelects: this.issueSelects
+				issueSelects: this.issueSelects,
+				team_id: this.team
 			})
 			.then(res => {
 				this.projects = res.data.projects;
@@ -424,6 +447,16 @@ export default {
 		],
 		end_date: [
 			{ handler: "fetchDataFilter" }
+		],
+		team: [
+			{
+				handler: function(value, oldValue) {
+					if ( value != oldValue ) {
+						this.fetchData()
+						this.setReportNotify(this.team)
+					}
+				}
+			}
 		]
     }
 }

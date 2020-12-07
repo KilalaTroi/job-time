@@ -32,12 +32,16 @@ export default {
       state.data = {
         projects: data.projects,
         schedules: data.schedules,
-        projectsFilter: data.projects
+        schedulesDetail: data.schedulesDetail,
+        projectsFilter: data.projects,
+        issuesNoSC: data.issues
       }
     },
 
     SET_DATA_SCHEDULE: (state, data) => {
-      state.data.schedules = data.schedules
+      state.data.schedules = data.schedules;
+      state.data.schedulesDetail = data.schedulesDetail;
+      state.data.issuesNoSC = data.issues;
     },
 
     SET_DATA_CALENDAR: (state, data) => {
@@ -77,26 +81,90 @@ export default {
 
       await axios.get(uri).then(response => {
         if (response.data.schedules.length) {
+          let schedulesVariation = [];
           response.data.schedules = response.data.schedules.map((item, index) => {
+            const arrProjects = [58, 59]; // Project show description and hide fc-time.
+            const arrProjectsHT = [58]; // Project hide fc-time.
+            const arrProjectsPV = [58, 66];  // Project don't have Variation.
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
+            const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
+            let sDetail = [];
+            let description = '';
+
+            // Get log time detail for schedule
+            if ( response.data.schedulesDetail.length ) {
+              sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
+            }
+
+            const codition = sDetail.length && state.filters.team == 2 && ! arrProjectsPV.includes(item.p_id);
+            const textTime = sDetail.length && state.filters.team == 2 && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
+            const startTime = codition ? sDetail[0].start_time : item.start_time;
+            const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
+            const classHideTime = textTime ? ' hide-fc-time' : '';
+
+            // Get description for schedule
+            if ( sDetail.length && state.filters.team == 2 && arrProjects.includes(item.p_id) ) {
+              description = sDetail.map((item) => {
+                const note = item.note ? ' (' + item.note + ')' : '';
+                return (item.start_time + ' - ' + item.end_time + note)
+              }).join('<br>')
+            }
+
+            // Function return schedule
+            let getSchedule = (_item, _value, _codition) => {
+              return Object.assign({}, _item, {
+                id: _item.id,
+                title:
+                  textTime +
+                  (_item.i_name
+                    ? _item.p_name + checkTR + " " + _item.i_name
+                    : _item.p_name + checkTR) +
+                  "<br>" +
+                  (_item.memo ? _item.memo : ""),
+                description: description,
+                className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
+                borderColor: type.value,
+                backgroundColor: type.value,
+                start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
+                end: rootGetters['dateFormat'](_item.date + " " + _value.end_time),
+                memo: _item.memo,
+                title_not_memo: _item.i_name
+                  ? _item.p_name + checkTR + " " + _item.i_name
+                  : _item.p_name + checkTR,
+              })
+            }
+
+            // Get schedule variation
+            if ( codition && sDetail.length > 1 ) {
+              let scVariation = [];
+
+              sDetail.forEach((value, index) => {
+                if ( index ) {
+                  if ( sDetail[index].start_time.replace(':', '') * 1 > sDetail[index - 1].end_time.replace(':', '') * 1 ) {
+                    scVariation.push( getSchedule(item, value, codition) );
+                  } else {
+                    if ( sDetail[index].end_time.replace(':', '') * 1 > sDetail[index - 1].end_time.replace(':', '') * 1 ) {
+                      scVariation[scVariation.length - 1].end_time = sDetail[index].end_time;
+                    }
+                  }
+                } else {
+                  scVariation.push( getSchedule(item, value, codition) );
+                }
+              })
+
+              // concat schedules variation
+              schedulesVariation = [...scVariation, ...schedulesVariation];
+
+            } else { // don't have schedule variation
+
+              return getSchedule(item, {start_time: startTime, end_time: endTime}, codition);
+
+            }
             
-            return Object.assign({}, {
-              title:
-                (item.i_name
-                  ? item.p_name + checkTR + " " + item.i_name
-                  : item.p_name + checkTR) +
-                "\n" +
-                (item.memo ? item.memo : ""),
-              borderColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
-              backgroundColor: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
-              start: rootGetters['dateFormat'](item.date + " " + item.start_time),
-              end: rootGetters['dateFormat'](item.date + " " + item.end_time),
-              memo: item.memo,
-              title_not_memo: item.i_name
-                ? item.p_name + checkTR + " " + item.i_name
-                : item.p_name + checkTR,
-            }, item)
           });
+
+          // concat schedules and schedules variation
+          response.data.schedules = [...response.data.schedules.filter(x => x), ...schedulesVariation]
         }
 
         if (!onlyEvent && response.data.projects.length) {
@@ -119,7 +187,10 @@ export default {
     },
 
     handleMonthChange({ commit }, data) {
-      commit('SET_FILTER', data) 
+      commit('SET_FILTER', data);
+      setTimeout(function() {
+        $('.fc-event.fc-short').removeClass('fc-short');
+      }, 3000);
     },
     
     resetValidate({ dispatch, commit }) {
@@ -163,10 +234,10 @@ export default {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
 
-      if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-        data.revert();
-        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      } else {
+      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
+      //   data.revert();
+      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
+      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -178,7 +249,7 @@ export default {
           }
         }
         dispatch('functionFullCalendar', request)
-      }
+      // }
     },
 
     resetSelectedItem({ commit }) {
@@ -189,10 +260,10 @@ export default {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
 
-      if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-        data.revert();
-        commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      } else {
+      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
+      //   data.revert();
+      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
+      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -203,7 +274,7 @@ export default {
           }
         }
         dispatch('functionFullCalendar', request)
-      }
+      // }
     },
 
     functionFullCalendar({ commit, dispatch }, request) {
@@ -227,13 +298,13 @@ export default {
 
     getItem({ commit, rootGetters }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      const titleArray = (data.event).title.split("\n");
+      const titleArray = (data.event).title.split("<br>");
       const item = {
         id: data.event.id,
-        title_not_memo: titleArray[0],
-        memo: titleArray[1],
-        start_time: rootGetters['dateFormat'](data.start, 'HH:mm'),
-        end_time: rootGetters['dateFormat'](data.end, 'HH:mm'),
+        title_not_memo: titleArray.length > 2 ? titleArray[1] : titleArray[0],
+        memo: titleArray.length > 2 ? titleArray[2] : titleArray[1],
+        start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
+        end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
       }
       $("#itemDetail").modal("show");
       commit('SET_SELECTED_ITEM', item)
@@ -256,9 +327,9 @@ export default {
         });
     },
 
-    deleteItem({ dispatch, state }, data) {
+    deleteItem({ dispatch, state }, msgText) {
       $("#itemDetail").modal("hide");
-      if (confirm(data.msgText)) {
+      if (confirm(msgText)) {
         const uri = "/data/schedules/" + state.selectedItem.id
         axios.delete(uri)
           .then(res => {

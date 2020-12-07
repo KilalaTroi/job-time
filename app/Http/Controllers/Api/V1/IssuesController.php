@@ -146,6 +146,28 @@ class IssuesController extends Controller
     }
 
     /**
+     * Archive the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function archiveAll(Request $request)
+    {
+        $ids =  $request->get('issues'); 
+        $status =  $request->get('status');
+
+        if ( $status ) {
+            Issue::whereIn('id', $ids)->update(['status' => "archive"]);
+        } else {
+            Issue::whereIn('id', $ids)->update(['status' => "publish"]);
+        }
+
+        return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
+    }
+
+    /**
      * Get page the specified resource from storage.
      *
      * @param  int  $id
@@ -157,6 +179,24 @@ class IssuesController extends Controller
 
         return response()->json(array(
             'page' => $issue->page
+        ), 200);
+    }
+
+    public function deleteAll(Request $request)
+    {
+        $ids = $request->get('issues');
+        Issue::destroy($ids);
+
+        $projects = Project::has('issues', '=', 0)->get()->pluck('id')->toArray();
+
+        if ( count($projects) ) {
+            Project::destroy($projects);
+        }
+
+        dd($projects);
+
+        return response()->json(array(
+            'message' => 'Successfully.'
         ), 200);
     }
 

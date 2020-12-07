@@ -16,11 +16,18 @@ import './admin/ml';
 // component
 Vue.component('pagination', require('laravel-vue-pagination'));
 
+import CKEditor from '@ckeditor/ckeditor5-vue';
+window.Vue.use( CKEditor );
+
 // LightBootstrap plugin
 import LightBootstrap from './admin/light-bootstrap-main'
 
 window.Vue.use(VueRouter);
 window.Vue.use(LightBootstrap);
+
+// Numeral plugin
+import vueNumeralFilterInstaller from 'vue-numeral-filter';
+Vue.use(vueNumeralFilterInstaller, { locale: 'en-gb' });
 
 import DashboardLayout from './admin/layout/EmployeeLayout'
 // GeneralViews
@@ -33,6 +40,9 @@ import Profile from './admin/pages/Profile';
 import OffDays from './admin/pages/OffDays';
 import Overview from './admin/pages/Overview';
 import Totaling from './admin/pages/Totaling';
+import Reports from './admin/pages/Reports';
+import Finish from './admin/pages/Finish';
+import Uploaded from './admin/pages/Finish/Uploaded';
 
 const routes = [{
         path: '/',
@@ -72,6 +82,21 @@ const routes = [{
                 path: 'totaling',
                 name: 'Totaling',
                 component: Totaling
+            },
+            {
+                path: 'reports',
+                name: 'Reports',
+                component: Reports
+            },
+            {
+                path: 'finish',
+                name: 'Finish',
+                component: Finish
+            },
+            {
+                path: 'uploaded',
+                name: 'Uploaded',
+                component: Uploaded
             },
             {
                 path: '*',

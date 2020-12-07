@@ -36,7 +36,7 @@
           :business-hours="businessHours"
           :editable="editable"
           :droppable="droppable"
-          :events="offDaysData"
+          :events="offDays"
           :all-day-slot="allDaySlot"
           :height="height"
           :hidden-days="hiddenDays"
@@ -109,7 +109,7 @@ export default {
   computed: {
     ...mapGetters({
       offDayTypes: "offdays/offDayTypes",
-      offDaysData: "offdays/offDaysData",
+      offDays: "offdays/offDays",
       currentEvent: "offdays/currentEvent",
       setBackground: "setBackground",
     }),
@@ -120,9 +120,8 @@ export default {
       handleMonthChange: "offdays/handleMonthChange",
       addEvent: "offdays/addEvent",
       clickEvent: "offdays/clickEvent",
-      getOffDaysRaw: "offdays/getOffDaysRaw",
+      getOffDays: "offdays/getOffDays",
       deleteEvent: "offdays/deleteEvent",
-      getDataOffDays: "offdays/getDataOffDays",
     }),
 
     makeDraggable() {
@@ -148,7 +147,6 @@ export default {
 
   mounted() {
     this.makeDraggable();
-    this.getOffDaysRaw();
   }
 };
 </script>

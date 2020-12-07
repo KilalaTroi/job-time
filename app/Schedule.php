@@ -14,4 +14,8 @@ class Schedule extends Model
     protected $fillable = [
         'issue_id', 'start_time', 'end_time', 'date', 'team_id' , 'memo'
     ];
+
+    public function issue() {
+        return $this->belongsTo(Issue::class);
+    }
 }

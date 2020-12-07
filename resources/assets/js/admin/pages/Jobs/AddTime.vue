@@ -22,6 +22,14 @@
             <div class="form-group" v-if="showLunchBreak">
                 <base-checkbox v-model="exceptLunchBreak" class="align-self-end">{{$ml.with('VueJS').get('txtExcludeLunchBreak')}}</base-checkbox>
             </div>
+            <div class="form-group" v-if="team == 2">
+                <label>{{ $ml.with('VueJS').get('txtWork') }}</label>
+                <input
+                    type="text"
+                    v-model="note"
+                    class="form-control"
+                />
+            </div>
             <error-item :errors="errors"></error-item>
             <success-item :success="success"></success-item>
             <hr>
@@ -46,17 +54,18 @@ export default {
         Modal,
         VueTimepicker
     },
-    props: ['currentJob', 'logTimeData', 'errors', 'success'],
+    props: ['team', 'currentJob', 'logTimeData', 'errors', 'success'],
     data() {
         return {
-            startHourRange: [[7, 19]],
-            endHourRange: [[7, 19]],
+            startHourRange: [[7, 22]],
+            endHourRange: [[7, 22]],
             startMinuteRange: [0, 10, 20, 30, 40, 50],
             endMinuteRange: [0, 10, 20, 30, 40, 50],
             startHour: '',
             startMinute: '',
             buttonDisabled: true,
             endDisabled: true,
+            note: '',
             start_time: '',
             end_time: '',
             showLunchBreak: false,
@@ -70,6 +79,8 @@ export default {
 
             const newTime = {
                 issue_id: this.currentJob.id,
+                schedule_id: this.currentJob.schedule_id,
+                note: this.note,
                 start_time: this.start_time,
                 end_time: this.end_time,
                 showLunchBreak: this.showLunchBreak,
@@ -84,7 +95,7 @@ export default {
         changeStartTime(eventData) {
             this.startMinute = eventData.data.m*1;
             this.startHour = this.startMinute === 50 ? eventData.data.H*1 + 1 : eventData.data.H*1;
-            this.endHourRange = [[this.startHour, 19]];
+            this.endHourRange = [[this.startHour, 22]];
             this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
             this.end_time = 'HH:mm';
             
@@ -147,6 +158,7 @@ export default {
         resetData(data) {
             // Reset
             if (data.length) {
+                this.note = '';
                 this.start_time = 'HH:mm';
                 this.end_time = 'HH:mm';
             }

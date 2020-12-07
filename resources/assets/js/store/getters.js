@@ -22,6 +22,20 @@ export default {
         }
     },
 
+    getArrObjectByID() {
+        return (Arr, id) => {
+            const result = Arr.filter(item => item.id === id)
+            return result.length ? result : []
+        }
+    },
+
+    getLogTime() {
+        return (Arr, id, date) => {
+            const result = Arr.filter(item => item.id === id && item.date === date)
+            return result.length ? result : []
+        }
+    },
+
     dateFormat() {
         return (date, string = null) => {
             if (moment(date).format() === 'Invalid date') return '--'

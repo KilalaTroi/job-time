@@ -21,6 +21,7 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
+                  :class="{ 'no-schedule' : scheduleData.issuesNoSC.includes(item.issue_id) }"
                   v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
@@ -38,7 +39,7 @@
         <div class="col-sm-12 col-lg-9 col-xl-10">
           <div class="filter_search">
             <div class="form-group d-flex align-items-center">
-              <label class="mb-0" :style="{ paddingRight: '10px',whiteSpace:'nowrap' }">{{
+              <label class="mb-0" :style="{ paddingRight: '10px', whiteSpace:'nowrap' }">{{
                 $ml.with("VueJS").get("txtTeam")
               }}</label>
               <div class="w-100">
@@ -52,7 +53,7 @@
           </div>
           <FullCalendar
             defaultView="timeGridWeek"
-            scroll-time="8:00:00"
+            scroll-time="7:00:00"
             :plugins="calendarPlugins"
             :header="calendarHeader"
             :business-hours="businessHours"
@@ -61,8 +62,8 @@
             :events="scheduleData.schedules"
             :event-overlap="true"
             :all-day-slot="false"
-            min-time="08:00:00"
-            max-time="17:00:00"
+            min-time="07:00:00"
+            max-time="19:00:00"
             height="auto"
             :hidden-days="hiddenDays"
             @eventReceive="addSchedule"
@@ -70,6 +71,7 @@
             @eventDrop="dropSchedule"
             @eventResize="resizeSchedule"
             @eventClick="getItem"
+            @eventRender="tooltipFunc"
             :locale="getLanguage(this.$ml)"
           />
         </div>
@@ -82,6 +84,7 @@
 
 <script>
 import FullCalendar from "@fullcalendar/vue"
+import Tooltip from "tooltip.js"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timeGrid"
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction"
@@ -116,14 +119,14 @@ export default {
           // days of week. an array of zero-based day of week integers (0=Sunday)
           daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
 
-          startTime: "08:00", // a start time (10am in this example)
-          endTime: "17:00", // an end time (6pm in this example)
+          startTime: "07:00", // a start time (10am in this example)
+          endTime: "19:00", // an end time (6pm in this example)
         },
         {
           // days of week. an array of zero-based day of week integers (0=Sunday)
           daysOfWeek: [6], // Monday - Thursday
 
-          startTime: "08:00", // a start time (10am in this example)
+          startTime: "07:00", // a start time (10am in this example)
           endTime: "12:00", // an end time (6pm in this example)
         },
       ],
@@ -178,13 +181,34 @@ export default {
             borderColor: eventEl.getAttribute("color"),
             backgroundColor: eventEl.getAttribute("color"),
             constraint: {
-              start: this.dateFormat(eventEl.getAttribute("start") + " " + "08:00"),
-              end: this.dateFormat(eventEl.getAttribute("end") + " " + "17:00"),
+              start: this.dateFormat(eventEl.getAttribute("start") + " " + "07:00"),
+              end: this.dateFormat(eventEl.getAttribute("end") + " " + "19:00"),
             },
             overlap: true,
-            duration: "1:00:00",
+            duration: "00:30:00",
           };
         },
+      });
+    },
+
+    tooltipFunc(info) {
+      info.el.querySelector('.fc-title').innerHTML = info.event.title;
+
+      var tooltip = new Tooltip(info.el, {
+        title: info.event.extendedProps.description,
+        placement: 'top',
+        trigger: 'hover',
+        container: 'body',
+      });
+
+      info.el.querySelector('.fc-content').addEventListener("mouseover", function(event) {
+        setTimeout(function() {
+          $('.tooltip-inner:not(.convert-html)').each(function(){
+            const text = $(this).text();
+            $(this).html(text);
+            $(this).addClass('convert-html');
+          }, 1000);
+        })
       });
     },
   },
@@ -219,56 +243,25 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import "~@fullcalendar/core/main.css";
-@import "~@fullcalendar/daygrid/main.css";
-@import "~@fullcalendar/timegrid/main.css";
-@import "~@fullcalendar/list/main.css";
+<style lang="scss" scope>
+@import "custom.scss";
+.no-schedule {
+  position: relative;
 
-.fc-time-grid .fc-event {
-  padding: 5px;
-}
-
-.fc-event {
-  cursor: move;
-  color: rgba(0, 0, 0, 0.8);
-}
-
-.fc-time-grid-event .fc-time,
-.fc-time-grid-event .fc-title {
-  color: rgba(0, 0, 0, 0.8);
-}
-
-.fc-time-grid .fc-slats td {
-  height: 2em;
-}
-
-.fc-unthemed td.fc-today {
-  background-color: transparent;
-}
-
-.fc .fc-view-container .fc-head .fc-today {
-  background-color: #ffd05b;
-}
-
-.filter_search {
-  @media screen and (min-width: 1550px) {
+  &:after {
+    content: "N";
     position: absolute;
-    width: 200px;
-    right: 210px;
+    right: 3px;
+    bottom: 3px;
+    width: 20px;
+    height: 20px;
+    background: red;
+    text-align: center;
+    line-height: 20px;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
   }
-}
-
-.fc-unthemed th,
-.fc-unthemed td,
-.fc-unthemed thead,
-.fc-unthemed tbody,
-.fc-unthemed .fc-divider,
-.fc-unthemed .fc-row,
-.fc-unthemed .fc-content,
-.fc-unthemed .fc-popover,
-.fc-unthemed .fc-list-view,
-.fc-unthemed .fc-list-heading td {
-  border-color: #b3aeae;
 }
 </style>

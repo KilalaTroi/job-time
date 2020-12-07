@@ -897,6 +897,10 @@ table {
   max-width: 1170px;
 }
 
+.max-width-1400 {
+  max-width: 1400px;
+}
+
 // vdp-datepicker
 .vdp-datepicker {
   .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
@@ -922,4 +926,8 @@ table {
       margin-left: 5px;
     }
   }
+}
+
+span[class^="ct-series"] {
+  display: inline-block;
 }

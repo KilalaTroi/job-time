@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="">{{ $ml.with("VueJS").get("txtName") }}</label>
+      <label class="">{{ $ml.with("VueJS").get("txtIssue") }}</label>
       <input
         v-model="selectedItem.i_name"
         type="text"

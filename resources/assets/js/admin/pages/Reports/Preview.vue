@@ -4,14 +4,14 @@
             <div class="d-flex justify-content-between">
                 <h4 class="card-title">{{$ml.with('VueJS').get('txtPreview')}}</h4>
                 <div class="align-self-end">
-                    <button @click="$emit('send-report')" class="btn btn-success btn-process mr-3"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                    <!-- <button @click="$emit('send-report')" class="btn btn-success btn-process mr-3"><i class="fa fa-paper-plane" aria-hidden="true"></i></button> -->
                     <button @click="exportPDF" class="btn btn-danger mr-3">{{$ml.with('VueJS').get('txtExportPDF')}}</button>
                     <button @click="$emit('back-to-list')" class="btn btn-primary">{{$ml.with('VueJS').get('txtBack')}}</button>
                 </div>
             </div>
         </template>
         <div class="row">
-            <div class="col-sm-9">
+            <div class="col-sm-6">
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtTitle')}}</strong></label>
                     <input v-if="preLanguage=='vi'" :value="currentReport.title" type="text" class="form-control" :disabled="true">
@@ -23,6 +23,13 @@
                 <div class="form-group">
                     <label class=""><strong>{{$ml.with('VueJS').get('txtReportType')}}</strong></label>
                     <input :value="currentReport.type" type="text" class="form-control" :disabled="true">
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label class=""><strong>{{$ml.with('VueJS').get('txtTeam')}}</strong></label>
+                    <input :value="currentReport.team_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
         </div>
@@ -41,33 +48,34 @@
                 </div>
             </div>
 
-            <div class="col-sm-12" v-if="isMeeting()">
+            <div class="col-sm-12" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
-                    <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} (KILALA)</strong></label>
+                    <label v-if="isNotice()"><strong>{{$ml.with('VueJS').get('txtDestination')}}</strong></label>
+                    <label v-else><strong>{{$ml.with('VueJS').get('txtAttendPerson')}}</strong></label>
                     <input :value="getReporter(currentReport.attend_person)" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
-            <div class="col-sm-9" v-if="isMeeting()">
+            <div class="col-sm-9" v-if="isMeeting() || isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtAttendPerson')}} ({{$ml.with('VueJS').get('txtOther')}} )</strong></label>
                     <input :value="currentReport.attend_other_person" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
 
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtDepts')}}</strong></label>
                     <input :value="currentReport.dept_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtProjects')}}</strong></label>
                     <input :value="currentReport.project_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting()">
+            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
                     <input :value="currentReport.issue_name" type="text" class="form-control" :disabled="true">
@@ -129,6 +137,9 @@ export default {
         isMeeting() {
             return this.currentReport.type == 'Meeting';
         },
+        isNotice() {
+            return this.currentReport.type == 'Notice';
+        },
         getReporter(data) {
             let result = [];
             let arrData = data.split(',');
@@ -143,11 +154,11 @@ export default {
         exportPDF() {
             let uri = "/pdf/report";
             let data = {
-                is_metting: this.isMeeting() ? 1 : 0,
+                is_metting: this.isMeeting() || this.isNotice() ? 1 : 0,
                 title: this.preLanguage=='vi' ? this.currentReport.title : this.currentReport.title_ja,
                 date_time: this.currentReport.date_time,
                 reporter: this.getReporter(this.currentReport.reporter),
-                attend_person: this.isMeeting() ? this.getReporter(this.currentReport.attend_person) : '',
+                attend_person: this.isMeeting() || this.isNotice() ? this.getReporter(this.currentReport.attend_person) : '',
                 attend_other_person: this.currentReport.attend_other_person,
                 dept_name: this.currentReport.dept_name,
                 project_name: this.currentReport.project_name,

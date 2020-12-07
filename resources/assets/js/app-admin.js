@@ -25,6 +25,10 @@ import LightBootstrap from './admin/light-bootstrap-main'
 window.Vue.use(VueRouter);
 window.Vue.use(LightBootstrap);
 
+// Numeral plugin
+import vueNumeralFilterInstaller from 'vue-numeral-filter';
+Vue.use(vueNumeralFilterInstaller, { locale: 'en-gb' });
+
 import DashboardLayout from './admin/layout/DashboardLayout'
 // GeneralViews
 import NotFound from './admin/pages/NotFoundPage'
@@ -45,6 +49,8 @@ import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
 import Ckeditor from './admin/pages/Ckeditor';
 import Reports from './admin/pages/Reports';
+import Finish from './admin/pages/Finish';
+import Uploaded from './admin/pages/Finish/Uploaded';
 
 const routes = [{
         path: '/',
@@ -129,6 +135,16 @@ const routes = [{
                 path: 'reports',
                 name: 'Reports',
                 component: Reports
+            },
+            {
+                path: 'finish',
+                name: 'Finish',
+                component: Finish
+            },
+            {
+                path: 'uploaded',
+                name: 'Uploaded',
+                component: Uploaded
             },
             {
                 path: '*',

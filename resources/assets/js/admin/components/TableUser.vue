@@ -12,6 +12,10 @@
             <tr v-for="(item, index) in users" :key="index">
                 <slot :row="item">
                     <td v-for="(column, index) in columns" :key="index" :class="column.class">
+                        <button v-if="index === 0" @click="getUserById(item.id)" type="button" class="btn btn-xs btn-default"
+                                data-toggle="modal" data-target="#itemDetail" data-backdrop="static" data-keyboard="false">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </button>
                         <span class="team-list-text" v-if="column.id == 'team'" v-html="getTeamText(item[column.id.toLowerCase()])"></span>
                         <span v-else v-html="itemValue(item, column)"></span>
                     </td>
