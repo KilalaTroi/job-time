@@ -52,7 +52,7 @@ export default {
     },
 
     SET_SELECTED_ITEM: (state, selectedItem) => {
-      state.selectedItem = selectedItem
+      state.selectedItem = Object.assign({}, selectedItem)
     },
 
     SET_FILTER: (state, data) => {

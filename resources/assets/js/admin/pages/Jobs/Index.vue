@@ -171,6 +171,10 @@ export default {
         });
     },
     methods: {
+        ...mapActions({
+            setCurrentTeam: "setCurrentTeam"
+        }),
+
         fetchItems() {
             let uri = '/data/jobs?date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter + '&team_id=' + this.selectTeam;
             axios.get(uri)
@@ -423,7 +427,11 @@ export default {
         }],
         selectTeam: [{
             handler: function(value, oldValue) {
-                if ( value != oldValue ) this.fetchItems()
+                if ( value != oldValue ) this.fetchItems();
+
+                if ( value != this.currentTeam.id ) {
+                    this.setCurrentTeam(value);
+                }
             }
         }]
     }

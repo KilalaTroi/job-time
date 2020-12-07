@@ -40,7 +40,7 @@ export default {
         },
 
         SET_SELECTED_USER: (state, user) => {
-            state.selectedUser = user
+            state.selectedUser = Object.assign({}, user)
         },
 
         SET_VALIDATE: (state, data) => {
@@ -62,8 +62,8 @@ export default {
             commit('SET_COLUMNS', columns)
         },
 
-        getAllUser({ commit }) {
-            axios.get('/data/users').then(response => {
+        getAllUser({ commit, rootState }) {
+            axios.get('/data/users?team_id=' + rootState.currentTeam.id).then(response => {
                 commit('GET_ALL_USER', response.data)
             })
         },
@@ -112,11 +112,6 @@ export default {
             commit('SET_SELECTED_USER', user)
         },
 
-        setSelectedUser({ state, commit, rootGetters, rootState }, user) {
-            user.team = rootGetters['getObjectByID'](rootState.currentTeamOption, +user.team)
-            commit('SET_SELECTED_USER', obj)
-        },
-
         updateUser({ commit }, user) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
@@ -143,7 +138,7 @@ export default {
             commit('SET_VALIDATE', {error: '', success: ''})
         },
 
-        createUser({ commit }, newUser) {
+        createUser({ dispatch, commit }, newUser) {
             commit('SET_VALIDATE', {error: '', success: ''})
 
             const data = Object.assign({}, newUser)
@@ -154,7 +149,7 @@ export default {
             axios
                 .post(uri, data)
                 .then(res => {
-                    commit('SET_SELECTED_USER', {})
+                    dispatch('resetSelectedUser')
                     commit('SET_VALIDATE', { error: '', success: res.data.message })
                 })
                 .catch(err => {
@@ -165,8 +160,11 @@ export default {
                 });
         },
 
-        resetSelectedUser({ commit }) {
-            commit('SET_SELECTED_USER', {})
+        resetSelectedUser({ commit, rootState }) {
+            commit('SET_SELECTED_USER', {
+                r_name: 0,
+                language: rootState.currentLang
+            })
         },
     }
 }

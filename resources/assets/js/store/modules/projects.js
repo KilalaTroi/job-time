@@ -37,7 +37,7 @@ export default {
 
 	mutations: {
         SET_DATA: (state, data) => {
-			state.data = data
+			state.data = Object.assign({}, data)
         },
 
 		SET_OPTIONS: (state, options) => {
@@ -45,7 +45,7 @@ export default {
 		},
 
 		SET_SELECTED_ITEM: (state, selectedItem) => {
-			state.selectedItem = selectedItem
+			state.selectedItem = Object.assign({}, selectedItem)
 		},
 
 		SET_PAGED: (state, paged) => {

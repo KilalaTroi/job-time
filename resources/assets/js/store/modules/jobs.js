@@ -38,7 +38,7 @@ export default {
 		},
 
 		SET_SELECTED_USER: (state, user) => {
-			state.selectedUser = user
+			state.selectedUser = Object.assign({}, user)
 		},
 
 		SET_VALIDATE: (state, data) => {

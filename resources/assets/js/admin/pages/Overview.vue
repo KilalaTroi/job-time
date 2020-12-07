@@ -255,6 +255,10 @@
             });
         },
         methods: {
+            ...mapActions({
+     	 	    setCurrentTeam: "setCurrentTeam"
+            }),
+            
             fetch() {
                 let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
                 let uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
@@ -457,7 +461,11 @@
             team: [{
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
-                        this.fetch()
+                        this.fetch();
+
+                        if ( value != this.currentTeam.id ) {
+                            this.setCurrentTeam(value);
+                        }
                     }
                 }
             }]

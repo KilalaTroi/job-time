@@ -256,6 +256,10 @@ export default {
 		});
 	},
 	methods: {
+		...mapActions({
+     	 	setCurrentTeam: "setCurrentTeam"
+		}),
+	
 		fetchData() {
 			let uri = "/data/statistic/datatotaling";
 			axios
@@ -473,6 +477,10 @@ watch: {
 				if ( this.firstLoad >= 1 && this.team ) {
 					this.fetchData()
 				}
+
+				if ( this.team != this.currentTeam.id ) {
+                    this.setCurrentTeam(this.team);
+                }
 			}
 		}
 	}
