@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use Mail;
 use Excel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -516,6 +517,18 @@ class Uploadcontroller extends Controller
     }
 
     public function submitMessage(Request $request) {
+        $from = array(
+            'email' => 'troi.hoang@kilala.vn',
+            'name' => 'Jobtime system'
+        );
+        $emails[] = 'troi.hoang@kilala.vn';
+
+        Mail::send('emails.finish', ['content' => $request->get('content')], function($message) use ($emails, $from)
+        {
+            $message->from($from['email'], $from['name']);
+            $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
+            $message->to($emails)->subject('Jobtime Finish');
+        });
 
         $client = new Client([
             'headers' => [

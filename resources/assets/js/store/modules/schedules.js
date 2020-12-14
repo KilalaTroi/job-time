@@ -85,7 +85,7 @@ export default {
           response.data.schedules = response.data.schedules.map((item, index) => {
             const arrProjects = [58, 59]; // Project show description and hide fc-time.
             const arrProjectsHT = [58]; // Project hide fc-time.
-            const arrProjectsPV = [58, 66];  // Project don't have Variation.
+            const arrProjectsPV = [58];  // Project don't have Variation.
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
             const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
             let sDetail = [];
@@ -96,14 +96,14 @@ export default {
               sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
             }
 
-            const codition = sDetail.length && state.filters.team == 2 && ! arrProjectsPV.includes(item.p_id);
-            const textTime = sDetail.length && state.filters.team == 2 && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
+            const codition = sDetail.length && (state.filters.team == 2) && ! arrProjectsPV.includes(item.p_id);
+            const textTime = sDetail.length && (state.filters.team == 2) && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
             const classHideTime = textTime ? ' hide-fc-time' : '';
 
             // Get description for schedule
-            if ( sDetail.length && state.filters.team == 2 && arrProjects.includes(item.p_id) ) {
+            if ( sDetail.length && (state.filters.team == 2) && arrProjects.includes(item.p_id) ) {
               description = sDetail.map((item) => {
                 const note = item.note ? ' (' + item.note + ')' : '';
                 return (item.start_time + ' - ' + item.end_time + note)
