@@ -5,13 +5,24 @@
       :sizeClasses="modalLg"
       v-on:reset-validation="resetValidate"
     >
-      <template slot="title">{{ $ml.with("VueJS").get("txtDetails") }}</template>
+      <template slot="title">{{
+        $ml.with("VueJS").get("txtDetails")
+      }}</template>
       <div v-if="currentProcess">
-		<div class="form-group border p-3">
-			<h5 class="mt-0 mb-1">{{ $ml.with("VueJS").get("txtProject") }}: {{ currentProcess.project }}</h5>
-			<h5 class="mt-0 mb-1">{{ $ml.with("VueJS").get("txtIssue") }}: {{ currentProcess.issue ? currentProcess.issue : '--' }}</h5>
-			<h5 class="m-0">{{ $ml.with("VueJS").get("txtPhase") }}: {{ currentProcess.phase ? currentProcess.phase : '--' }}</h5>
-		</div>
+        <div class="form-group border p-3">
+          <h5 class="mt-0 mb-1">
+            {{ $ml.with("VueJS").get("txtProject") }}:
+            {{ currentProcess.project }}
+          </h5>
+          <h5 class="mt-0 mb-1">
+            {{ $ml.with("VueJS").get("txtIssue") }}:
+            {{ currentProcess.issue ? currentProcess.issue : "--" }}
+          </h5>
+          <h5 class="m-0">
+            {{ $ml.with("VueJS").get("txtPhase") }}:
+            {{ currentProcess.phase ? currentProcess.phase : "--" }}
+          </h5>
+        </div>
         <hr />
         <div class="table-responsive">
           <table-no-action
@@ -34,6 +45,7 @@
 <script>
 import TableNoAction from "../../components/TableNoAction";
 import Modal from "../../components/Modals/Modal";
+import { mapGetters } from "vuex"
 
 export default {
   name: "process-modal",
@@ -42,6 +54,11 @@ export default {
     TableNoAction,
   },
   props: ["currentProcess", "arrCurrentProcess"],
+  computed: {
+    ...mapGetters({
+			dateFormat: "dateFormat"
+    })
+  },
   data() {
     return {
       columns: [
@@ -110,6 +127,7 @@ export default {
     getDataProcess() {
       if (this.arrCurrentProcess.length) {
         this.dataProcess = this.arrCurrentProcess.map((item, index) => {
+          item.date = this.dateFormat(item.date, 'MMM DD, YYYY HH:mm')
           return item;
         });
       } else {

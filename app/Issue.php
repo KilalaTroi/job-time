@@ -18,4 +18,8 @@ class Issue extends Model
     public function project() {
         return $this->belongsTo(Project::class);
     }
+
+    public function schedules() {
+        return $this->hasMany(Schedule::class);
+    }
 }

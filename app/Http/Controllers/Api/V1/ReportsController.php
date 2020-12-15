@@ -9,7 +9,13 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+
 use Excel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithMapping;
+
 use Google\Cloud\Translate\TranslateClient;
 
 class ReportsController extends Controller
@@ -138,6 +144,7 @@ class ReportsController extends Controller
                 $columnName = count($userArr) != 1 ? 'I' : 'H';
                 $columnNameBefore = count($userArr) != 1 ? 'H' : 'G';
                 $startLetter = count($userArr) === 1 ? 'B' : 'C';
+                $dateLetter = count($userArr) === 1 ? 'A' : 'B';
                 $endLetter = count($userArr) === 1 ? 'C' : 'D';
                 $totalLetter = count($userArr) === 1 ? 'D' : 'E';
 
@@ -167,6 +174,11 @@ class ReportsController extends Controller
                     $cells->setBackground('#ffd05b');
                 });
 
+                // Style time align
+                $sheet->cell($startLetter . '6:' . $endLetter . ($numberRows + 1), function($cells) {
+                    $cells->setAlignment('right');
+                });
+
                 for ($i=5; $i<=$numberRows; $i++) {
                     $sheet->cell('A'. $i.':'.$columnName.$i, function($cells) {
                         $cells->setBorder('thin','thin','thin','thin');
@@ -186,14 +198,12 @@ class ReportsController extends Controller
 
                 $sheet->setBorder($endLetter . ($numberRows + 1) . ':' . $totalLetter . ($numberRows + 1), 'thin');
 
-                // Format column
-                $sheet->setColumnFormat(array(
-                    $startLetter . '6:' . $totalLetter . $numberRows => '[h]:mm;@',
-                    $totalLetter . ($numberRows + 1) => '[h]:mm;@',
-                ));
-
                 // Fill array to sheet
                 $sheet->fromArray($dataTimeUser['data'], null, 'A5', true);
+
+                // Fill total time to sheet
+                $sheet->setCellValue($endLetter . ($numberRows + 1), 'Total');
+                $sheet->setCellValue($totalLetter . ($numberRows + 1), '=SUM('. $totalLetter . '6:' . $totalLetter . $numberRows .')');
 
                 //set title table
                 if ( count($userArr) != 1 ) {
@@ -217,9 +227,12 @@ class ReportsController extends Controller
                     $sheet->setCellValue('H5', "JOB TYPE");
                 }
 
-                // Fill total time to sheet
-                $sheet->setCellValue($endLetter . ($numberRows + 1), 'Total');
-                $sheet->setCellValue($totalLetter . ($numberRows + 1), $dataTimeUser['totalTime']);
+                // Format column
+                $sheet->setColumnFormat(array(
+                    $dateLetter . '6:' . $dateLetter . $numberRows => '[$-409]mmm d, yyyy;@',
+                    $startLetter . '6:' . $totalLetter . $numberRows => '[h]:mm;@',
+                    $totalLetter . ($numberRows + 1) => '[h]:mm;@',
+                ));
             });
 
             if ( $dataTimeUser['dataTotal'] ) {
@@ -288,22 +301,22 @@ class ReportsController extends Controller
 
                     $sheet->setBorder($columnTotalText . ($numberRows + 1) . ':' . $columnTotal . ($numberRows + 1), 'thin');
 
+                    // Fill array to sheet
+                    $sheet->fromArray($dataTimeUser['dataTotal'], null, 'A5', true);
+                    
+                    // Fill total time to sheet
+                    $sheet->setCellValue($columnTotalText . ($numberRows + 1), 'Total');
+                    $sheet->setCellValue($columnTotal . ($numberRows + 1), $dataTimeUser['totalTime']);
+
+                    //set title table
+                    $sheet->setCellValue('A5', "NAME");
+                    $sheet->setCellValue('B5', "TOTAL");
+
                     // Format column
                     $sheet->setColumnFormat(array(
                         $columnName . '6:' . $columnName . $numberRows => '[h]:mm;@',
                         $columnName . ($numberRows + 1) => '[h]:mm;@',
                     ));
-
-                    // Fill array to sheet
-                    $sheet->fromArray($dataTimeUser['dataTotal'], null, 'A5', true);
-
-                    //set title table
-                    $sheet->setCellValue('A5', "NAME");
-                    $sheet->setCellValue('B5', "TOTAL");
-                    
-                    // Fill total time to sheet
-                    $sheet->setCellValue($columnTotalText . ($numberRows + 1), 'Total');
-                    $sheet->setCellValue($columnTotal . ($numberRows + 1), $dataTimeUser['totalTime2']);
                    
                 });
             }
@@ -388,15 +401,9 @@ class ReportsController extends Controller
         $startLetter = count($userArr) === 1 ? 'B' : 'C';
         $endLetter = count($userArr) === 1 ? 'C' : 'D';
         $totalLetter = count($userArr) === 1 ? 'D' : 'E';
-        $totalTime = '=';
 
         foreach ($dataDetail as $key => $item) {
             $number = $key + 6;
-            if ( $totalTime === '=' ) {
-                $totalTime .= $totalLetter . '' . $number;
-            } else {
-                $totalTime .= '+' . $totalLetter . '' . $number;
-            }
             $keyNUmber = count($userArr) === 1 ? 3 : 4;
             $this->array_insert( $dataDetail[$key], $keyNUmber, array ('Time' => '=' . $endLetter . $number . '-' . $startLetter . $number));
             foreach ($item as $key1 => $element) {
@@ -404,7 +411,8 @@ class ReportsController extends Controller
                     $dataDetail[$key][$key1] = "--";
                 }
                 if($key1 == "dateReport") {
-                    $dataDetail[$key][$key1] = date('M d,Y', strtotime($element));
+                    $date = Carbon::createFromFormat('Y-m-d', $element)->format('d/m/Y');
+                    $dataDetail[$key][$key1] = Date::stringToExcel($date);
                 }
             }
         }
@@ -419,21 +427,21 @@ class ReportsController extends Controller
                 return (array) $x;
             })->toArray();
 
-            $totalTime2 = '=';
+            $totalTime = '=';
 
             foreach ($dataTotal as $key => $item) {
                 $number = $key + 6;
-                if ( $totalTime2 === '=' ) {
-                    $totalTime2 .= 'B' . $number;
+                if ( $totalTime === '=' ) {
+                    $totalTime .= 'B' . $number;
                 } else {
-                    $totalTime2 .= '+B' . $number;
+                    $totalTime .= '+B' . $number;
                 }
                 $hoursminsandsecs = $this->getHoursMinutes($item['total']*1, '%02d:%02d');
                 $dataTotal[$key]['total'] = $hoursminsandsecs;
             }
         };
 
-        return ['data' => $dataDetail, 'dataTotal' => $dataTotal, 'totalTime' => $totalTime, 'totalTime2' => isset($totalTime2) ? $totalTime2 : 0];
+        return ['data' => $dataDetail, 'dataTotal' => $dataTotal, 'totalTime' => isset($totalTime) ? $totalTime : 0];
     }
 
     function calcTime($start_time, $end_time) {

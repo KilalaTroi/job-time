@@ -30,6 +30,7 @@ class UsersController extends Controller
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+            ->where('team', $_GET['team_id'])
             ->get()->toArray();
 
         return response()->json([

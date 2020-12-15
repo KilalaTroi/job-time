@@ -2,20 +2,12 @@
 	<div class="content">
 		<div class="container-fluid">
             <div class="row">
-                <!-- <div class="col col-sm-auto">
-                    <card>
-                        <template slot="header">
-                            <h4 class="card-title text-center">{{ this.customFormatter(start_date) }}</h4>
-                        </template>
-                        <datepicker name="startDate" v-model="start_date" :format="customFormatter" :inline="false" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
-                        </datepicker>
-                    </card>
-                </div> -->
                 <div class="col">
                     <card>
                         <template slot="header">
                             <div class="d-flex justify-content-between">
                                 <h4 class="card-title">{{$ml.with('VueJS').get('txtFinish')}}</h4>
+
                                 <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 160px;">
 									<div class="d-flex align-items-stretch mr-3">
 										<label class="mr-2 mb-0 d-flex align-items-center text-dark">{{ $ml.with('VueJS').get('lblDate') }}</label>
@@ -29,6 +21,7 @@
 											</datepicker>
 										</div>
 									</div>
+
                                     <select-2
                                         :options="currentTeamOption"
                                         v-model="selectTeam"
@@ -39,13 +32,20 @@
                                 </div>
                             </div>
                         </template>
+
                         <div class="table-responsive">
-							<table-finish class="table-hover table-striped" :columns="columns" :data="projects" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finish>
+							<table-finish v-show="!loading" class="table-hover table-striped" :columns="columns" :data="items" v-on:get-process="getProcess" v-on:update-process="getProcess"></table-finish>
+							<div v-if="loading" class="text-center mt-3">
+								<img src="https://i.imgur.com/JfPpwOA.gif">
+							</div>
 						</div>
+
 						<process-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-modal>
+						
 						<process-detail-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-detail-modal>
+						
 						<pagination
-						:data="dataProjects"
+						:data="issueProcesses"
 						:show-disabled="jShowDisabled"
 						:limit="jLimit"
 						:align="jAlign"
@@ -58,11 +58,11 @@
         </div>
 	</div>
 </template>
+
 <script>
 import TableFinish from "../../components/TableFinish";
 import ProcessModal from './ProcessModal';
 import ProcessDetailModal from './ProcessDetailModal';
-import CommentsModal from './CommentsModal';
 import Card from "../../components/Cards/Card";
 import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
@@ -101,13 +101,14 @@ export default {
 				{ id: "page", value: this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
 				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
 			],
+			loading: true,
 			start_date: new Date(),
 			selectTeam: '',
 			txtAll: this.$ml.with('VueJS').get('txtSelectAll'),
 
-			dataProjects: {},
-			dataProcesses: [],
-			projects: [],
+			issueProcesses: {},
+			processDetails: [],
+			items: [],
 
 			jLimit: 2,
 			jShowDisabled: true,
@@ -129,7 +130,7 @@ export default {
 		};
 	},
 	mounted() {
-		let _this = this;
+		const _this = this;
 		_this.selectTeam = _this.currentTeam.id
 		_this.getOptions();
 		$(document).on('click', '.languages button', function() {
@@ -157,23 +158,27 @@ export default {
 
             return arrProcess;
         },
-		fetchData(page = 1) {
+		async fetchData(page = 1, loading = true) {
 			this.page = page;
-			let uri = "/data/finish/data?page=" + page;
-			axios
-			.post(uri, {
-				start_date: this.dateFormatter(this.start_date),
+			const uri = "/data/finish/data?page=" + page;
+			this.loading = loading;
+
+			await axios.post(uri, {
+				start_date: this.dateFormat(this.start_date, 'YYYY-MM-DD'),
 				selectTeam: this.selectTeam,
 				showFilter: this.showFilter
 			})
 			.then(res => {
-				this.dataProjects = res.data.dataProjects;
-				this.dataProcesses = res.data.dataProcesses;
+				this.issueProcesses = res.data.issueProcesses;
+				this.processDetails = res.data.processDetails;
 
-				if (res.data.dataProjects.data.length) {
-					this.projects = res.data.dataProjects.data.map((item, index) => {
-						const arrProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, item.id, item.phase) : [];
+				if (res.data.issueProcesses.data.length) {
+					this.items = res.data.issueProcesses.data.map((item, index) => {
+						// Get processes of issue
+						const arrProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, item.id, item.phase) : [];
+						// Get last process of issue
 						const lastProcess = arrProcess[arrProcess.length - 1];
+
 						return Object.assign({}, item, {
 							d_name: item.department === "All" ? "" : item.department,
 							p_name: item.project,
@@ -186,16 +191,18 @@ export default {
 						});
 					});
 				} else {
-					this.projects = [];
+					this.items = [];
 				}
 			})
 			.catch(err => {
 				console.log(err);
 				alert("Could not load data");
 			});
+
+			this.loading = false;
 		},
 		getOptions() {
-            let arr = [
+            const arr = [
                 {id: 'showSchedule', text: this.$ml.with('VueJS').get('txtShowBySchedule')},
                 {id: 'all', text: this.$ml.with('VueJS').get('txtShowAll')}
             ];
@@ -203,38 +210,20 @@ export default {
         },
 		getProcess(item) {
 			this.currentProcess = Object.assign({}, item, {status: null});
-			this.arrCurrentProcess = this.dataProcesses.length ? this.getProcessObjectValue(this.dataProcesses, this.currentProcess.id, this.currentProcess.phase) : [];
-		},
-		changeStatusProcess(item) {
-			item.status = item.status ? 0 : 1;
-			
-			const uri = "/data/finish/update-status";
-			axios.post(uri, {
-					currentProcess: item
-				})
-				.then(res => {
-					this.fetchData(this.page)
-				})
-				.catch(err => {
-					console.log(err);
-				});
-            
+			this.arrCurrentProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, this.currentProcess.id, this.currentProcess.phase) : [];
 		},
 		customFormatter(date) {
 			return moment(date).format("YYYY/MM/DD");
 		},
 		disabledEndDates() {
-			let obj = {
+			const obj = {
 				from: new Date()
 			};
 			return obj;
 		},
-		dateFormatter(date) {
-			return moment(date).format("YYYY-MM-DD") !== 'Invalid date' ? moment(date).format("YYYY-MM-DD") : false;
-		},
 		resetValidate() {
 			this.currentProcess = {};
-			this.fetchData(this.page)
+			this.fetchData(this.page, false)
 		},
 		getLanguage(data) {
 			return this.dataLang[data.current]

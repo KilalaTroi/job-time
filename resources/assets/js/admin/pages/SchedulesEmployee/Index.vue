@@ -148,8 +148,9 @@ export default {
       getAll: "getAll"
     }),
 
-    ...mapActions("types", {
-      getOptionType: "getOptions",
+    ...mapActions({
+      getOptionType: "types/getOptions",
+      setCurrentTeam: "setCurrentTeam"
     }),
 
     getLanguage(data) {
@@ -194,9 +195,13 @@ export default {
     ],
     filters: [
       {
-        handler: function() {
-          this.search = ''
-          this.getAll()
+        handler: function(value) {
+          this.search = '';
+          this.getAll();
+
+          if ( value.team != this.currentTeam.id ) {
+            this.setCurrentTeam(value.team);
+          }
         },
         deep: true,
       },

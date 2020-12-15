@@ -17,7 +17,7 @@
     @include('./components/favicon')
 
     <!-- Styles -->
-    <link href="{{ asset('css/app-admin.css') }}" rel="stylesheet">
+    <link href="{{ asset(mix('css/app-admin.css')) }}" rel="stylesheet">
 
     <script type="text/javascript">
         window.Laravel = {!! json_encode([
@@ -30,6 +30,6 @@
 <div id="app"></div>
 
 <!-- Scripts -->
-<script src="{{ asset('js/app-japanese_planner.js') }}"></script>
+<script src="{{ asset(mix('js/app-japanese_planner.js')) }}"></script>
 </body>
 </html>

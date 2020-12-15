@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use Mail;
 use Excel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,22 +20,10 @@ class Uploadcontroller extends Controller
         $defaultProjects = array(10, 58, 59, 67, 68, 69);
         // End POST data
 
-        // Get list max id of process
-        $startDate = Carbon::createFromFormat('Y-m-d', $selectDate)->subMonth()->format('Y-m-d');
-        $maxIDProcess = DB::table('processes as p')
-        ->select(DB::raw('max(id) as d'))
-        ->where(function ($query) use ($startDate) {
-            $query->where('p.date', '>=', $startDate)
-                ->orWhere('p.status', 'Finish Uploaded');
-        })
-        ->groupBy('p.issue_id', 'p.memo')
-        ->get()->toArray();
-
-        // Get Issue and schedule SQl
-        $dataProjects = DB::table('issues as i')
+        // Get Issue with processes
+        $issueProcesses = DB::table('issues as i')
         ->select(
             'i.id as id',
-            DB::raw('max(s.id) as schedule_id'),
             'd.name as department',
             'p.name as project',
             'i.name as issue',
@@ -42,8 +31,8 @@ class Uploadcontroller extends Controller
             't.line_room as room_id',
             's.memo as phase'
         )
-        ->join('projects as p', 'p.id', '=', 'i.project_id')
-        ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+        ->join('schedules as s', 'i.id', '=', 's.issue_id')
+        ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
         ->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->where(function ($query) use ($selectTeam) {
@@ -68,41 +57,37 @@ class Uploadcontroller extends Controller
         })
         ->where('t.line_room', '!=', NULL)
         ->where('i.created_at', '<=',  $selectDate . ' 23:59:59')
-        ->orderBy('s.created_at', 'desc')
         ->orderBy('i.created_at', 'desc')
+        ->orderBy('s.created_at', 'desc')
         ->groupBy('i.id', 's.memo')
         ->paginate(20);
 
         // Get issues IDs
-        $data = collect($dataProjects)->get('data');
-        if ( count($data) ) {
-            $issues = array_map(function($obj) {
-                return $obj->id;
-            }, $data);
-        }
+        $issueIds = $issueProcesses->pluck('id')->toArray();
 
-        // Get processes
-        $processes = array();
-        if ( isset($issues) ) {
-            $processes = DB::table('processes as p')
+        // Get process details
+        $processDetails = array();
+        if ( count($issueIds) ) {
+            $processDetails = DB::table('processes as p')
             ->select(
                 'p.id',
-                'issue_id',
-                'schedule_id',
-                'page',
-                'memo as phase',
-                'date',
+                'p.issue_id',
+                'p.page',
+                's.memo as phase',
+                'p.date',
                 'u.name as user_name',
-                'status as status'
+                'p.status as status'
             )
+            ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
             ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-            ->whereIn('issue_id', $issues)
+            ->whereIn('p.issue_id', $issueIds)
             ->get()->toArray();
         }
 
+        // Return Json
         return response()->json([
-            'dataProjects' => $dataProjects,
-            'dataProcesses' => $processes,
+            'issueProcesses' => $issueProcesses,
+            'processDetails' => $processDetails,
         ]);
     }
 
@@ -146,7 +131,10 @@ class Uploadcontroller extends Controller
         }
         // End POST data
 
+        // Get departments
         $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+
+        // Get types
         $types = DB::table('types as t')->select('t.id', 't.slug', 't.slug_vi', 't.slug_ja', 't.value')
         ->rightJoin('projects as p', 't.id', '=', 'p.type_id')
         ->where(function ($query) use ($teamFilter) {
@@ -158,11 +146,12 @@ class Uploadcontroller extends Controller
         ->orderBy('t.id', 'ASC')
         ->groupBy('t.id')
         ->get()->toArray();
+
+        // Get projects
         $projects = DB::table('projects as p')
         ->select(
             'p.id', 
-            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
-            DB::raw('max(i.id) as issue_id')
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text')
         )
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
@@ -173,9 +162,6 @@ class Uploadcontroller extends Controller
         ->when($typeArr, function ($query, $typeArr) {
             return $query->whereIn('p.type_id', $typeArr);
         })
-        // ->when($projectArr, function ($query, $projectArr) {
-        //     return $query->whereIn('p.id', $projectArr);
-        // })
         ->when($issueFilter, function ($query, $issueFilter) {
             return $query->where('i.name', 'like', '%'.$issueFilter.'%');
         })
@@ -185,7 +171,6 @@ class Uploadcontroller extends Controller
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
                   ->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
         })
-
         // Get projects by start time and end time
         ->where(function ($query) use ($end_time) {
             $query->where('i.start_date', '<=',  $end_time)
@@ -195,19 +180,16 @@ class Uploadcontroller extends Controller
             $query->where('i.end_date', '>=',  $start_time)
                   ->orWhere('i.end_date', '=',  NULL);
         })
-
-        // ->where('i.status', 'publish')
         ->groupBy('p.id')
         ->orderBy('p.id', 'desc')
         ->get()->toArray();
-        // End POST data
 
         // Get processes
         $processesUploaded = DB::table('processes as p')
         ->select(
             'p.issue_id as id',
             'p.page as page',
-            'p.memo as phase',
+            's.memo as phase',
             'p.date as date',
             'u.name as user_name',
             'p.status as status',
@@ -216,9 +198,10 @@ class Uploadcontroller extends Controller
             'i.name as issue',
             't.slug as job_type'
         )
+        ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
         ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-        ->join('issues as i', 'i.id', '=', 'p.issue_id')
-        ->join('projects as pr', 'pr.id', '=', 'i.project_id')
+        ->leftJoin('issues as i', 'i.id', '=', 'p.issue_id')
+        ->leftJoin('projects as pr', 'pr.id', '=', 'i.project_id')
         ->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
         ->leftJoin('types as t', 't.id', '=', 'pr.type_id')
         ->where('p.status', 'Finished Upload')
@@ -249,28 +232,24 @@ class Uploadcontroller extends Controller
         ->paginate(20);
 
         // Get issues IDs
-        $data = collect($processesUploaded)->get('data');
-        if ( count($data) ) {
-            $issues = array_map(function($obj) {
-                return $obj->id;
-            }, $data);
-        }
+        $issueIds = $processesUploaded->pluck('id')->toArray();
 
-        // Get processes
-        $processes = array();
-        if ( isset($issues) ) {
-            $processes = DB::table('processes as p')
+        // Get process details
+        $processDetails = array();
+        if ( isset($issueIds) ) {
+            $processDetails = DB::table('processes as p')
             ->select(
                 'p.id',
-                'issue_id',
-                'page',
-                'memo as phase',
-                'date',
+                'p.issue_id',
+                'p.page',
+                's.memo as phase',
+                'p.date',
                 'u.name as user_name',
-                'status as status'
+                'p.status as status'
             )
+            ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
             ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-            ->whereIn('issue_id', $issues)
+            ->whereIn('p.issue_id', $issueIds)
             ->get()->toArray();
         }
 
@@ -290,8 +269,8 @@ class Uploadcontroller extends Controller
 
         // Return Json
         return response()->json([
-            'dataProjects' => $processesUploaded,
-            'dataProcesses' => $processes,
+            'processesUploaded' => $processesUploaded,
+            'processDetails' => $processDetails,
             'users' => $users,
             'departments' => $departments,
             'types' => $types,
@@ -342,15 +321,18 @@ class Uploadcontroller extends Controller
         // Get processes
         $processesUploaded = DB::table('processes as p')
         ->select(
+            'p.id as id',
+            'p.issue_id as issue_id',
             'd.name as department',
             't.slug as job_type',
             'pr.name as project',
             'i.name as issue',
-            'p.memo as phase',
+            's.memo as phase',
             'p.date as date',
             'u.name as user_name',
             'p.page as page',
         )
+        ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
         ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
         ->join('issues as i', 'i.id', '=', 'p.issue_id')
         ->join('projects as pr', 'pr.id', '=', 'i.project_id')
@@ -382,10 +364,48 @@ class Uploadcontroller extends Controller
         ->where('p.date', '<=', $end_time . ' 23:59:59')
         ->where('t.line_room', '!=', NULL)->get();
 
-        $processesUploaded = collect($processesUploaded)->map(function($x) {
+        // get array process ids
+        $issueIds = $processesUploaded->pluck('issue_id')->toArray();
+        
+        // get total page of process
+        $processePage = DB::table('processes as p')
+        ->select(
+            DB::raw("MAX(p.id) as id"),
+            DB::raw("SUM(p.page) as page"),
+            'p.issue_id as issue_id',
+            's.memo as phase',
+        )
+        ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
+        ->whereIn('p.issue_id', $issueIds)
+        ->groupBy('p.issue_id', 'memo')
+        ->get()->toArray();
+
+        $processePage = collect($processePage)->map(function($x) {
+            $x->phase = $x->phase ? $x->phase : false;
+            return (array) $x;
+        })->toArray();
+        
+        // Get total page
+        $processesUploaded = collect($processesUploaded)->map(function($x) use($processePage) {
+            $pages = 0;
+            $x->phase = $x->phase ? $x->phase : false;
+
+            if ( count($processePage) ) {
+                // Define search list with multiple key=>value pair 
+                $search_items = array('issue_id'=>$x->issue_id, 'phase'=>$x->phase); 
+                
+                // Call search and pass the array and 
+                // the search list 
+                $res = $this->search($processePage, $search_items);
+                $pages = count($res) ? $res[0]['page'] : 0;
+            }
+            
+            $x->page = $pages ? $pages : '--';
             $x->issue = $x->issue ? $x->issue : '--';
             $x->phase = $x->phase ? $x->phase : '--';
-            $x->page = $x->page ? $x->page : '--';
+            unset($x->id);
+            unset($x->issue_id);
+
             return (array) $x;
         })->toArray();
 
@@ -447,8 +467,8 @@ class Uploadcontroller extends Controller
                 $sheet->setCellValue('B5', "JOB TYPE");
                 $sheet->setCellValue('C5', "PROJECT");
                 $sheet->setCellValue('D5', "ISSUE");
-                $sheet->setCellValue('E5', "TIME");
-                $sheet->setCellValue('F5', "INFO");
+                $sheet->setCellValue('E5', "INFO");
+                $sheet->setCellValue('F5', "DATE");
                 $sheet->setCellValue('G5', "REPORTER");
                 $sheet->setCellValue('H5', "PAGES WORK");
             });
@@ -497,7 +517,35 @@ class Uploadcontroller extends Controller
     }
 
     public function submitMessage(Request $request) {
+        // Send Mail
+        $from = array(
+            'email' => $request->get('user')['email'],
+            'name' => $request->get('user')['name']
+        );
 
+        if ( $request->get('team_id') == 2 ) {
+            $emails[] = 'cvn.notification@gmail.com';
+        } else {
+            $emails[] = 'troi.hoang@kilala.vn';
+        }
+
+        $contentArr = explode('---- ', $request->get('content'));
+
+        Mail::send('emails.finish', [
+            'content' => count($contentArr) > 1 ? $contentArr[1] : '',
+            'user' => $request->get('user'),
+            'p_name' => $request->get('p_name'),
+            'i_name' => $request->get('i_name'),
+            'phase' => $request->get('phase'),
+            'status' => $request->get('status')
+        ], function($message) use ($emails, $from, $request)
+        {
+            $message->from($from['email'], $from['name']);
+            $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
+            $message->to($emails)->subject('JobTime : Updated invitation: ['. $request->get('status') . ' - ' . $request->get('user')['name'] .'] ' . $request->get('p_name'));
+        });
+
+        // Send message Line Work
         $client = new Client([
             'headers' => [
                 'Access-Control-Allow-Origin' => '*',
@@ -543,4 +591,37 @@ class Uploadcontroller extends Controller
         curl_close($curl);
         return $result;
     }
+
+    // PHP program to search for multiple 
+    // key=>value pairs in array 
+    public function search($array, $search_list) { 
+      
+        // Create the result array 
+        $result = array(); 
+      
+        // Iterate over each array element 
+        foreach ($array as $key => $value) { 
+      
+            // Iterate over each search condition 
+            foreach ($search_list as $k => $v) { 
+          
+                // If the array element does not meet 
+                // the search condition then continue 
+                // to the next element 
+                if (!isset($value[$k]) || $value[$k] != $v) 
+                { 
+                      
+                    // Skip two loops 
+                    continue 2; 
+                } 
+            } 
+          
+            // Append array element's key to the 
+            //result array 
+            $result[] = $value; 
+        } 
+      
+        // Return result  
+        return $result; 
+    } 
 }

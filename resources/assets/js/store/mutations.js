@@ -4,7 +4,7 @@ export default {
     },
    
     SET_LOGIN_USER: (state, loginUser) => {
-        state.loginUser = loginUser
+        state.loginUser = Object.assign({}, loginUser)
     },
 
     SET_CURRENT_LANG: (state, lang) => {
@@ -12,7 +12,7 @@ export default {
     },
 
     SET_CURRENT_TEAM: (state, currentTeam) => {
-        state.currentTeam = currentTeam
+        state.currentTeam = Object.assign({}, currentTeam)
     },
 
     SET_CURRENT_TEAM_OPTION: (state, currentTeamOption) => {

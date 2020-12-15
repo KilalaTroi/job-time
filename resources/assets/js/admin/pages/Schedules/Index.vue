@@ -21,6 +21,7 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
+                  :class="{ 'no-schedule' : scheduleData.issuesNoSC.includes(item.issue_id) }"
                   v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
@@ -161,8 +162,9 @@ export default {
       getAll: "getAll"
     }),
 
-    ...mapActions("types", {
-      getOptionType: "getOptions",
+    ...mapActions({
+      getOptionType: "types/getOptions",
+      setCurrentTeam: "setCurrentTeam"
     }),
 
     getLanguage(data) {
@@ -231,9 +233,13 @@ export default {
     ],
     filters: [
       {
-        handler: function() {
-          this.search = ''
-          this.getAll()
+        handler: function(value) {
+          this.search = '';
+          this.getAll();
+          
+          if ( value.team != this.currentTeam.id ) {
+            this.setCurrentTeam(value.team);
+          }
         },
         deep: true,
       },
@@ -244,4 +250,23 @@ export default {
 
 <style lang="scss" scope>
 @import "custom.scss";
+.no-schedule {
+  position: relative;
+
+  &:after {
+    content: "N";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 20px;
+    height: 20px;
+    background: red;
+    text-align: center;
+    line-height: 20px;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
 </style>

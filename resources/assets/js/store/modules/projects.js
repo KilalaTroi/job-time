@@ -37,7 +37,7 @@ export default {
 
 	mutations: {
         SET_DATA: (state, data) => {
-			state.data = data
+			state.data = Object.assign({}, data)
         },
 
 		SET_OPTIONS: (state, options) => {
@@ -45,7 +45,7 @@ export default {
 		},
 
 		SET_SELECTED_ITEM: (state, selectedItem) => {
-			state.selectedItem = selectedItem
+			state.selectedItem = Object.assign({}, selectedItem)
 		},
 
 		SET_PAGED: (state, paged) => {
@@ -121,16 +121,37 @@ export default {
 			commit('SET_SELECTED_ITEM', item)
 		},
 
-		archiveItem({ state, dispatch }, data) {
-            const uri = '/data/issues/archive/' + data.id + '/' + data.status;
-            axios.get(uri).then((res) => {
-				if ( (state.paged - 1) * state.data.per_page < (state.data.total - 1) ) {
-					dispatch('getAll', state.paged);
-				} else {
-					let page = state.paged > 1 ? state.paged - 1 : 1;
-					dispatch('getAll', page);
-				}
-            }).catch(err => console.log(err));
+		archiveItem({ state, dispatch, rootGetters }, data) {
+			const message = data.status != "archive" ? rootGetters['getTranslate']('msgConfirmArchive') : rootGetters['getTranslate']('msgConfirmUnlockArchive')
+			if (confirm(message)) {
+				const uri = '/data/issues/archive/' + data.id + '/' + data.status;
+				axios.get(uri).then((res) => {
+					if ( (state.paged - 1) * state.data.per_page < (state.data.total - 1) ) {
+						dispatch('getAll', state.paged);
+					} else {
+						let page = state.paged > 1 ? state.paged - 1 : 1;
+						dispatch('getAll', page);
+					}
+				}).catch(err => console.log(err));
+			}
+		},
+
+		archiveAllItem({ state, dispatch, rootGetters }, data) {
+			const message = data.status ? rootGetters['getTranslate']('msgConfirmArchive') : rootGetters['getTranslate']('msgConfirmUnlockArchive')
+			if (confirm(message)) {
+				const uri = '/data/issues/archive-all';
+				axios.post(uri, {
+					issues: data.issues,
+					status: data.status
+				}).then((res) => {
+					if ( (state.paged - 1) * state.data.per_page < (state.data.total - data.issues.length) ) {
+						dispatch('getAll', state.paged);
+					} else {
+						let page = state.paged > 1 ? state.paged - 1 : 1;
+						dispatch('getAll', page);
+					}
+				}).catch(err => console.log(err));
+			}
 		},
 		
 		deleteItem({ state, dispatch }, issue) {
@@ -138,6 +159,22 @@ export default {
                 let uri = '/data/issues/' + issue.id;
                 axios.delete(uri).then((res) => {
                     if ( (state.paged - 1) * state.data.per_page < (state.data.total - 1) ) {
+						dispatch('getAll', state.paged);
+					} else {
+						let page = state.paged > 1 ? state.paged - 1 : 1;
+						dispatch('getAll', page);
+					}
+                }).catch(err => console.log(err));
+            }
+		},
+		
+		deleteAllItem({ state, dispatch, rootGetters }, issues) {
+            if (confirm(rootGetters['getTranslate']('msgConfirmDelete'))) {
+                let uri = '/data/issues/delete-all';
+                axios.post(uri, {
+					issues: issues
+				}).then((res) => {
+                    if ( (state.paged - 1) * state.data.per_page < (state.data.total - issues.length) ) {
 						dispatch('getAll', state.paged);
 					} else {
 						let page = state.paged > 1 ? state.paged - 1 : 1;
