@@ -517,19 +517,35 @@ class Uploadcontroller extends Controller
     }
 
     public function submitMessage(Request $request) {
+        // Send Mail
         $from = array(
-            'email' => 'troi.hoang@kilala.vn',
-            'name' => 'Jobtime system'
+            'email' => $request->get('user')['email'],
+            'name' => $request->get('user')['name']
         );
-        $emails[] = 'troi.hoang@kilala.vn';
 
-        Mail::send('emails.finish', ['content' => $request->get('content')], function($message) use ($emails, $from)
+        if ( $request->get('team_id') == 2 ) {
+            $emails[] = 'cvn.notification@gmail.com';
+        } else {
+            $emails[] = 'troi.hoang@kilala.vn';
+        }
+
+        $contentArr = explode('---- ', $request->get('content'));
+
+        Mail::send('emails.finish', [
+            'content' => count($contentArr) > 1 ? $contentArr[1] : '',
+            'user' => $request->get('user'),
+            'p_name' => $request->get('p_name'),
+            'i_name' => $request->get('i_name'),
+            'phase' => $request->get('phase'),
+            'status' => $request->get('status')
+        ], function($message) use ($emails, $from, $request)
         {
             $message->from($from['email'], $from['name']);
             $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
-            $message->to($emails)->subject('Jobtime Finish');
+            $message->to($emails)->subject('JobTime : Updated invitation: ['. $request->get('status') . ' - ' . $request->get('user')['name'] .'] ' . $request->get('p_name'));
         });
 
+        // Send message Line Work
         $client = new Client([
             'headers' => [
                 'Access-Control-Allow-Origin' => '*',

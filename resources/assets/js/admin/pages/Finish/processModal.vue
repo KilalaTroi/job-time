@@ -116,6 +116,7 @@ export default {
     ...mapGetters({
       loginUser: "loginUser",
       dateFormat: "dateFormat",
+      currentTeam: "currentTeam",
     }),
   },
   data() {
@@ -195,6 +196,12 @@ export default {
           .post(uri, {
             roomId: this.currentProcess.room_id,
             content: content,
+            user: this.loginUser,
+            p_name: this.currentProcess.project,
+            i_name: this.currentProcess.i_name,
+            phase: this.currentProcess.phase,
+            status: this.currentProcess.status,
+            team_id: this.currentTeam.id
           })
           .then((res) => {
             console.log(res.data);
@@ -223,7 +230,7 @@ export default {
         (this.currentProcess.i_name ? this.currentProcess.i_name : "--") +
         " \nPhase: " +
         (this.currentProcess.phase ? this.currentProcess.phase : "--") +
-        " \n----------------------------";
+        " \n----------------------------  ";
 
       if (this.arrCurrentProcess.length) {
         this.dataProcess = this.arrCurrentProcess.map((item, index) => {

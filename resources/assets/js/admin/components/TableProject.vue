@@ -2,7 +2,7 @@
   <table class="table">
     <thead>
       <slot name="columns">
-        <tr>
+        <tr width="66">
           <th>
             <div class="form-check">
               <label for="all" class="form-check-label">
