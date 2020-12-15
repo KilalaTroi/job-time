@@ -2,8 +2,8 @@
   <table class="table">
     <thead>
       <slot name="columns">
-        <tr width="66">
-          <th>
+        <tr>
+          <th width="66">
             <div class="form-check">
               <label for="all" class="form-check-label">
                 <input
