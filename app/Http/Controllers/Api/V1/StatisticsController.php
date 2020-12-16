@@ -501,7 +501,8 @@ class StatisticsController extends Controller
         $users['all'] = DB::connection('mysql')->table('role_user as ru')
             ->select(
                 'user.id as id',
-                'user.name as text'
+                'user.name as text',
+                'user.disable_date as disable_date'
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')

@@ -48,7 +48,7 @@ import Modal from "../../components/Modals/Modal";
 import { mapGetters } from "vuex"
 
 export default {
-  name: "process-modal",
+  name: "process-detail-modal",
   components: {
     Modal,
     TableNoAction,

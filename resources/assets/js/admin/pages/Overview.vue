@@ -425,7 +425,12 @@
                         id: 0,
                         text: this.$ml.with('VueJS').get('txtSelectAll')
                     };
-                    this.userOptions = [obj].concat(data);
+
+                    const userActive = data.filter((item) => {
+                        return item.disable_date === null;
+                    });
+
+                    this.userOptions = [obj].concat(userActive);
                 }
             },
             getLanguage(data) {
