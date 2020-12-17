@@ -160,7 +160,7 @@ export default {
               return getSchedule(item, {start_time: startTime, end_time: endTime}, codition);
 
             }
-            
+
           });
 
           // concat schedules and schedules variation
@@ -192,7 +192,7 @@ export default {
         $('.fc-event.fc-short').removeClass('fc-short');
       }, 3000);
     },
-    
+
     resetValidate({ dispatch, commit }) {
       dispatch('getAll', true)
       commit('SET_VALIDATE', { error: '', success: '' })

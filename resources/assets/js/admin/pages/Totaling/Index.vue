@@ -133,7 +133,7 @@
 				<template slot="header">
 					<div class="d-flex justify-content-between">
 						<h4 class="card-title">
-							{{$ml.with('VueJS').get('txtTimeRecord')}}             
+							{{$ml.with('VueJS').get('txtTimeRecord')}}
 						</h4>
 						<div class="align-self-end">
 							<button @click="exportExcel" class="btn btn-primary">
@@ -200,6 +200,7 @@ export default {
 				{ id: "total", value: this.$ml.with('VueJS').get('lblTime'), width: "120", class: "" },
 				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
+				{ id: "i_year", value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "note", value: this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
 				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
@@ -248,6 +249,7 @@ export default {
 				{ id: "total", value: _this.$ml.with('VueJS').get('lblTime'), width: "120", class: "" },
 				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "120", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
+				{ id: "i_year", value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "120", class: "" },
 				{ id: "note", value: _this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
 				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
@@ -259,7 +261,7 @@ export default {
 		...mapActions({
      	 	setCurrentTeam: "setCurrentTeam"
 		}),
-	
+
 		fetchData() {
 			let uri = "/data/statistic/datatotaling";
 			axios
@@ -364,6 +366,7 @@ export default {
 						d_name: item.department === "All" ? "" : item.department,
 						p_name: item.project,
 						i_name: item.issue,
+						i_year: item.issue_year,
 						note: item.note,
 						t_name: item.job_type,
 						html_team: this.getTeamText('' + item.team)

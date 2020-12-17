@@ -14,6 +14,18 @@
       </div>
     </div>
     <div class="form-group">
+      <label class="">{{ $ml.with("VueJS").get("txtYearOfIssue") }}</label>
+      <datepicker
+        input-class="form-control"
+        placeholder="Select Date"
+        minimum-view="year"
+        v-model="selectedItem.i_year"
+        format="yyyy"
+        :language="getLangCode(this.$ml)"
+      >
+      </datepicker>
+    </div>
+    <div class="form-group">
       <label class="">{{ $ml.with("VueJS").get("txtIssue") }}</label>
       <input
         v-model="selectedItem.i_name"
@@ -56,7 +68,11 @@
     <success-item :success="validationSuccess"></success-item>
     <hr />
     <div class="form-group text-right">
-      <button type="button" @click="addIssue(selectedItem)" class="btn btn-primary">
+      <button
+        type="button"
+        @click="addIssue(selectedItem)"
+        class="btn btn-primary"
+      >
         {{ $ml.with("VueJS").get("txtAdd") }}
       </button>
     </div>

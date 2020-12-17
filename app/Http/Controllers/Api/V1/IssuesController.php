@@ -9,217 +9,233 @@ use App\Http\Controllers\Controller;
 
 class IssuesController extends Controller
 {
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $request->merge(['name' => $request->get('i_name')]);
-        $project_id = $request->get('project_id');
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function store(Request $request)
+	{
+		$request->merge(['name' => $request->get('i_name')]);
+		$project_id = $request->get('project_id');
 
-        $this->validate($request, [
-            'project_id' => 'required|numeric|min:0|not_in:0',
-            'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $project_id,
-            'page' => 'numeric|nullable',
-        ]);
+		$validate = $this->validateMultileCol(
+			array(
+				'project_id' => $request->get('project_id'),
+				'year' => $request->get('i_year'),
+			)
+		);
 
-        $start_date = $request->get('start_date');
-        if ( strpos($start_date, 'T') !== false ) {
-            $start_date = explode('T', $start_date);
-            $start_date = $start_date[0];
-        } else {
-            $start_date = null;
-        }
+		$this->validate($request, [
+			'project_id' => 'required|numeric|min:0|not_in:0',
+			'name' => 'required|max:255|unique:issues,name,NULL,NULL,' . $validate,
+			'page' => 'numeric|nullable',
+		]);
 
-        $end_date = $request->get('end_date');
-        if ( strpos($end_date, 'T') !== false ) {
-            $end_date = explode('T', $end_date);
-            $end_date = $end_date[0];
-        } else {
-            $end_date = null;
-        }
+		$start_date = $request->get('start_date');
+		if (strpos($start_date, 'T') !== false) {
+			$start_date = explode('T', $start_date);
+			$start_date = $start_date[0];
+		} else {
+			$start_date = null;
+		}
 
-        $issue = Issue::create([
-            'project_id' => $project_id,
-            'name' => $request->get('name'),
-            'page' => $request->get('page'),
-            'start_date' => $start_date,
-            'end_date' => $end_date,
-            'status' => 'publish',
-        ]);
+		$end_date = $request->get('end_date');
+		if (strpos($end_date, 'T') !== false) {
+			$end_date = explode('T', $end_date);
+			$end_date = $end_date[0];
+		} else {
+			$end_date = null;
+		}
 
-        $project = $issue->project;
+		$issue = Issue::create([
+			'project_id' => $project_id,
+			'name' => $request->get('name'),
+			'page' => $request->get('page'),
+			'year' => $request->get('i_year'),
+			'start_date' => $start_date,
+			'end_date' => $end_date,
+			'status' => 'publish',
+		]);
 
-        return response()->json(array(
-            'id' => $project->id,
-            'issue_id' => $issue->id,
-            'page' => $issue->page,
-            'p_name' => $project->name,
-            'p_name_vi' => $project->name_vi,
-            'p_name_ja' => $project->name_ja,
-            'client_id' => $project->client_id,
-            'dept_id' => $project->dept_id,
-            'type_id' => $project->type_id,
-            'message' => 'Successfully.'
-        ), 200);
-    }
-    
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update($id, Request $request)
-    {
-        $request->merge(['name' => $request->get('i_name')]);
-        $issue = Issue::findOrFail($id);
+		$project = $issue->project;
 
-        $this->validate($request, [
-            'page' => 'numeric|nullable',
-        ]);
+		return response()->json(array(
+			'id' => $project->id,
+			'issue_id' => $issue->id,
+			'issue_year' => $issue->year,
+			'page' => $issue->page,
+			'p_name' => $project->name,
+			'p_name_vi' => $project->name_vi,
+			'p_name_ja' => $project->name_ja,
+			'client_id' => $project->client_id,
+			'dept_id' => $project->dept_id,
+			'type_id' => $project->type_id,
+			'message' => 'Successfully.'
+		), 200);
+	}
 
-        $sameIssue = Issue::where([
-            ['project_id', '=', $request->get('id')],
-            ['name', '=', $request->get('i_name')],
-            ['id', '<>', $issue->id],
-        ])->count();
-        
-        if ( $sameIssue > 0 ) {
-            $this->validate($request, [
-                'name' => 'required|max:255|unique:issues,name,NULL,NULL,project_id,' . $request->get('id')
-            ]);
-        }
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function update($id, Request $request)
+	{
+		$request->merge(['name' => $request->get('i_name')]);
+		$issue = Issue::findOrFail($id);
 
-        $start_date = $request->get('start_date');
-        if ( strpos($start_date, 'T') !== false ) {
-            $start_date = explode('T', $start_date);
-            $start_date = $start_date[0];
-        }
+		$this->validate($request, [
+			'page' => 'numeric|nullable',
+		]);
 
-        $end_date = $request->get('end_date');
-        if ( strpos($end_date, 'T') !== false ) {
-            $end_date = explode('T', $end_date);
-            $end_date = $end_date[0];
-        }
+		$sameIssue = Issue::where([
+			['project_id', '=', $request->get('id')],
+			['name', '=', $request->get('i_name')],
+			['year', '=', $request->get('i_year')],
+			['id', '<>', $issue->id],
+		])->count();
 
-        $issue->update([
-            'project_id' => $request->get('id'),
-            'name' => $request->get('name'),
-            'page' => $request->get('page'),
-            'start_date' => $start_date,
-            'end_date' => $end_date,
-        ]);
+		$validate = $this->validateMultileCol(
+			array(
+				'project_id' => $request->get('id'),
+				'year' => $request->get('i_year'),
+			)
+		);
 
-        return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
-    }
+		if ($sameIssue > 0) {
+			$this->validate($request, [
+				'name' => 'required|max:255|unique:issues,name,NULL,NULL,' . $validate
+			]);
+		}
 
-    /**
-     * Archive the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function archive($id, $status)
-    {
-        $issue = Issue::findOrFail($id);
+		$start_date = $request->get('start_date');
+		if (strpos($start_date, 'T') !== false) {
+			$start_date = explode('T', $start_date);
+			$start_date = $start_date[0];
+		}
 
-        if ( $status === 'publish' ) {
-            $issue->update([
-                'status' => 'archive'
-            ]);
-        } else {
-            $issue->update([
-                'status' => 'publish'
-            ]);
-        }
+		$end_date = $request->get('end_date');
+		if (strpos($end_date, 'T') !== false) {
+			$end_date = explode('T', $end_date);
+			$end_date = $end_date[0];
+		}
 
-        return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
-    }
+		$issue->update([
+			'project_id' => $request->get('id'),
+			'name' => $request->get('name'),
+			'year' => $request->get('i_year'),
+			'page' => $request->get('page'),
+			'start_date' => $start_date,
+			'end_date' => $end_date,
+		]);
 
-    /**
-     * Archive the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function archiveAll(Request $request)
-    {
-        $ids =  $request->get('issues'); 
-        $status =  $request->get('status');
+		return response()->json(array(
+			'message' => 'Successfully.'
+		), 200);
+	}
 
-        if ( $status ) {
-            Issue::whereIn('id', $ids)->update(['status' => "archive"]);
-        } else {
-            Issue::whereIn('id', $ids)->update(['status' => "publish"]);
-        }
+	/**
+	 * Archive the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function archive($id, $status)
+	{
+		$issue = Issue::findOrFail($id);
 
-        return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
-    }
+		if ($status === 'publish') {
+			$issue->update([
+				'status' => 'archive'
+			]);
+		} else {
+			$issue->update([
+				'status' => 'publish'
+			]);
+		}
 
-    /**
-     * Get page the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function getpage($id)
-    {
-        $issue = Issue::findOrFail($id);
+		return response()->json(array(
+			'message' => 'Successfully.'
+		), 200);
+	}
 
-        return response()->json(array(
-            'page' => $issue->page
-        ), 200);
-    }
+	/**
+	 * Archive the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function archiveAll(Request $request)
+	{
+		$ids =  $request->get('issues');
+		$status =  $request->get('status');
 
-    public function deleteAll(Request $request)
-    {
-        $ids = $request->get('issues');
-        Issue::destroy($ids);
+		if ($status) {
+			Issue::whereIn('id', $ids)->update(['status' => "archive"]);
+		} else {
+			Issue::whereIn('id', $ids)->update(['status' => "publish"]);
+		}
 
-        $projects = Project::has('issues', '=', 0)->get()->pluck('id')->toArray();
+		return response()->json(array(
+			'message' => 'Successfully.'
+		), 200);
+	}
 
-        if ( count($projects) ) {
-            Project::destroy($projects);
-        }
+	/**
+	 * Get page the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function getpage($id)
+	{
+		$issue = Issue::findOrFail($id);
 
-        dd($projects);
+		return response()->json(array(
+			'page' => $issue->page
+		), 200);
+	}
 
-        return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
-    }
+	public function deleteAll(Request $request)
+	{
+		$ids = $request->get('issues');
+		Issue::destroy($ids);
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $issue = Issue::findOrFail($id);
-        $projectIssue = Issue::where('project_id', $issue->project_id)->count();
+		$projects = Project::has('issues', '=', 0)->get()->pluck('id')->toArray();
 
-        if ( $projectIssue > 1 ) {
-            $issue->delete();
-        } else {
-            $project = Project::findOrFail($issue->project_id);
-            $project->delete();
-        }
+		if (count($projects)) {
+			Project::destroy($projects);
+		}
 
-        return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
-    }
+		return response()->json(array(
+			'message' => 'Successfully.'
+		), 200);
+	}
+
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function destroy($id)
+	{
+		$issue = Issue::findOrFail($id);
+		$projectIssue = Issue::where('project_id', $issue->project_id)->count();
+
+		if ($projectIssue > 1) {
+			$issue->delete();
+		} else {
+			$project = Project::findOrFail($issue->project_id);
+			$project->delete();
+		}
+
+		return response()->json(array(
+			'message' => 'Successfully.'
+		), 200);
+	}
 }

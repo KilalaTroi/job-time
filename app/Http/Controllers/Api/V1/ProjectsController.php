@@ -62,6 +62,7 @@ class ProjectsController extends Controller
                     'p.name_ja as p_name_ja',
                     'p.team as team',
                     'i.name as i_name',
+                    'i.year as i_year',
                     'i.page as page',
                     'status',
                     'dept_id',
@@ -153,6 +154,7 @@ class ProjectsController extends Controller
             $issue = Issue::create([
                 'project_id' => $project->id,
                 'name' => $request->get('issue_name'),
+                'year' => $request->get('issue_year'),
                 'page' => $request->get('page'),
                 'start_date' => $start_date,
                 'end_date' => $end_date,

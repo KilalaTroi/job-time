@@ -3,7 +3,7 @@
         <template slot="title">{{$ml.with('VueJS').get('txtAddTime')}}</template>
         <form v-if="currentJob" @submit="emitAddTime">
             <div class="form-group">
-                <h4 class="text-center mb-1"><b>{{ currentJob.p_name }} {{ currentJob.i_name }}</b></h4>
+                <h4 class="text-center mb-1"><b>{{ currentJob.p_name }} {{ currentJob.i_year ? currentJob.i_year+' ' : '' }}{{ currentJob.i_name }}</b></h4>
                 <h5 class="text-center mt-1">{{ this.customFormatter(currentJob.date) }}</h5>
             </div>
             <hr>
@@ -98,7 +98,7 @@ export default {
             this.endHourRange = [[this.startHour, 22]];
             this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
             this.end_time = 'HH:mm';
-            
+
             if ( !this.start_time.includes('HH') && !this.start_time.includes('mm') && this.start_time ) {
                 this.endDisabled = false;
             } else {
@@ -107,9 +107,9 @@ export default {
             }
         },
         changeEndTime(eventData) {
-            if ( eventData.data.H*1 > this.startHour ) 
+            if ( eventData.data.H*1 > this.startHour )
                 this.endMinuteRange = [0, 10, 20, 30, 40, 50];
-            else 
+            else
                 this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
 
             if ( !this.end_time.includes('HH') && !this.end_time.includes('mm') && this.end_time ) {

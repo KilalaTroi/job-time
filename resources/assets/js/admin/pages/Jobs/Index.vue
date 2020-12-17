@@ -46,7 +46,7 @@
                                 class="table-hover table-striped time-record"
                                 :columns="logColumns"
                                 :data="logTime"
-                                v-on:get-item="getItem" 
+                                v-on:get-item="getItem"
                                 v-on:delete-item="deleteItem">
                             </table-action>
                         </div>
@@ -86,7 +86,7 @@ export default {
     },
     computed: {
         ...mapGetters({
-            currentTeamOption: "currentTeamOption", 
+            currentTeamOption: "currentTeamOption",
             currentTeam: "currentTeam"
         })
     },
@@ -97,12 +97,14 @@ export default {
             columns: [
                 { id: 'department', value: this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
                 { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue_year', value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: '60', class: 'text-center' },
                 { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
                 { id: 'phase', value: this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'time', value: this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
             ],
             logColumns: [
                 { id: 'project', value: this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue_year', value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: '60', class: 'text-center' },
                 { id: 'issue', value: this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
                 { id: 'note', value: this.$ml.with('VueJS').get('txtWork'), width: '', class: 'note' },
                 { id: 'phase', value: this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
@@ -146,7 +148,7 @@ export default {
         let _this = this;
         this.selectTeam = this.currentTeam.id
         _this.getOptions();
-        
+
         $(document).on('click', '.languages button', function() {
             _this.getOptions();
             _this.showFilter = 'showSchedule';
@@ -154,6 +156,7 @@ export default {
             _this.columns = [
                 { id: 'department', value: _this.$ml.with('VueJS').get('txtDepartment'), width: '', class: '' },
                 { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue_year', value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: '60', class: 'text-center' },
                 { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
                 { id: 'phase', value: _this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
                 { id: 'time', value: _this.$ml.with('VueJS').get('lblTime'), width: '110', class: 'text-center' }
@@ -161,6 +164,7 @@ export default {
 
             _this.logColumns = [
                 { id: 'project', value: _this.$ml.with('VueJS').get('txtProject'), width: '', class: '' },
+                { id: 'issue_year', value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: '60', class: 'text-center' },
                 { id: 'issue', value: _this.$ml.with('VueJS').get('txtIssue'), width: '60', class: 'text-center' },
                 { id: 'note', value: _this.$ml.with('VueJS').get('txtWork'), width: '', class: 'note' },
                 { id: 'phase', value: _this.$ml.with('VueJS').get('txtPhase'), width: '', class: 'text-center' },
@@ -212,7 +216,7 @@ export default {
         getResults(page = 1) {
             axios.get('/data/jobs?page=' + page + '&date=' + this.dateFormatter(this.start_date) + '&user_id=' + this.userID + '&show=' + this.showFilter + '&team_id=' + this.selectTeam)
                 .then(response => {
-                    this.jobData = response.data.jobs; 
+                    this.jobData = response.data.jobs;
                 });
         },
         getObjectValue(data, id) {
@@ -251,6 +255,7 @@ export default {
                         department: this.getObjectValue(this.departments, item.dept_id).text != 'All' ? this.getObjectValue(this.departments, item.dept_id).text : '',
                         project: item.p_name + checkTR,
                         issue: item.i_name,
+                        issue_year: item.i_year,
                         time: time ? this.hourFormatter(time) : '00:00'
                     })
                 });
@@ -268,6 +273,7 @@ export default {
                     return Object.assign({}, item, {
                         project: issue.p_name + checkTR,
                         issue: issue.i_name,
+                        issue_year: issue.i_year,
                         total: item.total ? this.hourFormatter(item.total) : '00:00'
                     })
                 });
@@ -285,7 +291,7 @@ export default {
                     };
                     dataTimes.push(total);
                 }
-                
+
                 this.logTime = dataTimes;
             } else {
                 this.logTime = [];
@@ -298,6 +304,7 @@ export default {
                 schedule_id: job.schedule_id,
                 p_name: job.project,
                 i_name: job.issue,
+                i_year: job.issue_year,
                 date: this.start_date
             };
             this.currentJob = obj;
@@ -311,6 +318,7 @@ export default {
                 id: time.id,
                 p_name: time.project,
                 i_name: time.issue,
+                i_year: time.issue_year,
                 phase: time.phase,
                 note: time.note,
                 start_time: time.start_time,

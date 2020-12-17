@@ -23,4 +23,9 @@ class Controller extends BaseController
 			return $next($request);
 		});
 	}
+	public function validateMultileCol($arr){
+		$str = '';
+		foreach($arr as $k => $v)	$str .= isset($v) && !empty($v) ? ','. $k .','.$v : ','. $k .',0';
+		return ltrim($str,',');
+	}
 }
