@@ -34,7 +34,8 @@ class JobsController extends Controller
                     's.id as schedule_id',
                     's.memo as phase',
                     't.slug as type',
-                    'i.name as i_name'
+                    'i.name as i_name',
+                    'i.year as i_year'
                 )
                 ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
                 ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
@@ -72,7 +73,8 @@ class JobsController extends Controller
                     's.id as schedule_id',
                     's.memo as phase',
                     't.slug as type',
-                    'i.name as i_name'
+                    'i.name as i_name',
+                    'i.year as i_year'
                 )
                 ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
                 ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
@@ -99,14 +101,15 @@ class JobsController extends Controller
                 ->paginate(10);
         }
         // dd(DB::getQueryLog());
-        
+
         $allJobs = DB::table('issues as i')
             ->select(
                 'i.id as id',
                 't.dept_id',
                 'p.name as p_name',
                 't.slug as type',
-                'i.name as i_name'
+                'i.name as i_name',
+                'i.year as i_year'
             )
             ->join('projects as p', 'p.id', '=', 'i.project_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
@@ -126,7 +129,7 @@ class JobsController extends Controller
             //         ->orWhere('p.team', 'LIKE', '%,' . $teamID);
             // })
             ->get()->toArray();
-        
+
         // $schedules = DB::table('issues as i')
         //     ->select(
         //         'i.id as id',
@@ -168,7 +171,7 @@ class JobsController extends Controller
             ->where('jobs.user_id', '=', $userID)
             ->where('jobs.date', '=', $selectDate)
             ->orderBy('jobs.start_time', 'asc')
-            ->get()->toArray(); 
+            ->get()->toArray();
 
         return response()->json([
             'departments' => $departments,

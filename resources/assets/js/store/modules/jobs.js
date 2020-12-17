@@ -70,7 +70,6 @@ export default {
 		getAllJob({ state ,commit, rootGetters }, startDate) {
 			const uri = '/data/jobs?date=' + 	rootGetters['dateFormat'](startDate, 'YYYY-MM-DD') + '&user_id=' + state.userID + '&show=' + state.showFilter;
 			axios.get(uri).then(response => {
-				console.log(response.data)
 				commit('GET_ALL_JOBS', response.data)
 			})
 		},

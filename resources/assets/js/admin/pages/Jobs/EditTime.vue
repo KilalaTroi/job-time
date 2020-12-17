@@ -3,7 +3,7 @@
         <template slot="title">{{$ml.with('VueJS').get('txtUpdateTime')}}</template>
         <form v-if="currentTimeLog" @submit="emitUpdateTime">
             <div class="form-group">
-                <h4 class="text-center mb-1"><b>{{ currentTimeLog.p_name }} {{ currentTimeLog.i_name }} {{ currentTimeLog.phase }}</b></h4>
+                <h4 class="text-center mb-1"><b>{{ currentTimeLog.p_name }} {{ currentTimeLog.i_year ? currentTimeLog.i_year+' ' : '' }}{{ currentTimeLog.i_name }} {{ currentTimeLog.phase }}</b></h4>
                 <h5 class="text-center mt-1">{{ this.customFormatter(currentTimeLog.date) }}</h5>
             </div>
             <hr>
@@ -111,9 +111,9 @@ export default {
             }
         },
         changeEndTime(eventData) {
-            if ( eventData.data.H*1 > this.startHour ) 
+            if ( eventData.data.H*1 > this.startHour )
                 this.endMinuteRange = [0, 10, 20, 30, 40, 50];
-            else 
+            else
                 this.endMinuteRange = this.startMinute === 50 ? [0, 10, 20, 30, 40, 50] : this.endMinuteRange.filter(item => item > this.startMinute);
 
             if ( !this.currentTimeLog.end_time.includes('HH') && !this.currentTimeLog.end_time.includes('mm') && this.currentTimeLog.end_time ) {

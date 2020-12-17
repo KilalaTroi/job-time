@@ -30,7 +30,7 @@
                   :color="item.value"
                   :style="setBackground(item.value)"
                 >
-                  <span>{{ item.project }} {{ item.issue }}</span>
+                  <span>{{ item.project }} {{ item.issue_year ? item.issue_year+' ' : '' }}{{ item.issue }}</span>
                 </div>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default {
         handler: function(value) {
           this.search = '';
           this.getAll();
-          
+
           if ( value.team != this.currentTeam.id ) {
             this.setCurrentTeam(value.team);
           }

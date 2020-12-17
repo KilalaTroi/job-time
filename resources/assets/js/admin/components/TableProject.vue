@@ -72,6 +72,7 @@
             >
               <i class="fa fa-pencil" aria-hidden="true"></i>
             </button>
+
             <button
               v-if="checkIssueColumn(column)"
               @click="getItem(item.issue_id)"
@@ -177,7 +178,7 @@ export default {
       return data.id === "project";
     },
     checkIssueColumn(data) {
-      return data.id === "issue";
+      return data.id === "issue" || data.id === "issue_year";
     },
     archiveClass(archive) {
       return archive === "archive" ? "fa fa-unlock" : "fa fa-archive";

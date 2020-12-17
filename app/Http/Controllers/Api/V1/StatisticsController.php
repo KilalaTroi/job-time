@@ -104,8 +104,8 @@ class StatisticsController extends Controller
         $types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
         $projects = DB::table('projects as p')
         ->select(
-            'p.id', 
-            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'), 
+            'p.id',
+            DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text'),
             DB::raw('max(i.id) as issue_id')
         )
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
@@ -155,6 +155,7 @@ class StatisticsController extends Controller
                 'd.name as department',
                 'p.name as project',
                 'i.name as issue',
+                'i.year as issue_year',
                 'j.note as note',
                 't.slug as job_type',
                 'p.team as team'
@@ -299,9 +300,9 @@ class StatisticsController extends Controller
         $startRow = $infoUser ? 5 : 4;
         $numberRows = count($mainTable) + $startRow;
         $curentTimestampe = Carbon::now()->timestamp;
-        
+
         return Excel::create("Report_" . $nameFile . "_" . $curentTimestampe, function($excel) use ($mainTable, $columnName, $columnNameNext, $numberRows, $startRow, $year, $infoUser) {
-            
+
             $excel->setTitle('Report Job Time');
             $excel->setCreator('Kilala Job Time')
                 ->setCompany('Kilala');
@@ -315,7 +316,7 @@ class StatisticsController extends Controller
                 // Format Cell - 0.0_
                 $sheet->setColumnFormat(array(
                     $columnName . '5:' . $columnName . $numberRows => '0.0',
-                )); 
+                ));
 
                 // Layout Sheet
                 $sheet->setCellValue('A'.$startRow, 'Job type');
@@ -530,7 +531,7 @@ class StatisticsController extends Controller
             ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
             ->where('users.created_at', "<", str_replace('/', '-', $startMonth))
             ->count();
-        
+
 
         $userDisableArr = array();
 
@@ -544,7 +545,7 @@ class StatisticsController extends Controller
             ->where('disable_date', ">=", str_replace('/', '-', $startMonth))
             ->where('disable_date', "<=", str_replace('/', '-', $endMonth))
             ->get()->toArray();
-        
+
         if ( is_array($users['disable']) && count($users['disable']) > 0 ) {
             $userDisableArr = array_map(function($obj) {
                 return $obj->id;
@@ -572,7 +573,7 @@ class StatisticsController extends Controller
             ->orderBy('yearMonth', 'desc')
             ->groupBy('yearMonth')
             ->get()->toArray();
-        
+
         $convertUserMonth = array();
 
         foreach ($newUsersPerMonth as $key => $value) {
@@ -602,7 +603,7 @@ class StatisticsController extends Controller
             ->orderBy('yearMonth', 'desc')
             ->groupBy('yearMonth')
             ->get()->toArray() : [];
-        
+
         $convertUserMonth = array();
 
         foreach ($disableUsersInMonth as $key => $value) {
@@ -712,7 +713,7 @@ class StatisticsController extends Controller
         } else {
             $data['total'] = (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
         }
-        
+
 
         return $data;
     }
@@ -733,7 +734,7 @@ class StatisticsController extends Controller
 
             if ( isset($newUsersPerMonth[$key]) ) {
                 $usersOld += $newUsersPerMonth[$key];
-            } 
+            }
 
             array_map(function ($obj) use (&$hoursDisableUser) {
                 $hoursDisableUser[$obj->yearMonth] = $obj->total*1;
@@ -742,7 +743,7 @@ class StatisticsController extends Controller
             if ( isset($disableUsersInMonth[$key]) ) {
                 $usersOld -= $disableUsersInMonth[$key];
                 $ckHoursDisableUser = isset($hoursDisableUser[$key]) ? $hoursDisableUser[$key] : 0;
-            } 
+            }
 
             $totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + round($ckHoursDisableUser);
         }
