@@ -27,6 +27,7 @@ class Uploadcontroller extends Controller
             'd.name as department',
             'p.name as project',
             'i.name as issue',
+            'i.page as page_number',
             't.slug as job_type',
             't.line_room as room_id',
             's.memo as phase'
@@ -536,13 +537,16 @@ class Uploadcontroller extends Controller
             'user' => $request->get('user'),
             'p_name' => $request->get('p_name'),
             'i_name' => $request->get('i_name'),
+            'page' => $request->get('page'),
             'phase' => $request->get('phase'),
             'status' => $request->get('status')
         ], function($message) use ($emails, $from, $request)
         {
             $message->from($from['email'], $from['name']);
             $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
-            $message->to($emails)->subject('JobTime : Updated invitation: ['. $request->get('status') . ' - ' . $request->get('user')['name'] .'] ' . $request->get('p_name'));
+            $subject = 'JOBTIME : Updated invitation ['. $request->get('status') . '_' . ucfirst($request->get('user')['username']) .'] ' . $request->get('p_name');
+            if ( $request->get('page_number') ) $subject .= '_' . $request->get('page_number') . 'p';
+            $message->to($emails)->subject($subject);
         });
 
         // Send message Line Work

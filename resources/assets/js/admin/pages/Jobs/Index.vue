@@ -41,7 +41,7 @@
                         <template slot="header">
                             <h4 class="card-title">{{$ml.with('VueJS').get('txtTimeRecord')}}</h4>
                         </template>
-                        <div class="table-responsive" :class="{'path-team': selectTeam == 2}">
+                        <div class="table-responsive" :class="{'path-team': selectTeam == 2 || selectTeam == 3}">
                             <table-action
                                 class="table-hover table-striped time-record"
                                 :columns="logColumns"

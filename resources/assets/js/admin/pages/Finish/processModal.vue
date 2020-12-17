@@ -199,6 +199,8 @@ export default {
             user: this.loginUser,
             p_name: this.currentProcess.project,
             i_name: this.currentProcess.i_name,
+            page: this.currentProcess.page,
+            page_number: this.currentProcess.page_number,
             phase: this.currentProcess.phase,
             status: this.currentProcess.status,
             team_id: this.currentTeam.id
@@ -217,6 +219,10 @@ export default {
       }
     },
     getDataProcess() {
+      if ( this.currentProcess.page_number && ! this.currentProcess.page ) {
+        this.currentProcess.page = this.currentProcess.page_number;
+      }
+
       this.newMessage =
         "[" +
         (this.currentProcess.status

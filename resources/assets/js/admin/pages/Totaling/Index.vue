@@ -143,7 +143,7 @@
 						</div>
 					</div>
 				</template>
-				<div class="table-responsive" :class="{'path-team': team == 2}">
+				<div class="table-responsive" :class="{'path-team': team == 2 || team == 3}">
 					<table-no-action class="table-hover table-striped" :columns="columns" :data="logTime"></table-no-action>
 					<div v-if="!logTimeData.data" class="text-center mt-3">
                         <img src="https://i.imgur.com/JfPpwOA.gif">
