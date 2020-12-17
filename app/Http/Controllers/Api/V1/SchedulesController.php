@@ -90,6 +90,7 @@ class SchedulesController extends Controller
             ->select(
                 's.id as id',
                 'i.id as issue_id',
+                'i.year as issue_year',
                 'p.name as p_name',
                 'p.id as p_id',
                 't.slug as type',
