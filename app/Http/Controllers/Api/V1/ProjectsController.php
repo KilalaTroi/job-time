@@ -260,7 +260,6 @@ class ProjectsController extends Controller
 
     public function importProjects(Request $request)
     {
-
         $this->validate($request, [
             'file' => 'required'
         ]);
@@ -270,11 +269,12 @@ class ProjectsController extends Controller
             $reader->setHeaderRow(3);
 
         });
-        $dataList = $data->select(array('department', 'project', 'issue', 'page', 'type', 'team', 'start_date', 'end_date'))->get();
+        $dataList = $data->select(array('department', 'project', 'year_of_issue','issue', 'page', 'type', 'team', 'start_date', 'end_date'))->get();
         $dataList = $data->toArray();
+        //Remove records don't have project, department
         foreach ($dataList as $keyItem => $item) {
             foreach ($item as $key => $value) {
-                if ($key != "start_date" && $key != "end_date" && $key != "page" && $key != "issue") {
+                if ($key != "start_date" && $key != "end_date" && $key != "page" && $key != "issue" && $key != "year_of_issue") {
                     if (empty($value)) {
                         unset($dataList[$keyItem]);
                         break;
@@ -282,6 +282,7 @@ class ProjectsController extends Controller
                 }
             }
         }
+
         if (count($dataList)) {
             $validator = \Illuminate\Support\Facades\Validator::make($dataList, $this->rules());
             if ($validator->fails()) {
@@ -291,6 +292,7 @@ class ProjectsController extends Controller
             }
             $format = 'Y-m-d';
             $listnote = [];
+
             foreach ($dataList as $key => $value) {
                 $dept = Department::where('name', trim($value['department']))->first();
                 $type = Type::where('slug', trim($value['type']))->first();
@@ -329,6 +331,7 @@ class ProjectsController extends Controller
                 $deptId = $dept->id;
                 $typeId = $type->id;
                 $teamText = implode(",", $teamArr);
+
                 if ($deptId && $typeId && $teamText) {
                     $project = Project::where('name', trim($value['project']))->where('type_id', $typeId)->first();
                     if (empty($project)) {
@@ -342,11 +345,12 @@ class ProjectsController extends Controller
                         ]);
                     }
 
-                    $issue = Issue::where('name', trim(trim($value['issue']), '"'))->where('project_id', $project->id)->first();
+                    $issue = Issue::where('name', trim(trim($value['issue']), '"'))->where('year', trim(trim($value['year_of_issue']), '"'))->where('project_id', $project->id)->first();
                     if (empty($issue)) {
                         $issue = Issue::create([
                             'project_id' => $project->id,
                             'name' => trim(trim($value['issue']), '"'),
+                            'year' => trim(trim($value['year_of_issue']), '"'),
                             'start_date' => $start_time,
                             'end_date' => $end_time,
                             'page' => $page,
@@ -377,6 +381,7 @@ class ProjectsController extends Controller
             '*.team' => 'required',
             '*.project' => 'required|max:255',
             '*.issue' => 'max:255',
+            '*.issue_year' => 'max:4',
             '*.page' => 'numeric|nullable',
             '*.type' => 'required|max:255',
             '*.start_date' => 'date|nullable',

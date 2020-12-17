@@ -69,13 +69,19 @@
                     <input :value="currentReport.dept_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
+            <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtProjects')}}</strong></label>
                     <input :value="currentReport.project_name" type="text" class="form-control" :disabled="true">
                 </div>
             </div>
-            <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
+             <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
+                <div class="form-group">
+                    <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
+                    <input :value="currentReport.issue_year" type="text" class="form-control" :disabled="true">
+                </div>
+            </div>
+            <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
                 <div class="form-group">
                     <label class><strong>{{$ml.with('VueJS').get('txtIssue')}}</strong></label>
                     <input :value="currentReport.issue_name" type="text" class="form-control" :disabled="true">
@@ -163,6 +169,7 @@ export default {
                 dept_name: this.currentReport.dept_name,
                 project_name: this.currentReport.project_name,
                 issue_name: this.currentReport.issue_name,
+                issue_year: this.currentReport.issue_year,
                 content: this.preLanguage=='vi' ? this.currentReport.content : this.currentReport.content_ja
             };
 

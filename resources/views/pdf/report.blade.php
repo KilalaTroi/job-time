@@ -31,8 +31,9 @@
         <h5><strong>Departments:</strong> {{ $data['dept_name'] }}</h5>
         <h5><strong>Projects:</strong> {{ $data['project_name'] }}</h5>
         <h5><strong>Issue:</strong> {{ $data['issue_name'] }}</h5>
+        <h5><strong>Issue Year:</strong> {{ $data['issue_year'] }}</h5>
     @endif
-    
+
     <div class="content mt-5">
         {!! $data['content'] !!}
     </div>
