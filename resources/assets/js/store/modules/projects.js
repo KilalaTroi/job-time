@@ -280,7 +280,7 @@ export default {
 				{ id: 'department', value: rootGetters['getTranslate']('txtDepartment'), width: '', class: '' },
 				{ id: 'project', value: rootGetters['getTranslate']('txtName'), width: '', class: '' },
 				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '150', class: '' },
-				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '150', class: '' },
+				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '', class: '' },
 				{ id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '' },
 				{ id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '' },
 				{ id: 'value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center' },
