@@ -199,7 +199,7 @@ class StatisticsController extends Controller
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->whereNotIn('role.name', ['admin','japanese_planner'])
-            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee', 'hoa', 'nancy'])
             ->where(function ($query) use ($teamFilter) {
                 $query->where('team', $teamFilter);
             })
@@ -448,6 +448,7 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
+            ->whereNotIn('users.id', $this->usersIgnore())
             ->count();
 
             // Half day off
@@ -462,6 +463,7 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
+            ->whereNotIn('users.id', $this->usersIgnore())
             ->count();
         }
 
@@ -507,8 +509,7 @@ class StatisticsController extends Controller
             )
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
-            ->whereNotIn('role.name', ['admin','japanese_planner'])
-            ->whereNotIn('user.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->whereNotIn('user.id', $this->usersIgnore())
             ->when($teamID, function ($query, $teamID) {
                 return $query->where('team', $teamID);
             })
@@ -528,8 +529,7 @@ class StatisticsController extends Controller
                 $query->where('disable_date', '=',  NULL)
                       ->orWhere('disable_date', '>=', str_replace('/', '-', $startMonth));
             })
-            ->whereNotIn('roles.name', ['admin','japanese_planner'])
-            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->whereNotIn('users.id', $this->usersIgnore())
             ->where('users.created_at', "<", str_replace('/', '-', $startMonth))
             ->count();
 
@@ -545,6 +545,7 @@ class StatisticsController extends Controller
             })
             ->where('disable_date', ">=", str_replace('/', '-', $startMonth))
             ->where('disable_date', "<=", str_replace('/', '-', $endMonth))
+            ->whereNotIn('users.id', $this->usersIgnore())
             ->get()->toArray();
 
         if ( is_array($users['disable']) && count($users['disable']) > 0 ) {
@@ -564,8 +565,7 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('users.id', $user_id);
             })
-            ->whereNotIn('roles.name', ['admin','japanese_planner'])
-            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->whereNotIn('users.id', $this->usersIgnore())
             ->when($teamID, function ($query, $teamID) {
                 return $query->where('team', $teamID);
             })
@@ -594,8 +594,7 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('users.id', $user_id);
             })
-            ->whereNotIn('roles.name', ['admin','japanese_planner'])
-            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->whereNotIn('users.id', $this->usersIgnore())
             ->when($teamID, function ($query, $teamID) {
                 return $query->where('team', $teamID);
             })
@@ -623,6 +622,7 @@ class StatisticsController extends Controller
             ->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
             ->where('jobs.date', "<", str_replace('/', '-', $endMonth))
             ->whereIn('jobs.user_id', $userDisableArr)
+            ->whereNotIn('jobs.user_id', $this->usersIgnore())
             ->when($teamID, function ($query, $teamID) {
                 return $query->where('team_id', $teamID);
             })
@@ -649,6 +649,7 @@ class StatisticsController extends Controller
             ->when($user_id, function ($query, $user_id) {
                 return $query->where('user_id', $user_id);
             })
+            ->whereNotIn('jobs.user_id', $this->usersIgnore())
             ->where('jobs.date', ">=", $currentDate->startOfMonth()->format('Y-m-d'))
             ->get();
 
@@ -670,6 +671,7 @@ class StatisticsController extends Controller
         ->when($user_id, function ($query, $user_id) {
             return $query->where('user_id', $user_id);
         })
+        ->whereNotIn('users.id', $this->usersIgnore())
         ->where('type', '=', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
@@ -684,6 +686,7 @@ class StatisticsController extends Controller
         ->when($user_id, function ($query, $user_id) {
             return $query->where('user_id', $user_id);
         })
+        ->whereNotIn('users.id', $this->usersIgnore())
         ->where('type', '<>', 'all_day')
         ->where('date', '<=', $endDate)
         ->where('date', '>=',  $startDate)
@@ -694,8 +697,7 @@ class StatisticsController extends Controller
             ->select('users.id')
             ->join('users', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->whereNotIn('roles.name', ['admin','japanese_planner'])
-            ->whereNotIn('users.username', ['furuoya_vn_planner','furuoya_employee'])
+            ->whereNotIn('users.id', $this->usersIgnore())
             ->when($teamID, function ($query, $teamID) {
                 return $query->where('team', $teamID);
             })
@@ -803,6 +805,20 @@ class StatisticsController extends Controller
             })->groupBy('t.id', 'yearMonth')->get()->toArray();
 
         return response()->json($data);
+    }
+
+    function usersIgnore() {
+        $usersIgnore = DB::connection('mysql')->table('users')
+            ->select(
+                'users.id as id'
+            )
+            ->join('role_user', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('roles.name', ['admin','japanese_planner'])
+            ->orWhereIn('users.username', ['furuoya_vn_planner','furuoya_employee','hoa','nancy'])
+            ->get()->pluck('id')->toArray();
+
+        return $usersIgnore;
     }
 
     function columnLetter($c){

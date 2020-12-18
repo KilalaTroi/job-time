@@ -278,32 +278,32 @@ export default {
         {
           id: "date_time",
           value: this.$ml.with("VueJS").get("txtReportDate"),
-          width: "",
+          width: "100",
           class: "",
         },
         {
           id: "update_date",
           value: this.$ml.with("VueJS").get("txtUpdateDate"),
-          width: "100",
-          class: "",
+          width: "",
+          class: "no-wrap",
         },
         {
           id: "dept_name",
           value: this.$ml.with("VueJS").get("txtDepartment"),
-          width: "",
+          width: "100",
           class: "",
         },
         {
           id: "team_name",
           value: this.$ml.with("VueJS").get("txtTeam"),
-          width: "",
+          width: "100",
           class: "",
         },
         {
           id: "project_name",
           value: this.$ml.with("VueJS").get("txtProject"),
           width: "",
-          class: "",
+          class: "no-wrap",
         },
         {
           id: "issue_year",
@@ -314,8 +314,8 @@ export default {
         {
           id: "issue_name",
           value: this.$ml.with("VueJS").get("txtIssue"),
-          width: "80",
-          class: "",
+          width: "",
+          class: "no-wrap",
         },
         {
           id: this.$ml.current == "vi" ? "title" : "title_ja",
@@ -382,8 +382,8 @@ export default {
         {
           id: "update_date",
           value: _this.$ml.with("VueJS").get("txtUpdateDate"),
-          width: "100",
-          class: "",
+          width: "",
+          class: "no-wrap",
         },
         {
           id: "dept_name",
@@ -400,8 +400,8 @@ export default {
         {
           id: "project_name",
           value: _this.$ml.with("VueJS").get("txtProject"),
-          width: "100",
-          class: "",
+          width: "",
+          class: "no-wrap",
         },
         {
           id: "issue_year",
@@ -412,8 +412,8 @@ export default {
         {
           id: "issue_name",
           value: _this.$ml.with("VueJS").get("txtIssue"),
-          width: "100",
-          class: "",
+          width: "",
+          class: "no-wrap",
         },
         {
           id: _this.$ml.current == "vi" ? "title" : "title_ja",

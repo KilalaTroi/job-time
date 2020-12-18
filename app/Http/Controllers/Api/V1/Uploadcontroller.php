@@ -151,7 +151,7 @@ class Uploadcontroller extends Controller
         // Get projects
         $projects = DB::table('projects as p')
         ->select(
-            'p.id', 
+            'p.id',
             DB::raw('CONCAT(p.name, " (", t.slug, ")") AS text')
         )
         ->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
@@ -331,7 +331,7 @@ class Uploadcontroller extends Controller
             's.memo as phase',
             'p.date as date',
             'u.name as user_name',
-            'p.page as page',
+            'p.page as page'
         )
         ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
         ->leftJoin('users as u', 'u.id', '=', 'p.user_id')
@@ -367,14 +367,14 @@ class Uploadcontroller extends Controller
 
         // get array process ids
         $issueIds = $processesUploaded->pluck('issue_id')->toArray();
-        
+
         // get total page of process
         $processePage = DB::table('processes as p')
         ->select(
             DB::raw("MAX(p.id) as id"),
             DB::raw("SUM(p.page) as page"),
             'p.issue_id as issue_id',
-            's.memo as phase',
+            's.memo as phase'
         )
         ->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
         ->whereIn('p.issue_id', $issueIds)
@@ -385,22 +385,22 @@ class Uploadcontroller extends Controller
             $x->phase = $x->phase ? $x->phase : false;
             return (array) $x;
         })->toArray();
-        
+
         // Get total page
         $processesUploaded = collect($processesUploaded)->map(function($x) use($processePage) {
             $pages = 0;
             $x->phase = $x->phase ? $x->phase : false;
 
             if ( count($processePage) ) {
-                // Define search list with multiple key=>value pair 
-                $search_items = array('issue_id'=>$x->issue_id, 'phase'=>$x->phase); 
-                
-                // Call search and pass the array and 
-                // the search list 
+                // Define search list with multiple key=>value pair
+                $search_items = array('issue_id'=>$x->issue_id, 'phase'=>$x->phase);
+
+                // Call search and pass the array and
+                // the search list
                 $res = $this->search($processePage, $search_items);
                 $pages = count($res) ? $res[0]['page'] : 0;
             }
-            
+
             $x->page = $pages ? $pages : '--';
             $x->issue = $x->issue ? $x->issue : '--';
             $x->phase = $x->phase ? $x->phase : '--';
@@ -412,7 +412,7 @@ class Uploadcontroller extends Controller
 
         $numberRows = count($processesUploaded) + 5;
         // $processesUploaded = json_decode(json_encode($processesUploaded), true);
-        
+
 
         $results = Excel::create('Report_finished_record' . "--" . $start_time . "--" . $end_time, function($excel) use ($processesUploaded, $start_time, $end_time, $numberRows) {
             $excel->setTitle('Report Job Time');
@@ -492,7 +492,7 @@ class Uploadcontroller extends Controller
         $listArr = count($listProcess) > 0 ? array_map(function($value){
             return $value->id;
         }, $listProcess) : array();
-        
+
         if ( count($listArr) > 0 ) {
             // update schedules status
             DB::table('schedules')
@@ -511,7 +511,7 @@ class Uploadcontroller extends Controller
                     ->update(['status' => 'publish']);
             }
         }
-        
+
         return response()->json(array(
             'message' => 'Successfully.'
         ), 200);
@@ -596,36 +596,36 @@ class Uploadcontroller extends Controller
         return $result;
     }
 
-    // PHP program to search for multiple 
-    // key=>value pairs in array 
-    public function search($array, $search_list) { 
-      
-        // Create the result array 
-        $result = array(); 
-      
-        // Iterate over each array element 
-        foreach ($array as $key => $value) { 
-      
-            // Iterate over each search condition 
-            foreach ($search_list as $k => $v) { 
-          
-                // If the array element does not meet 
-                // the search condition then continue 
-                // to the next element 
-                if (!isset($value[$k]) || $value[$k] != $v) 
-                { 
-                      
-                    // Skip two loops 
-                    continue 2; 
-                } 
-            } 
-          
-            // Append array element's key to the 
-            //result array 
-            $result[] = $value; 
-        } 
-      
-        // Return result  
-        return $result; 
-    } 
+    // PHP program to search for multiple
+    // key=>value pairs in array
+    public function search($array, $search_list) {
+
+        // Create the result array
+        $result = array();
+
+        // Iterate over each array element
+        foreach ($array as $key => $value) {
+
+            // Iterate over each search condition
+            foreach ($search_list as $k => $v) {
+
+                // If the array element does not meet
+                // the search condition then continue
+                // to the next element
+                if (!isset($value[$k]) || $value[$k] != $v)
+                {
+
+                    // Skip two loops
+                    continue 2;
+                }
+            }
+
+            // Append array element's key to the
+            //result array
+            $result[] = $value;
+        }
+
+        // Return result
+        return $result;
+    }
 }
