@@ -1,7 +1,7 @@
 <template>
     <div class="content">
         <div class="container-fluid max-width-1170">
-            <off-days></off-days>      
+            <off-days></off-days>
         </div>
     </div>
 </template>

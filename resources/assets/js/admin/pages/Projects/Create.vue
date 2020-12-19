@@ -28,7 +28,7 @@
           <label class="">{{ $ml.with("VueJS").get("txtYearOfIssue") }}</label>
           <datepicker
             input-class="form-control"
-            placeholder="Select Date"
+            placeholder="Select Year"
             minimum-view="year"
             v-model="selectedItem.issue_year"
             format="yyyy"

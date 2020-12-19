@@ -112,15 +112,14 @@ export default {
 
             // Function return schedule
             let getSchedule = (_item, _value, _codition) => {
+              const issueYear = _item.issue_year ? ' ' + _item.issue_year : '';
+              const name = _item.i_name ? _item.p_name + checkTR + issueYear + " " + _item.i_name : _item.p_name + checkTR + issueYear;
+              const memo = _item.memo ? _item.memo : "";
+              const title = textTime + name + '<br>' + memo;
+
               return Object.assign({}, _item, {
                 id: _item.id,
-                title:
-                  textTime +
-                  (_item.i_name
-                    ? _item.p_name + checkTR + " " + _item.i_name
-                    : _item.p_name + checkTR) +
-                  "<br>" +
-                  (_item.memo ? _item.memo : ""),
+                title: title,
                 description: description,
                 className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
                 borderColor: type.value,

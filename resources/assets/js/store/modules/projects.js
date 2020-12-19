@@ -211,7 +211,7 @@ export default {
 
 			// Update issue
 			const uri_issue = '/data/issues/' + item.issue_id;
-			item.i_year = rootGetters['dateFormat'](item.i_year, 'YYYY')
+			item.i_year = item.i_year ? rootGetters['dateFormat'](item.i_year, 'YYYY') : ''
 			axios.patch(uri_issue, item).then((res) => {
 				commit('SET_VALIDATE', { error: '', success: res.data.message })
 			})
@@ -250,7 +250,7 @@ export default {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
 			const uri = '/data/issues';
-			item.i_year = rootGetters['dateFormat'](item.i_year, 'YYYY')
+			item.i_year = item.i_year ? rootGetters['dateFormat'](item.i_year, 'YYYY') : '';
 			axios.post(uri, item)
 				.then(res => {
 					commit('SET_SELECTED_ITEM', { project_id: 0, type_id: 0 })
@@ -280,7 +280,7 @@ export default {
 				{ id: 'department', value: rootGetters['getTranslate']('txtDepartment'), width: '', class: '' },
 				{ id: 'project', value: rootGetters['getTranslate']('txtName'), width: '', class: '' },
 				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '150', class: '' },
-				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '', class: '' },
+				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '', class: 'no-wrap' },
 				{ id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '' },
 				{ id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '' },
 				{ id: 'value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center' },
