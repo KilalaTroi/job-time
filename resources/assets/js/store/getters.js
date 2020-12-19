@@ -37,8 +37,8 @@ export default {
     },
 
     dateFormat() {
-        return (date, string = null) => {
-            if (moment(date).format() === 'Invalid date') return '--'
+        return (date, string = null, text='--') => {
+            if (moment(date).format() === 'Invalid date') return text
             if (string) return moment(date).format(string)
             return moment(date).format()
         }
