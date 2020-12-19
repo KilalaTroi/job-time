@@ -9,271 +9,301 @@ use App\Http\Controllers\Controller;
 
 class JobsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response/
-     */
-    public function index()
-    {
-        $departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
+  /**
+   * Display a listing of the resource.
+   *
+   * @return \Illuminate\Http\Response/
+   */
+  public function index(Request $request)
+  {
+    $userID = $request->session()->get('Auth')[0]['id'];
+    $filters = array(
+      'date' => $request->get('date'),
+      'team' => $request->get('team_id'),
+      'show' => $request->get('show')
+    );
 
-        $selectDate = $_GET['date'];
-        $userID = $_GET['user_id'];
-        $showBy = $_GET['show'];
-        $teamID = $_GET['team_id'];
-        $defaultProjects = array(58, 59, 67, 68, 69);
+    $totaling = $this->getTotaling($filters, $userID);
 
-        // DB::enableQueryLog();
-        if ( $showBy == 'showSchedule' ) {
-            $jobs = DB::table('issues as i')
-                ->select(
-                    'i.id as id',
-                    't.dept_id',
-                    'p.name as p_name',
-                    's.id as schedule_id',
-                    's.memo as phase',
-                    't.slug as type',
-                    'i.name as i_name',
-                    'i.year as i_year'
-                )
-                ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-                ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
-                ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-                ->where(function ($query) use ($selectDate, $teamID) {
-                    $query->where('s.date', '=', $selectDate)
-                        ->where('i.status', '=', 'publish')
-                        ->where(function ($query) use ($teamID) {
-                            $query->where('p.team', '=', $teamID)
-                                ->orWhere('p.team', 'LIKE', $teamID . ',%')
-                                ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
-                                ->orWhere('p.team', 'LIKE', '%,' . $teamID);
-                        });
-                })
-                ->orWhere(function ($query) use ($defaultProjects, $teamID) {
-                    $query->whereIn('p.id', $defaultProjects)
-                    ->where('i.status', '=', 'publish')
-                    ->where(function ($query) use ($teamID) {
-                        $query->where('p.team', '=', $teamID)
-                            ->orWhere('p.team', 'LIKE', $teamID . ',%')
-                            ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
-                            ->orWhere('p.team', 'LIKE', '%,' . $teamID);
-                    });
-                })
-                ->orderBy('i.created_at', 'desc')
-                ->orderBy('p_name', 'desc')
-                ->groupBy('i.id', 's.memo')
-                ->paginate(10);
+    $totalTime = 0;
+    foreach ($totaling as $v) $totalTime = $totalTime + $v->time;
+
+    return response()->json([
+      'jobs' => $this->getJobs($filters, $userID),
+      'totaling' => array(
+        'data' => $totaling,
+        'total' => array('text' => $this->formatTime($totalTime), 'value' => $totalTime)
+      ),
+    ]);
+  }
+
+  /**
+   * Store a newly created resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @return \Illuminate\Http\Response
+   */
+  public function store(Request $request)
+  {
+    $this->validate($request, [
+      'start_time' => 'nullable|required',
+      'end_time' => 'nullable|required'
+    ]);
+
+    $data = $request->all();
+
+    $data['user_id'] = $request->session()->get('Auth')[0]['id'];
+    $data['issue_id'] = $request->get('id');
+
+    $start_time = $this->formatTimeToString($request->get('start_time'));
+    $end_time = $this->formatTimeToString($request->get('end_time'));
+
+    if ($request->get('showLunchBreak') && $request->get('exceptLunchBreak')) {
+      for ($i = 0; $i < 2; $i++) {
+        if ($i == 0) {
+          $data['start_time'] = $start_time;
+          $data['end_time'] = '12:00';
         } else {
-            $jobs = DB::table('issues as i')
-                ->select(
-                    'i.id as id',
-                    't.dept_id',
-                    'p.name as p_name',
-                    's.id as schedule_id',
-                    's.memo as phase',
-                    't.slug as type',
-                    'i.name as i_name',
-                    'i.year as i_year'
-                )
-                ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-                ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
-                ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-                ->where(function ($query) use ($selectDate) {
-                    $query->where('start_date', '<=',  $selectDate)
-                          ->orWhere('start_date', '=',  NULL);
-                })
-                ->where(function ($query) use ($selectDate) {
-                    $query->where('end_date', '>=',  $selectDate)
-                          ->orWhere('end_date', '=',  NULL);
-                })
-                ->where('i.status', '=', 'publish')
-                ->where(function ($query) use ($teamID) {
-                    $query->where('p.team', '=', $teamID)
-                        ->orWhere('p.team', 'LIKE', $teamID . ',%')
-                        ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
-                        ->orWhere('p.team', 'LIKE', '%,' . $teamID);
-                })
-                ->orderBy('i.created_at', 'desc')
-                ->orderBy('p_name', 'desc')
-                ->orderBy('s.id', 'desc')
-                ->groupBy('i.id')
-                ->paginate(10);
+          $data['start_time'] = '13:00';
+          $data['end_time'] = $end_time;
         }
-        // dd(DB::getQueryLog());
-
-        $allJobs = DB::table('issues as i')
-            ->select(
-                'i.id as id',
-                't.dept_id',
-                'p.name as p_name',
-                't.slug as type',
-                'i.name as i_name',
-                'i.year as i_year'
-            )
-            ->join('projects as p', 'p.id', '=', 'i.project_id')
-            ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-            ->where(function ($query) use ($selectDate) {
-                $query->where('start_date', '<=',  $selectDate)
-                      ->orWhere('start_date', '=',  NULL);
-            })
-            ->where(function ($query) use ($selectDate) {
-                $query->where('end_date', '>=',  $selectDate)
-                      ->orWhere('end_date', '=',  NULL);
-            })
-            // ->where('i.status', '=', 'publish')
-            // ->where(function ($query) use ($teamID) {
-            //     $query->where('p.team', '=', $teamID)
-            //         ->orWhere('p.team', 'LIKE', $teamID . ',%')
-            //         ->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
-            //         ->orWhere('p.team', 'LIKE', '%,' . $teamID);
-            // })
-            ->get()->toArray();
-
-        // $schedules = DB::table('issues as i')
-        //     ->select(
-        //         'i.id as id',
-        //         'memo'
-        //     )
-        //     ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
-        //     ->where('i.status', '=', 'publish')
-        //     ->where('s.date', '=',  $selectDate)
-        //     ->get()->toArray();
-
-        $jobsTime = DB::table('jobs as j')
-            ->select(
-                'j.issue_id as id',
-                's.id as schedule_id',
-                's.memo as phase',
-                DB::raw('SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total')
-            )
-            ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
-            ->where('j.user_id', '=', $userID)
-            ->where('j.date', '=', $selectDate)
-            ->groupBy('j.issue_id', 's.id')
-            ->get()->toArray();
-
-        $logTime = DB::table('jobs')
-            ->select(
-                'jobs.id',
-                'jobs.issue_id',
-                's.memo as phase',
-                'jobs.note as note',
-                DB::raw('TIME_FORMAT(jobs.start_time,"%H:%i") as start_time'),
-                DB::raw('TIME_FORMAT(jobs.end_time,"%H:%i") as end_time'),
-                DB::raw('(TIME_TO_SEC(jobs.end_time) - TIME_TO_SEC(jobs.start_time)) as total')
-            )
-            ->leftJoin('schedules as s', 'jobs.schedule_id', '=', 's.id')
-            // ->leftJoin('schedules as s', function($join) {
-            //     $join->on('jobs.issue_id', '=', 's.issue_id')
-            //         ->on('jobs.date', '=', 's.date');
-            // })
-            ->where('jobs.user_id', '=', $userID)
-            ->where('jobs.date', '=', $selectDate)
-            ->orderBy('jobs.start_time', 'asc')
-            ->get()->toArray();
-
-        return response()->json([
-            'departments' => $departments,
-            'jobs' => $jobs ? $jobs : array(),
-            'jobsTime' => $jobsTime ? $jobsTime : array(),
-            'logTime' => $logTime ? $logTime : array(),
-            // 'schedules' => $schedules ? $schedules : array(),
-            'allJobs' => $allJobs ? $allJobs : array()
-        ]);
+        Job::create($data);
+      }
+    } else {
+      $data['start_time'] = $start_time;
+      $data['end_time'] = $end_time;
+      Job::create($data);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $this->validate($request, [
-            'start_time' => 'nullable|required',
-            'end_time' => 'nullable|required'
-        ]);
+    return response()->json(array(
+      'message' => 'Successfully.'
+    ), 200);
+  }
 
-        if ( $request->get('showLunchBreak') && $request->get('exceptLunchBreak') ) {
-            $job = Job::create([
-                'issue_id' => $request->get('issue_id'),
-                'user_id' => $request->get('user_id'),
-                'schedule_id' => $request->get('schedule_id'),
-                'note' => $request->get('note'),
-                'team_id' => $request->get('team_id'),
-                'date' => $request->get('date'),
-                'start_time' => $request->get('start_time'),
-                'end_time' => '12:00',
-            ]);
+  /**
+   * Update the specified resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function update($id, Request $request)
+  {
+    $job = Job::findOrFail($id);
 
-            $job = Job::create([
-                'issue_id' => $request->get('issue_id'),
-                'user_id' => $request->get('user_id'),
-                'schedule_id' => $request->get('schedule_id'),
-                'note' => $request->get('note'),
-                'team_id' => $request->get('team_id'),
-                'date' => $request->get('date'),
-                'start_time' => '13:00',
-                'end_time' => $request->get('end_time'),
-            ]);
-        } else {
-            $job = Job::create($request->all());
-        }
+    $data = $request->all();
+    $start_time = $this->formatTimeToString($request->get('start_time'));
+    $end_time = $this->formatTimeToString($request->get('end_time'));
 
-        return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
+    if ($request->get('showLunchBreak') && $request->get('exceptLunchBreak')) {
+      $job->update([
+        'note' => $request->get('note'),
+        'start_time' => $start_time,
+        'end_time' => '12:00',
+      ]);
+
+      Job::create([
+        'issue_id' => $job->issue_id,
+        'user_id' => $job->user_id,
+        'schedule_id' => $job->schedule_id,
+        'note' => $job->note,
+        'team_id' => $job->team_id,
+        'date' => $job->date,
+        'start_time' => '13:00',
+        'end_time' => $end_time,
+      ]);
+    } else {
+      $data['start_time'] = $start_time;
+      $data['end_time'] = $end_time;
+      $job->update($data);
     }
+    return response()->json(array(
+      'message' => 'Successfully.'
+    ), 200);
+  }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update($id, Request $request)
-    {
-        $job = Job::findOrFail($id);
+  /**
+   * Remove the specified resource from storage.
+   *
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function destroy($id)
+  {
+    $job = Job::findOrFail($id);
+    $job->delete();
 
-        if ( $request->get('showLunchBreak') && $request->get('exceptLunchBreak') ) {
-            $job->update([
-                'note' => $request->get('note'),
-                'start_time' => $request->get('start_time'),
-                'end_time' => '12:00',
-            ]);
+    return response()->json('Successfully');
+  }
 
-            $job2 = Job::create([
-                'issue_id' => $job->issue_id,
-                'user_id' => $job->user_id,
-                'schedule_id' => $job->schedule_id,
-                'note' => $job->note,
-                'team_id' => $job->team_id,
-                'date' => $job->date,
-                'start_time' => '13:00',
-                'end_time' => $request->get('end_time'),
-            ]);
-        } else {
-            $job->update($request->all());
-        }
-        return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
+  private function getJobs($filters, $userID)
+  {
+    $defaultProjects = array(58, 59, 67, 68, 69);
+    if ($filters['show'] == 'showSchedule') {
+      $jobs = DB::table('issues as i')
+        ->select(
+          'i.id as id',
+          't.dept_id',
+          'p.name as p_name',
+          's.id as schedule_id',
+          's.memo as phase',
+          't.slug as type',
+          'i.name as issue',
+          'i.year as issue_year'
+        )
+        ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+        ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+        ->where('i.status', '=', 'publish')
+        ->where(function ($query) use ($filters) {
+          $query->where('s.date', '=', $filters['date'])->where('i.status', '=', 'publish')
+            ->where(function ($query) use ($filters) {
+              $query->where('p.team', '=', $filters['team'])
+                ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
+                ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
+                ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
+            });
+        })
+        ->orWhere(function ($query) use ($defaultProjects, $filters) {
+          $query->whereIn('p.id', $defaultProjects)
+            ->where('i.status', '=', 'publish')
+            ->where(function ($query) use ($filters) {
+              $query->where('p.team', '=', $filters['team'])
+                ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
+                ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
+                ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
+            });
+        })
+        ->orderBy('i.created_at', 'desc')
+        ->orderBy('p_name', 'desc')
+        ->groupBy('i.id', 's.memo')
+        ->paginate(10);
+    } else {
+      $jobs = DB::table('issues as i')
+        ->select(
+          'i.id as id',
+          't.dept_id',
+          'p.name as p_name',
+          's.id as schedule_id',
+          's.memo as phase',
+          't.slug as type',
+          'i.name as issue',
+          'i.year as issue_year'
+        )
+        ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+        ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+        ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+        ->where('i.status', '=', 'publish')
+        ->where(function ($query) use ($filters) {
+          $query->where('start_date', '<=',  $filters['date'])->orWhere('start_date', '=',  NULL);
+        })
+        ->where(function ($query) use ($filters) {
+          $query->where('end_date', '>=',  $filters['date'])->orWhere('end_date', '=',  NULL);
+        })
+        ->where(function ($query) use ($filters) {
+          $query->where('p.team', '=', $filters['team'])
+            ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
+            ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
+            ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
+        })
+        ->orderBy('i.created_at', 'desc')
+        ->orderBy('p_name', 'desc')
+        ->orderBy('s.id', 'desc')
+        ->groupBy('i.id')
+        ->paginate(10);
     }
+    $jobs->transform(function ($item, $key) use ($userID, $filters) {
+      $item->fullproject = $item->p_name;
+      if (isset($item->issue_year) && !empty($item->issue_year)) $item->fullproject .= ' ' . $item->issue_year;
+      $item->fullproject .= ' ' . $item->issue;
+      $item->department = DB::table('departments')->select('name')->where('id', $item->dept_id)->first()->name;
+      $item->project = false !== strpos($item->type, '_tr') ? $item->p_name . ' (TR)' :  $item->p_name;
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $job = Job::findOrFail($id);
-        $job->delete();
+      $totalTime = DB::table('jobs as j')
+        ->select(DB::raw('SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as time'))
+        ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
+        ->where('j.user_id', '=', $userID)
+        ->where('j.issue_id', '=', $item->id)
+        ->where('j.date', '=', $filters['date'])
+        ->groupBy('j.issue_id', 's.id')
+        ->first();
 
-        return response()->json('Successfully');
+      $totalTime = isset($totalTime) && !empty($totalTime) ? $totalTime->time : '';
+
+      $item->time = $this->formatTime($totalTime);
+      return $item;
+    });
+    return $jobs;
+  }
+
+  private function getTotaling($filters, $userID)
+  {
+    $totaling =  DB::table('jobs')
+      ->select(
+        'jobs.id',
+        'jobs.issue_id',
+        's.memo as phase',
+        't.slug as type',
+        'jobs.note as note',
+        'p.name as p_name',
+        'i.name as issue',
+        'i.year as issue_year',
+        DB::raw('TIME_FORMAT(jobs.start_time,"%H:%i") as start_time'),
+        DB::raw('TIME_FORMAT(jobs.end_time,"%H:%i") as end_time'),
+        DB::raw('(TIME_TO_SEC(jobs.end_time) - TIME_TO_SEC(jobs.start_time)) as total')
+      )
+      ->leftJoin('issues as i', 'i.id', '=', 'jobs.issue_id')
+      ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+      ->leftJoin('schedules as s', 'jobs.schedule_id', '=', 's.id')
+      ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+      ->where('jobs.user_id', '=', $userID)
+      ->where('jobs.date', '=', $filters['date'])
+      ->orderBy('jobs.start_time', 'asc')
+      ->get();
+
+    $totaling->transform(function ($item, $key) {
+      $item->fullproject = $item->p_name;
+      if (isset($item->issue_year) && !empty($item->issue_year)) $item->fullproject .= ' ' . $item->issue_year;
+      $item->fullproject .= ' ' . $item->issue;
+      $item->project = false !== strpos($item->type, '_tr') ? $item->p_name . ' (TR)' :  $item->p_name;
+      $item->time = $item->total;
+      $item->start_time_string = $item->start_time;
+      $item->end_time_string = $item->end_time;
+
+      $startTime = explode(':',$item->start_time);
+      $endTime = explode(':',$item->end_time);
+
+      $item->start_time = array(
+        'HH' => $startTime[0],
+        'mm' => $startTime[1]
+      );
+
+      $item->end_time = array(
+        'HH' => $endTime[0],
+        'mm' => $endTime[1]
+      );
+
+      $item->total = $this->formatTime($item->total);
+      return $item;
+    });
+    return $totaling;
+  }
+
+  private function formatTime($time)
+  {
+    $strTime = "00:00";
+    if (isset($time) && !empty($time)) {
+      $time = $time * 1;
+      $hours = floor($time / 3600);
+      $minutes = floor(($time - $hours * 3600) / 60);
+      $strTime = 10 > $hours ? "0" . $hours : $hours;
+      $strTime .= ":" . (10 > $minutes ? "0" . $minutes : $minutes);
     }
+    return $strTime;
+  }
+
+  private function formatTimeToString($time)
+  {
+    return $time['HH'] . ':' . $time['mm'];
+  }
 }
