@@ -160,8 +160,8 @@ class ReportsController extends Controller
 				$sheet->setCellValue('A2', "Date: " . Carbon::now());
 				$sheet->setCellValue('A3', $titleExcel);
 
-				$columnName = count($userArr) != 1 ? 'I' : 'H';
-				$columnNameBefore = count($userArr) != 1 ? 'H' : 'G';
+				$columnName = count($userArr) != 1 ? 'J' : 'I';
+				$columnNameBefore = count($userArr) != 1 ? 'I' : 'H';
 				$startLetter = count($userArr) === 1 ? 'B' : 'C';
 				$dateLetter = count($userArr) === 1 ? 'A' : 'B';
 				$endLetter = count($userArr) === 1 ? 'C' : 'D';
@@ -233,8 +233,9 @@ class ReportsController extends Controller
 					$sheet->setCellValue('E5', "TIME");
 					$sheet->setCellValue('F5', "DEPARTMENT");
 					$sheet->setCellValue('G5', "PROJECT");
-					$sheet->setCellValue('H5', "ISSUE");
-					$sheet->setCellValue('I5', "JOB TYPE");
+					$sheet->setCellValue('H5', "ISSUE_YEAR");
+					$sheet->setCellValue('I5', "ISSUE");
+					$sheet->setCellValue('J5', "JOB TYPE");
 				} else {
 					$sheet->setCellValue('A5', "DATE");
 					$sheet->setCellValue('B5', "STRT");
@@ -242,8 +243,9 @@ class ReportsController extends Controller
 					$sheet->setCellValue('D5', "TIME");
 					$sheet->setCellValue('E5', "DEPARTMENT");
 					$sheet->setCellValue('F5', "PROJECT");
-					$sheet->setCellValue('G5', "ISSUE");
-					$sheet->setCellValue('H5', "JOB TYPE");
+					$sheet->setCellValue('G5', "ISSUE_YEAR");
+					$sheet->setCellValue('H5', "ISSUE");
+					$sheet->setCellValue('I5', "JOB TYPE");
 				}
 
 				// Format column
@@ -379,10 +381,10 @@ class ReportsController extends Controller
 			->where('j.date', '<=', $end_time);
 
 		if (count($userArr) === 1) {
-			$dataDetail = $data->select("j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"), DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"), "d.name as department", "p.name as project", "i.name as issue", "t.slug as job type")
+			$dataDetail = $data->select("j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"), DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"), "d.name as department", "p.name as project", "i.year as issue_year", "i.name as issue", "t.slug as job type")
 				->orderBy("j.date", "DESC")->orderBy("j.start_time", "DESC")->orderBy("j.user_id")->orderBy("j.end_time")->get();
 		} else {
-			$dataDetail = $data->select("j.user_id", "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"), DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"), "d.name as department", "p.name as project", "i.name as issue", "t.slug as job type")
+			$dataDetail = $data->select("j.user_id", "j.date as dateReport", DB::raw("TIME_FORMAT(j.start_time, \"%H:%i\") as start_time"), DB::raw("TIME_FORMAT(j.end_time, \"%H:%i\")  as end_time"), "d.name as department", "p.name as project", "i.year as issue_year", "i.name as issue", "t.slug as job type")
 				->orderBy("j.date", "DESC")->orderBy("j.start_time", "DESC")->orderBy("j.user_id")->orderBy("j.end_time")->get();
 
 			$dataTotal = $data->select("j.user_id", DB::raw("SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as total"))->groupBy('j.user_id')->get();
