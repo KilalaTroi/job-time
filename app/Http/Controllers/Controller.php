@@ -25,7 +25,7 @@ class Controller extends BaseController
 	}
 	public function validateMultileCol($arr){
 		$str = '';
-		foreach($arr as $k => $v)	$str .= isset($v) && !empty($v) ? ','. $k .','.$v : ','. $k .',0';
+		foreach($arr as $k => $v)	$str .= isset($v) && !empty($v) ? ','. $k .','.$v : ','. $k .',NULL';
 		return ltrim($str,',');
 	}
 }
