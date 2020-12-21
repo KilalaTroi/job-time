@@ -18,6 +18,7 @@
       <datepicker
         input-class="form-control"
         placeholder="Select Year"
+        :clear-button="true"
         minimum-view="year"
         v-model="selectedItem.i_year"
         format="yyyy"

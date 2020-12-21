@@ -137,7 +137,7 @@ export default {
 
 		getItem({ state, commit, rootGetters }, id) {
 			let item = rootGetters['getObjectByID'](state.data.totaling.data, id);
-
+			item.date = state.filters.currentDate;
 			commit('SET_SELECTED_ITEM', item)
 		},
 

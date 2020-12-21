@@ -174,4 +174,5 @@ export default {
     txtFinishRecord: 'Finish Record',
     txtDateTime: 'Date',
     txtYearOfIssue: 'Year of issue',
+    txtFilesWorked: 'Files Worked',
 }

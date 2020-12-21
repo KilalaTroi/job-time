@@ -8,9 +8,7 @@
        <h4 class="text-center mb-1">
           <b>{{ selectedItem.fullproject }}</b>
         </h4>
-        <h5 class="text-center mt-1">
-          {{ this.customFormatter(selectedItem.date) }}
-        </h5>
+        <h5 class="text-center mt-1">{{ dateFormat(selectedItem.date,'DD/MMM/YYYY','') }}</h5>
       </div>
       <hr />
       <div class="form-group">
@@ -89,6 +87,10 @@ export default {
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
     }),
+
+    ...mapGetters({
+      dateFormat: "dateFormat",
+    }),
 	},
 
   data() {
@@ -118,11 +120,6 @@ export default {
 			this.resetSelectedItem();
 		},
 
-    customFormatter(date) {
-      return moment(date).format("DD-MM-YYYY") !== "Invalid date"
-        ? moment(date).format("DD/MMM/YYYY")
-        : "";
-    },
     changeStartTime(eventData) {
       const slItem = this.selectedItem;
       const data = {

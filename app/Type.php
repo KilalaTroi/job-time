@@ -12,6 +12,6 @@ class Type extends Model
      * @var array
      */
     protected $fillable = [
-        'slug', 'slug_vi', 'slug_ja', 'value', 'dept_id', 'line_room',
+        'slug', 'slug_vi', 'slug_ja', 'value', 'dept_id', 'line_room','email'
     ];
 }
