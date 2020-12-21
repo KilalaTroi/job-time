@@ -45,6 +45,7 @@
             </template>
             <div class="table-responsive" v-if="data.jobs">
               <tbl-default
+                :class="{ 'path-team': filters.team == 2 || filters.team == 3 }"
                 :dataItems="data.jobs"
                 :dataCols="columns.jobs"
                 dataAction="addTime"
@@ -220,5 +221,10 @@ export default {
   .note {
     display: none;
   }
+}
+.table-responsive.path-team {
+    .year-of-issue {
+        display: none;
+    }
 }
 </style>

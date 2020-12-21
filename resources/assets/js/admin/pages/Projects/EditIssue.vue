@@ -16,7 +16,7 @@
             }}</label>
              <datepicker
             input-class="form-control"
-            placeholder="Select Date"
+            placeholder="Select Year"
             minimum-view="year"
             :clear-button="true"
             v-model="selectedItem.i_year"

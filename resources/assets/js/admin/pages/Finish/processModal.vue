@@ -218,6 +218,7 @@ export default {
             phase: this.currentProcess.phase,
             status: this.currentProcess.status,
             team_id: this.currentTeam.id,
+            email: this.currentProcess.email,
           })
           .then((res) => {
             console.log(res.data);
@@ -276,7 +277,6 @@ export default {
       // Reset validate
       this.errors = [];
       this.success = "";
-      this.isLoading = true;
       const checkStatus =
         this.currentProcess.status === "Finished Work" ? true : false;
 
@@ -289,6 +289,8 @@ export default {
       }
 
       if (!this.errors.length) {
+        this.isLoading = true;
+        
         const newProcess = {
           user_id: this.loginUser.id,
           issue_id: this.currentProcess.id,

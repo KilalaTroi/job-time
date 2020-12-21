@@ -31,6 +31,7 @@ class Uploadcontroller extends Controller
 				'i.page as page_number',
 				't.slug as job_type',
 				't.line_room as room_id',
+				't.email as email',
 				's.memo as phase'
 			)
 			->join('schedules as s', 'i.id', '=', 's.issue_id')
@@ -545,34 +546,32 @@ class Uploadcontroller extends Controller
 	public function submitMessage(Request $request)
 	{
 		// Send Mail
-		$from = array(
-			'email' => $request->get('user')['email'],
-			'name' => $request->get('user')['name']
-		);
-
-		if ($request->get('team_id') == 2) {
-			$emails[] = 'cvn.notification@gmail.com';
-		} else {
-			$emails[] = 'troi.hoang@kilala.vn';
+		if ( $request->get('email') ) {
+			$from = array(
+				'email' => $request->get('user')['email'],
+				'name' => $request->get('user')['name']
+			);
+	
+			$emails[] = $request->get('email');
+	
+			$contentArr = explode('---- ', $request->get('content'));
+	
+			Mail::send('emails.finish', [
+				'content' => count($contentArr) > 1 ? $contentArr[1] : '',
+				'user' => $request->get('user'),
+				'p_name' => $request->get('p_name'),
+				'i_name' => $request->get('i_name'),
+				'page' => $request->get('page'),
+				'phase' => $request->get('phase'),
+				'status' => $request->get('status')
+			], function ($message) use ($emails, $from, $request) {
+				$message->from($from['email'], $from['name']);
+				$message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
+				$subject = 'JOBTIME : Updated invitation [' . $request->get('status') . '_' . ucfirst($request->get('user')['username']) . '] ' . $request->get('p_name');
+				if ($request->get('page_number')) $subject .= '_' . $request->get('page_number') . 'p';
+				$message->to($emails)->subject($subject);
+			});
 		}
-
-		$contentArr = explode('---- ', $request->get('content'));
-
-		Mail::send('emails.finish', [
-			'content' => count($contentArr) > 1 ? $contentArr[1] : '',
-			'user' => $request->get('user'),
-			'p_name' => $request->get('p_name'),
-			'i_name' => $request->get('i_name'),
-			'page' => $request->get('page'),
-			'phase' => $request->get('phase'),
-			'status' => $request->get('status')
-		], function ($message) use ($emails, $from, $request) {
-			$message->from($from['email'], $from['name']);
-			$message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
-			$subject = 'JOBTIME : Updated invitation [' . $request->get('status') . '_' . ucfirst($request->get('user')['username']) . '] ' . $request->get('p_name');
-			if ($request->get('page_number')) $subject .= '_' . $request->get('page_number') . 'p';
-			$message->to($emails)->subject($subject);
-		});
 
 		// Send message Line Work
 		$client = new Client([
