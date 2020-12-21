@@ -5,17 +5,15 @@
         <div class="col col-sm-auto">
           <card>
             <template slot="header">
-              <h4 class="card-title text-center">
-                <!-- {{ this.customFormatter(start_date) }} -->
-              </h4>
+              <h4 class="card-title text-center">{{ dateFormat(new Date(),'DD MMM YYYY','') }}</h4>
             </template>
 
             <datepicker
-              :format="customFormatter"
+              :format="dateFormat"
               :disabled-dates="disabledEndDates()"
               v-model="filters.currentDate"
               :inline="true"
-              :language="getLanguage(this.$ml)"
+              :language="getLangCode(this.$ml)"
             >
             </datepicker>
           </card>
@@ -95,10 +93,7 @@
                     :class="column.class"
                   >
                     <span v-if="'end_time' == column.id">Total:</span>
-                    <span
-                      v-else-if="'total' == column.id"
-                      v-html="data.totaling.total.text"
-                    ></span>
+                    <span v-else-if="'total' == column.id" v-html="data.totaling.total.text"></span>
                     <span v-else>--</span>
                   </td>
                   <td></td>
@@ -149,96 +144,16 @@ export default {
       filters: "filters",
     }),
     ...mapGetters({
+      dateFormat: "dateFormat",
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
+      getLangCode: "getLangCode"
     }),
   },
   data() {
     return {
-      userCreatedAt: document
-        .querySelector("meta[name='user-created-at']")
-        .getAttribute("content"),
-
-      logColumns: [
-        {
-          id: "project",
-          value: this.$ml.with("VueJS").get("txtProject"),
-          width: "",
-          class: "",
-        },
-        {
-          id: "issue_year",
-          value: this.$ml.with("VueJS").get("txtYearOfIssue"),
-          width: "60",
-          class: "text-center",
-        },
-        {
-          id: "issue",
-          value: this.$ml.with("VueJS").get("txtIssue"),
-          width: "60",
-          class: "text-center",
-        },
-        {
-          id: "note",
-          value: this.$ml.with("VueJS").get("txtWork"),
-          width: "",
-          class: "note",
-        },
-        {
-          id: "phase",
-          value: this.$ml.with("VueJS").get("txtPhase"),
-          width: "",
-          class: "text-center",
-        },
-        {
-          id: "start_time",
-          value: this.$ml.with("VueJS").get("lblStartTime"),
-          width: "110",
-          class: "text-center",
-        },
-        {
-          id: "end_time",
-          value: this.$ml.with("VueJS").get("lblEndTime"),
-          width: "110",
-          class: "text-center",
-        },
-        {
-          id: "total",
-          value: this.$ml.with("VueJS").get("lblTime"),
-          width: "110",
-          class: "text-center",
-        },
-      ],
-      departments: [],
-      jobs: [],
-      allJobs: [],
-      jobData: {},
-      logTime: [],
-      logTimeData: [],
-      timeTotal: 0,
-      jobsTime: [],
-      optionsFilter: [],
-      // schedules: [],
-      currentJob: null,
-      currentTimeLog: null,
-
-      start_date: new Date(),
-
-      validationErrors: "",
-      validationSuccess: "",
-
-      jLimit: 2,
-      jShowDisabled: true,
-      jAlign: "right",
-      jSize: "small",
-
+      userCreatedAt: document.querySelector("meta[name='user-created-at']").getAttribute("content"),
       showFilter: "showSchedule",
-      dataLang: {
-        vi: vi,
-        ja: ja,
-        en: en,
-      },
-      selectTeam: "",
     };
   },
   methods: {
@@ -254,7 +169,7 @@ export default {
       getItem : "getItem",
       getItemJob: "getItemJob"
     }),
-    
+
     disabledEndDates() {
       let obj = {
         to: new Date(this.userCreatedAt),
@@ -262,15 +177,6 @@ export default {
         // days: [0], // Disable Saturday's and Sunday's
       };
       return obj;
-    },
-    customFormatter(date) {
-      return moment(date).format("DD-MM-YYYY") !== "Invalid date"
-        ? moment(date).format("DD MMM YYYY")
-        : "";
-    },
-    
-    getLanguage(data) {
-      return this.dataLang[data.current];
     },
   },
   async created() {

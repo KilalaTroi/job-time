@@ -16,7 +16,7 @@ class TypesController extends Controller
      */
     public function index(Request $request)
     {
-        if ( $request->input('page') !== null && $request->input('page') ) {
+        if ($request->input('page') !== null && $request->input('page')) {
             $types = Type::paginate(20);
         } else {
             $types = Type::get();
@@ -35,6 +35,7 @@ class TypesController extends Controller
     {
         $this->validate($request, [
             'slug' => 'required|unique:types|max:255',
+            'email' => 'email',
             'dept_id' => 'required|numeric|min:0|not_in:0'
         ]);
 
@@ -67,8 +68,14 @@ class TypesController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'slug' => 'required|unique:types,slug,'.$id.'|max:255'
+            'slug' => 'required|unique:types,slug,' . $id . '|max:255',
         ]);
+
+        if (!empty($request->input('email')) && NULL != $request->input('email')) {
+            $this->validate($request, [
+                'email' => 'email',
+            ]);
+        }
 
         $type = Type::findOrFail($id);
         $type->update($request->all());

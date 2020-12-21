@@ -81,6 +81,12 @@ export default {
           class: "",
         },
         {
+          id: "file",
+          value: this.$ml.with("VueJS").get("txtFilesWorked"),
+          width: "",
+          class: "",
+        },
+        {
           id: "status",
           value: this.$ml.with("VueJS").get("txtStatus"),
           width: "135",
@@ -111,6 +117,12 @@ export default {
         {
           id: "page",
           value: _this.$ml.with("VueJS").get("txtPagesWorked"),
+          width: "",
+          class: "",
+        },
+        {
+          id: "file",
+          value: _this.$ml.with("VueJS").get("txtFilesWorked"),
           width: "",
           class: "",
         },

@@ -31,6 +31,7 @@
             placeholder="Select Year"
             minimum-view="year"
             v-model="selectedItem.issue_year"
+            :clear-button="true"
             format="yyyy"
             :language="getLangCode(this.$ml)"
           >

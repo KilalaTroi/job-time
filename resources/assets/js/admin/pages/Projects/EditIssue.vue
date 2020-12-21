@@ -18,6 +18,7 @@
             input-class="form-control"
             placeholder="Select Date"
             minimum-view="year"
+            :clear-button="true"
             v-model="selectedItem.i_year"
             format="yyyy"
             :language="getLangCode(this.$ml)"

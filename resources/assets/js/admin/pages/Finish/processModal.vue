@@ -46,7 +46,21 @@
                 $ml.with("VueJS").get("txtPagesWorked")
               }}</label>
               <input
+                type="number"
                 v-model="currentProcess.page"
+                class="form-control"
+                :disabled="currentProcess.status != 'Finished Work'"
+              />
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label class="">{{
+                $ml.with("VueJS").get("txtFilesWorked")
+              }}</label>
+              <input
+                type="number"
+                v-model="currentProcess.file"
                 class="form-control"
                 :disabled="currentProcess.status != 'Finished Work'"
               />
@@ -203,7 +217,7 @@ export default {
             page_number: this.currentProcess.page_number,
             phase: this.currentProcess.phase,
             status: this.currentProcess.status,
-            team_id: this.currentTeam.id
+            team_id: this.currentTeam.id,
           })
           .then((res) => {
             console.log(res.data);
@@ -219,7 +233,7 @@ export default {
       }
     },
     getDataProcess() {
-      if ( this.currentProcess.page_number && ! this.currentProcess.page ) {
+      if (this.currentProcess.page_number && !this.currentProcess.page) {
         this.currentProcess.page = this.currentProcess.page_number;
       }
 
@@ -282,6 +296,7 @@ export default {
           memo: this.currentProcess.phase,
           date: this.dateFormat(new Date(), "YYYY-MM-DD HH:mm"),
           page: checkStatus ? this.currentProcess.page : null,
+          file: checkStatus ? this.currentProcess.file : null,
           status: this.currentProcess.status,
         };
 

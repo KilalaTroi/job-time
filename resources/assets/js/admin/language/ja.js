@@ -174,4 +174,5 @@ export default {
     txtFinishRecord: '終了レコード',
     txtDateTime: '日時',
     txtYearOfIssue: '発行年',
+    txtFilesWorked: 'ファイル数',
 }

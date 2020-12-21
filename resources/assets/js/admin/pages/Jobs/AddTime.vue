@@ -6,9 +6,7 @@
         <h4 class="text-center mb-1">
           <b>{{ selectedItemJob.fullproject }}</b>
         </h4>
-        <h5 class="text-center mt-1">
-          {{ this.customFormatter(selectedItemJob.date) }}
-        </h5>
+        <h5 class="text-center mt-1">{{ dateFormat(selectedItemJob.date,'DD/MMM/YYYY','') }}</h5>
       </div>
       <hr />
       <div class="form-group">
@@ -91,6 +89,11 @@ export default {
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
     }),
+
+    ...mapGetters({
+      dateFormat: "dateFormat",
+    }),
+
   },
   data() {
     return {
@@ -116,11 +119,6 @@ export default {
 			this.resetSelectedItem();
     },
 
-    customFormatter(date) {
-      return moment(date).format("DD-MM-YYYY") !== "Invalid date"
-        ? moment(date).format("DD/MMM/YYYY")
-        : "";
-    },
     changeStartTime(eventData) {
       this.startMinute = eventData.data.m * 1;
       const slItem = this.selectedItemJob;
