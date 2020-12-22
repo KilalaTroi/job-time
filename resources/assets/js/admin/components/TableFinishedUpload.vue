@@ -46,15 +46,16 @@
           </button>
         </td>
       </tr>
-      <tr>
+      <tr v-if="data.length">
         <td
           v-for="(column, index) in columns"
           :key="index"
           :class="column.class"
         >
+          <span v-if="'user_name' == column.id">Total:</span>
           <span v-if="'page' == column.id" v-html="total.page"></span>
           <span v-else-if="'file' == column.id" v-html="total.file"></span>
-          <span v-else>--</span>
+          <span v-else></span>
         </td>
         <td></td>
       </tr>

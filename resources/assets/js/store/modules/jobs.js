@@ -86,13 +86,14 @@ export default {
 				'jobs': [
 					{ id: "department", value: rootGetters['getTranslate']('txtDepartment'), width: "", class: "" },
 					{ id: "project", value: rootGetters['getTranslate']('txtProject'), width: "", class: "" },
-					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "", class: "text-center" },
+					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "", class: "text-center year-of-issue" },
 					{ id: "issue", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "text-center" },
+					{ id: 'phase', value: rootGetters['getTranslate']('txtPhase'), width: '', class: 'text-center' },
 					{ id: "time", value: rootGetters['getTranslate']('lblTime'), width: "", class: "text-center" }
 				],
 				'totaling': [
 					{ id: "project", value: rootGetters['getTranslate']('txtProject'), width: "", class: "" },
-					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "", class: "text-center" },
+					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "", class: "text-center year-of-issue" },
 					{ id: "issue", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "text-center" },
 					{ id: 'note', value: rootGetters['getTranslate']('txtWork'), width: '', class: 'note' },
 					{ id: 'phase', value: rootGetters['getTranslate']('txtPhase'), width: '', class: 'text-center' },

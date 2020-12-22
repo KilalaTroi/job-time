@@ -200,7 +200,7 @@ export default {
 				{ id: "total", value: this.$ml.with('VueJS').get('lblTime'), width: "120", class: "" },
 				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "", class: "" },
 				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
-				{ id: "i_year", value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "" },
+				{ id: "i_year", value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "year-of-issue" },
 				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "", class: "" },
 				{ id: "note", value: this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
 				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
@@ -249,7 +249,7 @@ export default {
 				{ id: "total", value: _this.$ml.with('VueJS').get('lblTime'), width: "120", class: "" },
 				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "", class: "" },
 				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
-				{ id: "i_year", value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "" },
+				{ id: "i_year", value: _this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "year-of-issue" },
 				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "", class: "" },
 				{ id: "note", value: _this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
 				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
@@ -502,6 +502,11 @@ watch: {
 }
 .table-responsive:not(.path-team) {
     .note {
+        display: none;
+    }
+}
+.table-responsive.path-team {
+    .year-of-issue {
         display: none;
     }
 }

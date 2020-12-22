@@ -757,7 +757,10 @@ class ReportsController extends Controller
 		if ($projectId == NULL || empty($projectId)) return array();
 
 		return DB::table('issues')
-			->select('year as id', 'year as text')
+			->select(
+				'year as id', 
+				DB::raw('IFNULL(year, "(--)") AS text')
+			)
 			->where('project_id', $projectId)
 			->when($issue, function ($query, $issue) {
 				return $query->where('name', $issue);

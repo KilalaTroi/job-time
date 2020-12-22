@@ -279,7 +279,7 @@ export default {
 			const columns = [
 				{ id: 'department', value: rootGetters['getTranslate']('txtDepartment'), width: '', class: '' },
 				{ id: 'project', value: rootGetters['getTranslate']('txtName'), width: '', class: '' },
-				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '150', class: '' },
+				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '150', class: 'year-of-issue' },
 				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '', class: 'no-wrap' },
 				{ id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '' },
 				{ id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '' },

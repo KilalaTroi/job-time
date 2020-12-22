@@ -210,7 +210,7 @@
           </div>
         </template>
 
-        <div class="table-responsive">
+        <div class="table-responsive" :class="{ 'path-team': team == 2 || team == 3 }">
           <table-report
             :userID="userID"
             class="table-hover table-striped"
@@ -309,7 +309,7 @@ export default {
           id: "issue_year",
           value: this.$ml.with("VueJS").get("txtYearOfIssue"),
           width: "100",
-          class: "",
+          class: "year-of-issue",
         },
         {
           id: "issue_name",
@@ -407,7 +407,7 @@ export default {
           id: "issue_year",
           value: _this.$ml.with("VueJS").get("txtYearOfIssue"),
           width: "100",
-          class: "",
+          class: "year-of-issue",
         },
         {
           id: "issue_name",
@@ -659,5 +659,11 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.table-responsive.path-team {
+    .year-of-issue {
+        display: none;
+    }
 }
 </style>
