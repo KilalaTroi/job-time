@@ -31,7 +31,7 @@
             <div class="form-group">
               <label class="">{{ $ml.with("VueJS").get("txtStatus") }}</label>
               <select-2 v-model="currentProcess.status" class="select2">
-                <option value="null" selected>--</option>
+                <option value="">--</option>
                 <option value="Start Working">Start Working</option>
                 <option value="Finished Work">Finished Work</option>
                 <option value="Start Uploading">Start Uploading</option>
@@ -47,6 +47,7 @@
               }}</label>
               <input
                 type="number"
+                min="0"
                 v-model="currentProcess.page"
                 class="form-control"
                 :disabled="currentProcess.status != 'Finished Work'"
@@ -60,6 +61,7 @@
               }}</label>
               <input
                 type="number"
+                min="0"
                 v-model="currentProcess.file"
                 class="form-control"
                 :disabled="currentProcess.status != 'Finished Work'"
@@ -242,7 +244,7 @@ export default {
         "[" +
         (this.currentProcess.status
           ? this.currentProcess.status
-          : "Please select status!") +
+          : "null!") +
         "] \nReporter:  " +
         this.loginUser.name +
         " \nProject: " +
@@ -277,8 +279,7 @@ export default {
       // Reset validate
       this.errors = [];
       this.success = "";
-      const checkStatus =
-        this.currentProcess.status === "Finished Work" ? true : false;
+      const checkStatus = this.currentProcess.status === "Finished Work" ? true : false;
 
       if (!this.currentProcess.status) {
         this.errors = [["Please choosing the status."], ...this.errors];
@@ -288,9 +289,13 @@ export default {
         this.errors = [["Please typing the massage."], ...this.errors];
       }
 
-      if (!this.errors.length) {
+      if(!this.currentProcess.page || 0 == this.currentProcess.page){
+        if(checkStatus) this.errors = [['Enter in "PAGES WORKS and FILES WORKED"'], ...this.errors];
+      }
+
+      if (0 == this.errors.length) {
         this.isLoading = true;
-        
+
         const newProcess = {
           user_id: this.loginUser.id,
           issue_id: this.currentProcess.id,
@@ -299,7 +304,7 @@ export default {
           date: this.dateFormat(new Date(), "YYYY-MM-DD HH:mm"),
           page: checkStatus ? this.currentProcess.page : null,
           file: checkStatus ? this.currentProcess.file : null,
-          status: this.currentProcess.status,
+          status: this.currentProcess.status ? this.currentProcess.status : "null",
         };
 
         const uri = "/data/processes";
