@@ -46,7 +46,9 @@
           </button>
         </td>
       </tr>
-      <tr v-if="data.length">
+    </tbody>
+    <tfoot v-if="data.length">
+      <tr>
         <td
           v-for="(column, index) in columns"
           :key="index"
@@ -57,9 +59,9 @@
           <span v-else-if="'file' == column.id" v-html="total.file"></span>
           <span v-else></span>
         </td>
-        <td></td>
+        <td style="border-top: 1px"></td>
       </tr>
-    </tbody>
+    </tfoot>
   </table>
 </template>
 <script>
@@ -119,6 +121,10 @@ export default {
   font-size: 12px;
   display: block;
   text-align: center;
+}
+tfoot{
+  border: 1px solid transparent;
+    border-top: 1px solid #000;
 }
 .start-working {
   background-color: #6dcff6;
