@@ -54,13 +54,13 @@
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label class>{{ $ml.with("VueJS").get("txtLineRoom") }} <input class="ml-2" v-model="checkFinsh.lineroom" type="checkbox"> FINISH MESSAGE</label>
+          <label class>{{ $ml.with("VueJS").get("txtLineRoom") }} <input class="ml-2" v-model="selectedItem.checkFinsh.lineroom" type="checkbox"> FINISH MESSAGE</label>
           <input
             v-model="selectedItem.line_room"
             type="text"
             name="line_room"
             class="form-control"
-            :disabled="!checkFinsh.lineroom"
+            :disabled="!selectedItem.checkFinsh.lineroom"
           />
         </div>
       </div>
@@ -70,13 +70,13 @@
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label class>{{ $ml.with("VueJS").get("txtEmail") }} <input class="ml-2" v-model="checkFinsh.email" type="checkbox"> FINISH MESSAGE</label>
+          <label class>{{ $ml.with("VueJS").get("txtEmail") }} <input class="ml-2" v-model="selectedItem.checkFinsh.email" type="checkbox"> FINISH MESSAGE</label>
           <input
             v-model="selectedItem.email"
             type="text"
             name="email"
             class="form-control"
-            :disabled="!checkFinsh.email"
+            :disabled="!selectedItem.checkFinsh.email"
           />
         </div>
       </div>
@@ -117,10 +117,6 @@ export default {
   data() {
     return {
       modalLg: "modal-lg",
-      checkFinsh: {
-        lineroom: false,
-        email: false,
-      }
     };
   },
 
@@ -151,10 +147,6 @@ export default {
     resetValidation() {
       this.resetValidate();
       this.resetSelectedItem();
-      this.checkFinsh = {
-        lineroom: false,
-        email: false
-      }
     },
   }
 };

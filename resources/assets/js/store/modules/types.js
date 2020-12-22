@@ -7,7 +7,11 @@ export default {
 		options: [],
 		selectedItem: {
 			value: '#000000',
-			dept_id: 0
+			dept_id: 0,
+			checkFinsh: {
+				lineroom: false,
+				email: false,
+			}
 		},
 		validationErrors: '',
 		validationSuccess: ''
@@ -51,14 +55,14 @@ export default {
 
 			await axios.get(uri).then(response => {
 				if (response.data.data.length) {
-                    response.data.data = response.data.data.map((item, index) => {
+					response.data.data = response.data.data.map((item, index) => {
 						const dept = rootGetters['getObjectByID'](rootState.departments.options, item.dept_id)
 						return Object.assign({}, {
 							html_value: '<span class="type-color" style="background: ' + item.value + '"></span>',
 							htmldept_vi: dept.name_vi ? dept.name_vi : dept.text,
 							htmldept_ja: dept.name_ja ? dept.name_ja : dept.text,
 						}, item)
-                    });
+					});
 				}
 
 				commit('SET_DATA', response.data)
@@ -70,7 +74,7 @@ export default {
 			const uri = '/data/types?page=0'
 
 			await axios.get(uri).then(response => {
-				let dataOptions = dafaultValue ? [{id: 0, text: '<div>' + rootGetters['getTranslate']('txtSelectOne') + '<div>'}] : []
+				let dataOptions = dafaultValue ? [{ id: 0, text: '<div>' + rootGetters['getTranslate']('txtSelectOne') + '<div>' }] : []
 
 				dataOptions = [...dataOptions, ...response.data.map(item => {
 					return {
@@ -98,21 +102,25 @@ export default {
 		},
 
 		getItem({ state, commit, rootGetters }, id) {
-			const type = rootGetters['getObjectByID'](state.data.data, id)
-			commit('SET_SELECTED_ITEM', type)
+			let item = rootGetters['getObjectByID'](state.data.data, id)
+			item.checkFinsh = {
+				lineroom: item.line_room ? true : false,
+				email: item.email ? true : false,
+			}
+			commit('SET_SELECTED_ITEM', item)
 		},
 
 		resetSelectedItem({ commit }) {
-			commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 })
+			commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0, checkFinsh: { lineroom: false, email: false, } })
 		},
 
-		updateItem({ commit }, type) {
+		updateItem({ commit }, item) {
 			commit('SET_VALIDATE', { error: '', success: '' })
 
-			const uri = '/data/types/' + type.id
+			const uri = '/data/types/' + item.id
 
 			axios
-				.patch(uri, type)
+				.patch(uri, item)
 				.then(res => {
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
@@ -130,7 +138,7 @@ export default {
 			axios
 				.post(uri, type)
 				.then(res => {
-					commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 })
+					commit('SET_SELECTED_ITEM', { value: '#000000', dept_id: 0 , checkFinsh: { lineroom: false, email: false, } })
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})
 				.catch(err => {
@@ -146,13 +154,13 @@ export default {
 
 		setColumns({ commit, rootGetters, rootState }) {
 			const columns = [
-				{id: 'slug', value: rootGetters['getTranslate']('txtName'), width: '200', class: ''},
-				{id: 'html_value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center'},
-				{id: 'slug_vi', value: rootGetters['getTranslate']('txtName')+ ' VI', width: '200', class: ''},
-				{id: 'slug_ja', value: rootGetters['getTranslate']('txtName')+ ' JA', width: '200', class: ''},
-				{id: 'htmldept_' + rootState.currentLang, value: rootGetters['getTranslate']('txtDepartments'), width: '', class: ''},
-				{id: 'email', value: rootGetters['getTranslate']('txtEmail'), width: '', class: ''},
-				{id: 'line_room', value: rootGetters['getTranslate']('txtLineRoom'), width: '200', class: ''},
+				{ id: 'slug', value: rootGetters['getTranslate']('txtName'), width: '200', class: '' },
+				{ id: 'html_value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center' },
+				{ id: 'slug_vi', value: rootGetters['getTranslate']('txtName') + ' VI', width: '200', class: '' },
+				{ id: 'slug_ja', value: rootGetters['getTranslate']('txtName') + ' JA', width: '200', class: '' },
+				{ id: 'htmldept_' + rootState.currentLang, value: rootGetters['getTranslate']('txtDepartments'), width: '', class: '' },
+				{ id: 'email', value: rootGetters['getTranslate']('txtEmail'), width: '', class: '' },
+				{ id: 'line_room', value: rootGetters['getTranslate']('txtLineRoom'), width: '200', class: '' },
 			]
 
 			commit('SET_COLUMNS', columns)

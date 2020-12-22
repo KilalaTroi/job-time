@@ -57,7 +57,7 @@
               >{{ $ml.with("VueJS").get("txtLineRoom") }}
               <input
                 class="ml-2"
-                v-model="checkFinsh.lineroom"
+                v-model="selectedItem.checkFinsh.lineroom"
                 type="checkbox"
               />
               FINISH MESSAGE</label
@@ -67,7 +67,7 @@
               type="text"
               name="line_room"
               class="form-control"
-              :disabled="!checkFinsh.lineroom"
+              :disabled="!selectedItem.checkFinsh.lineroom"
             />
           </div>
         </div>
@@ -78,7 +78,7 @@
           <div class="form-group">
             <label class
               >{{ $ml.with("VueJS").get("txtEmail") }}
-              <input class="ml-2" v-model="checkFinsh.email" type="checkbox" />
+              <input class="ml-2" v-model="selectedItem.checkFinsh.email" type="checkbox" />
               FINISH MESSAGE</label
             >
             <input
@@ -86,17 +86,14 @@
               type="text"
               name="email"
               class="form-control"
-              :disabled="!checkFinsh.email"
+              :disabled="!selectedItem.checkFinsh.email"
             />
           </div>
         </div>
       </div>
       <div class="form-group">
         <label class>{{ $ml.with("VueJS").get("txtColor") }}</label>
-        <color-picker
-          :color="selectedItem.value"
-          v-model="selectedItem.value"
-        ></color-picker>
+        <color-picker :color="selectedItem.value" v-model="selectedItem.value"></color-picker>
       </div>
       <error-item :errors="validationErrors"></error-item>
       <success-item :success="validationSuccess"></success-item>
@@ -128,10 +125,6 @@ export default {
   data() {
     return {
       modalLg: "modal-lg",
-      checkFinsh: {
-        lineroom: false,
-        email: false,
-      },
     };
   },
 
@@ -167,17 +160,17 @@ export default {
       this.resetSelectedItem();
     },
 
-    checkFinshMessage() {
-        this.checkFinsh.email = this.selectedItem.email ? true : false;
-        this.checkFinsh.lineroom = this.selectedItem.line_room ? true : false;
-    },
+    // checkFinshMessage() {
+    //     this.checkFinsh.email = this.selectedItem.email ? true : false;
+    //     this.checkFinsh.lineroom = this.selectedItem.line_room ? true : false;
+    // },
   },
   watch: {
-    selectedItem: [
-      {
-        handler: "checkFinshMessage",
-      },
-    ],
+    // selectedItem: [
+    //   {
+    //     handler: "checkFinshMessage",
+    //   },
+    // ],
   },
 };
 </script>

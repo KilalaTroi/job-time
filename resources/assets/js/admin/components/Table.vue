@@ -1,6 +1,6 @@
 <template>
   <div class="table-responsive">
-    <table class="table table-hover table-striped">
+    <table class="table table-hover table-striped" :id="dataPath">
       <thead>
         <tr>
           <th
@@ -8,6 +8,7 @@
             :key="index"
             :width="column.width"
             :class="column.class"
+            :data-filter="column.id"
           >
             {{ column.value }}
           </th>
@@ -23,6 +24,7 @@
             v-for="(column, index) in dataCols"
             :key="index"
             :class="column.class"
+            :data-filter="column.id"
           >
             <span v-html="itemValue(item, column)"></span>
           </td>
