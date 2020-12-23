@@ -126,6 +126,11 @@ export default {
                 backgroundColor: type.value,
                 start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
                 end: rootGetters['dateFormat'](_item.date + " " + _value.end_time),
+                // Get start date, end date of issue
+                // constraint: {
+                //   start: rootGetters['dateFormat'](_item.date, 'YYYY-MM-DD') + "T" + "00:00:00",
+                //   end: rootGetters['dateFormat'](_item.date, 'YYYY-MM-DD') + "T" + "23:59:59",
+                // },
                 memo: _item.memo,
                 title_not_memo: _item.i_name
                   ? _item.p_name + checkTR + " " + _item.i_name
