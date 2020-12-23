@@ -38,7 +38,8 @@ class ProjectsController extends Controller
                 ->when($keyword, function ($query, $keyword) {
                     return $query->where(function ($query) use ($keyword) {
                         $query->where('p.name', 'like', '%' . $keyword . '%')
-                            ->orWhere('i.name', 'like', '%' . $keyword . '%');
+                            ->orWhere('i.name', 'like', '%' . $keyword . '%')
+                            ->orWhere('i.year', 'like', '%' . $keyword . '%');
                     });
                 })
                 ->when($type_id, function ($query, $type_id) {
@@ -81,7 +82,8 @@ class ProjectsController extends Controller
                 ->when($keyword, function ($query, $keyword) {
                     return $query->where(function ($query) use ($keyword) {
                         $query->where('p.name', 'like', '%'. $keyword .'%')
-                            ->orWhere('i.name', 'like', '%'. $keyword .'%');
+                            ->orWhere('i.name', 'like', '%'. $keyword .'%')
+                            ->orWhere('i.year', 'like', '%' . $keyword . '%');
                     });
                 })
                 ->when($type_id, function ($query, $type_id) {

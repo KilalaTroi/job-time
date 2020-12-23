@@ -236,7 +236,11 @@ export default {
       }
     },
     getDataProcess() {
-      if (this.currentProcess.page_number && !this.currentProcess.page) {
+      if ( this.currentProcess.status !== "Finished Work" ) {
+        this.currentProcess.page = null;
+        this.currentProcess.file = null;
+      }
+      if (this.currentProcess.page_number && !this.currentProcess.page && this.currentProcess.status === "Finished Work") {
         this.currentProcess.page = this.currentProcess.page_number;
       }
 
@@ -290,7 +294,7 @@ export default {
       }
 
       if(!this.currentProcess.page || 0 == this.currentProcess.page){
-        if(checkStatus) this.errors = [['Enter in "PAGES WORKS and FILES WORKED"'], ...this.errors];
+        if(checkStatus) this.errors = [['Enter in "PAGES WORKS"'], ...this.errors];
       }
 
       if (0 == this.errors.length) {
