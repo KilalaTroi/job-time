@@ -153,6 +153,9 @@ export default {
 		});
 	},
 	methods: {
+		...mapActions({
+			setCurrentTeam: "setCurrentTeam",
+    }),
 		getProcessObjectValue(data, id, phase) {
             const arrProcess = data.filter((elem) => {
                 if (elem.issue_id === id && elem.phase === phase) return elem;
@@ -160,12 +163,12 @@ export default {
 
             return arrProcess;
         },
-		async fetchData(page = 1, loading = true) {
+		fetchData(page = 1, loading = true) {
 			this.page = page;
 			const uri = "/data/finish/data?page=" + page;
 			this.loading = loading;
 
-			await axios.post(uri, {
+			axios.post(uri, {
 				start_date: this.dateFormat(this.start_date, 'YYYY-MM-DD'),
 				selectTeam: this.selectTeam,
 				showFilter: this.showFilter
@@ -232,10 +235,16 @@ export default {
 			return this.dataLang[data.current]
 		}
 	},
+	async created() {
+		await this.fetchData();
+	},
 	watch: {
 		selectTeam: [{
-            handler: function(value, oldValue) {
-                if ( value != oldValue ) this.fetchData()
+            handler: function(value) {
+                if ( value != this.currentTeam.id ){
+									this.setCurrentTeam(value);
+									this.fetchData();
+								}
             }
         }],
 		start_date: [

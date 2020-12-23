@@ -330,8 +330,6 @@ export default {
   },
   mounted() {
     const _this = this;
-    _this.team = _this.currentTeam ? _this.currentTeam.id : "";
-    if (_this.team) _this.fetchData();
     $(document).on("click", ".languages button", function () {
       _this.txtAll = _this.$ml.with("VueJS").get("txtSelectAll");
       _this.columns = [
@@ -399,6 +397,9 @@ export default {
     });
   },
   methods: {
+    ...mapActions({
+			setCurrentTeam: "setCurrentTeam",
+    }),
     getProcessObjectValue(data, id, phase) {
       const arrProcess = data.filter((elem) => {
         if (elem.issue_id === id && elem.phase === phase) return elem;
@@ -426,7 +427,7 @@ export default {
           alert("Error!");
         });
     },
-    async fetchData(page = 1, loading = true) {
+    fetchData(page = 1, loading = true) {
       this.page = page;
       const uri = "/data/finish/uploaded?page=" + page;
       this.loading = loading;
@@ -434,7 +435,7 @@ export default {
         page: 0,
         file: 0,
       }
-      await axios
+      axios
         .post(uri, {
           user_id: this.user_id,
           start_date: this.dateFormatter(this.start_date),
@@ -544,6 +545,10 @@ export default {
       };
     },
   },
+  async created() {
+    this.team = this.currentTeam ? this.currentTeam.id : "";
+		await this.fetchData();
+	},
   watch: {
     users: [
       {
@@ -592,11 +597,10 @@ export default {
     ],
     team: [
       {
-        handler: function () {
-          if (this.team) {
-            if (this.firstLoad >= 1 && this.team) {
-              this.fetchData();
-            }
+        handler: function (value) {
+          if ( value != this.currentTeam.id ){
+            this.setCurrentTeam(value);
+            this.fetchData();
           }
         },
       },

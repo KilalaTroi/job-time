@@ -16,20 +16,19 @@ class JobsController extends Controller
    */
   public function index(Request $request)
   {
-    $userID = $request->session()->get('Auth')[0]['id'];
     $filters = array(
       'date' => $request->get('date'),
       'team' => $request->get('team_id'),
       'show' => $request->get('show')
     );
 
-    $totaling = $this->getTotaling($filters, $userID);
+    $totaling = $this->getTotaling($filters, $this->user['id']);
 
     $totalTime = 0;
     foreach ($totaling as $v) $totalTime = $totalTime + $v->time;
 
     return response()->json([
-      'jobs' => $this->getJobs($filters, $userID),
+      'jobs' => $this->getJobs($filters, $this->user['id']),
       'totaling' => array(
         'data' => $totaling,
         'total' => array('text' => $this->formatTime($totalTime), 'value' => $totalTime)

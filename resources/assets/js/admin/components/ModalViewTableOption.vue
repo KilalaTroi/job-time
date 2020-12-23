@@ -73,16 +73,13 @@ export default {
   watch: {
     dataCols: [
       {
-        handler: function (value) {
-          this.hanldeFliterColumns(this.checkColumns);
-        },
+        handler: function (value) { this.hanldeFliterColumns(this.checkColumns); },
         deep: true,
       }
     ],
     dataItems: [
       {
-        handler: function (value) {
-          this.hanldeFliterColumns(this.checkColumns); },
+        handler: function (value) { this.hanldeFliterColumns(this.checkColumns); },
         deep: true,
       },
 		],

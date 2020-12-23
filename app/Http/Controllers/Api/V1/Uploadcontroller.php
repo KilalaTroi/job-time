@@ -59,6 +59,7 @@ class Uploadcontroller extends Controller
 					});
 			})
 			->where('t.line_room', '!=', NULL)
+			->where('t.email', '!=', NULL)
 			->where('i.created_at', '<=',  $selectDate . ' 23:59:59')
 			->orderBy('i.created_at', 'desc')
 			->orderBy('s.created_at', 'desc')
@@ -161,6 +162,7 @@ class Uploadcontroller extends Controller
 			->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->where('t.line_room', '!=', NULL)
+			->where('t.email', '!=', NULL)
 			->when($deptArr, function ($query, $deptArr) {
 				return $query->whereIn('p.dept_id', $deptArr);
 			})
@@ -235,6 +237,7 @@ class Uploadcontroller extends Controller
 			->where('p.date', '>=', $start_time . ' 00:00:00')
 			->where('p.date', '<=', $end_time . ' 23:59:59')
 			->where('t.line_room', '!=', NULL)
+			->where('t.email', '!=', NULL)
 			->paginate(20);
 
 		// Get issues IDs
@@ -371,7 +374,9 @@ class Uploadcontroller extends Controller
 			})
 			->where('p.date', '>=', $start_time . ' 00:00:00')
 			->where('p.date', '<=', $end_time . ' 23:59:59')
-			->where('t.line_room', '!=', NULL)->get();
+			->where('t.line_room', '!=', NULL)
+			->where('t.email', '!=', NULL)
+			->get();
 
 		// get array process ids
 		$issueIds = $processesUploaded->pluck('issue_id')->toArray();
@@ -551,11 +556,11 @@ class Uploadcontroller extends Controller
 				'email' => $request->get('user')['email'],
 				'name' => $request->get('user')['name']
 			);
-	
+
 			$emails[] = $request->get('email');
-	
+
 			$contentArr = explode('---- ', $request->get('content'));
-	
+
 			Mail::send('emails.finish', [
 				'content' => count($contentArr) > 1 ? $contentArr[1] : '',
 				'user' => $request->get('user'),
