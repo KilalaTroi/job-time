@@ -58,8 +58,10 @@ class Uploadcontroller extends Controller
 							->orWhere('end_date', '=',  NULL);
 					});
 			})
-			->where('t.line_room', '!=', NULL)
-			->where('t.email', '!=', NULL)
+			->where(function ($query) {
+				$query->where('t.line_room', '!=', NULL)
+						->orWhere('t.email', '!=', NULL);
+			})
 			->where('i.created_at', '<=',  $selectDate . ' 23:59:59')
 			->orderBy('i.created_at', 'desc')
 			->orderBy('s.created_at', 'desc')
@@ -161,8 +163,10 @@ class Uploadcontroller extends Controller
 			)
 			->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
-			->where('t.line_room', '!=', NULL)
-			->where('t.email', '!=', NULL)
+			->where(function ($query) {
+				$query->where('t.line_room', '!=', NULL)
+						->orWhere('t.email', '!=', NULL);
+			})
 			->when($deptArr, function ($query, $deptArr) {
 				return $query->whereIn('p.dept_id', $deptArr);
 			})
@@ -236,8 +240,10 @@ class Uploadcontroller extends Controller
 			})
 			->where('p.date', '>=', $start_time . ' 00:00:00')
 			->where('p.date', '<=', $end_time . ' 23:59:59')
-			->where('t.line_room', '!=', NULL)
-			->where('t.email', '!=', NULL)
+			->where(function ($query) {
+				$query->where('t.line_room', '!=', NULL)
+						->orWhere('t.email', '!=', NULL);
+			})
 			->paginate(20);
 
 		// Get issues IDs
@@ -374,8 +380,10 @@ class Uploadcontroller extends Controller
 			})
 			->where('p.date', '>=', $start_time . ' 00:00:00')
 			->where('p.date', '<=', $end_time . ' 23:59:59')
-			->where('t.line_room', '!=', NULL)
-			->where('t.email', '!=', NULL)
+			->where(function ($query) {
+				$query->where('t.line_room', '!=', NULL)
+						->orWhere('t.email', '!=', NULL);
+			})
 			->get();
 
 		// get array process ids
@@ -579,27 +587,33 @@ class Uploadcontroller extends Controller
 		}
 
 		// Send message Line Work
-		$client = new Client([
-			'headers' => [
-				'Access-Control-Allow-Origin' => '*',
-				'Content-Type'     => 'application/json',
-				'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
-				'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
-			]
-		]);
+		if ( $request->get('roomId') ) {
+			$client = new Client([
+				'headers' => [
+					'Access-Control-Allow-Origin' => '*',
+					'Content-Type'     => 'application/json',
+					'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
+					'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
+				]
+			]);
 
-		$response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
-			'json' => [
-				"botNo" => 763699,
-				"roomId" => $request->get('roomId'),
-				"content" => array(
-					"type" => "text",
-					"text" => $request->get('content')
-				),
-			]
-		]);
+			$response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
+				'json' => [
+					"botNo" => 763699,
+					"roomId" => $request->get('roomId'),
+					"content" => array(
+						"type" => "text",
+						"text" => $request->get('content')
+					),
+				]
+			]);
 
-		return $response->getBody();;
+			return $response->getBody();
+		}
+
+		return response()->json(array(
+            'message' => 'Successfully.'
+        ), 200);
 	}
 
 	public function sendMessage($url, $data)
