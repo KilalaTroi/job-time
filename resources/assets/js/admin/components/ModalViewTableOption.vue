@@ -28,7 +28,8 @@ export default {
     };
   },
   mounted() {
-		this.resetValidation();
+    this.resetValidation();
+    this.checkTableColumns();
     this.hanldeFliterColumns(this.checkColumns);
   },
   methods: {
@@ -54,14 +55,25 @@ export default {
 				this.dataCols.map(function (value) { _this.checkColumns.push(value.id) });
 				localStorage.setItem("filter_" + this.dataTable, this.checkColumns);
 			}
-		}
+    },
+    checkTableColumns(){
+      let colsNew = '', colsOld = localStorage.getItem("cols_" + this.dataTable);
+      if(!colsOld) colsOld = '';
+
+      this.dataCols.map(function (value) { colsNew += value.id+','; });
+
+      if(colsOld != colsNew){
+        const _this = this;
+        this.dataCols.map(function (value) { if(-1 == colsOld.indexOf(value.id) && -1 == _this.checkColumns.indexOf(value.id)) _this.checkColumns.push(value.id) });
+        localStorage.setItem("filter_" + this.dataTable, this.checkColumns);
+        localStorage.setItem("cols_" + this.dataTable, colsNew)
+      }
+    }
   },
   watch: {
     dataItems: [
       {
-        handler: function (value) {
-         this.hanldeFliterColumns(this.checkColumns);
-        },
+        handler: function (value) { this.hanldeFliterColumns(this.checkColumns); },
         deep: true,
       },
 		],
