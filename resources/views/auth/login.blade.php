@@ -66,4 +66,8 @@
             </div>
         </div>
     </div>
+
+@endsection
+@section('after-app')
+<script>localStorage.removeItem('team');</script>
 @endsection
