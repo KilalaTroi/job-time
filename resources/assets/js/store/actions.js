@@ -19,18 +19,20 @@ export default {
 
     setCurrentTeam({ state, commit, getters }, data) {
         if ( data ) {
-            commit('SET_CURRENT_TEAM', getters['getObjectByID'](state.currentTeamOption, +data))
+            const team = getters['getObjectByID'](state.currentTeamOption, +data);
+            localStorage.setItem('team', team.id)
+            commit('SET_CURRENT_TEAM', team)
         }
     },
 
-    setReportNotify({ state, commit }, teamID) { 
+    setReportNotify({ state, commit }, teamID) {
         const uri = "/data/notify?user_id=" + state.loginUser.id + "&team_id=" + teamID
         axios.get(uri).then((response) => {
             commit('SET_REPORT_NOTIFY', response.data.notify)
         });
     },
 
-    updateReportNotify({ commit }) { 
+    updateReportNotify({ commit }) {
         commit('UPDATE_REPORT_NOTIFY')
     }
 }

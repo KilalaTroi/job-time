@@ -97,10 +97,11 @@ export default {
     },
 
     async created(){
-        const _this = this;
+        const _this = this, team = localStorage.getItem('team');
         _this.setCurrentLang(_this.$ml.current)
 
-        const teamDefault = document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0]
+        let teamDefault = team ? team : document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0];
+
         _this.setCurrentTeam(teamDefault)
 
         const _translateTexts = _this.$ml.with("VueJS")
