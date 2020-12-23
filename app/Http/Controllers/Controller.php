@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\DB;
 class Controller extends BaseController
 {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-	public $teamIDs;
+	public $teamIDs, $user;
 	public function __construct()
 	{
 		$this->middleware(function ($request, $next) {
 			// fetch session and use it in entire class with constructor
 			$user = $request->session()->get('Auth');
-
+			$this->user = $user[0];
 			if ( isset($_GET['team']) && $_GET['team_id'] ) $this->teamIDs = $_GET['team_id'];
 			else $this->teamIDs = explode(',',$user[0]['team'])[0];
 			return $next($request);

@@ -502,7 +502,7 @@ class ReportsController extends Controller
 	function getNotify()
 	{
 
-		$user_id = $_GET['user_id'];
+		$user_id = isset($_GET['user_id']) && !empty($_GET['user_id']) ? $_GET['user_id'] : $this->user['id'];
 		$team_id = $_GET['team_id'];
 		$count_notify = 0;
 
@@ -525,7 +525,7 @@ class ReportsController extends Controller
 
 	function updateSeen(Request $request)
 	{
-		$userID = $request->get('userID');
+		$userID = isset($_GET['user_id']) && !empty($_GET['user_id']) ? $_GET['user_id'] : $this->user['id'];
 		$reportID = $request->get('reportID');
 		$seenData = '';
 
@@ -758,7 +758,7 @@ class ReportsController extends Controller
 
 		return DB::table('issues')
 			->select(
-				'year as id', 
+				'year as id',
 				DB::raw('IFNULL(year, "(--)") AS text')
 			)
 			->where('project_id', $projectId)

@@ -100,7 +100,7 @@ export default {
         const _this = this, team = localStorage.getItem('team');
         _this.setCurrentLang(_this.$ml.current)
 
-        let teamDefault = team ? team : document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0];
+        const teamDefault = team ? team : document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0];
 
         _this.setCurrentTeam(teamDefault)
 

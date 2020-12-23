@@ -363,8 +363,6 @@ export default {
   },
   mounted() {
     let _this = this;
-    _this.team = _this.currentTeam ? _this.currentTeam.id : "";
-    // if ( _this.team ) _this.fetchData();
     $(document).on("click", ".languages button", function () {
       _this.columns = [
         {
@@ -426,6 +424,7 @@ export default {
   },
   methods: {
     ...mapActions({
+      setCurrentTeam: "setCurrentTeam",
       updateReportNotify: "updateReportNotify",
       setReportNotify: "setReportNotify",
     }),
@@ -459,7 +458,7 @@ export default {
       return this.dataLang[data.current];
     },
     fetchData() {
-      let uri = "/data/reports?team_id=" + this.team;
+      let uri = "/data/reports?team_id=" + this.currentTeam.id;
       axios
         .post(uri, {
           indexPage: true,
@@ -470,7 +469,7 @@ export default {
           projectSelects: this.projectSelects,
           issueSelects: this.issueSelects,
           issueYearSelects: this.issueYearSelects,
-          team_id: this.team,
+          team_id: this.currentTeam.id,
         })
         .then((res) => {
           this.departments = res.data.departments;
@@ -486,7 +485,7 @@ export default {
         });
     },
     fetchDataFilter() {
-      let uri = "/data/reports?team_id=" + this.team;
+      let uri = "/data/reports?team_id=" + this.currentTeam.id;
       axios
         .post(uri, {
           indexPage: true,
@@ -497,7 +496,7 @@ export default {
           projectSelects: this.projectSelects,
           issueSelects: this.issueSelects,
           issueYearSelects: this.issueYearSelects,
-          team_id: this.team,
+          team_id: this.currentTeam.id,
         })
         .then((res) => {
           this.projects = res.data.projects;
@@ -534,14 +533,14 @@ export default {
       if (newData) this.fetchDataFilter();
     },
     getResults(page = 1) {
-      let uri = "/data/reports?page=" + page + "&team_id=" + this.team;
+      let uri = "/data/reports?page=" + page + "&team_id=" + this.currentTeam.id;
       axios
         .post(uri, {
           deptSelects: this.deptSelects,
           projectSelects: this.projectSelects,
           issueSelects: this.issueSelects,
           issueYearSelects: this.issueYearSelects,
-          team_id: this.team,
+          team_id: this.currentTeam.id,
         })
         .then((res) => {
           this.projects = res.data.projects;
@@ -626,6 +625,9 @@ export default {
 			if(!flag) this.issueYearSelects = null;
     }
   },
+  async created() {
+		await this.fetchData();
+	},
   watch: {
     deptSelects: [{ handler: "fetchDataFilter" }, { handler: "resetProject" }],
     projectSelects: [
@@ -640,10 +642,11 @@ export default {
     end_date: [{ handler: "fetchDataFilter" }],
     team: [
       {
-        handler: function (value, oldValue) {
-          if (value != oldValue) {
+        handler: function (value) {
+          if (value != this.currentTeam.id) {
+            this.setCurrentTeam(value);
             this.fetchData();
-            this.setReportNotify(this.team);
+            this.setReportNotify(this.currentTeam.id);
           }
         },
       },
