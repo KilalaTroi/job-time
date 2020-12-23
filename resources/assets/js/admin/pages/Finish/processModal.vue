@@ -333,6 +333,7 @@ export default {
       this.errors = "";
       this.success = "";
       this.newMessage = "";
+      currentProcess.status = currentProcess.status ? currentProcess.status : '--';
       this.$emit("reset-validation");
     },
     onCancel() {
