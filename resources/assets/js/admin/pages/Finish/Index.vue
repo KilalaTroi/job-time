@@ -132,7 +132,6 @@ export default {
 	},
 	mounted() {
 		const _this = this;
-		_this.selectTeam = _this.currentTeam.id
 		_this.getOptions();
 		$(document).on('click', '.languages button', function() {
 			_this.txtAll = _this.$ml.with('VueJS').get('txtSelectAll')
@@ -236,6 +235,7 @@ export default {
 		}
 	},
 	async created() {
+		this.selectTeam = this.currentTeam.id
 		await this.fetchData();
 	},
 	watch: {
