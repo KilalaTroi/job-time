@@ -15,6 +15,7 @@ import projects from './modules/projects'
 import jobs from './modules/jobs'
 import offdays from './modules/offdays'
 import schedules from './modules/schedules'
+import totaling from './modules/totaling'
 
 Vue.use(Vuex)
 
@@ -32,7 +33,8 @@ export default new Vuex.Store({
     projects,
     jobs,
     offdays,
-    schedules
+    schedules,
+    totaling
   },
 })
 
