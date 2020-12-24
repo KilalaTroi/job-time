@@ -46,16 +46,24 @@ class Uploadcontroller extends Controller
 			})
 			->whereNotIn('p.id', $defaultProjects)
 			->when($showFilter, function ($query) use ($selectDate) {
-				return $query->where('s.date', '=', $selectDate);
+				return $query->where(function ($query) use ($selectDate) {
+					$query->where(function ($query) use ($selectDate) {
+						$query->where('s.date', '=',  $selectDate);
+					})
+					->orWhere(function ($query) use ($selectDate) {
+						$query->where('s.date', '<=',  $selectDate)
+						->where('s.end_date', '>=',  $selectDate);
+					});
+				});
 			})
 			->when(!$showFilter, function ($query) use ($selectDate) {
 				return $query->where(function ($query) use ($selectDate) {
-					$query->where('start_date', '<=',  $selectDate)
-						->orWhere('start_date', '=',  NULL);
+					$query->where('i.start_date', '<=',  $selectDate)
+						->orWhere('i.start_date', '=',  NULL);
 				})
 					->where(function ($query) use ($selectDate) {
-						$query->where('end_date', '>=',  $selectDate)
-							->orWhere('end_date', '=',  NULL);
+						$query->where('i.end_date', '>=',  $selectDate)
+							->orWhere('i.end_date', '=',  NULL);
 					});
 			})
 			->where(function ($query) {

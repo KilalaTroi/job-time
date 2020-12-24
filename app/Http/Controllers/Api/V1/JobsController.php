@@ -155,13 +155,22 @@ class JobsController extends Controller
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->where('i.status', '=', 'publish')
         ->where(function ($query) use ($filters) {
-          $query->where('s.date', '=', $filters['date'])->where('i.status', '=', 'publish')
-            ->where(function ($query) use ($filters) {
-              $query->where('p.team', '=', $filters['team'])
-                ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
-                ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
-                ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
+          $query->where(function ($query) use ($filters) {
+            $query->where(function ($query) use ($filters) {
+                $query->where('s.date', '=',  $filters['date']);
+            })
+            ->orWhere(function ($query) use ($filters) {
+                $query->where('s.date', '<=',  $filters['date'])
+                ->where('s.end_date', '>=',  $filters['date']);
             });
+          })
+          ->where('i.status', '=', 'publish')
+          ->where(function ($query) use ($filters) {
+            $query->where('p.team', '=', $filters['team'])
+              ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
+              ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
+              ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
+          });
         })
         ->orWhere(function ($query) use ($defaultProjects, $filters) {
           $query->whereIn('p.id', $defaultProjects)
@@ -194,10 +203,10 @@ class JobsController extends Controller
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->where('i.status', '=', 'publish')
         ->where(function ($query) use ($filters) {
-          $query->where('start_date', '<=',  $filters['date'])->orWhere('start_date', '=',  NULL);
+          $query->where('i.start_date', '<=',  $filters['date'])->orWhere('i.start_date', '=',  NULL);
         })
         ->where(function ($query) use ($filters) {
-          $query->where('end_date', '>=',  $filters['date'])->orWhere('end_date', '=',  NULL);
+          $query->where('i.end_date', '>=',  $filters['date'])->orWhere('i.end_date', '=',  NULL);
         })
         ->where(function ($query) use ($filters) {
           $query->where('p.team', '=', $filters['team'])

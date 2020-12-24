@@ -61,7 +61,7 @@
             :droppable="fullCalendar.droppable"
             :events="scheduleData.schedules"
             :event-overlap="true"
-            :all-day-slot="false"
+            :all-day-slot="true"
             min-time="07:00:00"
             max-time="19:00:00"
             height="auto"
