@@ -60,8 +60,6 @@ export default {
     CreateItem,
     EditItem,
     ButtonCreate,
-    ButtonViewTableOption,
-    ViewTableOption,
   },
   computed: {
     ...mapGetters("types", {

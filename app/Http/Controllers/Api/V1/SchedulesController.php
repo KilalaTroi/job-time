@@ -100,6 +100,7 @@ class SchedulesController extends Controller
                 'type_id',
                 's.date as date',
                 's.end_date as s_end_date',
+                's.all_date as all_date',
                 's.start_time as start_time',
                 's.end_time as end_time',
                 'memo'
@@ -108,8 +109,20 @@ class SchedulesController extends Controller
             ->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
             ->leftJoin('types as t', 't.id', '=', 'p.type_id')
             ->where('s.team_id', '=', $teamID)
-            ->where('s.date', '>=',  $startDate)
-            ->where('s.date', '<',  $endDate)
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->where(function ($query) use ($startDate, $endDate) {
+                    $query->where('s.date', '>=',  $startDate)
+                    ->where('s.date', '<',  $endDate);
+                })
+                ->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('s.end_date', '>=',  $startDate)
+                    ->where('s.end_date', '<=',  $endDate);
+                })
+                ->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('s.date', '<=',  $startDate)
+                    ->where('s.end_date', '>=',  $endDate);
+                });
+            })
             ->get()->toArray();
 
         $schedulesDetail = DB::table('jobs as j')
@@ -142,22 +155,26 @@ class SchedulesController extends Controller
      */
     public function store(Request $request)
     {
-        $start_date = strtotime($request->get('date') . ' ' . $request->get('start_time'));
-        $end_date = strtotime($request->get('date') . ' ' . $request->get('end_time'));
+        // $start_date = strtotime($request->get('date') . ' ' . $request->get('start_time'));
+        // $end_date = strtotime($request->get('end_date') . ' ' . $request->get('end_time'));
 
         $schedule = Schedule::create($request->all());
 
+        // return response()->json(array(
+        //     'event' => array(
+        //         'id' => $schedule->id,
+        //         'title' => $request->get('title'),
+        //         'borderColor' => $request->get('borderColor'),
+        //         'backgroundColor' => $request->get('backgroundColor'),
+        //         'start' => date('Y-m-d\TH:i:s', $start_date),
+        //         'end' => date('Y-m-d\TH:i:s', $end_date),
+        //         'title_not_memo' => $request->get('title'),
+        //         'team_id' => $request->get('team_id'),
+        //     ),
+        //     'message' => 'Successfully.'
+        // ), 200);
+
         return response()->json(array(
-            'event' => array(
-                'id' => $schedule->id,
-                'title' => $request->get('title'),
-                'borderColor' => $request->get('borderColor'),
-                'backgroundColor' => $request->get('backgroundColor'),
-                'start' => date('Y-m-d\TH:i:s', $start_date),
-                'end' => date('Y-m-d\TH:i:s', $end_date),
-                'title_not_memo' => $request->get('title'),
-                'team_id' => $request->get('team_id'),
-            ),
             'message' => 'Successfully.'
         ), 200);
     }

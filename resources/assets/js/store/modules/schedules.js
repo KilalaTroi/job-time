@@ -92,11 +92,11 @@ export default {
             let description = '';
 
             // Get log time detail for schedule
-            if ( response.data.schedulesDetail.length ) {
+            if ( response.data.schedulesDetail.length && !item.all_date ) {
               sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
             }
 
-            const codition = sDetail.length && (state.filters.team == 2) && ! arrProjectsPV.includes(item.p_id);
+            const codition = sDetail.length && (state.filters.team == 2) && ! arrProjectsPV.includes(item.p_id)
             const textTime = sDetail.length && (state.filters.team == 2) && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
@@ -140,7 +140,8 @@ export default {
                 borderColor: type.value,
                 backgroundColor: type.value,
                 start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
-                end: rootGetters['dateFormat'](_item.date + " " + _value.end_time),
+                end: _item.s_end_date ? rootGetters['dateFormat'](_item.s_end_date + " " + _value.end_time) : rootGetters['dateFormat'](_item.date + " " + _value.end_time),
+                allDay: _item.all_date,
                 memo: _item.memo,
                 title_not_memo: _item.i_name
                   ? _item.p_name + checkTR + " " + _item.i_name
@@ -235,6 +236,8 @@ export default {
           borderColor: event.borderColor,
           backgroundColor: event.backgroundColor,
           date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+          end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
+          all_date: event.allDay,
           start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
           end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
           team_id: state.filters.team
@@ -258,8 +261,10 @@ export default {
           uri: "/data/schedules/" + event.id,
           data: {
             date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+            end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+            all_date: event.allDay,
           }
         }
         dispatch('functionFullCalendar', request)
@@ -283,6 +288,8 @@ export default {
           method: "patch",
           uri: "/data/schedules/" + event.id,
           data: {
+            date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+            end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
           }
