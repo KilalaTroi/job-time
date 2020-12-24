@@ -696,16 +696,11 @@ class ReportsController extends Controller
 		return response()->json([
 			'reports' => $dataReports,
 			'users' => $users,
-			'departments' => $this->getDepartments(),
+			'departments' => $this->getDepartments($filters['team']),
 			'projects' => $this->getProject($filters['department']['id'], $filters['team']),
 			'issues' => $this->getIssue($filters['project']['id'], $filters['issueYear']['id']),
 			'issuesYear' => $this->getIssueYear($filters['project']['id'], $filters['issue']['id'])
 		]);
-	}
-
-	function getDepartments()
-	{
-		return  DB::table('departments')->select('id', 'name as text')->get()->toArray();
 	}
 
 	function getProject($departmentId, $teamId)
@@ -768,5 +763,21 @@ class ReportsController extends Controller
 			->groupBy('year')
 			->orderBy('year', 'desc')
 			->get()->toArray();
+	}
+
+	private function getDepartments($team)
+	{
+		return DB::table('departments as d')
+		->select('d.id', 'd.name as text')
+		->rightJoin('projects as p', 'd.id', '=', 'p.dept_id')
+		->where(function ($query) use ($team) {
+			$query->where('p.team', '=', $team . '')
+				->orWhere('p.team', 'LIKE', $team . ',%')
+				->orWhere('p.team', 'LIKE', '%,' . $team . ',%')
+				->orWhere('p.team', 'LIKE', '%,' . $team);
+		})
+		->orderBy('d.id', 'ASC')
+		->groupBy('d.id')
+		->get()->toArray();
 	}
 }

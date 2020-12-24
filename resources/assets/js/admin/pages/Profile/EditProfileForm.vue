@@ -44,7 +44,6 @@
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
               label="text"
               track-by="text"
-              :preselect-first="true"
             ></multiselect>
           </div>
         </div>

@@ -263,7 +263,6 @@ export default {
 		const _this = this;
 		_this.filters.team = _this.currentTeam.id;
 		_this.setColumns();
-   	await _this.getAll();
     $(document).on("click", ".languages button", function () {
 			_this.setColumns();
     });
