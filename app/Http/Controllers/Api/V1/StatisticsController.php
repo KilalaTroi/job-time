@@ -89,15 +89,11 @@ class StatisticsController extends Controller
 			$filters['projects'][] = $value['id'];
 		}
 
-
-		$departments = DB::table('departments')->select('id', 'name as text')->get()->toArray();
-		$types = DB::table('types')->select('id', 'slug', 'slug_vi', 'slug_ja', 'value')->get()->toArray();
-
 		return response()->json([
 			'users' => $this->getUsersByTeam($filters['team']),
 			'totaling' => $this->getTotaling($filters),
-			'departments' => $departments,
-			'types' => $types,
+			'departments' => $this->getDepartments($filters['team']),
+			'types' => $this->getTypes($filters['team']),
 			'projects' => $this->getProject($filters)
 		]);
 	}
@@ -846,26 +842,58 @@ class StatisticsController extends Controller
 			->paginate(20);
 
 		$totaling->transform(function ($item, $key) use ($team) {
-			$item->date = date('M d, Y',strtotime($item->date));
+			$item->date = date('M d, Y', strtotime($item->date));
 			$item->d_name = "All" === $item->department ? "" : $item->department;
-			$item->username = DB::table('users')->select('name')->where('id',$item->user_id)->first()->name;
+			$item->username = DB::table('users')->select('name')->where('id', $item->user_id)->first()->name;
 			$item->total = $this->formatTime($item->total);
-			$item->html_team = '<span>'.$team.'<span>';
+			$item->html_team = '<span>' . $team . '<span>';
 			return $item;
 		});
 		return $totaling;
 	}
 
+	private function getDepartments($team)
+	{
+		return DB::table('departments as d')
+		->select('d.id', 'd.name as text')
+		->rightJoin('projects as p', 'd.id', '=', 'p.dept_id')
+		->where(function ($query) use ($team) {
+			$query->where('p.team', '=', $team . '')
+				->orWhere('p.team', 'LIKE', $team . ',%')
+				->orWhere('p.team', 'LIKE', '%,' . $team . ',%')
+				->orWhere('p.team', 'LIKE', '%,' . $team);
+		})
+		->orderBy('d.id', 'ASC')
+		->groupBy('d.id')
+		->get()->toArray();
+	}
+
+	private function getTypes($team)
+	{
+		return DB::table('types as t')
+		->select('t.id', 't.slug', 't.slug_vi', 't.slug_ja', 't.value')
+		->rightJoin('projects as p', 't.id', '=', 'p.type_id')
+		->where(function ($query) use ($team) {
+			$query->where('p.team', '=', $team . '')
+				->orWhere('p.team', 'LIKE', $team . ',%')
+				->orWhere('p.team', 'LIKE', '%,' . $team . ',%')
+				->orWhere('p.team', 'LIKE', '%,' . $team);
+		})
+		->orderBy('t.id', 'ASC')
+		->groupBy('t.id')
+		->get()->toArray();
+	}
+
 	private function formatTime($time)
-  {
-    $strTime = "00:00";
-    if (isset($time) && !empty($time)) {
-      $time = $time * 1;
-      $hours = floor($time / 3600);
-      $minutes = floor(($time - $hours * 3600) / 60);
-      $strTime = 10 > $hours ? "0" . $hours : $hours;
-      $strTime .= ":" . (10 > $minutes ? "0" . $minutes : $minutes);
-    }
-    return $strTime;
-  }
+	{
+		$strTime = "00:00";
+		if (isset($time) && !empty($time)) {
+			$time = $time * 1;
+			$hours = floor($time / 3600);
+			$minutes = floor(($time - $hours * 3600) / 60);
+			$strTime = 10 > $hours ? "0" . $hours : $hours;
+			$strTime .= ":" . (10 > $minutes ? "0" . $minutes : $minutes);
+		}
+		return $strTime;
+	}
 }

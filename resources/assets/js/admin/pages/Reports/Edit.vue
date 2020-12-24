@@ -132,7 +132,6 @@
               :placeholder="$ml.with('VueJS').get('txtPickSome')"
               label="text"
               track-by="text"
-              :preselect-first="false"
             ></multiselect>
           </div>
         </div>
@@ -160,7 +159,6 @@
               :placeholder="$ml.with('VueJS').get('txtPickSome')"
               label="text"
               track-by="text"
-              :preselect-first="false"
             ></multiselect>
           </div>
         </div>
@@ -192,7 +190,6 @@
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
               label="text"
               track-by="text"
-              :preselect-first="false"
             ></multiselect>
           </div>
         </div>
@@ -212,7 +209,6 @@
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
               label="text"
               track-by="text"
-              :preselect-first="false"
             ></multiselect>
           </div>
         </div>
@@ -230,7 +226,6 @@
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
               label="text"
               track-by="text"
-              :preselect-first="true"
             ></multiselect>
           </div>
         </div>
@@ -250,7 +245,6 @@
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
               label="text"
               track-by="text"
-              :preselect-first="false"
             ></multiselect>
           </div>
         </div>

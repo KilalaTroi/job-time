@@ -18,7 +18,6 @@
                       :placeholder="$ml.with('VueJS').get('txtPickSome')"
                       label="text"
                       track-by="text"
-                      :preselect-first="true"
                     ></multiselect>
                   </div>
                 </div>
@@ -66,7 +65,6 @@
                       :placeholder="$ml.with('VueJS').get('txtPickSome')"
                       label="text"
                       track-by="text"
-                      :preselect-first="true"
                     ></multiselect>
                   </div>
                 </div>
@@ -86,7 +84,6 @@
                       :placeholder="$ml.with('VueJS').get('txtPickSome')"
                       label="text"
                       track-by="text"
-                      :preselect-first="true"
                     ></multiselect>
                   </div>
                 </div>
@@ -117,7 +114,6 @@
                       :placeholder="$ml.with('VueJS').get('txtPickSome')"
                       label="slug"
                       track-by="slug"
-                      :preselect-first="true"
                     >
                       <template slot="option" slot-scope="props">
                         <div>
