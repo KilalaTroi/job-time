@@ -117,6 +117,21 @@ export default {
               const memo = _item.memo ? _item.memo : "";
               const title = textTime + name + '<br>' + memo;
 
+              // Set constraint start date
+              _item.constraint = {}
+              if ( _item.start_date ) {
+                _item.constraint = Object.assign({}, _item.constraint, {
+                  start: _item.start_date + "T" + "00:00:00"
+                });
+              }
+
+              // Set constraint end date
+              if ( _item.end_date ) {
+                _item.constraint = Object.assign({}, _item.constraint, {
+                  end: _item.end_date + "T" + "23:59:59"
+                });
+              }
+
               return Object.assign({}, _item, {
                 id: _item.id,
                 title: title,
@@ -126,11 +141,6 @@ export default {
                 backgroundColor: type.value,
                 start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
                 end: rootGetters['dateFormat'](_item.date + " " + _value.end_time),
-                // Get start date, end date of issue
-                // constraint: {
-                //   start: rootGetters['dateFormat'](_item.date, 'YYYY-MM-DD') + "T" + "00:00:00",
-                //   end: rootGetters['dateFormat'](_item.date, 'YYYY-MM-DD') + "T" + "23:59:59",
-                // },
                 memo: _item.memo,
                 title_not_memo: _item.i_name
                   ? _item.p_name + checkTR + " " + _item.i_name
@@ -234,7 +244,7 @@ export default {
       dispatch('functionFullCalendar', request)
     },
 
-    dropSchedule({ commit, state, rootGetters, dispatch }, data) {
+    dropSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
 
