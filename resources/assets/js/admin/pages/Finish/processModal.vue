@@ -206,7 +206,7 @@ export default {
   },
   methods: {
     async sendMessageLineWork(content) {
-      if (this.currentProcess.room_id) {
+      if (this.currentProcess.room_id || this.currentProcess.email) {
         const uri = "/data/finish/submit-message";
         await axios
           .post(uri, {
@@ -223,11 +223,12 @@ export default {
             email: this.currentProcess.email,
           })
           .then((res) => {
-            console.log(res.data);
-            if (res.data.code === 200) {
-              this.success = "Successfully.";
-            } else {
-              this.errors = [[res.data.errorMessage]];
+            if (this.currentProcess.room_id) {
+              if (res.data.code === 200) {
+                this.success = "Successfully.";
+              } else {
+                this.errors = [[res.data.errorMessage]];
+              }
             }
           })
           .catch((err) => {
@@ -337,7 +338,7 @@ export default {
       this.errors = "";
       this.success = "";
       this.newMessage = "";
-      currentProcess.status = currentProcess.status ? currentProcess.status : '';
+      this.currentProcess.status = this.currentProcess.status ? this.currentProcess.status : '';
       this.$emit("reset-validation");
     },
     onCancel() {
