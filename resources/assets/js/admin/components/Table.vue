@@ -26,7 +26,10 @@
             :class="column.class"
             :data-filter="column.id"
           >
-            <span v-html="itemValue(item, column)"></span>
+            <span
+              :class="'cl-'+column.id"
+              v-html="itemValue(item, column)"
+            ></span>
           </td>
           <td v-if="dataAction && dataPath" class="text-center">
             <action
