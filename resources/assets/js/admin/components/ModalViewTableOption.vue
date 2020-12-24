@@ -2,7 +2,7 @@
   <modal id="viewTableOption" sizeClasses="modal-lg" v-on:reset-validation="resetValidation">
     <template slot="title">View Table Option</template>
     <ul class="tableColumns">
-      <li v-for="(column, index) in dataCols" :key="index">
+      <li v-for="(column, index) in dataCols" :key="index" :class="!column.filter ? 'd-none' : ''">
         <input type="checkbox" :value="column.id" v-model="checkColumns" :id="'table_' + column.id" />
         <label :for="'table_' + column.id">{{ column.value }}</label>
       </li>

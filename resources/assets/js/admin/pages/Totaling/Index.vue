@@ -140,11 +140,13 @@
 								<i class="fa fa-download"></i>
 								{{$ml.with('VueJS').get('txtExportExcel')}}
 							</button>
+							<button-view-table-option class="mt-0" />
 						</div>
 					</div>
 				</template>
 				<div class="table-responsive" :class="{'path-team': team == 2 || team == 3}">
-					<table-no-action class="table-hover table-striped" :columns="columns" :data="logTime"></table-no-action>
+					 <tbl-default :dataItems="logTime" :dataCols="columns" dataPath="totaling" />
+					<!-- <table-no-action class="table-hover table-striped" :columns="columns" :data="logTime.data"></table-no-action> -->
 					<div v-if="!logTimeData.data" class="text-center mt-3">
                         <img src="https://i.imgur.com/JfPpwOA.gif">
                     </div>
@@ -158,26 +160,33 @@
 				@pagination-change-page="getResults"
 				></pagination>
 			</card>
+			<view-table-option dataTable="totaling" :dataItems="logTime" :dataCols="columns" />
 		</div>
 	</div>
 </template>
 <script>
-import TableNoAction from "../../components/TableNoAction";
+import TblDefault from "../../components/Table";
+// import TableNoAction from "../../components/TableNoAction";
 import Card from "../../components/Cards/Card";
 import Select2 from '../../components/SelectTwo/SelectTwo.vue'
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
+import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
+import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex"
 
+// TableNoAction,
 export default {
 	components: {
-		TableNoAction,
+		TblDefault,
 		Card,
 		Datepicker,
 		Select2,
-		Multiselect
+		Multiselect,
+		ButtonViewTableOption,
+    ViewTableOption,
 	},
 
 	computed: {
@@ -198,13 +207,13 @@ export default {
 				{ id: "start_time", value: this.$ml.with('VueJS').get('lblStartTime'), width: "120", class: "" },
 				{ id: "end_time", value: this.$ml.with('VueJS').get('lblEndTime'), width: "120", class: "" },
 				{ id: "total", value: this.$ml.with('VueJS').get('lblTime'), width: "120", class: "" },
-				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "", class: "" },
-				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
-				{ id: "i_year", value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "year-of-issue" },
-				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "", class: "" },
-				{ id: "note", value: this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
-				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
-				{ id: 'html_team', value: this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
+				{ id: "d_name", value: this.$ml.with('VueJS').get('txtDepartment'), width: "", class: "", filter: true },
+				{ id: "p_name", value: this.$ml.with('VueJS').get('txtProject'), width: "", class: "", filter: true },
+				{ id: "i_year", value: this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", filter: true },
+				{ id: "i_name", value: this.$ml.with('VueJS').get('txtIssue'), width: "", class: "", filter: true },
+				{ id: "note", value: this.$ml.with('VueJS').get('txtWork'), width: "", class: "note", filter: true },
+				{ id: "t_name", value: this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "", filter: true },
+				{ id: 'html_team', value: this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center', filter: true },
 			],
 			users: [],
 			userOptions: [],
@@ -222,7 +231,9 @@ export default {
 			projects: [],
 
 			logTimeData: {},
-			logTime: [],
+			logTime: {
+				data: {}
+			},
 			jLimit: 2,
 			jShowDisabled: true,
 			jAlign: "right",
@@ -247,13 +258,13 @@ export default {
 				{ id: "start_time", value: _this.$ml.with('VueJS').get('lblStartTime'), width: "120", class: "" },
 				{ id: "end_time", value: _this.$ml.with('VueJS').get('lblEndTime'), width: "120", class: "" },
 				{ id: "total", value: _this.$ml.with('VueJS').get('lblTime'), width: "120", class: "" },
-				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "", class: "" },
-				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "" },
-				{ id: "i_year", value: _this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "year-of-issue" },
-				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "", class: "" },
+				{ id: "d_name", value: _this.$ml.with('VueJS').get('txtDepartment'), width: "", class: "", filter: true  },
+				{ id: "p_name", value: _this.$ml.with('VueJS').get('txtProject'), width: "", class: "", filter: true },
+				{ id: "i_year", value: _this.$ml.with('VueJS').get('txtYearOfIssue'), width: "120", class: "year-of-issue", filter: true },
+				{ id: "i_name", value: _this.$ml.with('VueJS').get('txtIssue'), width: "", class: "", filter: true },
 				{ id: "note", value: _this.$ml.with('VueJS').get('txtWork'), width: "", class: "note" },
-				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "" },
-				{ id: 'html_team', value: _this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center' },
+				{ id: "t_name", value: _this.$ml.with('VueJS').get('txtJobType'), width: "120", class: "", filter: true },
+				{ id: 'html_team', value: _this.$ml.with('VueJS').get('txtTeam'), width: '', class: 'text-center', filter: true },
 			];
 		});
 	},
@@ -356,7 +367,7 @@ export default {
 		},
 		getDataLogTime(logTimeData) {
 			if (logTimeData.data.length) {
-				this.logTime = logTimeData.data.map((item, index) => {
+				this.logTime.data = logTimeData.data.map((item, index) => {
 					return {
 						username: this.getObjectByID(this.users, +item.user_id).text,
 						date: this.customFormatter2(item.date),
@@ -373,7 +384,7 @@ export default {
 					};
 				});
 			} else {
-				this.logTime = [];
+				this.logTime.data = [];
 			}
 		},
 		customFormatter(date) {

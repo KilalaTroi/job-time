@@ -9,7 +9,6 @@
                 $ml.with("VueJS").get("txtCreateType")
               }}</template>
             </button-create>
-             <button-view-table-option class="mt-0 float-right" />
           </div>
         </div>
       </div>
@@ -43,8 +42,6 @@
       </card>
       <create-item />
       <edit-item />
-      <view-table-option dataTable="types" :dataItems="typeData" :dataCols="columns" />
-
     </div>
   </div>
 </template>
@@ -54,8 +51,6 @@ import Card from "../../components/Cards/Card";
 import CreateItem from "./Create";
 import EditItem from "./Edit";
 import ButtonCreate from "../../components/Buttons/Create";
-import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
-import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -63,10 +58,10 @@ export default {
     TblDefault,
     Card,
     CreateItem,
-    ViewTableOption,
     EditItem,
     ButtonCreate,
     ButtonViewTableOption,
+    ViewTableOption,
   },
   computed: {
     ...mapGetters("types", {
