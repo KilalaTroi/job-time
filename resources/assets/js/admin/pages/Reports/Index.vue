@@ -626,6 +626,7 @@ export default {
     }
   },
   async created() {
+    this.team = this.currentTeam.id;
 		await this.fetchData();
 	},
   watch: {
