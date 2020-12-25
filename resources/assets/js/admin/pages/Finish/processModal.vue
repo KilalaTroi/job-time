@@ -31,7 +31,7 @@
             <div class="form-group">
               <label class="">{{ $ml.with("VueJS").get("txtStatus") }}</label>
               <select-2 v-model="currentProcess.status" class="select2">
-                <option value="null" selected>--</option>
+                <option value="">--</option>
                 <option value="Start Working">Start Working</option>
                 <option value="Finished Work">Finished Work</option>
                 <option value="Start Uploading">Start Uploading</option>
@@ -46,7 +46,23 @@
                 $ml.with("VueJS").get("txtPagesWorked")
               }}</label>
               <input
+                type="number"
+                min="0"
                 v-model="currentProcess.page"
+                class="form-control"
+                :disabled="currentProcess.status != 'Finished Work'"
+              />
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label class="">{{
+                $ml.with("VueJS").get("txtFilesWorked")
+              }}</label>
+              <input
+                type="number"
+                min="0"
+                v-model="currentProcess.file"
                 class="form-control"
                 :disabled="currentProcess.status != 'Finished Work'"
               />
@@ -116,6 +132,7 @@ export default {
     ...mapGetters({
       loginUser: "loginUser",
       dateFormat: "dateFormat",
+      currentTeam: "currentTeam",
     }),
   },
   data() {
@@ -189,19 +206,29 @@ export default {
   },
   methods: {
     async sendMessageLineWork(content) {
-      if (this.currentProcess.room_id) {
+      if (this.currentProcess.room_id || this.currentProcess.email) {
         const uri = "/data/finish/submit-message";
         await axios
           .post(uri, {
             roomId: this.currentProcess.room_id,
             content: content,
+            user: this.loginUser,
+            p_name: this.currentProcess.project,
+            i_name: this.currentProcess.i_name,
+            page: this.currentProcess.page,
+            page_number: this.currentProcess.page_number,
+            phase: this.currentProcess.phase,
+            status: this.currentProcess.status,
+            team_id: this.currentTeam.id,
+            email: this.currentProcess.email,
           })
           .then((res) => {
-            console.log(res.data);
-            if (res.data.code === 200) {
-              this.success = "Successfully.";
-            } else {
-              this.errors = [[res.data.errorMessage]];
+            if (this.currentProcess.room_id) {
+              if (res.data.code === 200) {
+                this.success = "Successfully.";
+              } else {
+                this.errors = [[res.data.errorMessage]];
+              }
             }
           })
           .catch((err) => {
@@ -210,11 +237,19 @@ export default {
       }
     },
     getDataProcess() {
+      if ( this.currentProcess.status !== "Finished Work" ) {
+        this.currentProcess.page = null;
+        this.currentProcess.file = null;
+      }
+      if (this.currentProcess.page_number && !this.currentProcess.page && this.currentProcess.status === "Finished Work") {
+        this.currentProcess.page = this.currentProcess.page_number;
+      }
+
       this.newMessage =
         "[" +
         (this.currentProcess.status
           ? this.currentProcess.status
-          : "Please select status!") +
+          : "null!") +
         "] \nReporter:  " +
         this.loginUser.name +
         " \nProject: " +
@@ -223,7 +258,7 @@ export default {
         (this.currentProcess.i_name ? this.currentProcess.i_name : "--") +
         " \nPhase: " +
         (this.currentProcess.phase ? this.currentProcess.phase : "--") +
-        " \n----------------------------";
+        " \n----------------------------  ";
 
       if (this.arrCurrentProcess.length) {
         this.dataProcess = this.arrCurrentProcess.map((item, index) => {
@@ -249,9 +284,7 @@ export default {
       // Reset validate
       this.errors = [];
       this.success = "";
-      this.isLoading = true;
-      const checkStatus =
-        this.currentProcess.status === "Finished Work" ? true : false;
+      const checkStatus = this.currentProcess.status === "Finished Work" ? true : false;
 
       if (!this.currentProcess.status) {
         this.errors = [["Please choosing the status."], ...this.errors];
@@ -261,7 +294,13 @@ export default {
         this.errors = [["Please typing the massage."], ...this.errors];
       }
 
-      if (!this.errors.length) {
+      if(!this.currentProcess.page || 0 == this.currentProcess.page){
+        if(checkStatus) this.errors = [['Enter in "PAGES WORKS"'], ...this.errors];
+      }
+
+      if (0 == this.errors.length) {
+        this.isLoading = true;
+
         const newProcess = {
           user_id: this.loginUser.id,
           issue_id: this.currentProcess.id,
@@ -269,7 +308,8 @@ export default {
           memo: this.currentProcess.phase,
           date: this.dateFormat(new Date(), "YYYY-MM-DD HH:mm"),
           page: checkStatus ? this.currentProcess.page : null,
-          status: this.currentProcess.status,
+          file: checkStatus ? this.currentProcess.file : null,
+          status: this.currentProcess.status ? this.currentProcess.status : "null",
         };
 
         const uri = "/data/processes";
@@ -298,6 +338,7 @@ export default {
       this.errors = "";
       this.success = "";
       this.newMessage = "";
+      this.currentProcess.status = this.currentProcess.status ? this.currentProcess.status : '';
       this.$emit("reset-validation");
     },
     onCancel() {

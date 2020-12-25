@@ -172,5 +172,7 @@ export default {
     txtFinishTotaling: 'FINISH TOTALING',
     txtWorkReport: 'Work report',
     txtFinishRecord: 'Finish Record',
-    txtDateTime: 'Date'
+    txtDateTime: 'Date',
+    txtYearOfIssue: 'Year of issue',
+    txtFilesWorked: 'Files Worked',
 }

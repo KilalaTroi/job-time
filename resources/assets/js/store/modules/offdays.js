@@ -81,7 +81,7 @@ export default {
         },
 
         UPDATE_CURRENT_EVENT: (state, data) => {
-            state.currentEvent = data
+            state.currentEvent = Object.assign({}, data)
         },
 
         DELETE_EVENT: (state, id) => {

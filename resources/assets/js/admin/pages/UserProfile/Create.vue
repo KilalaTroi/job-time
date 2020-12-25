@@ -33,11 +33,10 @@
 						v-model="selectedUser.team"
 						:options="currentTeamOption"
 						:clear-on-select="false"
-						:preserve-search="false"
+						:searchable="false"
 						:placeholder="$ml.with('VueJS').get('txtSelectOne')"
 						label="text"
 						track-by="text"
-						:preselect-first="true"
 						></multiselect>
 					</div>
 				</div>
@@ -129,7 +128,6 @@ export default {
 	methods: {
 		...mapActions({
 			resetValidate: 'users/resetValidate',
-			setSelectedUser: 'users/setSelectedUser',
 			resetSelectedUser: 'users/resetSelectedUser',
             createUser: 'users/createUser'
 		}),
@@ -139,13 +137,9 @@ export default {
 			this.resetSelectedUser()
         }
 	},
-	
+
 	mounted() {
-		let _this = this
-		// this.setSelectedUser({language: _this.$ml.current})
-		$(document).on('click', '.languages button', function() {
-			_this.language = _this.$ml.current
-		});
+		this.resetSelectedUser()
 	},
 }
 </script>

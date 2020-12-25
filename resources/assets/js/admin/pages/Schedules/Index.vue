@@ -30,7 +30,7 @@
                   :color="item.value"
                   :style="setBackground(item.value)"
                 >
-                  <span>{{ item.project }} {{ item.issue }}</span>
+                  <span>{{ item.project }} {{ item.issue_year ? item.issue_year+' ' : '' }}{{ item.issue }}</span>
                 </div>
               </div>
             </div>
@@ -61,7 +61,7 @@
             :droppable="fullCalendar.droppable"
             :events="scheduleData.schedules"
             :event-overlap="true"
-            :all-day-slot="false"
+            :all-day-slot="true"
             min-time="07:00:00"
             max-time="19:00:00"
             height="auto"
@@ -162,8 +162,9 @@ export default {
       getAll: "getAll"
     }),
 
-    ...mapActions("types", {
-      getOptionType: "getOptions",
+    ...mapActions({
+      getOptionType: "types/getOptions",
+      setCurrentTeam: "setCurrentTeam"
     }),
 
     getLanguage(data) {
@@ -181,8 +182,8 @@ export default {
             borderColor: eventEl.getAttribute("color"),
             backgroundColor: eventEl.getAttribute("color"),
             constraint: {
-              start: this.dateFormat(eventEl.getAttribute("start") + " " + "07:00"),
-              end: this.dateFormat(eventEl.getAttribute("end") + " " + "19:00"),
+              start: this.dateFormat(eventEl.getAttribute("start"), 'YYYY-MM-DD') + "T" + "00:00:00",
+              end: this.dateFormat(eventEl.getAttribute("end"), 'YYYY-MM-DD') + "T" + "23:59:59",
             },
             overlap: true,
             duration: "00:30:00",
@@ -232,9 +233,13 @@ export default {
     ],
     filters: [
       {
-        handler: function() {
-          this.search = ''
-          this.getAll()
+        handler: function(value) {
+          this.search = '';
+          this.getAll();
+
+          if ( value.team != this.currentTeam.id ) {
+            this.setCurrentTeam(value.team);
+          }
         },
         deep: true,
       },

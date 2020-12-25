@@ -33,6 +33,10 @@ $table-border: 1px solid #4e4737;
   }
 }
 
+.no-wrap {
+  white-space: nowrap;
+}
+
 /********************************************/
 /**************    BUTTON          *********/
 /******************************************/
@@ -181,6 +185,9 @@ table {
   background-color: transparent;
   text-align: left;
   max-width: 280px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .table-responsive {
@@ -191,4 +198,76 @@ table {
       left: -3px;
     }
   }
+}
+
+// loading
+.ct-chart.loading {
+  position: relative;
+
+  &::before {
+    content: "";
+    border: 6px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 6px solid #3498db;
+    width: 60px;
+    height: 60px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -30px;
+    margin-left: -30px;
+    z-index: 1;
+  }
+
+  > * {
+    opacity: 0;
+  }
+}
+
+.loading.legend {
+  opacity: 0;
+}
+
+.vdp-datepicker__clear-button{
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+}
+
+#viewTableOption{
+  .tableColumns{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0 -8px -10px;
+    li{
+      flex: 0 0 25%;
+      max-width: 25%;
+      padding: {
+        left: 8px;
+        right: 8px;
+      }
+      margin-bottom: 10px;
+      label{
+        margin: 0;
+        padding-left: 5px;
+      }
+    }
+  }
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

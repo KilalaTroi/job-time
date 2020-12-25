@@ -52,7 +52,7 @@ export default {
     },
 
     SET_SELECTED_ITEM: (state, selectedItem) => {
-      state.selectedItem = selectedItem
+      state.selectedItem = Object.assign({}, selectedItem)
     },
 
     SET_FILTER: (state, data) => {
@@ -85,25 +85,25 @@ export default {
           response.data.schedules = response.data.schedules.map((item, index) => {
             const arrProjects = [58, 59]; // Project show description and hide fc-time.
             const arrProjectsHT = [58]; // Project hide fc-time.
-            const arrProjectsPV = [58, 66];  // Project don't have Variation.
+            const arrProjectsPV = [58];  // Project don't have Variation.
             const checkTR = item.type.includes("_tr") ? " (TR)" : "";
             const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
             let sDetail = [];
             let description = '';
 
             // Get log time detail for schedule
-            if ( response.data.schedulesDetail.length ) {
+            if ( response.data.schedulesDetail.length && !item.all_date ) {
               sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
             }
 
-            const codition = sDetail.length && state.filters.team == 2 && ! arrProjectsPV.includes(item.p_id);
-            const textTime = sDetail.length && state.filters.team == 2 && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
+            const codition = sDetail.length && (state.filters.team == 2) && ! arrProjectsPV.includes(item.p_id)
+            const textTime = sDetail.length && (state.filters.team == 2) && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
             const classHideTime = textTime ? ' hide-fc-time' : '';
 
             // Get description for schedule
-            if ( sDetail.length && state.filters.team == 2 && arrProjects.includes(item.p_id) ) {
+            if ( sDetail.length && (state.filters.team == 2) && arrProjects.includes(item.p_id) ) {
               description = sDetail.map((item) => {
                 const note = item.note ? ' (' + item.note + ')' : '';
                 return (item.start_time + ' - ' + item.end_time + note)
@@ -112,21 +112,36 @@ export default {
 
             // Function return schedule
             let getSchedule = (_item, _value, _codition) => {
+              const issueYear = _item.issue_year ? ' ' + _item.issue_year : '';
+              const name = _item.i_name ? _item.p_name + checkTR + issueYear + " " + _item.i_name : _item.p_name + checkTR + issueYear;
+              const memo = _item.memo ? _item.memo : "";
+              const title = textTime + name + '<br>' + memo;
+
+              // Set constraint start date
+              _item.constraint = {}
+              if ( _item.start_date ) {
+                _item.constraint = Object.assign({}, _item.constraint, {
+                  start: _item.start_date + "T" + "00:00:00"
+                });
+              }
+
+              // Set constraint end date
+              if ( _item.end_date ) {
+                _item.constraint = Object.assign({}, _item.constraint, {
+                  end: _item.end_date + "T" + "23:59:59"
+                });
+              }
+
               return Object.assign({}, _item, {
                 id: _item.id,
-                title:
-                  textTime +
-                  (_item.i_name
-                    ? _item.p_name + checkTR + " " + _item.i_name
-                    : _item.p_name + checkTR) +
-                  "<br>" +
-                  (_item.memo ? _item.memo : ""),
+                title: title,
                 description: description,
                 className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
                 borderColor: type.value,
                 backgroundColor: type.value,
                 start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
-                end: rootGetters['dateFormat'](_item.date + " " + _value.end_time),
+                end: _item.s_end_date ? rootGetters['dateFormat'](_item.s_end_date + " " + _value.end_time) : rootGetters['dateFormat'](_item.date + " " + _value.end_time),
+                allDay: _item.all_date,
                 memo: _item.memo,
                 title_not_memo: _item.i_name
                   ? _item.p_name + checkTR + " " + _item.i_name
@@ -160,7 +175,7 @@ export default {
               return getSchedule(item, {start_time: startTime, end_time: endTime}, codition);
 
             }
-            
+
           });
 
           // concat schedules and schedules variation
@@ -192,7 +207,7 @@ export default {
         $('.fc-event.fc-short').removeClass('fc-short');
       }, 3000);
     },
-    
+
     resetValidate({ dispatch, commit }) {
       dispatch('getAll', true)
       commit('SET_VALIDATE', { error: '', success: '' })
@@ -221,6 +236,8 @@ export default {
           borderColor: event.borderColor,
           backgroundColor: event.backgroundColor,
           date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+          end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
+          all_date: event.allDay,
           start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
           end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
           team_id: state.filters.team
@@ -230,7 +247,7 @@ export default {
       dispatch('functionFullCalendar', request)
     },
 
-    dropSchedule({ commit, state, rootGetters, dispatch }, data) {
+    dropSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
 
@@ -244,8 +261,10 @@ export default {
           uri: "/data/schedules/" + event.id,
           data: {
             date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+            end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+            all_date: event.allDay,
           }
         }
         dispatch('functionFullCalendar', request)
@@ -269,6 +288,8 @@ export default {
           method: "patch",
           uri: "/data/schedules/" + event.id,
           data: {
+            date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
+            end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
           }

@@ -139,9 +139,21 @@
                 v-show="flagCheck"
                 type="button"
                 class="btn btn-xs btn-second"
-                @click="archiveAllItem({issues: checkItem, status: !filters.showArchive})"
+                @click="
+                  archiveAllItem({
+                    issues: checkItem,
+                    status: !filters.showArchive,
+                  })
+                "
               >
-                <i aria-hidden="true" title="archive" :class="{'fa fa-archive' : !filters.showArchive, 'fa fa-unlock' : filters.showArchive}"></i>
+                <i
+                  aria-hidden="true"
+                  title="archive"
+                  :class="{
+                    'fa fa-archive': !filters.showArchive,
+                    'fa fa-unlock': filters.showArchive,
+                  }"
+                ></i>
               </button>
               <button
                 v-show="flagCheck"
@@ -159,7 +171,7 @@
             </div>
           </div>
         </template>
-        <div class="table-responsive">
+        <div class="table-responsive" :class="{'path-team': filters.team == 2 || filters.team == 3}">
           <table-project
             class="table-hover table-striped"
             v-on:check-item="showhideActionAll"
@@ -228,7 +240,7 @@ export default {
   data() {
     return {
       flagCheck: false,
-      checkItem: []
+      checkItem: [],
     };
   },
   methods: {
@@ -238,7 +250,8 @@ export default {
       setColumns: "projects/setColumns",
       getAllProject: "projects/getAll",
       deleteAllItem: "projects/deleteAllItem",
-      archiveAllItem: "projects/archiveAllItem"
+      archiveAllItem: "projects/archiveAllItem",
+      setCurrentTeam: 'setCurrentTeam'
     }),
 
     showhideActionAll(data) {
@@ -271,6 +284,19 @@ export default {
       _this.setColumns();
     });
   },
+
+  watch: {
+    filters: [
+      {
+        handler: function (value) {
+          if ( value.team != this.currentTeam.id ) {
+            this.setCurrentTeam(value.team);
+          }
+        },
+        deep: true
+      },
+    ],
+  },
 };
 </script>
 
@@ -281,5 +307,10 @@ export default {
   height: 20px;
   display: inline-block;
   vertical-align: middle;
+}
+.table-responsive.path-team {
+    .year-of-issue {
+        display: none;
+    }
 }
 </style>

@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="form-group">
         <div class="row">
-          <div class="col-12 col-sm-auto">
+          <div class="col-12">
             <button-create>
               <template slot="title">{{
                 $ml.with("VueJS").get("txtCreateType")

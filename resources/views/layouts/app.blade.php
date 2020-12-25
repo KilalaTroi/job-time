@@ -53,7 +53,7 @@
 
         @yield('content')
     </div>
-
+    @yield('after-app')
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
 </body>
