@@ -54,13 +54,29 @@
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label class>{{ $ml.with("VueJS").get("txtLineRoom") }} <input class="ml-2" v-model="c_lineroom" type="checkbox"> FINISH MESSAGE</label>
+          <label class>{{ $ml.with("VueJS").get("txtLineRoom") }} <input class="ml-2" v-model="selectedItem.checkFinsh.lineroom" type="checkbox"> FINISH MESSAGE</label>
           <input
             v-model="selectedItem.line_room"
             type="text"
             name="line_room"
             class="form-control"
-            :disabled="!c_lineroom"
+            :disabled="!selectedItem.checkFinsh.lineroom"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-6">
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label class>{{ $ml.with("VueJS").get("txtEmail") }} <input class="ml-2" v-model="selectedItem.checkFinsh.email" type="checkbox"> FINISH MESSAGE</label>
+          <input
+            v-model="selectedItem.email"
+            type="text"
+            name="email"
+            class="form-control"
+            :disabled="!selectedItem.checkFinsh.email"
           />
         </div>
       </div>
@@ -101,7 +117,6 @@ export default {
   data() {
     return {
       modalLg: "modal-lg",
-      c_lineroom: false
     };
   },
 

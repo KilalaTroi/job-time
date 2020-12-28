@@ -1,26 +1,46 @@
 <template>
-  <modal id="itemDetail" :sizeClasses="modalLg" v-on:reset-validation="resetValidation">
-    <template slot="title">{{$ml.with('VueJS').get('txtEditType')}}</template>
+  <modal
+    id="itemDetail"
+    :sizeClasses="modalLg"
+    v-on:reset-validation="resetValidation"
+  >
+    <template slot="title">{{ $ml.with("VueJS").get("txtEditType") }}</template>
     <div v-if="selectedItem">
       <div class="form-group">
-        <label class>{{$ml.with('VueJS').get('txtName')}}</label>
-        <input v-model="selectedItem.slug" type="text" name="slug" class="form-control" required />
+        <label class>{{ $ml.with("VueJS").get("txtName") }}</label>
+        <input
+          v-model="selectedItem.slug"
+          type="text"
+          name="slug"
+          class="form-control"
+          required
+        />
       </div>
       <div class="row">
         <div class="col-sm-6">
           <div class="form-group">
-            <label class>{{$ml.with('VueJS').get('txtNameVi')}}</label>
-            <input v-model="selectedItem.slug_vi" type="text" name="slug_vi" class="form-control" />
+            <label class>{{ $ml.with("VueJS").get("txtNameVi") }}</label>
+            <input
+              v-model="selectedItem.slug_vi"
+              type="text"
+              name="slug_vi"
+              class="form-control"
+            />
           </div>
         </div>
         <div class="col-sm-6">
           <div class="form-group">
-            <label class>{{$ml.with('VueJS').get('txtNameJa')}}</label>
-            <input v-model="selectedItem.slug_ja" type="text" name="slug_ja" class="form-control" />
+            <label class>{{ $ml.with("VueJS").get("txtNameJa") }}</label>
+            <input
+              v-model="selectedItem.slug_ja"
+              type="text"
+              name="slug_ja"
+              class="form-control"
+            />
           </div>
         </div>
       </div>
-       <div class="row">
+      <div class="row">
         <div class="col-sm-6">
           <div class="form-group">
             <label class>{{ $ml.with("VueJS").get("txtDepartments") }}</label>
@@ -33,18 +53,46 @@
         </div>
         <div class="col-sm-6">
           <div class="form-group">
-            <label class>{{ $ml.with("VueJS").get("txtLineRoom") }}</label>
+            <label class
+              >{{ $ml.with("VueJS").get("txtLineRoom") }}
+              <input
+                class="ml-2"
+                v-model="selectedItem.checkFinsh.lineroom"
+                type="checkbox"
+              />
+              FINISH MESSAGE</label
+            >
             <input
               v-model="selectedItem.line_room"
               type="text"
               name="line_room"
               class="form-control"
+              :disabled="!selectedItem.checkFinsh.lineroom"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6"></div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class
+              >{{ $ml.with("VueJS").get("txtEmail") }}
+              <input class="ml-2" v-model="selectedItem.checkFinsh.email" type="checkbox" />
+              FINISH MESSAGE</label
+            >
+            <input
+              v-model="selectedItem.email"
+              type="text"
+              name="email"
+              class="form-control"
+              :disabled="!selectedItem.checkFinsh.email"
             />
           </div>
         </div>
       </div>
       <div class="form-group">
-        <label class>{{$ml.with('VueJS').get('txtColor')}}</label>
+        <label class>{{ $ml.with("VueJS").get("txtColor") }}</label>
         <color-picker :color="selectedItem.value" v-model="selectedItem.value"></color-picker>
       </div>
       <error-item :errors="validationErrors"></error-item>
@@ -55,7 +103,9 @@
           @click="updateItem(selectedItem)"
           type="button"
           class="btn btn-primary"
-        >{{$ml.with('VueJS').get('txtUpdate')}}</button>
+        >
+          {{ $ml.with("VueJS").get("txtUpdate") }}
+        </button>
       </div>
     </div>
   </modal>
@@ -87,7 +137,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters('types',{
+    ...mapGetters("types", {
       selectedItem: "selectedItem",
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
@@ -95,11 +145,11 @@ export default {
 
     ...mapGetters("departments", {
       deptOptions: "options",
-    })
+    }),
   },
 
   methods: {
-    ...mapActions('types',{
+    ...mapActions("types", {
       resetValidate: "resetValidate",
       resetSelectedItem: "resetSelectedItem",
       updateItem: "updateItem",
@@ -108,7 +158,19 @@ export default {
     resetValidation() {
       this.resetValidate();
       this.resetSelectedItem();
-    }
-  }
+    },
+
+    // checkFinshMessage() {
+    //     this.checkFinsh.email = this.selectedItem.email ? true : false;
+    //     this.checkFinsh.lineroom = this.selectedItem.line_room ? true : false;
+    // },
+  },
+  watch: {
+    // selectedItem: [
+    //   {
+    //     handler: "checkFinshMessage",
+    //   },
+    // ],
+  },
 };
 </script>

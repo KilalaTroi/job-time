@@ -172,5 +172,7 @@ export default {
     txtFinishTotaling: '終了集計',
     txtWorkReport: '作業報告',
     txtFinishRecord: '終了レコード',
-    txtDateTime: '日時'
+    txtDateTime: '日時',
+    txtYearOfIssue: '発行年',
+    txtFilesWorked: 'ファイル数',
 }

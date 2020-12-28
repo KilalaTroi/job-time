@@ -171,7 +171,7 @@
             </div>
           </div>
         </template>
-        <div class="table-responsive">
+        <div class="table-responsive" :class="{'path-team': filters.team == 2 || filters.team == 3}">
           <table-project
             class="table-hover table-striped"
             v-on:check-item="showhideActionAll"
@@ -307,5 +307,10 @@ export default {
   height: 20px;
   display: inline-block;
   vertical-align: middle;
+}
+.table-responsive.path-team {
+    .year-of-issue {
+        display: none;
+    }
 }
 </style>

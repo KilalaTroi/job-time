@@ -21,6 +21,7 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
+                  :class="{ 'no-schedule' : scheduleData.issuesNoSC.includes(item.issue_id) }"
                   v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
@@ -29,7 +30,7 @@
                   :color="item.value"
                   :style="setBackground(item.value)"
                 >
-                  <span>{{ item.project }} {{ item.issue }}</span>
+                  <span>{{ item.project }} {{ item.issue_year ? item.issue_year+' ' : '' }}{{ item.issue }}</span>
                 </div>
               </div>
             </div>
@@ -60,7 +61,7 @@
             :droppable="false"
             :events="scheduleData.schedules"
             :event-overlap="true"
-            :all-day-slot="false"
+            :all-day-slot="currentTeam.id === 3"
             min-time="07:00:00"
             max-time="19:00:00"
             height="auto"
@@ -160,19 +161,21 @@ export default {
     tooltipFunc(info) {
       info.el.querySelector('.fc-title').innerHTML = info.event.title;
 
-      info.el.querySelector('.fc-content').addEventListener("mouseover", function(event) {
-        $('.tooltip-inner:not(.convert-html)').each(function(){
-          const text = $(this).text();
-          $(this).html(text);
-          $(this).addClass('convert-html');
-        });
-      });
-
       var tooltip = new Tooltip(info.el, {
         title: info.event.extendedProps.description,
         placement: 'top',
         trigger: 'hover',
         container: 'body',
+      });
+
+      info.el.querySelector('.fc-content').addEventListener("mouseover", function(event) {
+        setTimeout(function() {
+          $('.tooltip-inner:not(.convert-html)').each(function(){
+            const text = $(this).text();
+            $(this).html(text);
+            $(this).addClass('convert-html');
+          }, 1000);
+        })
       });
     },
   },
@@ -200,6 +203,7 @@ export default {
           this.getAll();
 
           if ( value.team != this.currentTeam.id ) {
+            $('.tooltip').remove();
             this.setCurrentTeam(value.team);
           }
         },

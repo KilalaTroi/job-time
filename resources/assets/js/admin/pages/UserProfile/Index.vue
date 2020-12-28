@@ -26,7 +26,6 @@
                             label="text"
                             track-by="text"
                             :name="'selectedTeam'"
-                            :preselect-first="true"
                             :showLabels="false"
                             ></multiselect>
                         </div>

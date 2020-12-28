@@ -4,7 +4,7 @@
             <slot name="header"></slot>
         </div>
         <div class="card-body">
-            <div :id="chartId" class="ct-chart"></div>
+            <div :id="chartId" class="ct-chart loading"></div>
         </div>
         <div class="card-footer" v-if="$slots.footer">
             <slot name="footer"></slot>

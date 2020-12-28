@@ -12,11 +12,11 @@
 									<div class="d-flex align-items-stretch mr-3">
 										<label class="mr-2 mb-0 d-flex align-items-center text-dark">{{ $ml.with('VueJS').get('lblDate') }}</label>
 										<div style="min-width: 110px">
-											<datepicker 
-												input-class="form-control" 
-												name="startDate" 
-												v-model="start_date" 
-												:format="customFormatter" 
+											<datepicker
+												input-class="form-control"
+												name="startDate"
+												v-model="start_date"
+												:format="customFormatter"
 												:inline="false" :disabled-dates="disabledEndDates()" :language="getLanguage(this.$ml)">
 											</datepicker>
 										</div>
@@ -41,9 +41,9 @@
 						</div>
 
 						<process-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-modal>
-						
+
 						<process-detail-modal :currentProcess="currentProcess" :arrCurrentProcess="arrCurrentProcess" v-on:reset-validation="resetValidate"></process-detail-modal>
-						
+
 						<pagination
 						:data="issueProcesses"
 						:show-disabled="jShowDisabled"
@@ -82,7 +82,7 @@ export default {
 
 	computed: {
         ...mapGetters({
-            currentTeamOption: "currentTeamOption", 
+            currentTeamOption: "currentTeamOption",
 			currentTeam: "currentTeam",
 			dateFormat: "dateFormat"
         })
@@ -99,6 +99,7 @@ export default {
 				{ id: "date", value: this.$ml.with('VueJS').get('txtDateTime'), width: "160", class: "" },
 				{ id: "user_name", value: this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
+				{ id: "file", value: this.$ml.with('VueJS').get('txtFilesWorked'), width: "", class: "" },
 				{ id: "status", value: this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
 			],
 			loading: true,
@@ -125,13 +126,12 @@ export default {
                 ja: ja,
                 en: en
 			},
-			
+
 			page: 1
 		};
 	},
 	mounted() {
 		const _this = this;
-		_this.selectTeam = _this.currentTeam.id
 		_this.getOptions();
 		$(document).on('click', '.languages button', function() {
 			_this.txtAll = _this.$ml.with('VueJS').get('txtSelectAll')
@@ -144,6 +144,7 @@ export default {
 				{ id: "date", value: _this.$ml.with('VueJS').get('txtDateTime'), width: "160", class: "" },
 				{ id: "user_name", value: _this.$ml.with('VueJS').get('txtReporter'), width: "", class: "" },
 				{ id: "page", value: _this.$ml.with('VueJS').get('txtPagesWorked'), width: "", class: "" },
+				{ id: "file", value: _this.$ml.with('VueJS').get('txtFilesWorked'), width: "", class: "" },
 				{ id: "status", value: _this.$ml.with('VueJS').get('txtStatus'), width: "135", class: "" }
 			];
 			_this.getOptions();
@@ -151,6 +152,9 @@ export default {
 		});
 	},
 	methods: {
+		...mapActions({
+			setCurrentTeam: "setCurrentTeam",
+    }),
 		getProcessObjectValue(data, id, phase) {
             const arrProcess = data.filter((elem) => {
                 if (elem.issue_id === id && elem.phase === phase) return elem;
@@ -158,12 +162,12 @@ export default {
 
             return arrProcess;
         },
-		async fetchData(page = 1, loading = true) {
+		fetchData(page = 1, loading = true) {
 			this.page = page;
 			const uri = "/data/finish/data?page=" + page;
 			this.loading = loading;
 
-			await axios.post(uri, {
+			axios.post(uri, {
 				start_date: this.dateFormat(this.start_date, 'YYYY-MM-DD'),
 				selectTeam: this.selectTeam,
 				showFilter: this.showFilter
@@ -186,6 +190,7 @@ export default {
 							t_name: item.job_type,
 							status: arrProcess.length ? lastProcess.status : '',
 							page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + (item.page*1) }, 0) : '',
+							file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + (item.file*1) }, 0) : '',
 							user_name: arrProcess.length ? lastProcess.user_name : '',
 							date: arrProcess.length ? this.dateFormat(lastProcess.date, 'MMM DD, YYYY HH:mm') : '',
 						});
@@ -229,10 +234,17 @@ export default {
 			return this.dataLang[data.current]
 		}
 	},
+	async created() {
+		this.selectTeam = this.currentTeam.id
+		await this.fetchData();
+	},
 	watch: {
 		selectTeam: [{
-            handler: function(value, oldValue) {
-                if ( value != oldValue ) this.fetchData()
+            handler: function(value) {
+                if ( value != this.currentTeam.id ){
+									this.setCurrentTeam(value);
+									this.fetchData();
+								}
             }
         }],
 		start_date: [
@@ -265,8 +277,8 @@ button {position: absolute; right: 0; top: 0; width: 110px;
 &.active {
 >span {height: auto;}
 button {
-.less{display:inline;}	
-.more{display:none;}	
+.less{display:inline;}
+.more{display:none;}
 }
 }
 }

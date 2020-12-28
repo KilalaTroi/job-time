@@ -12,6 +12,6 @@ class Process extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'issue_id', 'schedule_id', 'date', 'page', 'status'
+        'user_id', 'issue_id', 'schedule_id', 'date', 'page', 'file', 'status'
     ];
 }

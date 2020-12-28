@@ -106,7 +106,7 @@
                             <h4 class="card-title">Total pages</h4>
                         </template>
                         <template slot="footer">
-                            <div class="legend">
+                            <div class="legend loading">
                                 <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i> {{ type.slug }}</span>
                             </div>
                         </template>
@@ -425,7 +425,12 @@
                         id: 0,
                         text: this.$ml.with('VueJS').get('txtSelectAll')
                     };
-                    this.userOptions = [obj].concat(data);
+
+                    const userActive = data.filter((item) => {
+                        return item.disable_date === null;
+                    });
+
+                    this.userOptions = [obj].concat(userActive);
                 }
             },
             getLanguage(data) {
@@ -433,6 +438,7 @@
             },
             chartLoaded(chartID) {
                 const types = this.types;
+                $('.ct-chart, .card-footer .legend').addClass('loading');
                 if ( types.length ) {
                     setTimeout(function(){
                         types.forEach(function(item, index) {
@@ -441,6 +447,7 @@
                                 $(this).find('.ct-point, .ct-line, .ct-bar, .ct-slice-donut').css('stroke', item.value);
                             })
                         });
+                        $('.ct-chart, .card-footer .legend').removeClass('loading');
                     }, 1000);
                 }
             }
