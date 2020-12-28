@@ -61,7 +61,7 @@
           >
           <select-2
             :options="currentTeamOption"
-            v-model="team"
+            v-model="filters.team"
             class="select2"
           />
         </div>
@@ -80,7 +80,7 @@
             v-model="date"
             :format="customFormatter"
             :disabled-dates="disabledEndDates()"
-            :language="getLanguage(this.$ml)"
+            :language="getLangCode(this.$ml)"
           ></datepicker>
         </div>
       </div>
@@ -172,8 +172,8 @@
           <div>
             <multiselect
               :multiple="false"
-              v-model="deptSelects"
-              :options="departments"
+              v-model="filters.department"
+              :options="options.departments"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -191,8 +191,8 @@
           <div>
             <multiselect
               :multiple="false"
-              v-model="projectSelects"
-              :options="projects"
+              v-model="filters.project"
+              :options="options.projects"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -208,8 +208,8 @@
           <div>
             <multiselect
               :multiple="false"
-              v-model="issueYearSelects"
-              :options="issuesYear"
+              v-model="filters.issue_year"
+              :options="options.issues_year"
               :clear-on-select="true"
               :preserve-search="false"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -227,8 +227,8 @@
           <div>
             <multiselect
               :multiple="false"
-              v-model="issueSelects"
-              :options="issues"
+              v-model="filters.issues"
+              :options="options.issues"
               :clear-on-select="true"
               :preserve-search="false"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -418,6 +418,16 @@ export default {
     ...mapGetters({
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
+      getLangCode: "getLangCode",
+      customFormatter: "customFormatter",
+      disabledStartDates: "disabledStartDates",
+      disabledEndDates: "disabledEndDates"
+    }),
+
+    ...mapGetters('reports',{
+      filters: "filters",
+      options: "options",
+      action: "action",
     }),
   },
   props: ["userID", "actionNewReport"],
@@ -479,47 +489,20 @@ export default {
     }
     next();
   },
-  mounted() {
-    this.team = this.currentTeam.id;
-  },
+  async created() {
+    const _this = this;
+    _this.filters.team = _this.currentTeam.id;
+    _this.filters.page = -1;
+	},
   methods: {
-    fetchDataFilter() {
-      let uri = "/data/reports?team_id=" + this.team;
-      axios
-        .post(uri, {
-          deptSelects: this.deptSelects,
-          projectSelects: this.projectSelects,
-          issueSelects: this.issueSelects,
-          issueYearSelects: this.issueYearSelects,
-          team_id: this.team,
-        })
-        .then((res) => {
-          this.departments = res.data.departments;
-          this.projects = res.data.projects;
-          this.issues = res.data.issues;
-          this.issuesYear = res.data.issuesYear;
-          this.userOptions = res.data.users;
-          this.resetIssue();
-          this.resetIssueYear();
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("Could not load data");
-        });
-    },
-    getLanguage(data) {
-      return this.dataLang[data.current];
-    },
-    disabledEndDates() {
-      let obj = {
-        from: new Date(), // Disable all dates after specific date
-        // days: [0], // Disable Saturday's and Sunday's
-      };
-      return obj;
-    },
-    customFormatter(date) {
-      return moment(date).format("YYYY/MM/DD");
-    },
+     ...mapActions({
+      setCurrentTeam: "setCurrentTeam",
+    }),
+    ...mapActions('reports',{
+      getAll: "getAll",
+      resetFilters: "resetFilters",
+    }),
+
     onReady(editor) {
       // Insert the toolbar before the editable area.
       // editor.ui.getEditableElement().parentElement.insertBefore(
@@ -558,19 +541,19 @@ export default {
           this.errors = [["Please choosing the user attend"], ...this.errors];
         }
       } else {
-        if (!this.deptSelects) {
+        if (!this.filters.department) {
           this.errors = [["Please choosing the department"], ...this.errors];
         }
 
-        if (!this.projectSelects) {
+        if (!this.filters.project) {
           this.errors = [["Please choosing the project"], ...this.errors];
         }
 
-        if (!this.issueSelects) {
+        if (!this.filters.issue) {
           this.errors = [["Please choosing the issue"], ...this.errors];
         }
 
-        if (!this.issueYearSelects) {
+        if (!this.filters.issue_year) {
           this.errors = [["Please choosing the issue year"], ...this.errors];
         }
       }
@@ -650,34 +633,6 @@ export default {
           });
       }
     },
-    resetDepartment() {
-      this.departments = [];
-    },
-    resetProject() {
-      this.projectSelects = null;
-    },
-    resetIssue() {
-      let flag = false;
-      const check = this.issueSelects ? this.issueSelects.id : "";
-      this.issues.forEach(function (item) {
-        if (item.id == check) {
-          flag = true;
-          return;
-        }
-      });
-      if (!flag) this.issueSelects = null;
-    },
-    resetIssueYear() {
-      let flag = false;
-      const check = this.issueYearSelects ? this.issueYearSelects.id : "";
-      this.issuesYear.forEach(function (item) {
-        if (item.id == check) {
-          flag = true;
-          return;
-        }
-      });
-      if (!flag) this.issueYearSelects = null;
-    },
     defaultContent() {
       if (this.isMeeting()) {
         this.editorData =
@@ -715,7 +670,7 @@ export default {
       }
     },
     languageChange() {
-      if (this.actionNewReport) {
+      if (this.action.new) {
         this.errors = [];
         this.title = "";
         this.titleJA = "";
@@ -734,14 +689,7 @@ export default {
         handler: "contentChange",
       },
     ],
-    deptSelects: [{ handler: "fetchDataFilter" }, { handler: "resetProject" }],
-    projectSelects: [
-      { handler: "fetchDataFilter" },
-      { handler: "resetIssue" },
-      { handler: "resetIssueYear" },
-    ],
-    issueSelects: [{ handler: "fetchDataFilter" }],
-    issueYearSelects: [{ handler: "fetchDataFilter" }],
+
     reportType: [
       {
         handler: "typeReportChange",
@@ -750,16 +698,6 @@ export default {
     language: [
       {
         handler: "languageChange",
-      },
-    ],
-    team: [
-      {
-        handler: function (value, oldValue) {
-          if (value != oldValue) {
-            this.resetDepartment();
-            this.fetchDataFilter();
-          }
-        },
       },
     ],
   },
