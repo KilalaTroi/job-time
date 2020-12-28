@@ -6,9 +6,7 @@
           {{ $ml.with("VueJS").get("txtReportCreate") }}
         </h4>
         <div class="align-self-end">
-          <button @click="$emit('back-to-list')" class="btn btn-primary">
-            Back
-          </button>
+          <button @click="backToList()" class="btn btn-primary">Back</button>
         </div>
       </div>
     </template>
@@ -19,14 +17,14 @@
             ><strong>{{ $ml.with("VueJS").get("txtTitle") }}</strong></label
           >
           <input
-            v-if="language == 'vi'"
-            v-model="title"
+            v-if="selectedItem.language == 'vi'"
+            v-model="selectedItem.title"
             type="text"
             class="form-control"
           />
           <input
-            v-if="language == 'ja'"
-            v-model="titleJA"
+            v-if="selectedItem.language == 'ja'"
+            v-model="selectedItem.titleJA"
             type="text"
             class="form-control"
           />
@@ -40,7 +38,7 @@
               $ml.with("VueJS").get("txtReportType")
             }}</strong></label
           >
-          <select-2 v-model="reportType" class="select2">
+          <select-2 v-model="filters.type" class="select2">
             <option value="Trouble">
               {{ $ml.with("VueJS").get("txtTrouble") }}
             </option>
@@ -76,8 +74,7 @@
           <datepicker
             name="date"
             input-class="form-control"
-            placeholder=""
-            v-model="date"
+            v-model="selectedItem.date"
             :format="customFormatter"
             :disabled-dates="disabledEndDates()"
             :language="getLangCode(this.$ml)"
@@ -91,10 +88,10 @@
         >
         <vue-timepicker
           input-class="form-control"
-          v-model="time"
+          v-model="selectedItem.time"
           hide-disabled-items
-          :minute-range="MinuteRange"
-          :hour-range="HourRange"
+          :minute-range="[0, 10, 20, 30, 40, 50]"
+          :hour-range="[[8, 17]]"
           input-width="100%"
           close-on-complete
           required
@@ -114,8 +111,8 @@
           <div>
             <multiselect
               :multiple="true"
-              v-model="user_id"
-              :options="userOptions"
+              v-model="filters.user_id"
+              :options="options.users"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtPickSome')"
@@ -141,8 +138,8 @@
           <div>
             <multiselect
               :multiple="true"
-              v-model="attendPerson"
-              :options="userOptions"
+              v-model="selectedItem.attendPerson"
+              :options="options.users"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtPickSome')"
@@ -160,7 +157,7 @@
               >{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong
             ></label
           >
-          <input v-model="attendPersonOther" type="text" class="form-control" />
+          <input v-model="selectedItem.attendPersonOther" type="text" class="form-control" />
         </div>
       </div>
 
@@ -227,7 +224,7 @@
           <div>
             <multiselect
               :multiple="false"
-              v-model="filters.issues"
+              v-model="filters.issue"
               :options="options.issues"
               :clear-on-select="true"
               :preserve-search="false"
@@ -240,10 +237,8 @@
       </div>
       <div class="col-sm-2">
         <div class="form-group">
-          <label class=""
-            ><strong>{{ $ml.with("VueJS").get("txtLang") }}</strong></label
-          >
-          <select-2 v-model="language" class="select2">
+          <label class=""><strong>{{ $ml.with("VueJS").get("txtLang") }}</strong></label>
+          <select-2 v-model="selectedItem.language" class="select2">
             <option value="vi">{{ $ml.with("VueJS").get("txtVi") }}</option>
             <option value="ja">{{ $ml.with("VueJS").get("txtJa") }}</option>
           </select-2>
@@ -255,16 +250,16 @@
       <div id="toolbar-container"></div>
       <div id="ck-editor">
         <ckeditor
-          v-if="language == 'vi'"
+          v-if="selectedItem.language == 'vi'"
           :editor="editor"
-          v-model="editorData"
+          v-model="selectedItem.editorData"
           :config="editorConfig"
           @ready="onReady"
         ></ckeditor>
         <ckeditor
-          v-if="language == 'ja'"
+          v-if="selectedItem.language == 'ja'"
           :editor="editor"
-          v-model="editorDataJA"
+          v-model="selectedItem.editorDataJA"
           :config="editorConfig"
           @ready="onReady"
         ></ckeditor>
@@ -426,6 +421,7 @@ export default {
 
     ...mapGetters('reports',{
       filters: "filters",
+      selectedItem: "selectedItem",
       options: "options",
       action: "action",
     }),
@@ -433,30 +429,7 @@ export default {
   props: ["userID", "actionNewReport"],
   data() {
     return {
-      title: "",
-      titleJA: "",
-      date: "",
-      time: "",
-      HourRange: [[8, 17]],
-      MinuteRange: [0, 10, 20, 30, 40, 50],
-      dataLang: {
-        vi: vi,
-        ja: ja,
-      },
-      user_id: [],
-      attendPerson: [],
-      attendPersonOther: "",
-      deptSelects: null,
-      projectSelects: null,
-      issueSelects: null,
-      issueYearSelects: null,
-      reportType: "Trouble",
-      txtAll: this.$ml.with("VueJS").get("txtSelectAll"),
-      userOptions: [],
-      departments: [],
-      projects: [],
-      issues: [],
-      issuesYear: [],
+
       isEditing: false,
       editor: DecoupledEditor,
       editorData: "",
@@ -466,8 +439,6 @@ export default {
         // language: 'ja'
         extraPlugins: [MyCustomUploadAdapterPlugin],
       },
-
-      language: this.$ml.current,
       translatable: 0,
       errors: [],
       team: 0,
@@ -491,16 +462,16 @@ export default {
   },
   async created() {
     const _this = this;
-    _this.filters.team = _this.currentTeam.id;
+    // _this.filters.team = _this.currentTeam.id;
     _this.filters.page = -1;
+    _this.filters.types = "Trouble";
+    _this.selectedItem.language = this.$ml.current;
 	},
   methods: {
-     ...mapActions({
-      setCurrentTeam: "setCurrentTeam",
-    }),
     ...mapActions('reports',{
       getAll: "getAll",
       resetFilters: "resetFilters",
+      backToList: "backToList"
     }),
 
     onReady(editor) {
@@ -524,20 +495,20 @@ export default {
     emitCreateReport() {
       this.errors = [];
 
-      if (!this.title && !this.titleJA) {
+      if (!this.selectedItem.title && !this.selectedItem.titleJA) {
         this.errors = [["Please typing the title"], ...this.errors];
       }
 
-      if (!this.date) {
+      if (!this.selectedItem.date) {
         this.errors = [["Please choosing the date"], ...this.errors];
       }
 
-      if (!this.user_id.length) {
+      if (!this.filters.user_id.length) {
         this.errors = [["Please choosing the user report"], ...this.errors];
       }
 
       if (this.isMeeting() || this.isNotice()) {
-        if (!this.attendPerson.length) {
+        if (!this.selectedItem.attendPerson.length) {
           this.errors = [["Please choosing the user attend"], ...this.errors];
         }
       } else {
@@ -558,104 +529,94 @@ export default {
         }
       }
 
-      if (!this.editorData && !this.editorDataJA) {
+      if (!this.selectedItem.editorData && !this.selectedItem.editorDataJA) {
         this.errors = [["Please typing the content"], ...this.errors];
       }
 
       if (!this.errors.length) {
-        let uri = "/data/reports-action";
-        let newItem = {
-          language: this.language,
-          translatable: this.translatable,
-          type: this.reportType,
-          seen: this.userID.toString(),
-          author: this.user_id
-            .map((item, index) => {
-              return item.id;
-            })
-            .toString(),
-          team_id: this.team,
-        };
+        // let uri = "/data/reports-action";
+        // let newItem = {
+        //   language: this.language,
+        //   translatable: this.translatable,
+        //   type: this.reportType,
+        //   seen: this.userID.toString(),
+        //   author: this.user_id
+        //     .map((item, index) => {
+        //       return item.id;
+        //     })
+        //     .toString(),
+        //   team_id: this.team,
+        // };
 
-        if (this.language == "vi") {
-          newItem.title = this.title;
-          newItem.content = this.editorData;
-          newItem.title_ja = this.title;
-          newItem.content_ja = this.editorData;
-        } else {
-          newItem.title = this.titleJA;
-          newItem.content = this.editorDataJA;
-          newItem.title_ja = this.titleJA;
-          newItem.content_ja = this.editorDataJA;
-        }
+        // if (this.language == "vi") {
+        //   newItem.title = this.title;
+        //   newItem.content = this.editorData;
+        //   newItem.title_ja = this.title;
+        //   newItem.content_ja = this.editorData;
+        // } else {
+        //   newItem.title = this.titleJA;
+        //   newItem.content = this.editorDataJA;
+        //   newItem.title_ja = this.titleJA;
+        //   newItem.content_ja = this.editorDataJA;
+        // }
 
-        if (this.isMeeting() || this.isNotice()) {
-          newItem.attend_person = this.attendPerson
-            .map((item, index) => {
-              return item.id;
-            })
-            .toString();
-          newItem.attend_other_person = this.attendPersonOther;
-          newItem.date_time =
-            moment(this.date).format("YYYY-MM-DD") + " " + this.time;
-        } else {
-          newItem.date_time = moment(this.date).format("YYYY-MM-DD HH:mm");
-          newItem.projects = this.projectSelects.id;
-          newItem.issue = this.issueSelects.id;
-          newItem.issueYear = this.issueYearSelects.id;
-        }
+        // if (this.isMeeting() || this.isNotice()) {
+        //   newItem.attend_person = this.attendPerson
+        //     .map((item, index) => {
+        //       return item.id;
+        //     })
+        //     .toString();
+        //   newItem.attend_other_person = this.attendPersonOther;
+        //   newItem.date_time =
+        //     moment(this.date).format("YYYY-MM-DD") + " " + this.time;
+        // } else {
+        //   newItem.date_time = moment(this.date).format("YYYY-MM-DD HH:mm");
+        //   newItem.projects = this.projectSelects.id;
+        //   newItem.issue = this.issueSelects.id;
+        //   newItem.issueYear = this.issueYearSelects.id;
+        // }
 
-        axios
-          .post(uri, newItem)
-          .then((res) => {
-            this.title = "";
-            this.titleJA = "";
-            this.date = "";
-            this.time = "";
-            this.attendPerson = [];
-            this.attendPersonOther = "";
-            this.user_id = [];
-            this.deptSelects = null;
-            this.projectSelects = null;
-            this.issueSelects = null;
-            this.issueYearSelects = null;
-            this.reportType = "Trouble";
-            this.editorData = "";
-            this.editorDataJA = "";
-            this.errors = [];
-            this.$emit("back-to-list", true);
-          })
-          .catch((err) => {
-            console.log(err);
-            if (err.response.status == 422) {
-              this.errors = err.response.data;
-            }
-          });
+        // axios
+        //   .post(uri, newItem)
+        //   .then((res) => {
+        //     this.title = "";
+        //     this.titleJA = "";
+        //     this.date = "";
+        //     this.time = "";
+        //     this.attendPerson = [];
+        //     this.attendPersonOther = "";
+        //     this.user_id = [];
+        //     this.deptSelects = null;
+        //     this.projectSelects = null;
+        //     this.issueSelects = null;
+        //     this.issueYearSelects = null;
+        //     this.reportType = "Trouble";
+        //     this.editorData = "";
+        //     this.editorDataJA = "";
+        //     this.errors = [];
+        //     this.$emit("back-to-list", true);
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //     if (err.response.status == 422) {
+        //       this.errors = err.response.data;
+        //     }
+        //   });
       }
     },
     defaultContent() {
-      if (this.isMeeting()) {
-        this.editorData =
-          "<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>";
-        this.editorDataJA =
-          "<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>";
-      } else {
-        if (this.isNotice()) {
-          this.editorData = "<h4>お知らせ</h4>";
-          this.editorDataJA = "<h4>お知らせ</h4>";
-        } else {
-          this.editorData =
-            '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
-          this.editorDataJA =
-            '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
-        }
+      if (this.isMeeting()) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>";
+      else {
+        if (this.isNotice()) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>お知らせ</h4>";
+        else this.selectedItem.editorData = this.selectedItem.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
+
       }
     },
     isMeeting() {
-      return this.reportType == "Meeting";
+      return this.filters.types == "Meeting";
     },
     isNotice() {
-      return this.reportType == "Notice";
+      return this.filters.types == "Notice";
     },
     typeReportChange() {
       this.errors = [];
@@ -663,43 +624,53 @@ export default {
       this.defaultContent();
 
       if (this.isMeeting() || this.isNotice()) {
-        this.deptSelects = [];
+        this.filters.department = null;
       } else {
-        this.attendPerson = [];
-        this.attendPersonOther = "";
+        this.selectedItem.attendPerson = null;
+        this.selectedItem.attendPersonOther = "";
       }
     },
     languageChange() {
       if (this.action.new) {
         this.errors = [];
-        this.title = "";
-        this.titleJA = "";
+        this.selectedItem.title = this.selectedItem.titleJA = "";
         this.defaultContent();
       }
     },
   },
   watch: {
-    editorData: [
+      selectedItem: [
       {
-        handler: "contentChange",
-      },
-    ],
-    editorDataJA: [
-      {
-        handler: "contentChange",
-      },
-    ],
+        handler: function (value) {
+          const _this = this;
+          console.log(value)
+          if(value.editorData || value.editorDataJA) _this.contentChange();
+          if(value.language) _this.languageChange();
 
+        },
+        deep: true
+      },
+    ],
     reportType: [
       {
         handler: "typeReportChange",
       },
     ],
-    language: [
-      {
-        handler: "languageChange",
-      },
-    ],
+    // language: [
+    //   {
+    //     handler: "languageChange",
+    //   },
+    // ],
+    // editorData: [
+    //   {
+    //     handler: "contentChange",
+    //   },
+    // ],
+    // editorDataJA: [
+    //   {
+    //     handler: "contentChange",
+    //   },
+    // ],
   },
 };
 </script>

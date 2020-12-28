@@ -63,10 +63,14 @@ export default {
     },
 
     SET_SELECTED_ITEM: (state, selectedItem) => {
-			state.selectedItem = Object.assign({}, selectedItem)
-		},
+      state.selectedItem = Object.assign({}, selectedItem)
+    },
 
-    UPDATE_SEEN: () => {},
+    SET_RESET_FILTERS: (state, filtersItem) => {
+      state.filters = Object.assign({}, filtersItem)
+    },
+
+    UPDATE_SEEN: () => { },
 
     SET_COLUMNS: (state, columns) => {
       state.columns = columns
@@ -99,48 +103,73 @@ export default {
         });
     },
 
-    getItem({ state, commit, getters}, id) {
-			const item = getters['getProjectByIssueID'](state.data.data, id)
-			// if (item.team) {
-			// 	const arrTeam = item.team.split(',')
-			// 	item.team = arrTeam.map((item, index) => {
-			// 		return rootGetters['getObjectByID'](rootState.currentTeamOption, +item)
-			// 	})
-			// }
-			commit('SET_SELECTED_ITEM', item)
-		},
+    getItem({ state, commit, getters }, id) {
+      const item = getters['getProjectByIssueID'](state.data.data, id)
+      // if (item.team) {
+      // 	const arrTeam = item.team.split(',')
+      // 	item.team = arrTeam.map((item, index) => {
+      // 		return rootGetters['getObjectByID'](rootState.currentTeamOption, +item)
+      // 	})
+      // }
+      commit('SET_SELECTED_ITEM', item)
+    },
 
-    resetFilters({ state }) {
-      let flagProject = false;
-      let flagIssue = false;
-      let flagIssueYear = false;
+    resetFilters({ state, commit }, flag = '') {
+      if ('all' == flag) {
+        commit('SET_RESET_FILTERS', {
+          type: 0,
+          start_date: new Date(moment().subtract(1, "years").startOf("month").format("YYYY/MM/DD")),
+          end_date: new Date(moment().add(1, "days").format("YYYY/MM/DD")),
+          department: null,
+          project: null,
+          issue: null,
+          issue_year: null,
+          team: state.filters.team,
+        })
+      } else if(!flag) {
+        let flagProject = false;
+        let flagIssue = false;
+        let flagIssueYear = false;
 
-      const checkProject = state.filters.project ? state.filters.project.id : "";
-      (state.options.projects).forEach(function (item) {
-        if (item.id == checkProject) {
-          flagProject = true;
-          return;
-        }
-      });
+        const checkProject = state.filters.project ? state.filters.project.id : "";
+        (state.options.projects).forEach(function (item) {
+          if (item.id == checkProject) {
+            flagProject = true;
+            return;
+          }
+        });
 
-      const checkIssue = state.filters.issue ? state.filters.issue.id : "";
-      (state.options.issues).forEach(function (item) {
-        if (item.id == checkIssue) {
-          flagIssue = true;
-          return;
-        }
-      });
+        const checkIssue = state.filters.issue ? state.filters.issue.id : "";
+        (state.options.issues).forEach(function (item) {
+          if (item.id == checkIssue) {
+            flagIssue = true;
+            return;
+          }
+        });
 
-      const checkIssueYear = state.filters.issue_year ? state.filters.issue_year.id : "";
-      (state.options.issues_year).forEach(function (item) {
-        if (item.id == checkIssueYear) {
-          flagIssueYear = true;
-          return;
-        }
-      });
-      if (!flagProject) state.filters.project = null;
-      if (!flagIssue) state.filters.issue = null;
-      if (!flagIssueYear) state.filters.issue_year = null;
+        const checkIssueYear = state.filters.issue_year ? state.filters.issue_year.id : "";
+        (state.options.issues_year).forEach(function (item) {
+          if (item.id == checkIssueYear) {
+            flagIssueYear = true;
+            return;
+          }
+        });
+        if (!flagProject) state.filters.project = null;
+        if (!flagIssue) state.filters.issue = null;
+        if (!flagIssueYear) state.filters.issue_year = null;
+      }
+    },
+
+    resetSelectedItem({ commit }) {
+      commit('SET_SELECTED_ITEM', {})
+    },
+
+    backToList({state, dispatch }) {
+      state.action.new = state.action.preview = state.action.edit = false;
+      dispatch('resetSelectedItem');
+      // dispatch('resetFilters', 'all');
+      delete state.filters['page'];
+      dispatch('getAll');
     },
 
     updateSeen({ dispatch, commit }, item) {
@@ -152,7 +181,7 @@ export default {
         .then((res) => {
           dispatch('getAll');
           dispatch('/updateReportNotify');
-          commit(UPDATE_SEEN);
+          commit('UPDATE_SEEN');
         })
         .catch((err) => {
           console.log(err);

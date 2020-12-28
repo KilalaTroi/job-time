@@ -149,7 +149,6 @@
         <div class="container">
           <add-new
             v-if="action.new"
-            v-on:back-to-list="backToList"
           ></add-new>
 
           <!-- <edit
@@ -291,13 +290,6 @@ export default {
       this.currentReport = this.getObjectByID(this.reports.data, id);
       this.currentReport.isSeen = seen;
     },
-    backToList(newData = false) {
-      this.action.new = this.action.preview = this.action.edit = false;
-      this.currentReport = {};
-
-      if (newData) this.fetchDataFilter();
-    },
-
 
     deleteReport(id) {
       if (confirm(this.$ml.with("VueJS").get("msgConfirmDelete"))) {
@@ -342,7 +334,10 @@ export default {
       {
         handler: function (value) {
           const _this = this;
-          this.getAll(this.filters.page ? this.filters.page : 1);
+
+          if(-1 == _this.filters.page) _this.getAll(-1);
+          else if(!_this.filters.page) _this.getAll();
+
           if (value.team != this.currentTeam.id) {
             this.setCurrentTeam(value.team);
             this.setReportNotify(value.team);
