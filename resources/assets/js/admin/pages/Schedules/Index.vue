@@ -30,7 +30,7 @@
                   :color="item.value"
                   :style="setBackground(item.value)"
                 >
-                  <span>{{ item.project }} {{ item.issue_year ? item.issue_year+' ' : '' }}{{ item.issue }}</span>
+                  <span>{{ item.fullname }}</span>
                 </div>
               </div>
             </div>
