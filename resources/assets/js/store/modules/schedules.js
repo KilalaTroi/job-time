@@ -203,6 +203,7 @@ export default {
     },
 
     handleMonthChange({ commit }, data) {
+      $('.tooltip').remove();
       commit('SET_FILTER', data);
       setTimeout(function() {
         $('.fc-event.fc-short').removeClass('fc-short');

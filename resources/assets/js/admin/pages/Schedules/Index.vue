@@ -196,7 +196,7 @@ export default {
       info.el.querySelector('.fc-title').innerHTML = info.event.title;
 
       var tooltip = new Tooltip(info.el, {
-        title: info.event.extendedProps.description,
+        title: info.event.extendedProps.description + "",
         placement: 'top',
         trigger: 'hover',
         container: 'body',
@@ -238,6 +238,7 @@ export default {
           this.getAll();
 
           if ( value.team != this.currentTeam.id ) {
+            $('.tooltip').remove();
             this.setCurrentTeam(value.team);
           }
         },
