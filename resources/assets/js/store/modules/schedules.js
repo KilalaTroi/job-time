@@ -80,6 +80,7 @@ export default {
       const uri = '/data/schedules?startDate=' + currentStart + '&endDate=' + currentEnd + '&team_id=' + state.filters.team + '&only_event=' + onlyEvent
 
       await axios.get(uri).then(response => {
+        $('.tooltip').remove();
         if (response.data.schedules.length) {
           let schedulesVariation = [];
           response.data.schedules = response.data.schedules.map((item, index) => {
