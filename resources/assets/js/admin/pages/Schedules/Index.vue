@@ -61,7 +61,7 @@
             :droppable="fullCalendar.droppable"
             :events="scheduleData.schedules"
             :event-overlap="true"
-            :all-day-slot="true"
+            :all-day-slot="currentTeam.id === 3"
             min-time="07:00:00"
             max-time="19:00:00"
             height="auto"
@@ -250,23 +250,4 @@ export default {
 
 <style lang="scss" scope>
 @import "custom.scss";
-.no-schedule {
-  position: relative;
-
-  &:after {
-    content: "N";
-    position: absolute;
-    right: 3px;
-    bottom: 3px;
-    width: 20px;
-    height: 20px;
-    background: red;
-    text-align: center;
-    line-height: 20px;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 700;
-  }
-}
 </style>

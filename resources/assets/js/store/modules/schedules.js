@@ -115,7 +115,8 @@ export default {
               const issueYear = _item.issue_year ? ' ' + _item.issue_year : '';
               const name = _item.i_name ? _item.p_name + checkTR + issueYear + " " + _item.i_name : _item.p_name + checkTR + issueYear;
               const memo = _item.memo ? _item.memo : "";
-              const title = textTime + name + '<br>' + memo;
+              const textTimeAllday = _item.all_date ? '<span>08:00 - 17:00</span><br>' : '';
+              const title = textTimeAllday + textTime + name + '<br>' + memo;
 
               // Set constraint start date
               _item.constraint = {}
