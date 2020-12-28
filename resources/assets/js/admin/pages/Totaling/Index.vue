@@ -144,11 +144,11 @@
               {{ $ml.with("VueJS").get("txtTimeRecord") }}
             </h4>
             <div class="align-self-end">
+              <button-view-table-option class="mt-0" />
               <button @click="exportExcel" class="btn btn-primary">
                 <i class="fa fa-download"></i>
                 {{ $ml.with("VueJS").get("txtExportExcel") }}
               </button>
-              <button-view-table-option class="mt-0" />
             </div>
           </div>
         </template>
