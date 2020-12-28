@@ -203,6 +203,7 @@ export default {
           this.getAll();
 
           if ( value.team != this.currentTeam.id ) {
+            $('.tooltip').remove();
             this.setCurrentTeam(value.team);
           }
         },
