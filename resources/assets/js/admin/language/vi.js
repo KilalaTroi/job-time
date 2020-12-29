@@ -175,4 +175,5 @@ export default {
     txtDateTime: 'Date',
     txtYearOfIssue: 'Year of issue',
     txtFilesWorked: 'Files Worked',
+    txtQuantity: 'Quantity',
 }

@@ -1,6 +1,10 @@
 <template>
     <div class="wrapper">
         <side-bar>
+            <sidebar-link to="/schedules">
+                <i class="nc-icon nc-paper-2"></i>
+                <p v-text="$ml.with('VueJS').get('sbSchedules')" />
+            </sidebar-link>
             <sidebar-link to="/overview">
                 <i class="nc-icon nc-chart-pie-36"></i>
                 <p v-text="$ml.with('VueJS').get('sbStatistics')" />
@@ -8,6 +12,14 @@
             <sidebar-link to="/totaling">
                 <i class="nc-icon nc-chart-bar-32"></i>
                 <p v-text="$ml.with('VueJS').get('sbTotaling')" />
+            </sidebar-link>
+            <sidebar-link to="/projects">
+                <i class="nc-icon nc-bag"></i>
+                <p v-text="$ml.with('VueJS').get('sbProjects')" />
+            </sidebar-link>
+            <sidebar-link to="/types">
+                <i class="nc-icon nc-tag-content"></i>
+                <p v-text="$ml.with('VueJS').get('sbJobTypes')" />
             </sidebar-link>
             <sidebar-link to="/user">
                 <i class="nc-icon nc-badge"></i>
@@ -20,18 +32,6 @@
             <sidebar-link to="/departments">
                 <i class="nc-icon nc-bank"></i>
                 <p v-text="$ml.with('VueJS').get('sbDepartments')" />
-            </sidebar-link>
-            <sidebar-link to="/types">
-                <i class="nc-icon nc-tag-content"></i>
-                <p v-text="$ml.with('VueJS').get('sbJobTypes')" />
-            </sidebar-link>
-            <sidebar-link to="/projects">
-                <i class="nc-icon nc-bag"></i>
-                <p v-text="$ml.with('VueJS').get('sbProjects')" />
-            </sidebar-link>
-            <sidebar-link to="/schedules">
-                <i class="nc-icon nc-paper-2"></i>
-                <p v-text="$ml.with('VueJS').get('sbSchedules')" />
             </sidebar-link>
             <sidebar-link to="/reports">
                 <i class="nc-icon nc-single-copy-04"></i>

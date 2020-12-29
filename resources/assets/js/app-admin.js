@@ -55,12 +55,12 @@ import Uploaded from './admin/pages/Finish/Uploaded';
 const routes = [{
         path: '/',
         component: DashboardLayout,
-        redirect: '/overview'
+        redirect: '/schedules'
     },
     {
         path: '/',
         component: DashboardLayout,
-        redirect: '/overview',
+        redirect: '/schedules',
         children: [{
                 path: 'overview',
                 name: 'Overview',
