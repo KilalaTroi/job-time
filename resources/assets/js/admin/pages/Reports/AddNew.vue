@@ -82,7 +82,7 @@
         </div>
       </div>
 
-      <div class="col-sm-3" v-if="isMeeting() || isNotice()">
+      <div class="col-sm-3" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <label
           ><strong>{{ $ml.with("VueJS").get("lblTime") }}</strong></label
         >
@@ -99,10 +99,7 @@
       </div>
 
       <div
-        :class="[
-          { 'col-sm-6': isMeeting() || isNotice() },
-          { 'col-sm-9': !isMeeting() && !isNotice() },
-        ]"
+        :class="'Meeting' == filters.type || 'Notice' == filters.type ? 'col-sm-6' : 'col-sm-9' "
       >
         <div class="form-group">
           <label
@@ -123,18 +120,10 @@
         </div>
       </div>
 
-      <div class="col-sm-12" v-if="isMeeting() || isNotice()">
+      <div class="col-sm-12" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
-          <label v-if="isNotice()"
-            ><strong>{{
-              $ml.with("VueJS").get("txtDestination")
-            }}</strong></label
-          >
-          <label v-else
-            ><strong>{{
-              $ml.with("VueJS").get("txtAttendPerson")
-            }}</strong></label
-          >
+          <label v-if="'Notice' == filters.type"><strong>{{ $ml.with("VueJS").get("txtDestination") }}</strong></label>
+          <label v-else><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }}</strong></label>
           <div>
             <multiselect
               :multiple="true"
@@ -150,18 +139,13 @@
         </div>
       </div>
 
-      <div class="col-sm-9" v-if="isMeeting() || isNotice()">
+      <div class="col-sm-9" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
-          <label class
-            ><strong
-              >{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong
-            ></label
-          >
+          <label><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong></label>
           <input v-model="selectedItem.attendPersonOther" type="text" class="form-control" />
         </div>
       </div>
-
-      <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-3" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
           <label class
             ><strong>{{ $ml.with("VueJS").get("txtDepts") }}</strong></label
@@ -180,11 +164,9 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-3" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
-          <label class
-            ><strong>{{ $ml.with("VueJS").get("txtProjects") }}</strong></label
-          >
+          <label><strong>{{ $ml.with("VueJS").get("txtProjects") }}</strong></label>
           <div>
             <multiselect
               :multiple="false"
@@ -199,7 +181,7 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-2" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
           <label class>{{ $ml.with("VueJS").get("txtYearOfIssue") }}</label>
           <div>
@@ -216,11 +198,9 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-2" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
-          <label class
-            ><strong>{{ $ml.with("VueJS").get("txtIssue") }}</strong></label
-          >
+          <label><strong>{{ $ml.with("VueJS").get("txtIssue") }}</strong></label>
           <div>
             <multiselect
               :multiple="false"
@@ -266,10 +246,10 @@
       </div>
     </div>
 
-    <error-item :errors="errors"></error-item>
+    <error-item :errors="validationErrors"></error-item>
 
     <div class="form-group text-right">
-      <button @click="emitCreateReport" class="btn btn-primary">
+      <button @click="addNew()" class="btn btn-primary">
         {{ $ml.with("VueJS").get("txtCreate") }}
       </button>
     </div>
@@ -424,253 +404,112 @@ export default {
       selectedItem: "selectedItem",
       options: "options",
       action: "action",
+      validationErrors: "validationErrors"
     }),
   },
   props: ["userID", "actionNewReport"],
   data() {
     return {
-
+      filtersOld: {
+        type: "Trouble",
+      },
+      selectedItemOld: {
+        language: "",
+      },
       isEditing: false,
       editor: DecoupledEditor,
-      editorData: "",
-      editorDataJA: "",
       editorConfig: {
         // The configuration of the editor.
         // language: 'ja'
         extraPlugins: [MyCustomUploadAdapterPlugin],
       },
-      translatable: 0,
-      errors: [],
-      team: 0,
     };
   },
   beforeMount() {
     this.defaultContent();
-
+    // this.selectedItem.language = this.$ml.current;
     window.addEventListener("beforeunload", this.preventNav);
     this.$once("hook:beforeDestroy", () => {
       window.removeEventListener("beforeunload", this.preventNav);
     });
   },
   beforeRouteLeave(to, from, next) {
-    if (this.isEditing) {
-      if (!window.confirm("Leave without saving?")) {
-        return;
-      }
-    }
+    if (this.isEditing) if (!window.confirm("Leave without saving?")) return;
     next();
   },
+
   async created() {
     const _this = this;
-    // _this.filters.team = _this.currentTeam.id;
     _this.filters.page = -1;
-    _this.filters.types = "Trouble";
-    _this.selectedItem.language = this.$ml.current;
+    _this.filters.type = "Trouble";
+    _this.selectedItem.language =  _this.selectedItemOld.language = this.$ml.current;
 	},
   methods: {
-    ...mapActions('reports',{
+    ...mapActions('reports', {
       getAll: "getAll",
       resetFilters: "resetFilters",
-      backToList: "backToList"
+      backToList: "backToList",
+      addNew: "addNew",
+      resetValidate : "resetValidate",
     }),
 
     onReady(editor) {
-      // Insert the toolbar before the editable area.
-      // editor.ui.getEditableElement().parentElement.insertBefore(
-      //     editor.ui.view.toolbar.element,
-      //     editor.ui.getEditableElement()
-      // );
-
       const toolbarContainer = document.querySelector("#toolbar-container");
       toolbarContainer.appendChild(editor.ui.view.toolbar.element);
     },
+
     preventNav(event) {
       if (!this.isEditing) return;
       event.preventDefault();
       event.returnValue = "";
     },
-    contentChange() {
-      this.isEditing = true;
-    },
-    emitCreateReport() {
-      this.errors = [];
-
-      if (!this.selectedItem.title && !this.selectedItem.titleJA) {
-        this.errors = [["Please typing the title"], ...this.errors];
-      }
-
-      if (!this.selectedItem.date) {
-        this.errors = [["Please choosing the date"], ...this.errors];
-      }
-
-      if (!this.filters.user_id.length) {
-        this.errors = [["Please choosing the user report"], ...this.errors];
-      }
-
-      if (this.isMeeting() || this.isNotice()) {
-        if (!this.selectedItem.attendPerson.length) {
-          this.errors = [["Please choosing the user attend"], ...this.errors];
-        }
-      } else {
-        if (!this.filters.department) {
-          this.errors = [["Please choosing the department"], ...this.errors];
-        }
-
-        if (!this.filters.project) {
-          this.errors = [["Please choosing the project"], ...this.errors];
-        }
-
-        if (!this.filters.issue) {
-          this.errors = [["Please choosing the issue"], ...this.errors];
-        }
-
-        if (!this.filters.issue_year) {
-          this.errors = [["Please choosing the issue year"], ...this.errors];
-        }
-      }
-
-      if (!this.selectedItem.editorData && !this.selectedItem.editorDataJA) {
-        this.errors = [["Please typing the content"], ...this.errors];
-      }
-
-      if (!this.errors.length) {
-        // let uri = "/data/reports-action";
-        // let newItem = {
-        //   language: this.language,
-        //   translatable: this.translatable,
-        //   type: this.reportType,
-        //   seen: this.userID.toString(),
-        //   author: this.user_id
-        //     .map((item, index) => {
-        //       return item.id;
-        //     })
-        //     .toString(),
-        //   team_id: this.team,
-        // };
-
-        // if (this.language == "vi") {
-        //   newItem.title = this.title;
-        //   newItem.content = this.editorData;
-        //   newItem.title_ja = this.title;
-        //   newItem.content_ja = this.editorData;
-        // } else {
-        //   newItem.title = this.titleJA;
-        //   newItem.content = this.editorDataJA;
-        //   newItem.title_ja = this.titleJA;
-        //   newItem.content_ja = this.editorDataJA;
-        // }
-
-        // if (this.isMeeting() || this.isNotice()) {
-        //   newItem.attend_person = this.attendPerson
-        //     .map((item, index) => {
-        //       return item.id;
-        //     })
-        //     .toString();
-        //   newItem.attend_other_person = this.attendPersonOther;
-        //   newItem.date_time =
-        //     moment(this.date).format("YYYY-MM-DD") + " " + this.time;
-        // } else {
-        //   newItem.date_time = moment(this.date).format("YYYY-MM-DD HH:mm");
-        //   newItem.projects = this.projectSelects.id;
-        //   newItem.issue = this.issueSelects.id;
-        //   newItem.issueYear = this.issueYearSelects.id;
-        // }
-
-        // axios
-        //   .post(uri, newItem)
-        //   .then((res) => {
-        //     this.title = "";
-        //     this.titleJA = "";
-        //     this.date = "";
-        //     this.time = "";
-        //     this.attendPerson = [];
-        //     this.attendPersonOther = "";
-        //     this.user_id = [];
-        //     this.deptSelects = null;
-        //     this.projectSelects = null;
-        //     this.issueSelects = null;
-        //     this.issueYearSelects = null;
-        //     this.reportType = "Trouble";
-        //     this.editorData = "";
-        //     this.editorDataJA = "";
-        //     this.errors = [];
-        //     this.$emit("back-to-list", true);
-        //   })
-        //   .catch((err) => {
-        //     console.log(err);
-        //     if (err.response.status == 422) {
-        //       this.errors = err.response.data;
-        //     }
-        //   });
-      }
-    },
     defaultContent() {
-      if (this.isMeeting()) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>";
-      else {
-        if (this.isNotice()) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>お知らせ</h4>";
-        else this.selectedItem.editorData = this.selectedItem.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
-
-      }
-    },
-    isMeeting() {
-      return this.filters.types == "Meeting";
-    },
-    isNotice() {
-      return this.filters.types == "Notice";
+      if ('Meeting' == this.filters.type) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>";
+      else if('Notice' == this.filters.type) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>お知らせ</h4>";
+      else this.selectedItem.editorData = this.selectedItem.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
     },
     typeReportChange() {
-      this.errors = [];
-
+      this.resetValidate();
       this.defaultContent();
-
-      if (this.isMeeting() || this.isNotice()) {
-        this.filters.department = null;
-      } else {
+      if ('Meeting' == this.filters.type || 'Notice' == this.filters.type)  this.filters.department = null;
+      else {
         this.selectedItem.attendPerson = null;
         this.selectedItem.attendPersonOther = "";
       }
     },
     languageChange() {
       if (this.action.new) {
-        this.errors = [];
+        this.resetValidate();
         this.selectedItem.title = this.selectedItem.titleJA = "";
         this.defaultContent();
       }
     },
   },
   watch: {
-      selectedItem: [
+    selectedItem: [
       {
-        handler: function (value) {
+        handler: function (value,valueOld) {
           const _this = this;
-          console.log(value)
-          if(value.editorData || value.editorDataJA) _this.contentChange();
-          if(value.language) _this.languageChange();
-
+          if(value.editorData || value.editorDataJA) _this.isEditing = true;
+          if(value.language != this.selectedItemOld.language){
+            this.selectedItemOld.language = value.language;
+            _this.languageChange();
+          }
         },
         deep: true
       },
     ],
-    reportType: [
+    filters: [
       {
-        handler: "typeReportChange",
+        handler: function (value) {
+          if(value.type != this.typeOld){
+            this.typeOld = value.type;
+            this.typeReportChange();
+          }
+        },
+        deep: true
       },
     ],
-    // language: [
-    //   {
-    //     handler: "languageChange",
-    //   },
-    // ],
-    // editorData: [
-    //   {
-    //     handler: "contentChange",
-    //   },
-    // ],
-    // editorDataJA: [
-    //   {
-    //     handler: "contentChange",
-    //   },
-    // ],
   },
 };
 </script>

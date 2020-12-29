@@ -12,6 +12,7 @@ export default {
       project: null,
       issue: null,
       issue_year: null,
+      user_id: null,
       team: "",
     },
     data: {},
@@ -29,10 +30,11 @@ export default {
       edit: false,
       preview: false,
     },
-
-    selectedItem: {},
-    // validationErrors: '',
-    // validationSuccess: ''
+    selectedItem: {
+      language: '',
+    },
+    validationErrors: '',
+    validationSuccess: ''
   },
 
   getters: {
@@ -42,8 +44,8 @@ export default {
     options: state => state.options,
     action: state => state.action,
     selectedItem: state => state.selectedItem,
-    // validationErrors: state => state.validationErrors,
-    // validationSuccess: state => state.validationSuccess
+    validationErrors: state => state.validationErrors,
+    validationSuccess: state => state.validationSuccess
   },
 
   mutations: {
@@ -71,6 +73,11 @@ export default {
     },
 
     UPDATE_SEEN: () => { },
+
+    SET_VALIDATE: (state, data) => {
+      state.validationErrors = data.error
+      state.validationSuccess = data.success
+    },
 
     SET_COLUMNS: (state, columns) => {
       state.columns = columns
@@ -126,7 +133,7 @@ export default {
           issue_year: null,
           team: state.filters.team,
         })
-      } else if(!flag) {
+      } else if (!flag) {
         let flagProject = false;
         let flagIssue = false;
         let flagIssueYear = false;
@@ -164,7 +171,7 @@ export default {
       commit('SET_SELECTED_ITEM', {})
     },
 
-    backToList({state, dispatch }) {
+    backToList({ state, dispatch }) {
       state.action.new = state.action.preview = state.action.edit = false;
       dispatch('resetSelectedItem');
       // dispatch('resetFilters', 'all');
@@ -187,6 +194,75 @@ export default {
           console.log(err);
           alert("Could not load data");
         });
+    },
+
+    addNew({ state, commit }) {
+      commit('SET_VALIDATE', { error: '', success: '' });
+      if (!state.selectedItem.title && !state.selectedItem.titleJA) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
+      if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
+      if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
+      if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
+        if (!state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
+      } else {
+        if (!state.filters.department) state.validationErrors = [["Please choosing the department"], ...state.validationErrors];
+        if (!state.filters.project) state.validationErrors = [["Please choosing the project"], ...state.validationErrors];
+        if (!state.filters.issue) state.validationErrors = [["Please choosing the issue"], ...state.validationErrors];
+        if (!state.filters.issue_year) state.validationErrors = [["Please choosing the issue year"], ...state.validationErrors];
+      }
+      if (!state.selectedItem.editorData && !state.selectedItem.editorDataJA) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
+      if (!state.validationErrors.length) {
+        const uri = "/data/reports-action";
+        let dataSend = {
+          language: state.selectedItem.language,
+          translatable: 0,
+          type: state.filters.type,
+          author: state.filters.user_id.map((item, index) => { return item.id; }).toString(),
+          team_id: state.filters.team,
+        }
+        if (state.selectedItem.language == "vi") {
+          dataSend.title = dataSend.title_ja = state.selectedItem.title;
+          dataSend.content = dataSend.content_ja = state.selectedItem.editorData;
+        } else {
+          dataSend.title = dataSend.title_ja = state.selectedItem.titleJA;
+          dataSend.content = dataSend.content_ja = state.selectedItem.editorDataJA;
+        }
+        if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
+          dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
+          dataSend.attend_other_person = state.selectedItem.attendPersonOther;
+          dataSend.date_time = moment(state.selectedItem.date).format("YYYY-MM-DD") + " " + state.selectedItem.time;
+        } else {
+          dataSend.date_time = moment(state.selectedItem.date).format("YYYY-MM-DD HH:mm");
+          dataSend.projects = state.filters.project.id;
+          dataSend.issue = state.filters.issue.id;
+          dataSend.issueYear = state.filters.issue_year.id;
+        }
+
+        axios
+          .post(uri, dataSend)
+          .then((res) => {
+            // this.title = "";
+            // this.titleJA = "";
+            // this.date = "";
+            // this.time = "";
+            // this.attendPerson = [];
+            // this.attendPersonOther = "";
+            // this.user_id = [];
+            // this.deptSelects = null;
+            // this.projectSelects = null;
+            // this.issueSelects = null;
+            // this.issueYearSelects = null;
+            // this.reportType = "Trouble";
+            // this.editorData = "";
+            // this.editorDataJA = "";
+            // this.errors = [];
+            // this.$emit("back-to-list", true);
+          })
+          .catch((err) => {  if (err.response.status === 422) commit('SET_VALIDATE', { error: err.response.data, success: '' }) });
+      }
+    },
+
+    resetValidate({ commit }) {
+      commit('SET_VALIDATE', { error: '', success: '' })
     },
 
     setColumns({ commit, rootGetters }, language) {
