@@ -176,4 +176,5 @@ export default {
     txtYearOfIssue: 'Year of issue',
     txtFilesWorked: 'Files Worked',
     txtPrint: 'Print',
+    txtQuantity: 'Quantity',
 }

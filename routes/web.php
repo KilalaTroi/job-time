@@ -54,6 +54,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
     Route::get('all-off-days', 'OffDaysController@allOffDays');
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
+    Route::get('finish-page', 'JobsController@getFinishPage');
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
     Route::get('users/archive/{id}/{status}', 'UsersController@archive');
     Route::resource('processes', 'ProcessesController', ['except' => ['create', 'edit']]);

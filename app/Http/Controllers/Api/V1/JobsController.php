@@ -97,6 +97,7 @@ class JobsController extends Controller
     if ($request->get('showLunchBreak') && $request->get('exceptLunchBreak')) {
       $job->update([
         'note' => $request->get('note'),
+        'quantity' => $request->get('quantity'),
         'start_time' => $start_time,
         'end_time' => '12:00',
       ]);
@@ -147,6 +148,8 @@ class JobsController extends Controller
           's.id as schedule_id',
           's.memo as phase',
           't.slug as type',
+          't.email as email',
+          't.line_room as room_id',
           'i.name as issue',
           'i.year as issue_year'
         )
@@ -195,6 +198,8 @@ class JobsController extends Controller
           's.id as schedule_id',
           's.memo as phase',
           't.slug as type',
+          't.email as email',
+          't.line_room as room_id',
           'i.name as issue',
           'i.year as issue_year'
         )
@@ -252,7 +257,10 @@ class JobsController extends Controller
         'jobs.issue_id',
         's.memo as phase',
         't.slug as type',
+        't.email as email',
+        't.line_room as room_id',
         'jobs.note as note',
+        'jobs.quantity as quantity',
         'p.name as p_name',
         'i.name as issue',
         'i.year as issue_year',
@@ -295,6 +303,17 @@ class JobsController extends Controller
       return $item;
     });
     return $totaling;
+  }
+
+  public function getFinishPage() {
+    return DB::table('processes as p')
+    ->select(
+      'p.page',
+    )
+    ->where('p.issue_id', $_GET['issue_id'])
+    ->where('p.user_id', $this->user['id'])
+    ->where('p.page', '>', 0)
+    ->get()->pluck('page')->toArray();
   }
 
   private function formatTime($time)

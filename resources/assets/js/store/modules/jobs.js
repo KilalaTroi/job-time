@@ -93,13 +93,14 @@ export default {
 				],
 				'totaling': [
 					{ id: "project", value: rootGetters['getTranslate']('txtProject'), width: "", class: "" },
-					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "120", class: "text-center year-of-issue" },
+					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "100", class: "text-center year-of-issue" },
 					{ id: "issue", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "text-center" },
+					{ id: 'quantity', value: rootGetters['getTranslate']('txtQuantity'), width: '80', class: 'quantity' },
 					{ id: 'note', value: rootGetters['getTranslate']('txtWork'), width: '', class: 'note' },
 					{ id: 'phase', value: rootGetters['getTranslate']('txtPhase'), width: '', class: 'text-center' },
-					{ id: "start_time_string", value: rootGetters['getTranslate']('lblStartTime'), width: "", class: "text-center" },
-					{ id: "end_time_string", value: rootGetters['getTranslate']('lblEndTime'), width: "", class: "text-center" },
-					{ id: "total", value: rootGetters['getTranslate']('lblTime'), width: "110", class: "text-center" }
+					{ id: "start_time_string", value: rootGetters['getTranslate']('lblStartTime'), width: "100", class: "text-center" },
+					{ id: "end_time_string", value: rootGetters['getTranslate']('lblEndTime'), width: "100", class: "text-center" },
+					{ id: "total", value: rootGetters['getTranslate']('lblTime'), width: "100", class: "text-center" }
 				]
 			}
 			commit('SET_COLUMNS', columns)
@@ -127,12 +128,22 @@ export default {
 			})
 		},
 
-		getItemJob({ state, commit, rootGetters }, id) {
+		async getItemJob({ state, commit, rootGetters }, id) {
 			let item = rootGetters['getObjectByID'](state.data.jobs.data, id);
 			item.date = state.filters.currentDate;
 			item.start_time = item.end_time = { 'HH': '', 'mm': '' }
 			item.exceptLunchBreak = true;
 			item.showLunchBreak = false;
+
+			if ( state.filters.team == 2 ) {
+				await axios
+					.get("/data/finish-page?issue_id=" + item.id)
+					.then((res) => {
+						if ( res.data.length ) item.quantity = res.data[0];
+					})
+					.catch(err => console.log(err))
+			}
+
 			commit('SET_SELECTED_ITEM_JOB', item)
 		},
 
