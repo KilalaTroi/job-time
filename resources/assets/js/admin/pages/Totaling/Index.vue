@@ -152,9 +152,7 @@
             </div>
           </div>
         </template>
-        <div
-          class="table-responsive"
-        >
+        <div class="table-responsive" >
           <tbl-default
             :dataItems="totalingData"
             :dataCols="columns"
