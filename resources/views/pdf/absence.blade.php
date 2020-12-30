@@ -6,8 +6,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;1,700&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@400;700&display=fallback" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;1,700&display=fallback" rel="stylesheet">
 
   <title>{{ config('app.name', 'Job Time') }}</title>
 
@@ -16,7 +16,7 @@
 
   <style>
     body {
-      font-family: 'Merriweather', serif;
+      font-family: 'Merriweather', sans-serif;
       padding: 10px 30px;
       font-size: 18px
     }
@@ -43,6 +43,12 @@
     span.overflow-x-hidden.text-center::before {
       left: 0;
     }
+
+    span.overflow-x-hidden.font-family-dif::before{
+      font-family: 'Merriweather Sans', sans-serif;
+      font-size: 20px;
+    }
+
 
     /* .table--text ul {
       padding: 0;
@@ -100,7 +106,7 @@
         data-label="{{ $data['now_date'] }}">................................................................................................................</span>
     </p>
     <h1 class="text-center" style="font-size: 26px; margin-bottom: 60px;">APPLICATION FOR ABSENCE</h1>
-    <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="width: 630px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ $data['name'] }}">................................................................................................................................................................................................................................</span>
+    <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="width: 630px; padding-top: 8px;" class="d-inline-block overflow-x-hidden font-family-dif" data-label="{{ $data['name'] }}">................................................................................................................................................................................................................................</span>
     </p>
     <p>Today, I would like to write this application to ask for your approval for my absence from the company on:</p>
     <ul>
