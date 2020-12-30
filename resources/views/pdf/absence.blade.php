@@ -18,7 +18,8 @@
     body {
       font-family: 'Merriweather', sans-serif;
       padding: 10px 30px;
-      font-size: 18px
+      font-size: 18px;
+      color: #000;
     }
 
     h1 {
@@ -45,8 +46,9 @@
     span.overflow-x-hidden.font-family-dif::before{
       font-family: 'Merriweather Sans', sans-serif;
       font-size: 20px;
+      text-transform: uppercase;
     }
-    
+
     .table thead th,
     .table tbody td,
     .table .table-border {
@@ -76,7 +78,7 @@
     <p style="font-size: 22px; margin-bottom: 60px;" class="d-flex algin-items-end">Date:&nbsp&nbsp<span style="width: 160px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ $data['now_date'] }}">................................................................................................................</span>
     </p>
     <h1 class="text-center" style="font-size: 26px; margin-bottom: 60px;">APPLICATION FOR ABSENCE</h1>
-    <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="width: 630px; padding-top: 8px;" class="d-inline-block overflow-x-hidden font-family-dif" data-label="{{ $data['name'] }}">................................................................................................................................................................................................................................</span>
+    <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="width: 630px; padding-top: 10px;" class="d-inline-block overflow-x-hidden font-family-dif" data-label="{{ $data['name'] }}">................................................................................................................................................................................................................................</span>
     </p>
     <p>Today, I would like to write this application to ask for your approval for my absence from the company on:</p>
     <ul>
