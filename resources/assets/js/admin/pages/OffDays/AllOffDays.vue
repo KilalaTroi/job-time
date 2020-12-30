@@ -88,7 +88,8 @@ export default {
     }),
 
     getLanguage(data) {
-      return data.current;
+      const language = data.current == 'vi' ? 'en' : 'ja';
+      return language;
     },
   },
 

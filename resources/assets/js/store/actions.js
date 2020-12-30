@@ -8,6 +8,7 @@ export default {
         const uri = '/data/users/' + id
         axios.get(uri).then((response) => {
             let _user = response.data.user;
+            _user.role = response.data.role;
             _user.team = getters['getObjectByID'](state.currentTeamOption, +_user.team)
             commit('SET_LOGIN_USER', _user)
         });

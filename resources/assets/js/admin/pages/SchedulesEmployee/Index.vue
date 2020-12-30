@@ -30,7 +30,7 @@
                   :color="item.value"
                   :style="setBackground(item.value)"
                 >
-                  <span>{{ item.project }} {{ item.issue_year ? item.issue_year+' ' : '' }}{{ item.issue }}</span>
+                  <span>{{ item.fullname }}</span>
                 </div>
               </div>
             </div>
@@ -171,7 +171,6 @@ export default {
       info.el.querySelector('.fc-content').addEventListener("mouseover", function(event) {
         setTimeout(function() {
           $('.tooltip-inner:not(.convert-html)').each(function(){
-            const text = $(this).text();
             $(this).html(text);
             $(this).addClass('convert-html');
           }, 1000);

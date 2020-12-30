@@ -103,7 +103,7 @@
             </button-create>
           </div>
           <div class="col-12 col-sm-auto ml-auto">
-            <button-view-table-option class="mt-0" />
+            <button-view-table-option class="mt-0 mr-3" />
             <button
               type="button"
               class="btn btn-primary mr-3"

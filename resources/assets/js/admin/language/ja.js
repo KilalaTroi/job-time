@@ -175,4 +175,6 @@ export default {
     txtDateTime: '日時',
     txtYearOfIssue: '発行年',
     txtFilesWorked: 'ファイル数',
+    txtPrint: 'Print',
+    txtQuantity: '量',
 }

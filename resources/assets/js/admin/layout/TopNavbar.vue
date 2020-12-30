@@ -100,20 +100,21 @@ export default {
         const _this = this, team = localStorage.getItem('team');
         _this.setCurrentLang(_this.$ml.current)
 
-        const teamDefault = team ? team : document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0];
-
-        _this.setCurrentTeam(teamDefault)
-
         const _translateTexts = _this.$ml.with("VueJS")
         _this.setTranslateTexts(_translateTexts)
 
         const userID = document.querySelector("meta[name='user-id']").getAttribute('content')
+
+        let teamDefault = document.querySelector("meta[name='team-default']").getAttribute('content').split(',')[0];
+        if(userID == 1) if(team) teamDefault = team
+        _this.setCurrentTeam(teamDefault)
+
         await _this.setLoginUser(userID)
 
         _this.setReportNotify(this.currentTeam.id)
 
         $(document).on("click", ".languages button", function () {
-            _this.setCurrentLang(_this.$ml.current)
+           _this.setCurrentLang(_this.$ml.current)
         });
     }
 }

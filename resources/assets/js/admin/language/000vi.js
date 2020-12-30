@@ -1,8 +1,8 @@
 // Vietnamese Dictionary
 export default {
     siteName: 'Job Time',
-    sbStatistics: 'Reports',
-    sbTotaling: 'Statistics',
+    sbStatistics: 'Statistics',
+    sbTotaling: 'JOB TOTALING',
     sbUsers: 'Users',
     sbTeams: 'TEAMS',
     sbDepartments: 'Departments',
@@ -11,7 +11,7 @@ export default {
     sbSchedules: 'Schedules',
     sbJobs: 'Tasks',
     sbOffDays: 'Off days',
-    sbReports: 'Notes',
+    sbReports: 'Reports',
     msWelcome: 'Welcome',
     mnProfile: 'Profile',
     mnLogOut: 'Log out',
