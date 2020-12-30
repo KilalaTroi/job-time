@@ -29,7 +29,7 @@ window.Vue.use(LightBootstrap);
 import vueNumeralFilterInstaller from 'vue-numeral-filter';
 Vue.use(vueNumeralFilterInstaller, { locale: 'en-gb' });
 
-import DashboardLayout from './admin/layout/PlannerLayout'
+import DashboardLayout from './admin/layout/DashboardLayout'
 // GeneralViews
 import NotFound from './admin/pages/NotFoundPage'
 

@@ -49,10 +49,10 @@ class pdfController extends Controller
 
 		$file_name = 'absence-' . $this->user['id']. '_'. $data['type']. '_' . str_replace('/','',$data['date']) . '_' . str_replace('/','',$data['now_date']) . '.pdf';
 
-		if(!File::exists(storage_path($file_name))){
+		// if(!File::exists(storage_path($file_name))){
 			$pdf = PDFSNAPPY::loadView('pdf.absence',  compact('data'))->setTemporaryFolder(storage_path('app/absence/tmp'));
 			Storage::put('public/pdf/' . $file_name, $pdf->output());
-		}
+		// }
 
 		return response()->json(array(
 			'file_name' => url('data/pdf/' . $file_name),

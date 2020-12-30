@@ -25,8 +25,6 @@
       font-weight: 700;
     }
 
-
-
     span.overflow-x-hidden {
       position: relative;
       overflow-x: hidden !important;
@@ -48,51 +46,25 @@
       font-family: 'Merriweather Sans', sans-serif;
       font-size: 20px;
     }
-
-
-    /* .table--text ul {
-      padding: 0;
-      margin: 0;
-      list-style: none;
-      display: flex;
-      font-size: 16px;
-    }
-
-    .table--text ul li {
-      width: 33.333%;
-    }
-
-    .table--text ul li div {
+    
+    .table thead th,
+    .table tbody td,
+    .table .table-border {
       border: thin solid #000;
     }
 
-    .table--text ul li div:first-of-type {
-      text-align: center;
-      padding: 10px 0;
-    }
-
-    .table--text ul li div:last-of-type {
-      border-top: 0;
-      height: 120px;
-    } */
-
-    .table thead th,.table tbody td, .table .table-border{
-      border: thin solid #000;
-    }
-
-    .table{
+    .table {
       font-size: 14px;
     }
 
-    .table thead th{
+    .table thead th {
       font-weight: 400;
       text-align: center
     }
 
-    .table tbody td{
+    .table tbody td {
       height: 90px;
     }
-
   </style>
 </head>
 
@@ -101,9 +73,7 @@
   <div class="container">
     <p style="margin-bottom: 5px"><span style="width: 60px; display:inline-block">To:</span>KILALA COMMUNICATIONS CO., LTD.</p>
     <p style="margin-bottom: 30px"><span style="width: 60px; display:inline-block">Attn:</span>Mr. KASADO HIROFUMI, General Director</p>
-    <p style="font-size: 22px; margin-bottom: 60px;" class="d-flex algin-items-end">Date:&nbsp&nbsp<span
-        style="width: 160px; padding-top: 6px;" class="d-inline-block overflow-x-hidden"
-        data-label="{{ $data['now_date'] }}">................................................................................................................</span>
+    <p style="font-size: 22px; margin-bottom: 60px;" class="d-flex algin-items-end">Date:&nbsp&nbsp<span style="width: 160px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ $data['now_date'] }}">................................................................................................................</span>
     </p>
     <h1 class="text-center" style="font-size: 26px; margin-bottom: 60px;">APPLICATION FOR ABSENCE</h1>
     <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="width: 630px; padding-top: 8px;" class="d-inline-block overflow-x-hidden font-family-dif" data-label="{{ $data['name'] }}">................................................................................................................................................................................................................................</span>
@@ -129,8 +99,7 @@
           <img style="position: relative; top: -5px" class="mr-2" src="{{ 'all_day' === $data['type'] ? asset('images/check.gif') : asset('images/uncheck.gif') }}">
           <p class='mb-0'>Full-day (08:00 - 17:00)</p>
         </div>
-        <span style="width: 300px; padding-top: 6px;"
-          class="d-inline-block overflow-x-hidden" data-label="{{ 'all_day' === $data['type'] ? $data['date'] : '' }}">................................................................................................................</span>
+        <span style="width: 300px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ 'all_day' === $data['type'] ? $data['date'] : '' }}">................................................................................................................</span>
       </li>
     </ul>
     <p style="margin-bottom: 60px" class="d-flex algin-items-end">Total of off-day:&nbsp&nbsp&nbsp&nbsp<span style="width: 80px; padding-top: 4px" class="d-inline-block overflow-x-hidden text-center" data-label="{{ $data['totalOff'] }}">...................</span>&nbspday(s).</p>
@@ -159,35 +128,17 @@
       <li class="d-flex align-items-center">
         <img style="position: relative; top: -5px;opacity: 0;" class="mr-2" src="{{ asset('images/uncheck.gif') }}">
         <p class='mb-0'>Others:&nbsp&nbsp&nbsp</p>
-        <span style="width: 650px; line-height: 31px"
-          class="d-inline-block overflow-x-hidden">................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................</span>
+        <span style="width: 650px; line-height: 31px" class="d-inline-block overflow-x-hidden">................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................</span>
       </li>
     </ul>
     <p style="margin-bottom: 60px">I commits that I will arrange and finish my tasks as soon as returning to work.</p>
     <div class="d-flex">
       <div style="min-width: 180px; position: relative">
         <p>Yours sincerely,</p>
-        <span style="width: 180px; line-height: 31px; position: absolute; bottom: -8px; left: 0;"
-          class="d-inline-block overflow-x-hidden">................................................................</span>
+        <span style="width: 180px; line-height: 31px; position: absolute; bottom: -8px; left: 0;" class="d-inline-block overflow-x-hidden">................................................................</span>
       </div>
       <div style="width: 700px; padding-left: 90px;">
         <p style="font-weight: 700" class="text-center">Company’s Approval</p>
-        {{-- <div class="table--text">
-          <ul>
-            <li>
-              <div style="border-right: 0;">Leader</div>
-              <div style="border-right: 0;"></div>
-            </li>
-            <li>
-              <div style="border-right: 0;">Administrative Manager</div>
-              <div style="border-right: 0;"></div>
-            </li>
-            <li>
-              <div>D. General Director</div>
-              <div></div>
-            </li>
-          </ul>
-        </div> --}}
         <table class="table table-border">
           <thead>
             <th>Leader</th>
