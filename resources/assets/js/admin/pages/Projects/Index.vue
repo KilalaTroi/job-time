@@ -103,6 +103,7 @@
             </button-create>
           </div>
           <div class="col-12 col-sm-auto ml-auto">
+            <button-view-table-option class="mt-0" />
             <button
               type="button"
               class="btn btn-primary mr-3"
@@ -190,6 +191,11 @@
           @pagination-change-page="getAllProject"
         ></pagination>
       </card>
+      <view-table-option
+        dataTable="project"
+        :dataItems="projectData"
+        :dataCols="columns"
+      />
       <create-item />
       <edit-project />
       <edit-issue />
@@ -210,6 +216,8 @@ import ButtonCreate from "../../components/Buttons/Create";
 import TableProject from "../../components/TableProject";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import Select2Type from "../../components/SelectTwo/SelectTwoType.vue";
+import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
+import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -224,6 +232,8 @@ export default {
     ButtonCreate,
     TableProject,
     ImportIssue,
+    ButtonViewTableOption,
+    ViewTableOption,
   },
   computed: {
     ...mapGetters({
@@ -233,6 +243,7 @@ export default {
       typeOptions: "types/options",
       filters: "projects/filters",
       projectData: "projects/data",
+      columns: "projects/columns",
       validationErrors: "projects/validationErrors",
       validationSuccess: "projects/validationSuccess",
     }),

@@ -1,5 +1,5 @@
 <template>
-  <table class="table">
+  <table id="project" class="table">
     <thead>
       <slot name="columns">
         <tr>
@@ -25,6 +25,7 @@
             :key="index"
             :width="column.width"
             :class="column.class"
+            :data-filter="column.id"
           >
             {{ column.value }}
           </th>
@@ -59,6 +60,7 @@
             v-for="(column, index) in columns"
             :key="index"
             :class="column.class"
+            :data-filter="column.id"
           >
             <button
               v-if="checkProjectColumn(column)"
