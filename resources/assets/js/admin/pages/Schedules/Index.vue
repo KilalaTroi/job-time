@@ -30,7 +30,7 @@
                   :color="item.value"
                   :style="setBackground(item.value)"
                 >
-                  <span>{{ item.project }} {{ item.issue_year ? item.issue_year+' ' : '' }}{{ item.issue }}</span>
+                  <span>{{ item.fullname }}</span>
                 </div>
               </div>
             </div>
@@ -61,7 +61,7 @@
             :droppable="fullCalendar.droppable"
             :events="scheduleData.schedules"
             :event-overlap="true"
-            :all-day-slot="true"
+            :all-day-slot="currentTeam.id === 3"
             min-time="07:00:00"
             max-time="19:00:00"
             height="auto"
@@ -196,7 +196,7 @@ export default {
       info.el.querySelector('.fc-title').innerHTML = info.event.title;
 
       var tooltip = new Tooltip(info.el, {
-        title: info.event.extendedProps.description,
+        title: info.event.extendedProps.description + "",
         placement: 'top',
         trigger: 'hover',
         container: 'body',
@@ -238,6 +238,7 @@ export default {
           this.getAll();
 
           if ( value.team != this.currentTeam.id ) {
+            $('.tooltip').remove();
             this.setCurrentTeam(value.team);
           }
         },
@@ -250,23 +251,4 @@ export default {
 
 <style lang="scss" scope>
 @import "custom.scss";
-.no-schedule {
-  position: relative;
-
-  &:after {
-    content: "N";
-    position: absolute;
-    right: 3px;
-    bottom: 3px;
-    width: 20px;
-    height: 20px;
-    background: red;
-    text-align: center;
-    line-height: 20px;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 700;
-  }
-}
 </style>

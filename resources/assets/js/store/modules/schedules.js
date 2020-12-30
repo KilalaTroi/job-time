@@ -80,22 +80,18 @@ export default {
       const uri = '/data/schedules?startDate=' + currentStart + '&endDate=' + currentEnd + '&team_id=' + state.filters.team + '&only_event=' + onlyEvent
 
       await axios.get(uri).then(response => {
+        $('.tooltip').remove();
         if (response.data.schedules.length) {
           let schedulesVariation = [];
           response.data.schedules = response.data.schedules.map((item, index) => {
             const arrProjects = [58, 59]; // Project show description and hide fc-time.
             const arrProjectsHT = [58]; // Project hide fc-time.
             const arrProjectsPV = [58];  // Project don't have Variation.
-            const checkTR = item.type.includes("_tr") ? " (TR)" : "";
-            const type = rootGetters['getObjectByID'](rootState.types.options, item.type_id);
             let sDetail = [];
             let description = '';
 
             // Get log time detail for schedule
-            if ( response.data.schedulesDetail.length && !item.all_date ) {
-              sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
-            }
-
+            if ( response.data.schedulesDetail.length && !item.all_date ) sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
             const codition = sDetail.length && (state.filters.team == 2) && ! arrProjectsPV.includes(item.p_id)
             const textTime = sDetail.length && (state.filters.team == 2) && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
@@ -112,40 +108,17 @@ export default {
 
             // Function return schedule
             let getSchedule = (_item, _value, _codition) => {
-              const issueYear = _item.issue_year ? ' ' + _item.issue_year : '';
-              const name = _item.i_name ? _item.p_name + checkTR + issueYear + " " + _item.i_name : _item.p_name + checkTR + issueYear;
               const memo = _item.memo ? _item.memo : "";
-              const title = textTime + name + '<br>' + memo;
-
-              // Set constraint start date
-              _item.constraint = {}
-              if ( _item.start_date ) {
-                _item.constraint = Object.assign({}, _item.constraint, {
-                  start: _item.start_date + "T" + "00:00:00"
-                });
-              }
-
-              // Set constraint end date
-              if ( _item.end_date ) {
-                _item.constraint = Object.assign({}, _item.constraint, {
-                  end: _item.end_date + "T" + "23:59:59"
-                });
-              }
 
               return Object.assign({}, _item, {
                 id: _item.id,
-                title: title,
+                title: _item.title + textTime + _item.name + '<br>' + memo,
                 description: description,
                 className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
-                borderColor: type.value,
-                backgroundColor: type.value,
                 start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
                 end: _item.s_end_date ? rootGetters['dateFormat'](_item.s_end_date + " " + _value.end_time) : rootGetters['dateFormat'](_item.date + " " + _value.end_time),
                 allDay: _item.all_date,
                 memo: _item.memo,
-                title_not_memo: _item.i_name
-                  ? _item.p_name + checkTR + " " + _item.i_name
-                  : _item.p_name + checkTR,
               })
             }
 
@@ -184,12 +157,7 @@ export default {
 
         if (!onlyEvent && response.data.projects.length) {
           response.data.projects = response.data.projects.map((item, index) => {
-            const checkTR = item.type.includes("_tr") ? " (TR)" : "";
-
             return Object.assign({}, item, {
-              project: item.p_name + checkTR,
-              issue: item.i_name,
-              value: rootGetters['getObjectByID'](rootState.types.options, item.type_id).value,
               start_date: rootGetters['dateFormat'](item.start_date),
               end_date: rootGetters['dateFormat'](item.end_date),
             })
@@ -202,6 +170,7 @@ export default {
     },
 
     handleMonthChange({ commit }, data) {
+      $('.tooltip').remove();
       commit('SET_FILTER', data);
       setTimeout(function() {
         $('.fc-event.fc-short').removeClass('fc-short');
