@@ -9,7 +9,7 @@ export default {
     sbJobTypes: 'Job Types',
     sbProjects: 'Projects',
     sbSchedules: 'Schedules',
-    sbJobs: 'Jobs',
+    sbJobs: 'Tasks',
     sbOffDays: 'Off days',
     sbReports: 'Reports',
     msWelcome: 'Welcome',
@@ -106,7 +106,7 @@ export default {
     msgOverTime: 'You work over 8 hours!!!',
     txtMyOffDay: 'My off days',
     txtOffDay: 'Off days',
-    txtStaffOffDay: 'Staff off days',
+    txtStaffOffDay: 'Absence',
     txtWorkedTime: 'Worked Time',
     txtHour: 'hrs',
     txtWorkingTime: 'Working time',
@@ -175,4 +175,5 @@ export default {
     txtDateTime: 'Date',
     txtYearOfIssue: 'Year of issue',
     txtFilesWorked: 'Files Worked',
+    txtPrint: 'Print',
 }

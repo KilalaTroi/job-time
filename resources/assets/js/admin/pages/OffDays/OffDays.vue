@@ -4,7 +4,7 @@
       {{ $ml.with("VueJS").get("txtMyOffDay") }}
     </h4>
     <div class="row">
-      <div class="col-sm-12 col-lg-3">
+      <div class="col-sm-12 col-lg-2">
         <card>
           <template slot="header">
             <h4 class="card-title">{{ $ml.with("VueJS").get("txtType") }}</h4>
@@ -27,19 +27,19 @@
           </div>
         </card>
       </div>
-      <div class="col-sm-12 col-lg-9">
+      <div class="col-sm-12 col-lg-10">
         <FullCalendar
           class="off-days"
           defaultView="dayGridMonth"
           :plugins="calendarPlugins"
           :header="calendarHeader"
           :business-hours="businessHours"
-          :editable="editable"
-          :droppable="droppable"
+          :editable="false"
+          :droppable="false"
           :events="offDays"
-          :all-day-slot="allDaySlot"
-          :height="height"
-          :hidden-days="hiddenDays"
+          :all-day-slot="false"
+          height="auto"
+          :hidden-days="[0]"
           @eventReceive="addEvent"
           @eventClick="clickEvent"
           :locale="getLanguage(this.$ml)"
@@ -48,10 +48,7 @@
       </div>
     </div>
 
-    <EditEvent
-      :currentEvent="currentEvent"
-      v-on:delete-event="deleteEvent"
-    ></EditEvent>
+    <edit-event />
   </card>
 </template>
 
@@ -92,11 +89,6 @@ export default {
           daysOfWeek: [6], // Monday - Thursday
         },
       ],
-      editable: false,
-      droppable: false,
-      allDaySlot: false,
-      height: "auto",
-      hiddenDays: [0],
     };
   },
 
@@ -141,7 +133,8 @@ export default {
     },
 
     getLanguage(data) {
-      return data.current;
+      const language = data.current == 'vi' ? 'en' : 'ja';
+      return language;
     },
   },
 
@@ -165,6 +158,20 @@ export default {
   cursor: move;
   color: rgba(0, 0, 0, 0.8);
 }
+
+.card{
+  &:not(.all){
+    .fc-dayGrid-view .fc-body .fc-row{
+      height: 70px !important;
+    }
+  }
+  &.all{
+    .fc-dayGrid-view .fc-body .fc-row{
+      height: 120px !important;
+    }
+  }
+}
+
 
 .fc-time-grid-event .fc-time,
 .fc-time-grid-event .fc-title {
