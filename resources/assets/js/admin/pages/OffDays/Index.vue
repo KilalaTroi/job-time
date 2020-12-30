@@ -50,4 +50,17 @@ export default {
     z-index: 1;
   }
 }
+
+.card{
+  &:not(.all){
+    .fc-dayGrid-view .fc-body .fc-row{
+      height: 70px !important;
+    }
+  }
+  &.all{
+    .fc-dayGrid-view .fc-body .fc-row{
+      height: 120px !important;
+    }
+  }
+}
 </style>

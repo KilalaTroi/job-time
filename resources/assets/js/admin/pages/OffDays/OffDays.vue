@@ -159,20 +159,6 @@ export default {
   color: rgba(0, 0, 0, 0.8);
 }
 
-.card{
-  &:not(.all){
-    .fc-dayGrid-view .fc-body .fc-row{
-      height: 70px !important;
-    }
-  }
-  &.all{
-    .fc-dayGrid-view .fc-body .fc-row{
-      height: 120px !important;
-    }
-  }
-}
-
-
 .fc-time-grid-event .fc-time,
 .fc-time-grid-event .fc-title {
   color: rgba(0, 0, 0, 0.8);
