@@ -37,6 +37,7 @@ Auth::routes();
 
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 Route::post('/pdf/report', 'pdfController@index')->name('report');
+Route::get('/pdf/absence', 'pdfController@absence')->name('absence');
 
 # Get Data
 Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
