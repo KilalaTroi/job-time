@@ -277,9 +277,9 @@ export default {
 
 		setColumns({ commit, rootGetters }) {
 			const columns = [
-				{ id: 'department', value: rootGetters['getTranslate']('txtDepartment'), width: '', class: '' },
+				{ id: 'department', value: rootGetters['getTranslate']('txtDepartment'), width: '', class: '', filter: true },
 				{ id: 'project', value: rootGetters['getTranslate']('txtName'), width: '', class: '' },
-				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '120', class: 'year-of-issue', filter: true},
+				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '120', class: '', filter: true},
 				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '', class: 'no-wrap'},
 				{ id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '', filter: true },
 				{ id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '', filter: true },
