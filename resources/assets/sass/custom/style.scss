@@ -83,17 +83,19 @@ table {
 /******************************************/
 .popper,
 .tooltip {
-  position: absolute;
-  z-index: 9999;
-  background: #fff;
-  color: black;
-  width: 300px;
-  border-radius: 3px;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-  border: 1px solid #b3aeae;
-  padding: 10px;
-  text-align: left;
-  opacity: 1;
+  &[aria-hidden="false"] {
+    position: absolute;
+    z-index: 9999;
+    background: #fff;
+    color: black;
+    width: 300px;
+    border-radius: 3px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    border: 1px solid #b3aeae;
+    padding: 10px;
+    text-align: left;
+    opacity: 1;
+  }
 }
 .style5 .tooltip {
   background: #1e252b;

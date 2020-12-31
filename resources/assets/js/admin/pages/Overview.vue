@@ -114,9 +114,7 @@
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
-            <all-off-days :team="team"></all-off-days>
-        </div>
+
     </div>
 </template>
 <script>
@@ -128,7 +126,6 @@
     import Datepicker from 'vuejs-datepicker';
     import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
     import Select2 from '../components/SelectTwo/SelectTwo.vue'
-    import AllOffDays from './OffDays/AllOffDays.vue'
     import moment from 'moment'
     import { mapGetters, mapActions } from "vuex"
 
@@ -139,7 +136,6 @@
             datepicker: Datepicker,
             StatsCard,
             Select2,
-            AllOffDays
         },
         computed: {
             ...mapGetters({
@@ -161,7 +157,7 @@
 
                 startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
                 endMonth: new Date(moment().subtract(0, 'months').endOf('month').format('YYYY/MM/DD')),
-                currentMonth: {}, 
+                currentMonth: {},
 
                 users: [],
                 userOptions: [],
@@ -249,7 +245,7 @@
                 var pages = value > 1 ? 'pages' : 'page';
                 $('.ct-tooltip').html('<span>' + seriesDesc + '</span><br><span>' + value + " " + pages + "</span>");
             });
-            
+
             $(document).on('click', '.languages button', function() {
                 _this.fetch();
             });
@@ -258,7 +254,7 @@
             ...mapActions({
      	 	    setCurrentTeam: "setCurrentTeam"
             }),
-            
+
             fetch() {
                 let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
                 let uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
@@ -306,7 +302,7 @@
                         console.log(err);
                         alert("Could not load data");
                     });
-                
+
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 axios.get(uri)
@@ -411,7 +407,7 @@
                     from: this.endMonth,
                 };
                 return obj;
-            }, 
+            },
             disabledStartMonth() {
                 let obj = {
                     to: this.startMonth,

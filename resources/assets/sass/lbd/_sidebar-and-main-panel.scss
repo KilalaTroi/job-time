@@ -101,9 +101,11 @@ body > .navbar-collapse{
     .nav{
         margin-top: 20px;
         float: none;
-        display: block;
+        flex: unset !important;
 
         li{
+            width: 100%;
+
             .nav-link{
                 color: $white-color;
                 margin: 5px 15px;
@@ -132,7 +134,7 @@ body > .navbar-collapse{
                 }
 
                 i{
-                    font-size: 28px;
+                    font-size: 24px;
                     margin-right: 15px;
                     width: 30px;
                     text-align: center;

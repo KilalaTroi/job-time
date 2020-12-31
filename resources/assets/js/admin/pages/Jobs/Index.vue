@@ -80,7 +80,7 @@
               <h4 class="card-title">{{ $ml.with("VueJS").get("txtTimeRecord") }}</h4>
             </template>
             <tbl-default
-              :class="{ 'path-team': filters.team == 2 || filters.team == 3 }"
+              :class="{ 'path': filters.team == 2, 'web': filters.team == 3 }"
               :dataItems="data.totaling"
               :dataCols="columns.totaling"
               dataAction="all"
@@ -217,14 +217,21 @@ export default {
 .time-record tr:last-child button {
   display: none;
 }
-.table-responsive:not(.path-team) {
-  .note {
+.table-responsive {
+  .note, .year-of-issue, .quantity {
     display: none;
   }
-}
-.table-responsive.path-team {
-    .year-of-issue {
-        display: none;
+
+  &.web, &.path {
+    .note, .year-of-issue {
+      display: table-cell;
     }
+  }
+
+  &.path {
+    .quantity {
+      display: table-cell;
+    }
+  }
 }
 </style>

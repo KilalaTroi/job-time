@@ -3,15 +3,16 @@ export default {
 		commit('SET_TRANSLATE_TEXTS', data)
 	},
 
-	setLoginUser({ commit, state, getters }, id) {
-		commit('SET_LOGIN_USER', { id: id })
-		const uri = '/data/users/' + id
-		axios.get(uri).then((response) => {
-			let _user = response.data.user;
-			_user.team = getters['getObjectByID'](state.currentTeamOption, +_user.team)
-			commit('SET_LOGIN_USER', _user)
-		});
-	},
+    setLoginUser({ commit, state, getters }, id) {
+        commit('SET_LOGIN_USER', {id: id})
+        const uri = '/data/users/' + id
+        axios.get(uri).then((response) => {
+            let _user = response.data.user;
+            _user.role = response.data.role;
+            _user.team = getters['getObjectByID'](state.currentTeamOption, +_user.team)
+            commit('SET_LOGIN_USER', _user)
+        });
+    },
 
 	setCurrentLang({ commit }, lang) {
 		commit('SET_CURRENT_LANG', lang)

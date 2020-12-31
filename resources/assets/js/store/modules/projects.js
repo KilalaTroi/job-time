@@ -279,14 +279,14 @@ export default {
 			const columns = [
 				{ id: 'department', value: rootGetters['getTranslate']('txtDepartment'), width: '', class: '' },
 				{ id: 'project', value: rootGetters['getTranslate']('txtName'), width: '', class: '' },
-				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '120', class: 'year-of-issue' },
-				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '', class: 'no-wrap' },
-				{ id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '' },
-				{ id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '' },
-				{ id: 'value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center' },
-				{ id: 'html_team', value: rootGetters['getTranslate']('txtTeam'), width: '', class: 'text-center' },
-				{ id: 'ct_start_date', value: rootGetters['getTranslate']('lblStartDate'), width: '', class: '' },
-				{ id: 'ct_end_date', value: rootGetters['getTranslate']('lblEndDate'), width: '', class: '' }
+				{ id: 'issue_year', value: rootGetters['getTranslate']('txtYearOfIssue'), width: '120', class: 'year-of-issue', filter: true},
+				{ id: 'issue', value: rootGetters['getTranslate']('txtIssue'), width: '', class: 'no-wrap'},
+				{ id: 'page', value: rootGetters['getTranslate']('txtPage'), width: '60', class: '', filter: true },
+				{ id: 'type', value: rootGetters['getTranslate']('txtType'), width: '', class: '', filter: true },
+				{ id: 'value', value: rootGetters['getTranslate']('txtColor'), width: '110', class: 'text-center', filter: true },
+				{ id: 'html_team', value: rootGetters['getTranslate']('txtTeam'), width: '', class: 'text-center', filter: true },
+				{ id: 'ct_start_date', value: rootGetters['getTranslate']('lblStartDate'), width: '', class: '', filter: true },
+				{ id: 'ct_end_date', value: rootGetters['getTranslate']('lblEndDate'), width: '', class: '', filter: true }
 			]
 
 			commit('SET_COLUMNS', columns)
