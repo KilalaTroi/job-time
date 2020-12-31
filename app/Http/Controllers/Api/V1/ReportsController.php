@@ -29,6 +29,7 @@ class ReportsController extends Controller
 	public function store(Request $request)
 	{
 		$data = $request->all();
+		$data['seen'] = $this->user['id'];
 		$issue_id =  DB::table('issues')
 			->select('id')
 			->where('project_id', $data['projects'])
@@ -554,19 +555,24 @@ class ReportsController extends Controller
 		]);
 
 		# The text to translate
-		$text = $request->get('text');
+		$texts = $request->get('text');
 
 		# The target language
 		$target = $request->get('lang');
-
 		# Translates some text into Russian
-		$translation = $translate->translate($text, [
-			'target' => $target
-		]);
+		$dataText = array();
+		foreach ($texts as $index => $text) {
+			if (isset($text) && !empty($text)) {
+				$translation = $translate->translate($text, ['target' => $target]);
+				$dataText[$index] = $translation['text'];
+			}
+		}
 
-		return response()->json([
-			'contentTranslated' => $translation['text']
-		]);
+		// $translation = $translate->translate($text, [
+		// 	'target' => $target
+		// ]);
+
+		return response()->json(array('contentTranslated' => $dataText));
 	}
 
 	function sendReport(Request $request)
@@ -624,11 +630,14 @@ class ReportsController extends Controller
 					'r.id as id',
 					DB::raw('IFNULL(i.name, "--") AS issue_name'),
 					DB::raw('IFNULL(i.year, "--") AS issue_year'),
+					DB::raw('IFNULL(i.year, "(--)") AS issue_year_text'),
+					DB::raw('IFNULL(i.year, null) AS issue_year_key'),
 					'r.team_id as team_id',
 					't.name as team_name',
 					'title',
 					'title_ja',
 					'date_time',
+					'date_time as date',
 					'r.updated_at as update_date',
 					'type',
 					'p.name as project_name',
@@ -638,6 +647,8 @@ class ReportsController extends Controller
 					'attend_other_person',
 					'content',
 					'content_ja',
+					'content as editorData',
+					'content_ja as editorDataJA',
 					'r.language as language',
 					'r.translatable as translatable',
 					'seen',
@@ -653,20 +664,20 @@ class ReportsController extends Controller
 					return $query->where('r.type', $type);
 				})
 				->when($filters['issue'], function ($query, $issue) {
-					return $query->where('i.id', $issue['id']);
+					return $query->where('i.name', $issue['id']);
 				})
 				->when($filters['project'], function ($query, $project) {
 					return $query->where('p.id', $project['id']);
 				})
 				->when($filters['department'], function ($query, $department) {
-					if ($department['id'] > 1)
-						return $query->where('d.id', $department['id']);
+					if ($department['id'] > 1) return $query->where('d.id', $department['id']);
 					return $query;
 				})
 				->when($filters['team'], function ($query, $teamID) {
 					return $query->where('r.team_id', $teamID);
 				})
 				->when($filters['issueYear'], function ($query, $issueYear) {
+					if ($issueYear['id'] == 'NULL' || $issueYear['id'] == 'null') $issueYear['id'] = NULL;
 					return $query->where('i.year', $issueYear['id']);
 				})
 				->where('r.date_time', '>=', $filters['startDate'])
