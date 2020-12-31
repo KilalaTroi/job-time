@@ -137,7 +137,7 @@ export default {
 
 			if ( state.filters.team == 2 ) {
 				await axios
-					.get("/data/finish-page?issue_id=" + item.id)
+					.get("/data/issue-pages?issue_id=" + item.id)
 					.then((res) => {
 						if ( res.data.length ) item.quantity = res.data[0];
 					})
