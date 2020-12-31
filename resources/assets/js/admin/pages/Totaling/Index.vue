@@ -28,8 +28,8 @@
                 input-class="form-control"
                 placeholder="Select Date"
                 v-model="filters.start_date"
-                :format="dateFormatter"
-                :disabled-dates="disabledEndDates()"
+                :format="dateFormat(filters.start_date,'YYYY-MM-DD')"
+                :disabled-dates="disabledEndDates(filters.end_date)"
                 :language="getLangCode(this.$ml)"
               ></datepicker>
             </div>
@@ -42,8 +42,8 @@
                 input-class="form-control"
                 placeholder="Select Date"
                 v-model="filters.end_date"
-                :format="dateFormatter"
-                :disabled-dates="disabledStartDates()"
+                :format="dateFormat(filters.end_date,'YYYY-MM-DD')"
+                :disabled-dates="disabledStartDates(filters.start_date)"
                 :language="getLangCode(this.$ml)"
               ></datepicker>
             </div>
@@ -212,7 +212,9 @@ export default {
       getObjectByID: "getObjectByID",
 			getTeamText: "getTeamText",
 			dateFormat: "dateFormat",
-      getLangCode: "getLangCode"
+      getLangCode: "getLangCode",
+      disabledStartDates: "disabledStartDates",
+      disabledEndDates: "disabledEndDates"
     }),
     ...mapGetters("totaling", {
 			columns: "columns",
@@ -233,28 +235,10 @@ export default {
 			exportExcel: "exportExcel",
     }),
 
-
     optionStyle(color) {
       return {
         backgroundColor: color,
       };
-    },
-
-    disabledStartDates() {
-      let obj = {
-        to: new Date(this.start_date), // Disable all dates after specific date
-        from: new Date(), // Disable all dates after specific date
-      };
-      return obj;
-    },
-    disabledEndDates() {
-      let obj = {
-        from: new Date(this.end_date), // Disable all dates after specific date
-      };
-      return obj;
-    },
-    dateFormatter(date) {
-      return moment(date).format("YYYY-MM-DD");
     },
 	},
 	async created(){
@@ -268,7 +252,8 @@ export default {
   watch: {
     filters: [
       {
-        handler: function(value){
+        handler: function(value,valueOld){
+          console.log(value,valueOld)
 					if (value.team != this.currentTeam.id) {
 						this.setCurrentTeam(value.team);
 					}

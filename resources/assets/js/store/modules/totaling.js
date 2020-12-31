@@ -21,11 +21,6 @@ export default {
       types: [],
       users: [],
     }
-
-    // options: [],
-    // selectedItem: {},
-    // validationErrors: '',
-    // validationSuccess: ''
   },
 
   getters: {
@@ -33,9 +28,6 @@ export default {
     filters: state => state.filters,
     data: state => state.data,
     options: state => state.options,
-    // selectedItem: state => state.selectedItem,
-    // validationErrors: state => state.validationErrors,
-    // validationSuccess: state => state.validationSuccess
   },
 
   mutations: {
@@ -51,15 +43,6 @@ export default {
         users: options.users
       };
     },
-
-    // SET_SELECTED_ITEM: (state, selectedItem) => {
-    // 	state.selectedItem = Object.assign({}, selectedItem)
-    // },
-
-    // SET_VALIDATE: (state, data) => {
-    // 	state.validationErrors = data.error
-    // 	state.validationSuccess = data.success
-    // },
 
     SET_COLUMNS: (state, columns) => {
       state.columns = columns

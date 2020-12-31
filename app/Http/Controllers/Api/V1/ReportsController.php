@@ -30,12 +30,12 @@ class ReportsController extends Controller
 	{
 		$data = $request->all();
 		$issue_id =  DB::table('issues')
-		->select('id')
-		->where('project_id', $data['projects'])
-		->where('name', $data['issue'])
-		->where('year', $data['issueYear'])
-		->first();
-		if(isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+			->select('id')
+			->where('project_id', $data['projects'])
+			->where('name', $data['issue'])
+			->where('year', $data['issueYear'])
+			->first();
+		if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
 
 		$report = Report::create($data);
 
@@ -56,12 +56,12 @@ class ReportsController extends Controller
 		$report = Report::findOrFail($id);
 		$data = $request->all();
 		$issue_id =  DB::table('issues')
-		->select('id')
-		->where('project_id', $data['projects'])
-		->where('name', $data['issue'])
-		->where('year', $data['issueYear'])
-		->first();
-		if(isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+			->select('id')
+			->where('project_id', $data['projects'])
+			->where('name', $data['issue'])
+			->where('year', $data['issueYear'])
+			->first();
+		if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
 
 		$report->update($data);
 
@@ -608,33 +608,17 @@ class ReportsController extends Controller
 
 	function getData(Request $request)
 	{
-		$indexPage = $request->get('indexPage');
 		$filters = array(
-			'reportType' => $request->get('reportType'),
-			'startDate' =>  $request->get('startDate'),
-			'endDate'	=> $request->get('endDate'),
-			'department' => $request->get('deptSelects'),
-			'team' =>  $request->get('team_id'),
-			'project'	=> $request->get('projectSelects'),
-			'issue'	=> $request->get('issueSelects'),
-			'issueYear'	=> $request->get('issueYearSelects'),
+			'type' => $request->get('type'),
+			'startDate' =>  $request->get('start_date'),
+			'endDate'	=> $request->get('end_date'),
+			'department' => $request->get('department'),
+			'team' =>  $request->get('team'),
+			'project'	=> $request->get('project'),
+			'issue'	=> $request->get('issue'),
+			'issueYear'	=> $request->get('issue_year'),
 		);
-
-		$users = DB::connection('mysql')->table('role_user as ru')
-			->select('user.id as id',	'user.name as text')
-			->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
-			->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
-			->whereNotIn('role.name', ['admin'])
-			->whereNotIn('user.username', ['furuoya_vn_planner', 'furuoya_employee'])
-			->when($filters['team'], function ($query, $teamID) {
-				return $query->where('user.team', $teamID);
-			})
-			->get()->toArray();
-
-		//DB::enableQueryLog();
-
-		$dataReports = array();
-		if (isset($indexPage) && !empty($indexPage)) {
+		if ($request->get('page') != -1) {
 			$dataReports =  DB::table('reports as r')
 				->select(
 					'r.id as id',
@@ -665,8 +649,8 @@ class ReportsController extends Controller
 				->leftJoin('issues as i', 'i.id', '=', 'r.issue')
 				->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 				->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
-				->when($filters['reportType'], function ($query,  $reportType) {
-					return $query->where('r.type', $reportType);
+				->when($filters['type'], function ($query,  $type) {
+					return $query->where('r.type', $type);
 				})
 				->when($filters['issue'], function ($query, $issue) {
 					return $query->where('i.id', $issue['id']);
@@ -691,11 +675,9 @@ class ReportsController extends Controller
 				->paginate(20);
 		}
 
-		//dd(DB::getQueryLog());
-
 		return response()->json([
-			'reports' => $dataReports,
-			'users' => $users,
+			'reports' => isset($dataReports) && !empty($dataReports) ? $dataReports : '',
+			'users' => $this->getUsers($filters['team']),
 			'departments' => $this->getDepartments($filters['team']),
 			'projects' => $this->getProject($filters['department']['id'], $filters['team']),
 			'issues' => $this->getIssue($filters['project']['id'], $filters['issueYear']['id']),
@@ -703,7 +685,7 @@ class ReportsController extends Controller
 		]);
 	}
 
-	function getProject($departmentId, $teamId)
+	private function getProject($departmentId, $teamId)
 	{
 		if ($departmentId == NULL || empty($departmentId)) return array();
 
@@ -729,7 +711,21 @@ class ReportsController extends Controller
 			->get()->toArray();
 	}
 
-	function getIssue($projectId, $issueYear)
+	private function getUsers($team)
+	{
+		return DB::table('role_user as ru')
+			->select('user.id as id',	'user.name as text')
+			->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+			->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+			->whereNotIn('role.name', ['admin'])
+			->whereNotIn('user.username', ['furuoya_vn_planner', 'furuoya_employee'])
+			->when($team, function ($query, $teamID) {
+				return $query->where('user.team', $teamID);
+			})
+			->get()->toArray();
+	}
+
+	private function getIssue($projectId, $issueYear)
 	{
 		if ($projectId == NULL || empty($projectId)) return array();
 
@@ -747,7 +743,7 @@ class ReportsController extends Controller
 			->get()->toArray();
 	}
 
-	function getIssueYear($projectId, $issue)
+	private function getIssueYear($projectId, $issue)
 	{
 		if ($projectId == NULL || empty($projectId)) return array();
 
@@ -768,16 +764,16 @@ class ReportsController extends Controller
 	private function getDepartments($team)
 	{
 		return DB::table('departments as d')
-		->select('d.id', 'd.name as text')
-		->rightJoin('projects as p', 'd.id', '=', 'p.dept_id')
-		->where(function ($query) use ($team) {
-			$query->where('p.team', '=', $team . '')
-				->orWhere('p.team', 'LIKE', $team . ',%')
-				->orWhere('p.team', 'LIKE', '%,' . $team . ',%')
-				->orWhere('p.team', 'LIKE', '%,' . $team);
-		})
-		->orderBy('d.id', 'ASC')
-		->groupBy('d.id')
-		->get()->toArray();
+			->select('d.id', 'd.name as text')
+			->rightJoin('projects as p', 'd.id', '=', 'p.dept_id')
+			->where(function ($query) use ($team) {
+				$query->where('p.team', '=', $team . '')
+					->orWhere('p.team', 'LIKE', $team . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $team . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $team);
+			})
+			->orderBy('d.id', 'ASC')
+			->groupBy('d.id')
+			->get()->toArray();
 	}
 }
