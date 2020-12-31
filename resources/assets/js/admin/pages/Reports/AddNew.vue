@@ -24,7 +24,7 @@
           />
           <input
             v-if="selectedItem.language == 'ja'"
-            v-model="selectedItem.titleJA"
+            v-model="selectedItem.title_ja"
             type="text"
             class="form-control"
           />
@@ -83,9 +83,7 @@
       </div>
 
       <div class="col-sm-3" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
-        <label
-          ><strong>{{ $ml.with("VueJS").get("lblTime") }}</strong></label
-        >
+        <label><strong>{{ $ml.with("VueJS").get("lblTime") }}</strong></label>
         <vue-timepicker
           input-class="form-control"
           v-model="selectedItem.time"
@@ -98,9 +96,7 @@
         ></vue-timepicker>
       </div>
 
-      <div
-        :class="'Meeting' == filters.type || 'Notice' == filters.type ? 'col-sm-6' : 'col-sm-9' "
-      >
+      <div :class="'Meeting' == filters.type || 'Notice' == filters.type ? 'col-sm-6' : 'col-sm-9'">
         <div class="form-group">
           <label
             ><strong>{{ $ml.with("VueJS").get("txtReporter") }}</strong></label
@@ -232,14 +228,14 @@
         <ckeditor
           v-if="selectedItem.language == 'vi'"
           :editor="editor"
-          v-model="selectedItem.editorData"
+          v-model="selectedItem.content"
           :config="editorConfig"
           @ready="onReady"
         ></ckeditor>
         <ckeditor
           v-if="selectedItem.language == 'ja'"
           :editor="editor"
-          v-model="selectedItem.editorDataJA"
+          v-model="selectedItem.content_ja"
           :config="editorConfig"
           @ready="onReady"
         ></ckeditor>
@@ -407,7 +403,6 @@ export default {
       validationErrors: "validationErrors"
     }),
   },
-  props: ["userID", "actionNewReport"],
   data() {
     return {
       filtersOld: {
@@ -464,9 +459,9 @@ export default {
       event.returnValue = "";
     },
     defaultContent() {
-      if ('Meeting' == this.filters.type) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>";
-      else if('Notice' == this.filters.type) this.selectedItem.editorData = this.selectedItem.editorDataJA = "<h4>お知らせ</h4>";
-      else this.selectedItem.editorData = this.selectedItem.editorDataJA = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
+      if ('Meeting' == this.filters.type) this.selectedItem.content = this.selectedItem.content_ja = "<h4>議事内容</h4><ol><li>会議の内容や決定事項を記入</li><li>会議の内容や決定事項を記入</li></ol><h4>次回の予定</h4><ul><li>次回のミーティング内容、やるべきことを記入</li></ul>";
+      else if('Notice' == this.filters.type) this.selectedItem.content = this.selectedItem.content_ja = "<h4>お知らせ</h4>";
+      else this.selectedItem.content = this.selectedItem.content_ja = '<h4>トラブルの内容</h4><ol><li>「いつ」「誰が」「何をした」を時間順に記入</li><li>「いつ」「誰が」「何をした」を時間順に記入</li></ol><h4>参考画像</h4><p style="margin-left:40px;">&nbsp;</p><h4>トラブルの原因</h4><ul><li>トラブルの「原因」を記入</li></ul><h4>改善方法</h4><ul><li>トラブル防止の「改善方法」を記入</li></ul>';
     },
     typeReportChange() {
       this.resetValidate();
@@ -480,7 +475,7 @@ export default {
     languageChange() {
       if (this.action.new) {
         this.resetValidate();
-        this.selectedItem.title = this.selectedItem.titleJA = "";
+        this.selectedItem.title = this.selectedItem.title_ja = "";
         this.defaultContent();
       }
     },
@@ -490,7 +485,7 @@ export default {
       {
         handler: function (value,valueOld) {
           const _this = this;
-          if(value.editorData || value.editorDataJA) _this.isEditing = true;
+          if(value.content || value.content_ja) _this.isEditing = true;
           if(value.language != this.selectedItemOld.language){
             this.selectedItemOld.language = value.language;
             _this.languageChange();

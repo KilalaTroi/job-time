@@ -147,9 +147,8 @@
 
       <div class="row">
         <div class="container">
-          <add-new
-            v-if="action.new"
-          ></add-new>
+          <add-new v-if="action.new" />
+          <edit v-if="action.edit" />
 
           <!-- <edit
             :projectsParent="projects"
@@ -275,6 +274,7 @@ export default {
       setColumns: "setColumns",
       getAll: "getAll",
       resetFilters: "resetFilters",
+      editReport: "editReport",
     }),
 
     addNewReport() {
@@ -282,11 +282,6 @@ export default {
     },
     viewReport(id, seen) {
       this.action.preview = true;
-      this.currentReport = this.getObjectByID(this.reports.data, id);
-      this.currentReport.isSeen = seen;
-    },
-    editReport(id, seen) {
-      this.action.edit = true;
       this.currentReport = this.getObjectByID(this.reports.data, id);
       this.currentReport.isSeen = seen;
     },
@@ -338,11 +333,12 @@ export default {
           if(-1 == _this.filters.page) _this.getAll(-1);
           else if(!_this.filters.page) _this.getAll();
 
-          if (value.team != this.currentTeam.id) {
-            this.setCurrentTeam(value.team);
-            this.setReportNotify(value.team);
-          }
-          setTimeout(function(){ _this.resetFilters() }, 200)
+          if (value.team != _this.currentTeam.id) {
+            _this.setCurrentTeam(value.team);
+            _this.setReportNotify(value.team);
+            _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
+          }else  setTimeout(function(){ _this.resetFilters() }, 200)
+
         },
         deep: true
       },

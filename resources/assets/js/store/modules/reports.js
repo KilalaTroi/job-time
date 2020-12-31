@@ -68,8 +68,12 @@ export default {
       state.selectedItem = Object.assign({}, selectedItem)
     },
 
-    SET_RESET_FILTERS: (state, filtersItem) => {
+    SET_FILTERS: (state, filtersItem) => {
       state.filters = Object.assign({}, filtersItem)
+    },
+
+    SET_TRANSLATE_CONTENT(state, data) {
+
     },
 
     UPDATE_SEEN: () => { },
@@ -110,20 +114,26 @@ export default {
         });
     },
 
-    getItem({ state, commit, getters }, id) {
-      const item = getters['getProjectByIssueID'](state.data.data, id)
-      // if (item.team) {
-      // 	const arrTeam = item.team.split(',')
-      // 	item.team = arrTeam.map((item, index) => {
-      // 		return rootGetters['getObjectByID'](rootState.currentTeamOption, +item)
-      // 	})
-      // }
+    editReport({ state, commit, rootGetters, dispatch }, data) {
+      let item = rootGetters['getObjectByID'](state.data.data, data.id);
+      item.isSeen = data.seen;
+      state.action.edit = true;
+      const filters = {
+        page: -1,
+        type: item.type ? item.type : null,
+        department: item ? { id: item.dept_id, text: item.dept_name } : null,
+        project: item ? { id: item.project_id, text: item.project_name } : null,
+        issue: item ? { id: item.issue_name, text: item.issue_name } : null,
+        issue_year: item ? { id: item.issue_year_key, text: item.issue_year_text } : null,
+        team: item.team_id,
+      }
+      commit('SET_FILTERS', filters)
       commit('SET_SELECTED_ITEM', item)
     },
 
     resetFilters({ state, commit }, flag = '') {
       if ('all' == flag) {
-        commit('SET_RESET_FILTERS', {
+        commit('SET_FILTERS', {
           type: 0,
           start_date: new Date(moment().subtract(1, "years").startOf("month").format("YYYY/MM/DD")),
           end_date: new Date(moment().add(1, "days").format("YYYY/MM/DD")),
@@ -167,6 +177,32 @@ export default {
       }
     },
 
+    translateContent({ state, commit }) {
+      const uri = "/data/translate-content";
+      axios
+        .post(uri, {
+          lang: state.selectedItem.language,
+          text: {
+            title: state.selectedItem.language == "vi" ? state.selectedItem.title : state.selectedItem.title_ja,
+            content: state.selectedItem.language == "vi" ? state.selectedItem.content : state.selectedItem.content_ja
+          },
+        })
+        .then((res) => {
+          // if (state.editLanguage == "vi") {
+          //   state.selectedItem.title = res.data.contentTranslated;
+          //   state.selectedItem.editorData = res.data.contentTranslated;
+          // } else {
+          //   state.selectedItem.titleJA = res.data.contentTranslated;
+          //   state.selectedItem.editorDataJA = res.data.contentTranslated;
+          // }
+          state.translatable = 1;
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("Could not translate");
+        });
+    },
+
     resetSelectedItem({ commit }) {
       commit('SET_SELECTED_ITEM', {})
     },
@@ -186,7 +222,6 @@ export default {
           reportID: item.id,
         })
         .then((res) => {
-          dispatch('getAll');
           dispatch('/updateReportNotify');
           commit('UPDATE_SEEN');
         })
@@ -196,7 +231,7 @@ export default {
         });
     },
 
-    addNew({ state, commit }) {
+    addNew({ state, dispatch, commit }) {
       commit('SET_VALIDATE', { error: '', success: '' });
       if (!state.selectedItem.title && !state.selectedItem.titleJA) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
@@ -209,7 +244,7 @@ export default {
         if (!state.filters.issue) state.validationErrors = [["Please choosing the issue"], ...state.validationErrors];
         if (!state.filters.issue_year) state.validationErrors = [["Please choosing the issue year"], ...state.validationErrors];
       }
-      if (!state.selectedItem.editorData && !state.selectedItem.editorDataJA) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
+      if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
       if (!state.validationErrors.length) {
         const uri = "/data/reports-action";
         let dataSend = {
@@ -221,10 +256,10 @@ export default {
         }
         if (state.selectedItem.language == "vi") {
           dataSend.title = dataSend.title_ja = state.selectedItem.title;
-          dataSend.content = dataSend.content_ja = state.selectedItem.editorData;
+          dataSend.content = dataSend.content_ja = state.selectedItem.content;
         } else {
-          dataSend.title = dataSend.title_ja = state.selectedItem.titleJA;
-          dataSend.content = dataSend.content_ja = state.selectedItem.editorDataJA;
+          dataSend.title = dataSend.title_ja = state.selectedItem.title_ja;
+          dataSend.content = dataSend.content_ja = state.selectedItem.content_ja;
         }
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
@@ -240,6 +275,8 @@ export default {
         axios
           .post(uri, dataSend)
           .then((res) => {
+
+            dispatch('backToList');
             // this.title = "";
             // this.titleJA = "";
             // this.date = "";
@@ -257,7 +294,7 @@ export default {
             // this.errors = [];
             // this.$emit("back-to-list", true);
           })
-          .catch((err) => {  if (err.response.status === 422) commit('SET_VALIDATE', { error: err.response.data, success: '' }) });
+          .catch((err) => { if (err.response.status === 422) commit('SET_VALIDATE', { error: err.response.data, success: '' }) });
       }
     },
 
