@@ -130,9 +130,7 @@
 
       <div class="col-sm-12" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
-          <label v-if="isNotice()"
-            ><strong>{{ $ml.with("VueJS").get("txtDestination") }}</strong></label
-          >
+          <label v-if="'Notice' == filters.type"><strong>{{ $ml.with("VueJS").get("txtDestination") }}</strong></label>
           <label v-else><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }}</strong></label>
           <div>
             <multiselect
@@ -260,8 +258,8 @@
     <error-item :errors="validationErrors"></error-item>
 
     <div class="form-group text-right">
-      <!-- @click="emitUpdateReport" -->
-      <button  class="btn btn-primary">
+      <!-- @click="updateReport" -->
+      <button @click="updateReport()" class="btn btn-primary">
         {{ $ml.with("VueJS").get("txtUpdate") }}
       </button>
     </div>
@@ -418,54 +416,8 @@ export default {
       validationErrors: "validationErrors"
     }),
   },
-  // props: [
-  //   "currentReport",
-  //   "userOptionsParent",
-  //   "departmentsParent",
-  //   "projectsParent",
-  //   "issuesParent",
-  //   "issuesYearParent",
-  //   "userID",
-  // ],
   data() {
     return {
-      // countLoad: 0,
-      // title: this.currentReport.title,
-      // titleJA: this.currentReport.title_ja,
-      // team: this.currentReport.team_id,
-      // date: this.currentReport.date_time,
-      // time: this.currentReport.date_time.split(" ")[1],
-      // HourRange: [[8, 17]],
-      // MinuteRange: [0, 10, 20, 30, 40, 50],
-      // dataLang: {
-      //   vi: vi,
-      //   ja: ja,
-      // },
-      // user_id: "",
-      // attendPerson: "",
-      // attendPersonOther: this.currentReport.attend_other_person,
-      // deptSelects: this.getDepartment(this.currentReport),
-      // projectSelects: this.getProject(this.currentReport),
-      // issueSelects: this.getIssue(this.currentReport),
-      // issueYearSelects: this.getIssueYear(this.currentReport),
-      // reportType: this.currentReport.type,
-      // txtAll: this.$ml.with("VueJS").get("txtSelectAll"),
-      // userOptions: this.userOptionsParent,
-      // departments: this.departmentsParent,
-      // projects: this.projectsParent,
-      // issues: this.issuesParent,
-      // issuesYear: this.issuesYearParent,
-      // isEditing: false,
-      // editor: DecoupledEditor,
-      // editorData: this.currentReport.content,
-      // editorDataJA: this.currentReport.content_ja,
-      // editorConfig: {
-      //   // The configuration of the editor.
-      //   // language: 'ja'
-      //   extraPlugins: [MyCustomUploadAdapterPlugin],
-      // },
-
-      // errors: [],
       editLanguage: this.$ml.current,
       isEditing: false,
       editor: DecoupledEditor,
@@ -496,7 +448,9 @@ export default {
   async created() {
     const _this = this;
     _this.filters.user_id = this.getReporter(_this.selectedItem.reporter);
-    _this.selectedItem.attendPerson = this.getReporter(_this.selectedItem.attend_person);
+    if(_this.selectedItem.attend_person) _this.selectedItem.attendPerson = this.getReporter(_this.selectedItem.attend_person);
+    _this.page = -1;
+    _this.updateSeen();
 	},
 
   methods: {
@@ -504,54 +458,13 @@ export default {
       translateContent: "translateContent",
       backToList: "backToList",
       resetValidate : "resetValidate",
+      updateReport: "updateReport",
+      updateSeen: "updateSeen",
     }),
     checkTranslate() {
       return (!this.selectedItem.translatable && this.selectedItem.language != this.editLanguage);
     },
-    // translateContent() {
-    //   let uri = "/data/translate-content";
-    //   let title = this.editLanguage == "vi" ? this.title : this.titleJA;
-    //   let content =
-    //     this.editLanguage == "vi" ? this.editorData : this.editorDataJA;
 
-    //   this.translatable = 1;
-
-    //   // translate Title
-    //   axios
-    //     .post(uri, {
-    //       lang: this.editLanguage,
-    //       text: title,
-    //     })
-    //     .then((res) => {
-    //       if (this.editLanguage == "vi") {
-    //         this.title = res.data.contentTranslated;
-    //       } else {
-    //         this.titleJA = res.data.contentTranslated;
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //       alert("Could not translate");
-    //     });
-
-    //   // translate Content
-    //   axios
-    //     .post(uri, {
-    //       lang: this.editLanguage,
-    //       text: content,
-    //     })
-    //     .then((res) => {
-    //       if (this.editLanguage == "vi") {
-    //         this.editorData = res.data.contentTranslated;
-    //       } else {
-    //         this.editorDataJA = res.data.contentTranslated;
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //       alert("Could not translate");
-    //     });
-    // },
     getObjectValue(data, id) {
       let obj = data.filter((elem) => {
         if (elem.id == id) return elem;
@@ -702,9 +615,9 @@ export default {
     // },
 
 
-    updateSeen() {
-      this.$emit("update-seen");
-    },
+    // updateSeen() {
+    //   this.$emit("update-seen");
+    // },
   },
   watch: {
     selectedItem: [

@@ -629,6 +629,8 @@ class ReportsController extends Controller
 				->select(
 					'r.id as id',
 					DB::raw('IFNULL(i.name, "--") AS issue_name'),
+					DB::raw('IFNULL(i.name, null) AS issue_name_key'),
+					DB::raw('IFNULL(i.name, "(--)") AS issue_name_text'),
 					DB::raw('IFNULL(i.year, "--") AS issue_year'),
 					DB::raw('IFNULL(i.year, "(--)") AS issue_year_text'),
 					DB::raw('IFNULL(i.year, null) AS issue_year_key'),

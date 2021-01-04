@@ -149,6 +149,7 @@
         <div class="container">
           <add-new v-if="action.new" />
           <edit v-if="action.edit" />
+          <preview v-if="action.preview" />
 
           <!-- <edit
             :projectsParent="projects"
@@ -275,16 +276,18 @@ export default {
       getAll: "getAll",
       resetFilters: "resetFilters",
       editReport: "editReport",
+      viewReport: "viewReport",
     }),
 
     addNewReport() {
       this.action.new = true;
     },
-    viewReport(id, seen) {
-      this.action.preview = true;
-      this.currentReport = this.getObjectByID(this.reports.data, id);
-      this.currentReport.isSeen = seen;
-    },
+
+    // viewReport(id, seen) {
+    //   this.action.preview = true;
+    //   this.currentReport = this.getObjectByID(this.reports.data, id);
+    //   this.currentReport.isSeen = seen;
+    // },
 
     deleteReport(id) {
       if (confirm(this.$ml.with("VueJS").get("msgConfirmDelete"))) {
@@ -297,22 +300,6 @@ export default {
             this.fetchDataFilter();
           })
           .catch((err) => console.log(err));
-      }
-    },
-    sendReport() {
-      if (confirm("Send members about this update?")) {
-        let uri = "/data/send-report";
-        axios
-          .post(uri, {
-            userID: this.userID,
-          })
-          .then((res) => {
-            console.log("Email was sent!");
-          })
-          .catch((err) => {
-            console.log(err);
-            alert("Could not send email!");
-          });
       }
     },
   },
@@ -329,16 +316,16 @@ export default {
       {
         handler: function (value) {
           const _this = this;
+          if(!_this.action.preview){
+            if(-1 == _this.filters.page) _this.getAll(-1);
+            else if(!_this.filters.page) _this.getAll();
 
-          if(-1 == _this.filters.page) _this.getAll(-1);
-          else if(!_this.filters.page) _this.getAll();
-
-          if (value.team != _this.currentTeam.id) {
-            _this.setCurrentTeam(value.team);
-            _this.setReportNotify(value.team);
-            _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
-          }else  setTimeout(function(){ _this.resetFilters() }, 200)
-
+            if (value.team != _this.currentTeam.id) {
+              _this.setCurrentTeam(value.team);
+              _this.setReportNotify(value.team);
+              _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
+            }else  setTimeout(function(){ _this.resetFilters() }, 200)
+          }
         },
         deep: true
       },

@@ -19,9 +19,9 @@
                     </td>
                 </slot>
                 <td class="text-center">
-                    <i @click="$emit('edit-report', item.id, checkSeen(item.seen))" class="fa fa-pencil btn-process" aria-hidden="true"></i>
+                    <i @click="$emit('edit-report', { 'id': item.id, 'seen': checkSeen(item.seen) })" class="fa fa-pencil btn-process" aria-hidden="true"></i>
                     <!--<i @click="$emit('send-report')" class="ml-1 fa fa-paper-plane btn-process" aria-hidden="true"></i>-->
-                    <i @click="$emit('view-report', item.id, checkSeen(item.seen))" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>
+                    <i @click="$emit('view-report', { 'id': item.id, 'seen': checkSeen(item.seen) })" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>
                 </td>
             </tr>
         </tbody>
