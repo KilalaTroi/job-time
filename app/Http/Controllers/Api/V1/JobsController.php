@@ -305,14 +305,12 @@ class JobsController extends Controller
     return $totaling;
   }
 
-  public function getFinishPage() {
-    return DB::table('processes as p')
+  public function getIssuePages() {
+    return DB::table('issues as i')
     ->select(
-      'p.page',
+      'i.page',
     )
-    ->where('p.issue_id', $_GET['issue_id'])
-    ->where('p.user_id', $this->user['id'])
-    ->where('p.page', '>', 0)
+    ->where('id', $_GET['issue_id'])
     ->get()->pluck('page')->toArray();
   }
 

@@ -1,31 +1,31 @@
 <template>
     <div class="wrapper" :class="loginUser.role ? 'loaded-role wrapper-' + loginUser.role.name : ''">
         <side-bar>
-            <sidebar-link to="/schedules">
-                <!-- <i class="nc-icon nc-paper-2"></i> -->
-                <i class="fa fa-calendar" aria-hidden="true"></i>
-                <p v-text="$ml.with('VueJS').get('sbSchedules')" />
-            </sidebar-link>
-            <sidebar-link to="/overview">
-                <!-- <i class="nc-icon nc-chart-pie-36"></i> -->
-                <i class="fa fa-line-chart" aria-hidden="true"></i>
-                <p v-text="$ml.with('VueJS').get('sbStatistics')" />
-            </sidebar-link>
-            <sidebar-link to="/totaling">
-                <!-- <i class="nc-icon nc-chart-bar-32"></i> -->
-                <i class="fa fa-file-text-o" aria-hidden="true"></i>
-                <p v-text="$ml.with('VueJS').get('sbTotaling')" />
-            </sidebar-link>
             <sidebar-link to="/projects">
                 <!-- <i class="nc-icon nc-bag"></i> -->
                 <i class="fa fa-sitemap" aria-hidden="true"></i>
                 <p v-text="$ml.with('VueJS').get('sbProjects')" />
+            </sidebar-link>
+            <sidebar-link to="/schedules">
+                <!-- <i class="nc-icon nc-paper-2"></i> -->
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+                <p v-text="$ml.with('VueJS').get('sbSchedules')" />
             </sidebar-link>
             <sidebar-link to="/jobs">
                 <!-- <i class="nc-icon nc-watch-time"></i> -->
                 <!-- <i class="fa fa-tasks" aria-hidden="true"></i> -->
                 <i class="fa fa-list-ul" aria-hidden="true"></i>
                 <p v-text="$ml.with('VueJS').get('sbJobs')" />
+            </sidebar-link>
+            <sidebar-link to="/totaling">
+                <!-- <i class="nc-icon nc-chart-bar-32"></i> -->
+                <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                <p v-text="$ml.with('VueJS').get('sbTotaling')" />
+            </sidebar-link>
+            <sidebar-link to="/overview">
+                <!-- <i class="nc-icon nc-chart-pie-36"></i> -->
+                <i class="fa fa-line-chart" aria-hidden="true"></i>
+                <p v-text="$ml.with('VueJS').get('sbStatistics')" />
             </sidebar-link>
             <sidebar-link to="/off-days">
                 <!-- <i class="nc-icon nc-spaceship"></i> -->
@@ -111,17 +111,17 @@
     }
 }
 
-li[class*="menu"] {
-    order: 99;
-}
+// li[class*="menu"] {
+//     order: 99;
+// }
 
-.wrapper-admin {
-    .menu {
-        &-jobs {
-            display: none;
-        }
-    }
-}
+// .wrapper-admin {
+//     .menu {
+//         &-jobs {
+//             display: none;
+//         }
+//     }
+// }
 
 .wrapper-planner, .wrapper-japanese_planner, .wrapper-employee {
     .menu {
@@ -129,21 +129,21 @@ li[class*="menu"] {
             display: none;
         }
 
-        &-projects {
-            order: 1;
-        }
+        // &-projects {
+        //     order: 1;
+        // }
 
-        &-schedules {
-            order: 2;
-        }
+        // &-schedules {
+        //     order: 2;
+        // }
 
-        &-jobs {
-            order: 3;
-        }
+        // &-jobs {
+        //     order: 3;
+        // }
 
-        &-off-days {
-            order: 4;
-        }
+        // &-off-days {
+        //     order: 4;
+        // }
     }
 }
 
@@ -153,13 +153,13 @@ li[class*="menu"] {
             display: none;
         }
 
-        &-jobs {
-            order: 1;
-        }
+        // &-jobs {
+        //     order: 1;
+        // }
 
-        &-off-days {
-            order: 3;
-        }
+        // &-off-days {
+        //     order: 3;
+        // }
     }
 }
 
