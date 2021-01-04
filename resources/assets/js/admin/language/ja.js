@@ -180,4 +180,5 @@ export default {
     txtFiles: 'ファイル数',
     txtPrint: 'Print',
     txtQuantity: '量',
+    txtImage: 'ページ数',
 }

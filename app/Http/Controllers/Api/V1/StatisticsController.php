@@ -810,9 +810,11 @@ class StatisticsController extends Controller
 				'd.name as department',
 				'p.name as p_name',
 				'i.name as i_name',
+				'j.quantity as image',
 				'i.year as i_year',
 				'j.note as note',
 				't.slug as t_name',
+				't.value as t_value',
 				'p.team as team'
 			)
 			->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
@@ -850,6 +852,7 @@ class StatisticsController extends Controller
 			$item->username = DB::table('users')->select('name')->where('id', $item->user_id)->first()->name;
 			$item->total = $this->formatTime($item->total);
 			$item->html_team = '<span>' . $team . '<span>';
+			$item->t_value = '<span class="type-color cl-value" style="margin-right: 0;background-color:'. $item->t_value .' "></span>';
 			return $item;
 		});
 		return $totaling;
