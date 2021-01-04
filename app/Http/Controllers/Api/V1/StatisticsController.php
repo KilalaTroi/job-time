@@ -168,20 +168,23 @@ class StatisticsController extends Controller
 
 			return $value;
 		}, $other);
-		$otherSlug['slug'] = 'other';
-		$otherSlug['slug_ja'] = 'その他';
+
+		$otherName = $teamID == 2 ? 'free_time' : 'other';
+		$otherJAText = $teamID == 2 ? 'Free time' : 'その他';
+		$otherSlug['slug'] = $otherName;
+		$otherSlug['slug_ja'] = $otherJAText;
 		$other = array_merge($otherSlug, $other);
 
-		$mainTable['other'] = $other;
-		$mainTable['other'][''] = "  ";
-		$mainTable['other']['Total'] = '=SUM(C' . $maxRow . ':' . $letterMaxColumn . $maxRow . ')/SUM($C$5:$' . $letterMaxColumn . '$' . $maxRow . ')*100';
+		$mainTable[$otherName] = $other;
+		$mainTable[$otherName][''] = "  ";
+		$mainTable[$otherName]['Total'] = '=SUM(C' . $maxRow . ':' . $letterMaxColumn . $maxRow . ')/SUM($C$5:$' . $letterMaxColumn . '$' . $maxRow . ')*100';
 
 		$year = $nameFile = str_replace('/', '-', $startMonth) . '_' . str_replace('/', '-', $endMonth);
 		if ($infoUser) $nameFile .= '-' . $infoUser[0]->text;
 
 		// Excel
-		$columnName = $this->columnLetter(count($mainTable['other']));
-		$columnNameNext = $this->columnLetter(count($mainTable['other']) + 1);
+		$columnName = $this->columnLetter(count($mainTable[$otherName]));
+		$columnNameNext = $this->columnLetter(count($mainTable[$otherName]) + 1);
 		$startRow = $infoUser ? 5 : 4;
 		$numberRows = count($mainTable) + $startRow;
 		$curentTimestampe = Carbon::now()->timestamp;
