@@ -57,7 +57,7 @@ export default {
 		}
 
 		return (data) => {
-			return dataLang[data.current]
+			if('ja' == data.current) return dataLang[data.current]
 		}
 	},
 

@@ -49,7 +49,7 @@
                 :dataItems="data.jobs"
                 :dataCols="columns.jobs"
                 dataAction="addTime"
-                dataPath="jobs"
+                dataPath="taks"
               >
                 <template v-slot:action="slotAction">
                   <button
@@ -77,7 +77,12 @@
           </card>
           <card>
             <template slot="header">
-              <h4 class="card-title">{{ $ml.with("VueJS").get("txtTimeRecord") }}</h4>
+              <div class="d-flex justify-content-between">
+                <h4 class="card-title">{{ $ml.with("VueJS").get("txtTimeRecord") }}</h4>
+                <div class="form-group mb-0 d-flex justify-content-between">
+                  <button-view-table-option class="mt-0" />
+                </div>
+              </div>
             </template>
             <tbl-default
               :class="{ 'path': filters.team == 2, 'web': filters.team == 3 }"
@@ -114,6 +119,11 @@
 
       <add-time />
       <edit-time />
+       <view-table-option
+        dataTable="jobs"
+        :dataItems="data.totaling"
+        :dataCols="columns.totaling"
+      />
     </div>
   </div>
 </template>
@@ -126,6 +136,8 @@ import TblDefault from "../../components/Table";
 import AddTime from "./AddTime";
 import EditTime from "./EditTime";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
+import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
+import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -136,6 +148,8 @@ export default {
     AddTime,
     EditTime,
     Select2,
+    ButtonViewTableOption,
+    ViewTableOption
   },
   computed: {
     ...mapGetters("jobs", {
@@ -218,19 +232,19 @@ export default {
   display: none;
 }
 .table-responsive {
-  .note, .year-of-issue, .quantity {
-    display: none;
-  }
+  // .note, .year-of-issue, .quantity {
+  //   display: none;
+  // }
 
-  &.web, &.path {
-    .note, .year-of-issue {
-      display: table-cell;
-    }
-  }
+  // &.web, &.path {
+  //   .note, .year-of-issue {
+  //     display: table-cell;
+  //   }
+  // }
 
-  &.path {
+  &:not(.path) {
     .quantity {
-      display: table-cell;
+      display: none;
     }
   }
 }
