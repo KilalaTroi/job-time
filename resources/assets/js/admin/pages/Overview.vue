@@ -59,62 +59,78 @@
                     </stats-card>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id" v-on:chart-loaded="chartLoaded">
-                        <template slot="header">
-                            <h4 class="card-title">{{$ml.with('VueJS').get('txtKilalaTimeAllocation')}}</h4>
-                            <div class="d-flex mt-2 justify-content-between">
-                                <div class="d-flex align-items-center flex-wrap">
-                                    <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
-                                    </datepicker>
-                                    <span class="mx-2">-</span>
-                                    <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
-                                    </datepicker>
-                                </div>
-                                <div>
-                                    <div class="d-flex align-items-center">
-                                        <div class="d-flex align-items-center mr-3" style="min-width: 100px;">
-                                            <label class="mr-2">{{$ml.with('VueJS').get('txtTeam')}}</label>
-                                            <div>
-                                                <select-2 :options="currentTeamOption" v-model="team" class="select2" />
-                                            </div>
-                                        </div>
-                                        <div style="width: 200px;">
-                                            <select2 :options="userOptions" v-model="user_id" class="select2 form-control no-disable-first-value">
-                                                <option disabled value="0">All</option>
-                                            </select2>
-                                        </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex mb-3 justify-content-between">
+                        <div class="d-flex align-items-center flex-wrap">
+                            <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
+                            </datepicker>
+                            <span class="mx-2">-</span>
+                            <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
+                            </datepicker>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center mr-3" style="min-width: 100px;">
+                                    <label class="mr-2">{{$ml.with('VueJS').get('txtTeam')}}</label>
+                                    <div>
+                                        <select-2 :options="currentTeamOption" v-model="team" class="select2" />
                                     </div>
                                 </div>
-                            </div>
-                        </template>
-                        <template slot="footer">
-                            <div class="legend">
-                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i> {{ type.slug }}</span>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="export col-auto ml-auto">
-                                    <a :href="exportLink"><i class="fa fa-download"></i> {{$ml.with('VueJS').get('txtExportExcel')}}</a>
+                                <div style="width: 200px;">
+                                    <select2 :options="userOptions" v-model="user_id" class="select2 form-control no-disable-first-value">
+                                        <option disabled value="0">All</option>
+                                    </select2>
                                 </div>
                             </div>
-                        </template>
-                    </chart-card>
-                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
-                        <template slot="header">
-                            <h4 class="card-title">Total pages</h4>
-                        </template>
-                        <template slot="footer">
-                            <div class="legend loading">
-                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i> {{ type.slug }}</span>
+                        </div>
+                    </div>
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a class="nav-item nav-link active" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
+                            <a class="nav-item nav-link" id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
+                        </div>
+                    </nav>
+                     <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade show active" id="timeallocation" role="tabpanel" aria-labelledby="timeallocation-tab">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id" v-on:chart-loaded="chartLoaded">
+                                        <template slot="footer">
+                                            <div class="legend">
+                                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="export col-auto ml-auto">
+                                                    <a :href="exportLink"><i class="fa fa-download"></i> {{$ml.with('VueJS').get('txtExportExcel')}}</a>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </chart-card>
+                                </div>
                             </div>
-                        </template>
-                    </chart-card>
+
+                        </div>
+                        <div class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
+                                        <template slot="footer">
+                                            <div class="legend loading">
+                                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
+                                            </div>
+                                        </template>
+                                    </chart-card>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
+
+        </div>
     </div>
 </template>
 <script>
@@ -140,7 +156,8 @@
         computed: {
             ...mapGetters({
                 currentTeamOption: 'currentTeamOption',
-                currentTeam: 'currentTeam'
+                currentTeam: 'currentTeam',
+                currentLang: 'currentLang',
             }),
         },
         data() {
@@ -478,6 +495,18 @@
 <style lang="scss">
 $chart-tooltip-bg: rgba(40, 40, 40, 0.75) ;
 $chart-tooltip-color: #fff;
+#nav-tabContent{
+    overflow: hidden;
+}
+.tab-content{
+    > .tab-pane{
+        display: block;
+        height: 0;
+    }
+    > .active {
+        height: auto;
+    }
+}
 .ct-tooltip {
     position: absolute;
     margin-top: 150px;
