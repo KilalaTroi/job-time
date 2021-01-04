@@ -11,13 +11,12 @@
           >
             {{ $ml.with("VueJS").get("txtTranslate") }}
           </button>
-          <button
-            @click="$emit('delete-report', currentReport.id)"
-            class="btn btn-danger mr-3"
-          >
+            <!-- @click="$emit('delete-report', currentReport.id)" -->
+
+          <button class="btn btn-danger mr-3">
             {{ $ml.with("VueJS").get("txtDelete") }}
           </button>
-          <button @click="$emit('back-to-list')" class="btn btn-primary">
+          <button  @click="backToList()" class="btn btn-primary">
             {{ $ml.with("VueJS").get("txtBack") }}
           </button>
         </div>
@@ -30,14 +29,14 @@
             ><strong>{{ $ml.with("VueJS").get("txtTitle") }}</strong></label
           >
           <input
-            v-if="editLanguage == 'vi'"
-            v-model="title"
+            v-if="selectedItem.language == 'vi'"
+            v-model="selectedItem.title"
             type="text"
             class="form-control"
           />
           <input
-            v-if="editLanguage == 'ja'"
-            v-model="titleJA"
+            v-if="selectedItem.language == 'ja'"
+            v-model="selectedItem.title_ja"
             type="text"
             class="form-control"
           />
@@ -51,7 +50,7 @@
               $ml.with("VueJS").get("txtReportType")
             }}</strong></label
           >
-          <select-2 v-model="reportType" class="select2">
+          <select-2 v-model="filters.type" class="select2">
             <option value="Trouble">
               {{ $ml.with("VueJS").get("txtTrouble") }}
             </option>
@@ -72,7 +71,7 @@
           >
           <select-2
             :options="currentTeamOption"
-            v-model="team"
+            v-model="filters.team"
             class="select2"
           />
         </div>
@@ -84,40 +83,32 @@
           <label
             ><strong>{{ $ml.with("VueJS").get("lblDate") }}</strong></label
           >
-          <datepicker
+           <datepicker
             name="date"
             input-class="form-control"
-            placeholder=""
-            v-model="date"
+            v-model="selectedItem.date"
             :format="customFormatter"
             :disabled-dates="disabledEndDates()"
-            :language="getLanguage(this.$ml)"
+            :language="getLangCode(this.$ml)"
           ></datepicker>
         </div>
       </div>
 
-      <div class="col-sm-3" v-if="isMeeting() || isNotice()">
-        <label
-          ><strong>{{ $ml.with("VueJS").get("lblTime") }}</strong></label
-        >
+      <div class="col-sm-3" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
+        <label><strong>{{ $ml.with("VueJS").get("lblTime") }}</strong></label>
         <vue-timepicker
           input-class="form-control"
-          v-model="time"
+          v-model="selectedItem.time"
           hide-disabled-items
-          :minute-range="MinuteRange"
-          :hour-range="HourRange"
+          :minute-range="[0, 10, 20, 30, 40, 50]"
+          :hour-range="[[8, 17]]"
           input-width="100%"
           close-on-complete
           required
         ></vue-timepicker>
       </div>
 
-      <div
-        :class="[
-          { 'col-sm-6': isMeeting() || isNotice() },
-          { 'col-sm-9': !isMeeting() && !isNotice() },
-        ]"
-      >
+      <div :class="'Meeting' == filters.type || 'Notice' == filters.type ? 'col-sm-6' : 'col-sm-9'">
         <div class="form-group">
           <label class
             ><strong>{{ $ml.with("VueJS").get("txtReporter") }}</strong></label
@@ -125,8 +116,8 @@
           <div>
             <multiselect
               :multiple="true"
-              v-model="user_id"
-              :options="userOptions"
+              v-model="filters.user_id"
+              :options="options.users"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtPickSome')"
@@ -137,23 +128,15 @@
         </div>
       </div>
 
-      <div class="col-sm-12" v-if="isMeeting() || isNotice()">
+      <div class="col-sm-12" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
-          <label v-if="isNotice()"
-            ><strong>{{
-              $ml.with("VueJS").get("txtDestination")
-            }}</strong></label
-          >
-          <label v-else
-            ><strong>{{
-              $ml.with("VueJS").get("txtAttendPerson")
-            }}</strong></label
-          >
+          <label v-if="'Notice' == filters.type"><strong>{{ $ml.with("VueJS").get("txtDestination") }}</strong></label>
+          <label v-else><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }}</strong></label>
           <div>
             <multiselect
               :multiple="true"
-              v-model="attendPerson"
-              :options="userOptions"
+              v-model="selectedItem.attendPerson"
+              :options="options.users"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtPickSome')"
@@ -164,18 +147,14 @@
         </div>
       </div>
 
-      <div class="col-sm-9" v-if="isMeeting() || isNotice()">
+      <div class="col-sm-9" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
-          <label class
-            ><strong
-              >{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong
-            ></label
-          >
-          <input v-model="attendPersonOther" type="text" class="form-control" />
+          <label><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong></label>
+          <input v-model="selectedItem.attendPersonOther" type="text" class="form-control" />
         </div>
       </div>
 
-      <div class="col-sm-3" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-3" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
           <label class
             ><strong>{{ $ml.with("VueJS").get("txtDepts") }}</strong></label
@@ -183,8 +162,8 @@
           <div>
             <multiselect
               :multiple="false"
-              v-model="deptSelects"
-              :options="departments"
+              v-model="filters.department"
+              :options="options.departments"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -194,16 +173,14 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-3" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
-          <label class
-            ><strong>{{ $ml.with("VueJS").get("txtProjects") }}</strong></label
-          >
+          <label><strong>{{ $ml.with("VueJS").get("txtProjects") }}</strong></label>
           <div>
             <multiselect
               :multiple="false"
-              v-model="projectSelects"
-              :options="projects"
+              v-model="filters.project"
+              :options="options.projects"
               :clear-on-select="false"
               :preserve-search="true"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -213,14 +190,14 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-2" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
           <label class>{{ $ml.with("VueJS").get("txtYearOfIssue") }}</label>
           <div>
             <multiselect
               :multiple="false"
-              v-model="issueYearSelects"
-              :options="issuesYear"
+              v-model="filters.issue_year"
+              :options="options.issues_year"
               :clear-on-select="true"
               :preserve-search="false"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -230,16 +207,14 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-2" v-if="!isMeeting() && !isNotice()">
+      <div class="col-sm-2" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
-          <label class
-            ><strong>{{ $ml.with("VueJS").get("txtIssue") }}</strong></label
-          >
+          <label><strong>{{ $ml.with("VueJS").get("txtIssue") }}</strong></label>
           <div>
             <multiselect
               :multiple="false"
-              v-model="issueSelects"
-              :options="issues"
+              v-model="filters.issue"
+              :options="options.issues"
               :clear-on-select="true"
               :preserve-search="false"
               :placeholder="$ml.with('VueJS').get('txtSelectOne')"
@@ -249,12 +224,10 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-3">
+      <div class="col-sm-2">
         <div class="form-group">
-          <label class=""
-            ><strong>{{ $ml.with("VueJS").get("txtLang") }}</strong></label
-          >
-          <select-2 v-model="editLanguage" class="select2">
+          <label class=""><strong>{{ $ml.with("VueJS").get("txtLang") }}</strong></label>
+          <select-2 v-model="selectedItem.language" class="select2">
             <option value="vi">{{ $ml.with("VueJS").get("txtVi") }}</option>
             <option value="ja">{{ $ml.with("VueJS").get("txtJa") }}</option>
           </select-2>
@@ -266,26 +239,27 @@
       <div id="toolbar-container"></div>
       <div id="ck-editor">
         <ckeditor
-          v-if="editLanguage == 'vi'"
+          v-if="selectedItem.language == 'vi'"
           :editor="editor"
-          v-model="editorData"
+          v-model="selectedItem.content"
           :config="editorConfig"
           @ready="onReady"
         ></ckeditor>
         <ckeditor
-          v-if="editLanguage == 'ja'"
+          v-if="selectedItem.language == 'ja'"
           :editor="editor"
-          v-model="editorDataJA"
+          v-model="selectedItem.content_ja"
           :config="editorConfig"
           @ready="onReady"
         ></ckeditor>
       </div>
     </div>
 
-    <error-item :errors="errors"></error-item>
+    <error-item :errors="validationErrors"></error-item>
 
     <div class="form-group text-right">
-      <button @click="emitUpdateReport" class="btn btn-primary">
+      <!-- @click="updateReport" -->
+      <button @click="updateReport()" class="btn btn-primary">
         {{ $ml.with("VueJS").get("txtUpdate") }}
       </button>
     </div>
@@ -428,66 +402,34 @@ export default {
   computed: {
     ...mapGetters({
       currentTeamOption: "currentTeamOption",
+      currentTeam: "currentTeam",
+      getLangCode: "getLangCode",
+      customFormatter: "customFormatter",
+      disabledStartDates: "disabledStartDates",
+      disabledEndDates: "disabledEndDates"
+    }),
+    ...mapGetters('reports',{
+      filters: "filters",
+      selectedItem: "selectedItem",
+      options: "options",
+      action: "action",
+      validationErrors: "validationErrors"
     }),
   },
-  props: [
-    "currentReport",
-    "userOptionsParent",
-    "departmentsParent",
-    "projectsParent",
-    "issuesParent",
-    "issuesYearParent",
-    "userID",
-  ],
   data() {
     return {
-      countLoad: 0,
-      title: this.currentReport.title,
-      titleJA: this.currentReport.title_ja,
-      team: this.currentReport.team_id,
-      date: this.currentReport.date_time,
-      time: this.currentReport.date_time.split(" ")[1],
-      HourRange: [[8, 17]],
-      MinuteRange: [0, 10, 20, 30, 40, 50],
-      dataLang: {
-        vi: vi,
-        ja: ja,
-      },
-      user_id: "",
-      attendPerson: "",
-      attendPersonOther: this.currentReport.attend_other_person,
-      deptSelects: this.getDepartment(this.currentReport),
-      projectSelects: this.getProject(this.currentReport),
-      issueSelects: this.getIssue(this.currentReport),
-      issueYearSelects: this.getIssueYear(this.currentReport),
-      reportType: this.currentReport.type,
-      txtAll: this.$ml.with("VueJS").get("txtSelectAll"),
-      userOptions: this.userOptionsParent,
-      departments: this.departmentsParent,
-      projects: this.projectsParent,
-      issues: this.issuesParent,
-      issuesYear: this.issuesYearParent,
+      editLanguage: this.$ml.current,
       isEditing: false,
       editor: DecoupledEditor,
-      editorData: this.currentReport.content,
-      editorDataJA: this.currentReport.content_ja,
       editorConfig: {
         // The configuration of the editor.
         // language: 'ja'
         extraPlugins: [MyCustomUploadAdapterPlugin],
       },
 
-      editLanguage: this.$ml.current,
-      translatable: this.currentReport.translatable,
-      errors: [],
     };
   },
-  mounted() {
-    let _this = this;
-    _this.user_id = this.getReporter(this.currentReport.reporter);
-    _this.attendPerson = this.getReporter(this.currentReport.attend_person);
-    if (_this.currentReport.isSeen) _this.updateSeen();
-  },
+
   beforeMount() {
     window.addEventListener("beforeunload", this.preventNav);
     this.$once("hook:beforeDestroy", () => {
@@ -502,56 +444,27 @@ export default {
     }
     next();
   },
+
+  async created() {
+    const _this = this;
+    _this.filters.user_id = this.getReporter(_this.selectedItem.reporter);
+    if(_this.selectedItem.attend_person) _this.selectedItem.attendPerson = this.getReporter(_this.selectedItem.attend_person);
+    _this.page = -1;
+    _this.updateSeen();
+	},
+
   methods: {
+    ...mapActions('reports', {
+      translateContent: "translateContent",
+      backToList: "backToList",
+      resetValidate : "resetValidate",
+      updateReport: "updateReport",
+      updateSeen: "updateSeen",
+    }),
     checkTranslate() {
-      return (
-        !this.translatable && this.currentReport.language != this.editLanguage
-      );
+      return (!this.selectedItem.translatable && this.selectedItem.language != this.editLanguage);
     },
-    translateContent() {
-      let uri = "/data/translate-content";
-      let title = this.editLanguage == "vi" ? this.title : this.titleJA;
-      let content =
-        this.editLanguage == "vi" ? this.editorData : this.editorDataJA;
 
-      this.translatable = 1;
-
-      // translate Title
-      axios
-        .post(uri, {
-          lang: this.editLanguage,
-          text: title,
-        })
-        .then((res) => {
-          if (this.editLanguage == "vi") {
-            this.title = res.data.contentTranslated;
-          } else {
-            this.titleJA = res.data.contentTranslated;
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("Could not translate");
-        });
-
-      // translate Content
-      axios
-        .post(uri, {
-          lang: this.editLanguage,
-          text: content,
-        })
-        .then((res) => {
-          if (this.editLanguage == "vi") {
-            this.editorData = res.data.contentTranslated;
-          } else {
-            this.editorDataJA = res.data.contentTranslated;
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("Could not translate");
-        });
-    },
     getObjectValue(data, id) {
       let obj = data.filter((elem) => {
         if (elem.id == id) return elem;
@@ -565,93 +478,12 @@ export default {
       let result = [];
       let arrData = data.split(",");
       result = arrData.map((item, index) => {
-        return this.getObjectValue(this.userOptions, item);
+        return this.getObjectValue(this.options.users, item);
       });
       return result;
     },
-    getDepartment(data) {
-      if (!data) return null;
 
-      return {
-        id: data.dept_id,
-        text: data.dept_name,
-      };
-    },
-    getProject(data) {
-      if (!data) return null;
-
-      return {
-        id: data.project_id,
-        text: data.project_name,
-      };
-    },
-    getIssue(data) {
-      if (!data) return null;
-
-      return {
-        id: data.issue_name,
-        text: data.issue_name,
-      };
-    },
-    getIssueYear(data) {
-      if (!data) return null;
-      return {
-        id: data.issue_year,
-        text: data.issue_year,
-      };
-    },
-    fetchDataFilter() {
-      let uri = "/data/reports?team_id=" + this.team;
-      axios
-        .post(uri, {
-          deptSelects: this.deptSelects,
-          projectSelects: this.projectSelects,
-          issueSelects: this.issueSelects,
-          issueYearSelects: this.issueYearSelects,
-          team_id: this.team,
-        })
-        .then((res) => {
-          this.departments = res.data.departments;
-          this.projects = res.data.projects;
-          this.issues = res.data.issues;
-          this.issuesYear = res.data.issuesYear;
-          this.userOptions = res.data.users;
-          this.countLoad += 1;
-          if (this.countLoad === 1) {
-            this.projectSelects = this.getProject(this.currentReport);
-          }
-
-          if (this.countLoad === 2) {
-            this.issueSelects = this.getIssue(this.currentReport);
-          }
-          this.resetIssue();
-          this.resetIssueYear();
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("Could not load data");
-        });
-    },
-    getLanguage(data) {
-      return this.dataLang[data.current];
-    },
-    disabledEndDates() {
-      let obj = {
-        from: new Date(), // Disable all dates after specific date
-        // days: [0], // Disable Saturday's and Sunday's
-      };
-      return obj;
-    },
-    customFormatter(date) {
-      return moment(date).format("YYYY/MM/DD");
-    },
     onReady(editor) {
-      // Insert the toolbar before the editable area.
-      // editor.ui.getEditableElement().parentElement.insertBefore(
-      //     editor.ui.view.toolbar.element,
-      //     editor.ui.getEditableElement()
-      // );
-
       const toolbarContainer = document.querySelector("#toolbar-container");
       toolbarContainer.appendChild(editor.ui.view.toolbar.element);
     },
@@ -660,209 +492,152 @@ export default {
       event.preventDefault();
       event.returnValue = "";
     },
-    contentChange() {
-      this.isEditing = true;
-    },
-    emitUpdateReport() {
-      this.errors = [];
 
-      if (!this.title && this.editLanguage == "vi") {
-        this.errors = [["Please typing the title"], ...this.errors];
-      }
+    // emitUpdateReport() {
+    //   this.errors = [];
 
-      if (!this.titleJA && this.editLanguage == "ja") {
-        this.errors = [["Please typing the title"], ...this.errors];
-      }
+    //   if (!this.title && this.editLanguage == "vi") {
+    //     this.errors = [["Please typing the title"], ...this.errors];
+    //   }
 
-      if (!this.date) {
-        this.errors = [["Please choosing the date"], ...this.errors];
-      }
+    //   if (!this.titleJA && this.editLanguage == "ja") {
+    //     this.errors = [["Please typing the title"], ...this.errors];
+    //   }
 
-      if (!this.user_id.length) {
-        this.errors = [["Please choosing the user report"], ...this.errors];
-      }
+    //   if (!this.date) {
+    //     this.errors = [["Please choosing the date"], ...this.errors];
+    //   }
 
-      if (this.isMeeting() || this.isNotice()) {
-        if (!this.attendPerson.length) {
-          this.errors = [["Please choosing the user attend"], ...this.errors];
-        }
-      } else {
-        if (!this.deptSelects) {
-          this.errors = [["Please choosing the department"], ...this.errors];
-        }
+    //   if (!this.user_id.length) {
+    //     this.errors = [["Please choosing the user report"], ...this.errors];
+    //   }
 
-        if (!this.projectSelects) {
-          this.errors = [["Please choosing the project"], ...this.errors];
-        }
+    //   if (this.isMeeting() || this.isNotice()) {
+    //     if (!this.attendPerson.length) {
+    //       this.errors = [["Please choosing the user attend"], ...this.errors];
+    //     }
+    //   } else {
+    //     if (!this.deptSelects) {
+    //       this.errors = [["Please choosing the department"], ...this.errors];
+    //     }
 
-        if (!this.issueSelects) {
-          this.errors = [["Please choosing the issue"], ...this.errors];
-        }
-        if (!this.issueYearSelects) {
-          this.errors = [["Please choosing the issue"], ...this.errors];
-        }
-      }
+    //     if (!this.projectSelects) {
+    //       this.errors = [["Please choosing the project"], ...this.errors];
+    //     }
 
-      if (!this.editorData && this.editLanguage == "vi") {
-        this.errors = [["Please typing the content"], ...this.errors];
-      }
+    //     if (!this.issueSelects) {
+    //       this.errors = [["Please choosing the issue"], ...this.errors];
+    //     }
+    //     if (!this.issueYearSelects) {
+    //       this.errors = [["Please choosing the issue"], ...this.errors];
+    //     }
+    //   }
 
-      if (!this.editorDataJA && this.editLanguage == "ja") {
-        this.errors = [["Please typing the content"], ...this.errors];
-      }
+    //   if (!this.editorData && this.editLanguage == "vi") {
+    //     this.errors = [["Please typing the content"], ...this.errors];
+    //   }
 
-      if (!this.errors.length) {
-        let uri = "/data/reports-action/" + this.currentReport.id;
-        let newItem = {
-          type: this.reportType,
-          team_id: this.team,
-          seen: this.userID.toString(),
-          author: this.user_id
-            .map((item, index) => {
-              return item.id;
-            })
-            .toString(),
-        };
+    //   if (!this.editorDataJA && this.editLanguage == "ja") {
+    //     this.errors = [["Please typing the content"], ...this.errors];
+    //   }
 
-        if (this.editLanguage == "vi") {
-          newItem.title = this.title;
-          newItem.content = this.editorData;
-        } else {
-          newItem.title_ja = this.titleJA;
-          newItem.content_ja = this.editorDataJA;
-        }
+    //   if (!this.errors.length) {
+    //     let uri = "/data/reports-action/" + this.currentReport.id;
+    //     let newItem = {
+    //       type: this.reportType,
+    //       team_id: this.team,
+    //       seen: this.userID.toString(),
+    //       author: this.user_id
+    //         .map((item, index) => {
+    //           return item.id;
+    //         })
+    //         .toString(),
+    //     };
 
-        if (this.translatable) {
-          newItem.translatable = this.translatable;
-        }
+    //     if (this.editLanguage == "vi") {
+    //       newItem.title = this.title;
+    //       newItem.content = this.editorData;
+    //     } else {
+    //       newItem.title_ja = this.titleJA;
+    //       newItem.content_ja = this.editorDataJA;
+    //     }
 
-        if (this.isMeeting() || this.isNotice()) {
-          newItem.attend_person = this.attendPerson
-            .map((item, index) => {
-              return item.id;
-            })
-            .toString();
-          newItem.attend_other_person = this.attendPersonOther;
-          newItem.date_time =
-            moment(this.date).format("YYYY-MM-DD") + " " + this.time;
-          newItem.issue = "";
-        } else {
-          newItem.date_time = moment(this.date).format("YYYY-MM-DD HH:mm");
-          newItem.projects = this.projectSelects.id;
-          newItem.issue = this.issueSelects.id;
-          newItem.issueYear = this.issueYearSelects.id;
-          newItem.attend_person = "";
-          newItem.attend_other_person = "";
-        }
+    //     if (this.translatable) {
+    //       newItem.translatable = this.translatable;
+    //     }
 
-        axios
-          .patch(uri, newItem)
-          .then((res) => {
-            console.log(res.data.message);
-            this.title = "";
-            this.titleJA = "";
-            this.date = "";
-            this.time = "";
-            this.attendPerson = [];
-            this.attendPersonOther = "";
-            this.user_id = [];
-            this.deptSelects = null;
-            this.projectSelects = null;
-            this.issueSelects = null;
-            this.issueYearSelects = null;
-            this.reportType = "Trouble";
-            this.editorData = "";
-            this.errors = [];
-            this.$emit("back-to-list", true);
-          })
-          .catch((err) => {
-            console.log(err);
-            if (err.response.status == 422) {
-              this.errors = err.response.data;
-            }
-          });
-      }
-    },
-    resetDepartment() {
-      this.deptSelects = null;
-    },
-    resetProject() {
-      this.projectSelects = null;
-    },
-    resetIssue() {
-      let flag = false;
-      const check = this.issueSelects ? this.issueSelects.id : "";
-      this.issues.forEach(function (item) {
-        if (item.id == check) {
-          flag = true;
-          return;
-        }
-      });
-      if (!flag) this.issueSelects = null;
-    },
-    resetIssueYear() {
-      let flag = false;
-      const check = this.issueYearSelects ? this.issueYearSelects.id : "";
-      this.issuesYear.forEach(function (item) {
-        if (item.id == check) {
-          flag = true;
-          return;
-        }
-      });
-      if (!flag) this.issueYearSelects = null;
-    },
-    isMeeting() {
-      return this.reportType == "Meeting";
-    },
-    isNotice() {
-      return this.reportType == "Notice";
-    },
-    updateSeen() {
-      this.$emit("update-seen");
-    },
+    //     if (this.isMeeting() || this.isNotice()) {
+    //       newItem.attend_person = this.attendPerson
+    //         .map((item, index) => {
+    //           return item.id;
+    //         })
+    //         .toString();
+    //       newItem.attend_other_person = this.attendPersonOther;
+    //       newItem.date_time =
+    //         moment(this.date).format("YYYY-MM-DD") + " " + this.time;
+    //       newItem.issue = "";
+    //     } else {
+    //       newItem.date_time = moment(this.date).format("YYYY-MM-DD HH:mm");
+    //       newItem.projects = this.projectSelects.id;
+    //       newItem.issue = this.issueSelects.id;
+    //       newItem.issueYear = this.issueYearSelects.id;
+    //       newItem.attend_person = "";
+    //       newItem.attend_other_person = "";
+    //     }
+
+    //     axios
+    //       .patch(uri, newItem)
+    //       .then((res) => {
+    //         console.log(res.data.message);
+    //         this.title = "";
+    //         this.titleJA = "";
+    //         this.date = "";
+    //         this.time = "";
+    //         this.attendPerson = [];
+    //         this.attendPersonOther = "";
+    //         this.user_id = [];
+    //         this.deptSelects = null;
+    //         this.projectSelects = null;
+    //         this.issueSelects = null;
+    //         this.issueYearSelects = null;
+    //         this.reportType = "Trouble";
+    //         this.editorData = "";
+    //         this.errors = [];
+    //         this.$emit("back-to-list", true);
+    //       })
+    //       .catch((err) => {
+    //         console.log(err);
+    //         if (err.response.status == 422) {
+    //           this.errors = err.response.data;
+    //         }
+    //       });
+    //   }
+    // },
+
+
+    // updateSeen() {
+    //   this.$emit("update-seen");
+    // },
   },
   watch: {
-    editorData: [
+    selectedItem: [
       {
-        handler: "contentChange",
-      },
-    ],
-    editorDataJA: [
-      {
-        handler: "contentChange",
-      },
-    ],
-    deptSelects: [
-      {
-        handler: function (value, oldValue) {
-          if (value != oldValue) {
-            this.fetchDataFilter();
-            this.resetProject();
-          }
+        handler: function (value,valueOld) {
+          const _this = this;
+          if(value.content || value.content_ja) _this.isEditing = true;
         },
+        deep: true
       },
     ],
-    projectSelects: [
+    filters: [
       {
-        handler: function (value, oldValue) {
-          if (value != oldValue) {
-            this.fetchDataFilter();
-            this.resetIssue();
-            this.resetIssueYear();
-          }
+        handler: function (value) {
+          // if(value.type != this.typeOld){
+          //   this.typeOld = value.type;
+          //   this.typeReportChange();
+          // }
         },
-      },
-    ],
-    issueSelects: [{ handler: "fetchDataFilter" }],
-    issueYearSelects: [{ handler: "fetchDataFilter" }],
-    team: [
-      {
-        handler: function (value, oldValue) {
-          if (value != oldValue) {
-            this.resetDepartment();
-            this.fetchDataFilter();
-          }
-        },
+        deep: true
       },
     ],
   },

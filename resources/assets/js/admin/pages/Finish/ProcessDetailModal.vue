@@ -76,13 +76,13 @@ export default {
         },
         {
           id: "page",
-          value: this.$ml.with("VueJS").get("txtPagesWorked"),
+          value: this.$ml.with("VueJS").get("txtPages"),
           width: "",
           class: "",
         },
         {
           id: "file",
-          value: this.$ml.with("VueJS").get("txtFilesWorked"),
+          value: this.$ml.with("VueJS").get("txtFiles"),
           width: "",
           class: "",
         },
@@ -116,13 +116,13 @@ export default {
         },
         {
           id: "page",
-          value: _this.$ml.with("VueJS").get("txtPagesWorked"),
+          value: _this.$ml.with("VueJS").get("txtPages"),
           width: "",
           class: "",
         },
         {
           id: "file",
-          value: _this.$ml.with("VueJS").get("txtFilesWorked"),
+          value: _this.$ml.with("VueJS").get("txtFiles"),
           width: "",
           class: "",
         },

@@ -168,6 +168,7 @@ export default {
     txtWork: "作業",
     txtStatus: '制作状態',
     txtPagesWorked: '作業ページ数',
+    txtPages: '作業ページ数',
     txtDetails: '詳細情報',
     txtFinishTotaling: '終了集計',
     txtWorkReport: '作業報告',
@@ -175,6 +176,7 @@ export default {
     txtDateTime: '日時',
     txtYearOfIssue: '発行年',
     txtFilesWorked: 'ファイル数',
+    txtFiles: 'ファイル数',
     txtPrint: 'Print',
     txtQuantity: '量',
 }

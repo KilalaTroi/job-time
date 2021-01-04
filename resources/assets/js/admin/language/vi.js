@@ -168,6 +168,7 @@ export default {
     txtWork: "Work",
     txtStatus: 'Status',
     txtPagesWorked: 'Pages Worked',
+    txtPages: 'Pages',
     txtDetails: 'Details',
     txtFinishTotaling: 'FINISH TOTALING',
     txtWorkReport: 'Work report',
@@ -175,6 +176,7 @@ export default {
     txtDateTime: 'Date',
     txtYearOfIssue: 'Year of issue',
     txtFilesWorked: 'Files Worked',
+    txtFiles: 'Files',
     txtPrint: 'Print',
     txtQuantity: 'Quantity',
 }
