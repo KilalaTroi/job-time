@@ -2,7 +2,9 @@ export default {
 	namespaced: true,
 
 	state: {
-		columns: [],
+		columns: {
+			'totaling': []
+		},
 		overlap: true,
 		data: {
 			jobs: {},
@@ -93,13 +95,13 @@ export default {
 				],
 				'totaling': [
 					{ id: "project", value: rootGetters['getTranslate']('txtProject'), width: "", class: "" },
-					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "100", class: "text-center year-of-issue" },
+					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "100", class: "text-center year-of-issue", filter: false },
 					{ id: "issue", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "text-center" },
 					{ id: 'quantity', value: rootGetters['getTranslate']('txtQuantity'), width: '80', class: 'quantity' },
-					{ id: 'note', value: rootGetters['getTranslate']('txtWork'), width: '', class: 'note' },
-					{ id: 'phase', value: rootGetters['getTranslate']('txtPhase'), width: '', class: 'text-center' },
-					{ id: "start_time_string", value: rootGetters['getTranslate']('lblStartTime'), width: "100", class: "text-center" },
-					{ id: "end_time_string", value: rootGetters['getTranslate']('lblEndTime'), width: "100", class: "text-center" },
+					{ id: 'note', value: rootGetters['getTranslate']('txtWork'), width: '', class: 'note', filter: true },
+					{ id: 'phase', value: rootGetters['getTranslate']('txtPhase'), width: '', class: 'text-center', filter: true },
+					{ id: "start_time_string", value: rootGetters['getTranslate']('lblStartTime'), width: "100", class: "text-center", filter: true },
+					{ id: "end_time_string", value: rootGetters['getTranslate']('lblEndTime'), width: "100", class: "text-center", filter: true },
 					{ id: "total", value: rootGetters['getTranslate']('lblTime'), width: "100", class: "text-center" }
 				]
 			}
@@ -135,11 +137,11 @@ export default {
 			item.exceptLunchBreak = true;
 			item.showLunchBreak = false;
 
-			if ( state.filters.team == 2 ) {
+			if (state.filters.team == 2) {
 				await axios
 					.get("/data/issue-pages?issue_id=" + item.id)
 					.then((res) => {
-						if ( res.data.length ) item.quantity = res.data[0];
+						if (res.data.length) item.quantity = res.data[0];
 					})
 					.catch(err => console.log(err))
 			}
