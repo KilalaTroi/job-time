@@ -113,6 +113,7 @@ export default {
     txtCurrentJobs: '現在のタスク',
     txtNewUser: '新ユーザー',
     txtKilalaTimeAllocation: 'Kilala 稼働内容の時間配分',
+    txtTimeAllocation: '稼働内容の時間配分',
     txtWelcome: 'ようこそ',
     txtProfile: 'プロフィール',
     txtLogOut: 'ログアウト',

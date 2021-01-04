@@ -113,6 +113,7 @@ export default {
     txtCurrentJobs: 'Current jobs',
     txtNewUser: 'New users',
     txtKilalaTimeAllocation: 'Kilala time allocation',
+    txtTimeAllocation: 'Time allocation',
     txtWelcome: 'Welcome',
     txtProfile: 'Profile',
     txtLogOut: 'Log out',
