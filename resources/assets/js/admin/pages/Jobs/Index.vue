@@ -97,6 +97,7 @@
                     v-for="(column, index) in columns.totaling"
                     :key="index"
                     :class="column.class"
+                    :data-filter="column.id"
                   >
                     <span v-if="'end_time' == column.id">Total:</span>
                     <span v-else-if="'total' == column.id" v-html="data.totaling.total.text"></span>

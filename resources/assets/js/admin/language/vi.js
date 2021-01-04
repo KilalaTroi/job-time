@@ -180,4 +180,5 @@ export default {
     txtFiles: 'Files',
     txtPrint: 'Print',
     txtQuantity: 'Quantity',
+    txtImage: 'Image',
 }

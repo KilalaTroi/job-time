@@ -152,16 +152,14 @@
             </div>
           </div>
         </template>
-        <div class="table-responsive" >
-          <tbl-default
-            :dataItems="totalingData"
-            :dataCols="columns"
-            dataPath="totaling"
-          />
-          <!-- <table-no-action class="table-hover table-striped" :columns="columns" :data="logTime.data"></table-no-action> -->
-          <div v-if="!totalingData" class="text-center mt-3">
-            <img src="https://i.imgur.com/JfPpwOA.gif" />
-          </div>
+        <tbl-default
+          :class="{ 'path': filters.team == 2 }"
+          :dataItems="totalingData"
+          :dataCols="columns"
+          dataPath="totaling"
+        />
+        <div v-if="!totalingData" class="text-center mt-3">
+          <img src="https://i.imgur.com/JfPpwOA.gif" />
         </div>
 				<pagination
           :data="totalingData"
@@ -267,6 +265,13 @@ export default {
 </script>
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
+.table-responsive {
+  &:not(.path) {
+    .image {
+      display: none;
+    }
+  }
+}
 .type-color {
   width: 30px;
   height: 20px;
