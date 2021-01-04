@@ -75,36 +75,74 @@
   <div class="container">
     <p style="margin-bottom: 5px"><span style="width: 60px; display:inline-block">To:</span>KILALA COMMUNICATIONS CO., LTD.</p>
     <p style="margin-bottom: 30px"><span style="width: 60px; display:inline-block">Attn:</span>Mr. KASADO HIROFUMI, General Director</p>
-    <p style="font-size: 22px; margin-bottom: 60px;" class="d-flex algin-items-end">Date:&nbsp&nbsp<span style="width: 160px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ $data['now_date'] }}">................................................................................................................</span>
+
+    @php
+      $styleNowDate= "width: 160px; padding-top: 6px;";
+      $contentNowDate = "......................................";
+      if(isset($data['now_date']) && !empty($data['now_date'])) {
+        $styleNowDate= "font-size:22px";
+        $contentNowDate = $data['now_date'];
+      }
+    @endphp
+
+    <p style="font-size: 22px; margin-bottom: 60px;" class="d-flex algin-items-end">Date:&nbsp&nbsp<span style="{{ $styleNowDate }}" class="d-inline-block overflow-x-hidden">{{ $contentNowDate }}</span>
     </p>
     <h1 class="text-center" style="font-size: 26px; margin-bottom: 60px;">APPLICATION FOR ABSENCE</h1>
-    <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="width: 630px; padding-top: 10px;" class="d-inline-block overflow-x-hidden font-family-dif" data-label="{{ $data['name'] }}">................................................................................................................................................................................................................................</span>
+
+    @php
+      $styleName= "width: 630px; padding-top: 10px;";
+      $contentName = "................................................................................................................................................................................................................................";
+      if(isset($data['name']) && !empty($data['name'])) {
+        $styleName= "font-size:22px";
+        $contentName = $data['name'];
+      }
+    @endphp
+
+    <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="{{ $styleName }}" class="d-inline-block overflow-x-hidden font-family-dif">{{ $contentName  }}</span>
     </p>
     <p>Today, I would like to write this application to ask for your approval for my absence from the company on:</p>
     <ul>
+      @php
+        $styleType = "width: 300px; padding-top: 6px;";
+        $contentType[0] = $contentType[1] = $contentType[2] = "................................................................................................................";
+        if(isset($data['date']) && !empty($data['date'])) {
+          $styleType= "width: 300px; font-size:22px";
+          if('morning' === $data['type']) $contentType[0] = $data['date'];
+          if('afternoon' === $data['type']) $contentType[1] = $data['date'];
+          if('all_day' === $data['type']) $contentType[2] = $data['date'];
+        }
+      @endphp
       <li class="d-flex" style="margin-bottom: 10px;">
         <div class="d-flex align-items-center" style="margin-right: 60px; width: 260px">
           <img style="position: relative; top: -5px" class="mr-2" src="{{ 'morning' === $data['type'] ? asset('images/check.gif') : asset('images/uncheck.gif') }}">
           <p class='mb-0'>Half-day (08:00 - 12:00)</p>
         </div>
-        <span style="width: 300px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ 'morning' === $data['type'] ? $data['date'] : '' }}">................................................................................................................</span>
+        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[0] }}</span>
       </li>
       <li class="d-flex" style="margin-bottom: 10px;">
         <div class="d-flex align-items-center" style="margin-right: 60px; width: 260px">
           <img style="position: relative; top: -5px" class="mr-2" src="{{ 'afternoon' === $data['type'] ? asset('images/check.gif') : asset('images/uncheck.gif') }}">
           <p class='mb-0'>Half-day (13:00 - 17:00)</p>
         </div>
-        <span style="width: 300px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ 'afternoon' === $data['type'] ? $data['date'] : '' }}">................................................................................................................</span>
+        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[1] }}</span>
       </li>
       <li class="d-flex">
         <div class="d-flex align-items-center" style="margin-right: 60px; width: 260px">
           <img style="position: relative; top: -5px" class="mr-2" src="{{ 'all_day' === $data['type'] ? asset('images/check.gif') : asset('images/uncheck.gif') }}">
           <p class='mb-0'>Full-day (08:00 - 17:00)</p>
         </div>
-        <span style="width: 300px; padding-top: 6px;" class="d-inline-block overflow-x-hidden" data-label="{{ 'all_day' === $data['type'] ? $data['date'] : '' }}">................................................................................................................</span>
+        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[2] }}</span>
       </li>
     </ul>
-    <p style="margin-bottom: 60px" class="d-flex algin-items-end">Total of off-day:&nbsp&nbsp&nbsp&nbsp<span style="width: 80px; padding-top: 4px" class="d-inline-block overflow-x-hidden text-center" data-label="{{ $data['totalOff'] }}">...................</span>&nbspday(s).</p>
+    @php
+      $styleTotalOff= "width: 80px; padding-top: 4px;";
+      $contentTotalOff = "...................";
+      if(isset($data['totalOff']) && !empty($data['totalOff'])) {
+        $styleTotalOff= "width: 60px; font-size:22px";
+        $contentTotalOff = $data['totalOff'];
+      }
+    @endphp
+    <p style="margin-bottom: 60px" class="d-flex algin-items-end">Total of off-day:&nbsp&nbsp&nbsp&nbsp<span style="{{ $styleTotalOff }}" class="d-inline-block overflow-x-hidden text-center">{{ $contentTotalOff }}</span>&nbspday(s).</p>
     <p>For the following reason:</p>
     <ul style="margin-bottom: 60px">
       <li class="d-flex align-items-center" style="margin-bottom: 10px">
@@ -143,9 +181,9 @@
         <p style="font-weight: 700" class="text-center">Company’s Approval</p>
         <table class="table table-border">
           <thead>
-            <th>Leader</th>
-            <th>Administrative Manager</th>
-            <th>D. General Director</th>
+            <th style="width: 30%">Leader</th>
+            <th style="width: 40%">Administrative Manager</th>
+            <th style="width: 30%">D. General Director</th>
           </thead>
           <tbody>
             <tr>
