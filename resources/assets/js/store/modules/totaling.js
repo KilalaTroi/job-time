@@ -104,7 +104,7 @@ export default {
         { id: "i_name", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "", filter: true },
         { id: "note", value: rootGetters['getTranslate']('txtWork'), width: "", class: "note", filter: true },
         { id: "image", value: rootGetters['getTranslate']('txtImage'), width: "120", class: "image text-center" },
-        { id: "t_value", value: rootGetters['getTranslate']('txtColor'), width: "30", class: "text-center", filter: true },
+        { id: "t_value", value: rootGetters['getTranslate']('txtColor'), width: "110", class: "text-center", filter: true },
         { id: "t_name", value: rootGetters['getTranslate']('txtJobType'), width: "120", class: "", filter: true },
         { id: 'html_team', value: rootGetters['getTranslate']('txtTeam'), width: '', class: 'text-center', filter: true },
       ]
