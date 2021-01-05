@@ -19,7 +19,7 @@ class TypesController extends Controller
 		if ($request->input('page') !== null && $request->input('page')) {
 			$types = Type::paginate(20);
 		} else {
-			$types = Type::get();
+			$types = Type::where('status',1)->get();
 		}
 
 		return response()->json($types);

@@ -61,6 +61,13 @@ export default {
 		}
 	},
 
+	getLanguage(){
+		return (data) => {
+			const language = 'ja' == data.current ? 'ja' : 'en';
+      return language;
+		}
+	},
+
 	setBackground() {
 		return (color) => {
 			return {
