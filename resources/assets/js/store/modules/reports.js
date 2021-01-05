@@ -32,6 +32,7 @@ export default {
     },
     selectedItem: {
       language: '',
+      time: 'HH:mm',
       attendPerson: null,
       attendPersonOther: '',
       title: '',
@@ -130,6 +131,7 @@ export default {
     handleGetItem({ state, commit, rootGetters }, data) {
       let item = rootGetters['getObjectByID'](state.data.data, data.id);
       item.isSeen = data.seen;
+      item.time = item.date_time ? rootGetters['dateFormat'](item.date_time, 'HH:mm') : 'HH:mm';
       const filters = {
         start_date: new Date(moment().subtract(1, "years").startOf("month").format("YYYY/MM/DD")),
         end_date: new Date(moment().add(1, "days").format("YYYY/MM/DD")),
@@ -248,61 +250,6 @@ export default {
       // }
     },
 
-    updateReport({ state, dispatch, commit }) {
-      commit('SET_VALIDATE', { error: '', success: '' });
-      if (!state.selectedItem.title && !state.selectedItem.title_ja) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
-      if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
-      if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
-      if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (!state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
-      } else {
-        if (!state.filters.department) state.validationErrors = [["Please choosing the department"], ...state.validationErrors];
-        if (!state.filters.project) state.validationErrors = [["Please choosing the project"], ...state.validationErrors];
-        if (!state.filters.issue) state.validationErrors = [["Please choosing the issue"], ...state.validationErrors];
-        if (!state.filters.issue_year) state.validationErrors = [["Please choosing the issue year"], ...state.validationErrors];
-      }
-      if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
-      if (!state.validationErrors.length) {
-        let uri = "/data/reports-action/" + state.selectedItem.id;
-
-        let dataSend = {
-          translatable: state.selectedItem.translatable,
-          type: state.filters.type,
-          author: state.filters.user_id.map((item, index) => { return item.id; }).toString(),
-          team_id: state.filters.team,
-        }
-        if (state.selectedItem.language == "vi") {
-          dataSend.title = state.selectedItem.title;
-          dataSend.content = state.selectedItem.content;
-        } else {
-          dataSend.title_ja = state.selectedItem.title_ja;
-          dataSend.content_ja = state.selectedItem.content_ja;
-        }
-        if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-          dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
-          dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = moment(state.selectedItem.date).format("YYYY-MM-DD") + " " + state.selectedItem.time;
-        } else {
-          dataSend.date_time = moment(state.selectedItem.date).format("YYYY-MM-DD HH:mm");
-          dataSend.projects = state.filters.project.id;
-          dataSend.issue = state.filters.issue.id;
-          dataSend.issueYear = state.filters.issue_year.id;
-        }
-
-        axios
-          .patch(uri, dataSend)
-          .then((res) => {
-            dispatch('backToList');
-          })
-          .catch((err) => {
-            console.log(err);
-            if (err.response.status == 422) {
-              this.errors = err.response.data;
-            }
-          });
-      }
-    },
-
     updateSeen({ state, dispatch, commit }) {
       let uri = "/data/update-seen";
       axios
@@ -319,7 +266,7 @@ export default {
         });
     },
 
-    addNew({ state, dispatch, commit }) {
+    addNew({ state, dispatch, commit, rootGetters }) {
       commit('SET_VALIDATE', { error: '', success: '' });
       if (!state.selectedItem.title && !state.selectedItem.title_ja) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
@@ -352,9 +299,9 @@ export default {
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
           dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = moment(state.selectedItem.date).format("YYYY-MM-DD") + " " + state.selectedItem.time;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
-          dataSend.date_time = moment(state.selectedItem.date).format("YYYY-MM-DD HH:mm");
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
           dataSend.projects = state.filters.project.id;
           dataSend.issue = state.filters.issue.id;
           dataSend.issueYear = state.filters.issue_year.id;
@@ -369,6 +316,60 @@ export default {
       }
     },
 
+    updateReport({ state, dispatch, commit, rootGetters }) {
+      commit('SET_VALIDATE', { error: '', success: '' });
+      if (!state.selectedItem.title && !state.selectedItem.title_ja) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
+      if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
+      if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
+      if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
+        if (!state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
+      } else {
+        if (!state.filters.department) state.validationErrors = [["Please choosing the department"], ...state.validationErrors];
+        if (!state.filters.project) state.validationErrors = [["Please choosing the project"], ...state.validationErrors];
+        if (!state.filters.issue) state.validationErrors = [["Please choosing the issue"], ...state.validationErrors];
+        if (!state.filters.issue_year) state.validationErrors = [["Please choosing the issue year"], ...state.validationErrors];
+      }
+      if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
+      if (!state.validationErrors.length) {
+        let uri = "/data/reports-action/" + state.selectedItem.id;
+
+        let dataSend = {
+          translatable: state.selectedItem.translatable,
+          type: state.filters.type,
+          author: state.filters.user_id.map((item, index) => { return item.id; }).toString(),
+          team_id: state.filters.team,
+        }
+        if (state.selectedItem.language == "vi") {
+          dataSend.title = state.selectedItem.title;
+          dataSend.content = state.selectedItem.content;
+        } else {
+          dataSend.title_ja = state.selectedItem.title_ja;
+          dataSend.content_ja = state.selectedItem.content_ja;
+        }
+        if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
+          dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
+          dataSend.attend_other_person = state.selectedItem.attendPersonOther;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
+        } else {
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
+          dataSend.projects = state.filters.project.id;
+          dataSend.issue = state.filters.issue.id;
+          dataSend.issueYear = state.filters.issue_year.id;
+        }
+
+        axios
+          .patch(uri, dataSend)
+          .then((res) => {
+            dispatch('backToList');
+          })
+          .catch((err) => {
+            console.log(err);
+            if (err.response.status == 422) {
+              this.errors = err.response.data;
+            }
+          });
+      }
+    },
 
     exportPDF({ state }) {
       const uri = "/pdf/report";
