@@ -551,4 +551,9 @@ $chart-tooltip-color: #fff;
 .ct-area, .ct-line {
     pointer-events: none;
 }
+.tab-content .card {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top-color: transparent;
+}
 </style>
