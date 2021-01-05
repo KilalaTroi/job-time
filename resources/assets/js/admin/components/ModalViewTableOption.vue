@@ -1,8 +1,8 @@
 <template>
   <modal id="viewTableOption" sizeClasses="modal-lg" v-on:reset-validation="resetValidation">
-    <template slot="title">View Table Option</template>
+    <template slot="title">Columns Filter</template>
     <ul class="tableColumns">
-      <li v-for="(column, index) in dataCols" :key="index" :class="!column.filter ? 'd-none' : ''">
+      <li v-for="(column, index) in dataCols" :key="index" :class="true === column.filter || false === column.filter ? '' : 'd-none'">
         <input type="checkbox" :value="column.id" v-model="checkColumns" :id="'table_' + column.id" />
         <label :for="'table_' + column.id">{{ column.value }}</label>
       </li>
@@ -28,9 +28,13 @@ export default {
     };
   },
   mounted() {
-    this.resetValidation();
-    this.checkTableColumns();
-    this.hanldeFliterColumns(this.checkColumns);
+    const _this = this;
+
+    setTimeout(function(){
+      _this.resetValidation();
+      _this.checkTableColumns();
+      _this.hanldeFliterColumns(_this.checkColumns);
+    },100)
   },
   methods: {
     fliterColumns() {
@@ -43,28 +47,31 @@ export default {
 			}
     },
     hanldeFliterColumns(colunms) {
-			const table = "#" + this.dataTable;
-			$(table).find("th[data-filter],td[data-filter]").addClass("d-none");
+      const table = "#" + this.dataTable;
+      $(table).find("th[data-filter],td[data-filter]").addClass("d-none");
       colunms.map(function (value) { $(table).find("[data-filter='" + value + "']").removeClass("d-none"); });
 		},
 		resetValidation(){
 			const fliterColumns = localStorage.getItem("filter_" + this.dataTable);
 			if(fliterColumns) this.checkColumns = fliterColumns.split(",");
 			else {
-				const _this = this;
-				this.dataCols.map(function (value) { _this.checkColumns.push(value.id) });
-				localStorage.setItem("filter_" + this.dataTable, this.checkColumns);
+        const _this = this;
+				_this.dataCols.map(function (value,index) {
+          _this.checkColumns.push(value.id)
+          if(false === value.filter){ delete _this.checkColumns[index]; }
+        });
+				localStorage.setItem("filter_" + _this.dataTable, _this.checkColumns);
 			}
     },
     checkTableColumns(){
       let colsNew = '', colsOld = localStorage.getItem("cols_" + this.dataTable);
       if(!colsOld) colsOld = '';
-
       this.dataCols.map(function (value) { colsNew += value.id+','; });
-
       if(colsOld != colsNew){
         const _this = this;
-        this.dataCols.map(function (value) { if(-1 == colsOld.indexOf(value.id) && -1 == _this.checkColumns.indexOf(value.id)) _this.checkColumns.push(value.id) });
+        this.dataCols.map(function (value) {
+          if(-1 == colsOld.indexOf(value.id) && -1 == _this.checkColumns.indexOf(value.id)) _this.checkColumns.push(value.id)
+        });
         localStorage.setItem("filter_" + this.dataTable, this.checkColumns);
         localStorage.setItem("cols_" + this.dataTable, colsNew)
       }

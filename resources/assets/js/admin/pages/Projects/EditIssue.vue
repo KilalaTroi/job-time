@@ -9,7 +9,7 @@
     }}</template>
     <div v-if="selectedItem">
       <div class="row">
-        <div class="col-sm-2">
+        <div v-show="3 != currentTeam.id" class="col-sm-2">
           <div class="form-group">
             <label class="">{{
               $ml.with("VueJS").get("txtYearOfIssue")
@@ -26,7 +26,7 @@
           </datepicker>
           </div>
         </div>
-        <div class="col-sm-2">
+        <div :class="3 != currentTeam.id ? 'col-sm-2'  : 'col-sm-4' ">
           <div class="form-group">
             <label class="">{{ $ml.with("VueJS").get("txtIssue") }}</label>
             <input
@@ -149,6 +149,7 @@ export default {
       customFormatter: "customFormatter",
       dateFormat: "dateFormat",
       getLangCode: "getLangCode",
+      currentTeam: "currentTeam",
     }),
   },
 

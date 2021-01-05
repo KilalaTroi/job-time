@@ -28,8 +28,8 @@
                 input-class="form-control"
                 placeholder="Select Date"
                 v-model="filters.start_date"
-                :format="dateFormatter"
-                :disabled-dates="disabledEndDates()"
+                :format="dateFormat(filters.start_date,'YYYY-MM-DD')"
+                :disabled-dates="disabledEndDates(filters.end_date)"
                 :language="getLangCode(this.$ml)"
               ></datepicker>
             </div>
@@ -42,8 +42,8 @@
                 input-class="form-control"
                 placeholder="Select Date"
                 v-model="filters.end_date"
-                :format="dateFormatter"
-                :disabled-dates="disabledStartDates()"
+                :format="dateFormat(filters.end_date,'YYYY-MM-DD')"
+                :disabled-dates="disabledStartDates(filters.start_date)"
                 :language="getLangCode(this.$ml)"
               ></datepicker>
             </div>
@@ -152,16 +152,14 @@
             </div>
           </div>
         </template>
-        <div class="table-responsive" >
-          <tbl-default
-            :dataItems="totalingData"
-            :dataCols="columns"
-            dataPath="totaling"
-          />
-          <!-- <table-no-action class="table-hover table-striped" :columns="columns" :data="logTime.data"></table-no-action> -->
-          <div v-if="!totalingData" class="text-center mt-3">
-            <img src="https://i.imgur.com/JfPpwOA.gif" />
-          </div>
+        <tbl-default
+          :class="{ 'path': filters.team == 2 }"
+          :dataItems="totalingData"
+          :dataCols="columns"
+          dataPath="totaling"
+        />
+        <div v-if="!totalingData" class="text-center mt-3">
+          <img src="https://i.imgur.com/JfPpwOA.gif" />
         </div>
 				<pagination
           :data="totalingData"
@@ -212,7 +210,9 @@ export default {
       getObjectByID: "getObjectByID",
 			getTeamText: "getTeamText",
 			dateFormat: "dateFormat",
-      getLangCode: "getLangCode"
+      getLangCode: "getLangCode",
+      disabledStartDates: "disabledStartDates",
+      disabledEndDates: "disabledEndDates"
     }),
     ...mapGetters("totaling", {
 			columns: "columns",
@@ -233,28 +233,10 @@ export default {
 			exportExcel: "exportExcel",
     }),
 
-
     optionStyle(color) {
       return {
         backgroundColor: color,
       };
-    },
-
-    disabledStartDates() {
-      let obj = {
-        to: new Date(this.start_date), // Disable all dates after specific date
-        from: new Date(), // Disable all dates after specific date
-      };
-      return obj;
-    },
-    disabledEndDates() {
-      let obj = {
-        from: new Date(this.end_date), // Disable all dates after specific date
-      };
-      return obj;
-    },
-    dateFormatter(date) {
-      return moment(date).format("YYYY-MM-DD");
     },
 	},
 	async created(){
@@ -268,7 +250,8 @@ export default {
   watch: {
     filters: [
       {
-        handler: function(value){
+        handler: function(value,valueOld){
+          console.log(value,valueOld)
 					if (value.team != this.currentTeam.id) {
 						this.setCurrentTeam(value.team);
 					}
@@ -282,8 +265,15 @@ export default {
 </script>
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
+.table-responsive {
+  &:not(.path) {
+    .image {
+      display: none;
+    }
+  }
+}
 .type-color {
-  width: 30px;
+  width: 60px;
   height: 20px;
   margin-right: 5px;
   display: inline-block;

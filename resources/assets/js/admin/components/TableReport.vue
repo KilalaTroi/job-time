@@ -4,24 +4,24 @@
             <slot name="columns">
                 <tr>
                     <th width="50"><i class="nc-icon nc-bell-55"></i></th>
-                    <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
+                    <th v-for="(column, index) in columns" :key="index" :width="column.width" :data-filter="column.id" :class="column.class">{{ column.value }}</th>
                     <th width="120" class="text-center">{{$ml.with('VueJS').get('txtAction')}}</th>
                 </tr>
             </slot>
         </thead>
         <tbody>
-            <tr v-for="(item, index) in data" :key="index">
+            <tr v-for="(item, index) in data.data" :key="index">
                 <td><i class="nc-icon nc-bell-55" v-if="checkSeen(item.seen)"></i></td>
                 <slot :row="item">
-                    <td v-for="(column, index) in columns" :key="index" :class="column.class">
+                    <td v-for="(column, index) in columns" :key="index" :class="column.class" :data-filter="column.id">
                         <span v-if="checkDateColumn(column)" v-html="removeTime(item[column.id])"></span>
                         <span v-else v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
                 <td class="text-center">
-                    <i @click="$emit('edit-report', item.id, checkSeen(item.seen))" class="fa fa-pencil btn-process" aria-hidden="true"></i>
+                    <i @click="$emit('edit-report', { 'id': item.id, 'seen': checkSeen(item.seen) })" class="fa fa-pencil btn-process" aria-hidden="true"></i>
                     <!--<i @click="$emit('send-report')" class="ml-1 fa fa-paper-plane btn-process" aria-hidden="true"></i>-->
-                    <i @click="$emit('view-report', item.id, checkSeen(item.seen))" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>
+                    <i @click="$emit('view-report', { 'id': item.id, 'seen': checkSeen(item.seen) })" class="ml-1 fa fa-eye btn-process" aria-hidden="true"></i>
                 </td>
             </tr>
         </tbody>
@@ -32,7 +32,7 @@ export default {
     name: 'table-report',
     props: {
         columns: Array,
-        data: Array,
+        data: {},
         userID: String,
     },
     methods: {

@@ -50,12 +50,14 @@ class OffDaysController extends Controller
         $user = $request->session()->get('Auth');
 
         // Check filter team for user
-        $codition = $teamID && ($user[0]['id'] != 1);
+        // $codition = $teamID && ($user[0]['id'] != 1);
+        $codition = $teamID;
 
         $offDays = DB::table('off_days')
             ->select(
                 'off_days.id as id',
                 'users.name as name',
+                'users.id as user_id',
                 'off_days.type as type',
                 'off_days.date as date'
             )
@@ -84,8 +86,8 @@ class OffDaysController extends Controller
      */
     public function store(Request $request)
     {
-        $ids = array(); // ids ngày nghĩ bị trùng 
-        
+        $ids = array(); // ids ngày nghĩ bị trùng
+
         // lấy ngày nghĩ bị trùng
         $oldOffDay = DB::table('off_days')
             ->select(
@@ -97,7 +99,7 @@ class OffDaysController extends Controller
 
         if ($oldOffDay) {
         	foreach ($oldOffDay as $value) {
-        		$ids[] = $value->id; // ids ngày nghĩ bị trùng 
+        		$ids[] = $value->id; // ids ngày nghĩ bị trùng
         	}
         	OffDay::destroy($ids);
     	}
@@ -114,7 +116,7 @@ class OffDaysController extends Controller
                 'backgroundColor' => $request->get('backgroundColor'),
                 'title' => $request->get('title')
             ),
-            'oldEvent' => $ids, // ids ngày nghĩ bị trùng 
+            'oldEvent' => $ids, // ids ngày nghĩ bị trùng
             'message' => 'Successfully.'
         ), 200);
     }

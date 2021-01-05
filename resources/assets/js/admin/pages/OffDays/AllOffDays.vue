@@ -43,6 +43,7 @@ export default {
   computed: {
     ...mapGetters({
       allOffDays: "offdays/allOffDays",
+      filters: "offdays/filters"
     }),
   },
 
@@ -88,7 +89,8 @@ export default {
     }),
 
     getLanguage(data) {
-      return data.current;
+      const language = data.current == 'vi' ? 'en' : 'ja';
+      return language;
     },
   },
 
@@ -100,7 +102,8 @@ export default {
     team: [
       {
         handler: function() {
-          this.setTeam(this.team)
+          this.filters.team = this.team;
+          // this.setTeam(this.team)
           this.getAllOffDays();
         }
       },
@@ -122,6 +125,7 @@ export default {
 .fc-event {
   cursor: move;
   color: rgba(0, 0, 0, 0.8);
+  min-height: 0;
 }
 
 .fc-time-grid-event .fc-time,

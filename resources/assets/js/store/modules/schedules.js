@@ -185,8 +185,7 @@ export default {
     searchItem({ commit, state }, value) {
       let dataSearchResults = state.data.projects
       dataSearchResults = (state.data.projects).filter((item) => {
-        let title = item.project + " " + item.issue;
-        return title.toLowerCase().includes(value.toLowerCase());
+        return item.fullname.toLowerCase().includes(value.toLowerCase());
       });
       commit('SET_DATA_SEARCH', dataSearchResults)
     },

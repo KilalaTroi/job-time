@@ -168,20 +168,23 @@ class StatisticsController extends Controller
 
 			return $value;
 		}, $other);
-		$otherSlug['slug'] = 'other';
-		$otherSlug['slug_ja'] = 'その他';
+
+		$otherName = $teamID == 2 ? 'free_time' : 'other';
+		$otherJAText = $teamID == 2 ? 'Free time' : 'その他';
+		$otherSlug['slug'] = $otherName;
+		$otherSlug['slug_ja'] = $otherJAText;
 		$other = array_merge($otherSlug, $other);
 
-		$mainTable['other'] = $other;
-		$mainTable['other'][''] = "  ";
-		$mainTable['other']['Total'] = '=SUM(C' . $maxRow . ':' . $letterMaxColumn . $maxRow . ')/SUM($C$5:$' . $letterMaxColumn . '$' . $maxRow . ')*100';
+		$mainTable[$otherName] = $other;
+		$mainTable[$otherName][''] = "  ";
+		$mainTable[$otherName]['Total'] = '=SUM(C' . $maxRow . ':' . $letterMaxColumn . $maxRow . ')/SUM($C$5:$' . $letterMaxColumn . '$' . $maxRow . ')*100';
 
 		$year = $nameFile = str_replace('/', '-', $startMonth) . '_' . str_replace('/', '-', $endMonth);
 		if ($infoUser) $nameFile .= '-' . $infoUser[0]->text;
 
 		// Excel
-		$columnName = $this->columnLetter(count($mainTable['other']));
-		$columnNameNext = $this->columnLetter(count($mainTable['other']) + 1);
+		$columnName = $this->columnLetter(count($mainTable[$otherName]));
+		$columnNameNext = $this->columnLetter(count($mainTable[$otherName]) + 1);
 		$startRow = $infoUser ? 5 : 4;
 		$numberRows = count($mainTable) + $startRow;
 		$curentTimestampe = Carbon::now()->timestamp;
@@ -807,9 +810,11 @@ class StatisticsController extends Controller
 				'd.name as department',
 				'p.name as p_name',
 				'i.name as i_name',
+				'j.quantity as image',
 				'i.year as i_year',
 				'j.note as note',
 				't.slug as t_name',
+				't.value as t_value',
 				'p.team as team'
 			)
 			->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
@@ -847,6 +852,7 @@ class StatisticsController extends Controller
 			$item->username = DB::table('users')->select('name')->where('id', $item->user_id)->first()->name;
 			$item->total = $this->formatTime($item->total);
 			$item->html_team = '<span>' . $team . '<span>';
+			$item->t_value = '<span class="type-color cl-value" style="margin-right: 0;background-color:'. $item->t_value .' "></span>';
 			return $item;
 		});
 		return $totaling;

@@ -49,7 +49,7 @@
                 :dataItems="data.jobs"
                 :dataCols="columns.jobs"
                 dataAction="addTime"
-                dataPath="jobs"
+                dataPath="taks"
               >
                 <template v-slot:action="slotAction">
                   <button
@@ -77,10 +77,15 @@
           </card>
           <card>
             <template slot="header">
-              <h4 class="card-title">{{ $ml.with("VueJS").get("txtTimeRecord") }}</h4>
+              <div class="d-flex justify-content-between">
+                <h4 class="card-title">{{ $ml.with("VueJS").get("txtTimeRecord") }}</h4>
+                <div class="form-group mb-0 d-flex justify-content-between">
+                  <button-view-table-option class="mt-0" />
+                </div>
+              </div>
             </template>
             <tbl-default
-              :class="{ 'path-team': filters.team == 2 || filters.team == 3 }"
+              :class="{ 'path': filters.team == 2, 'web': filters.team == 3 }"
               :dataItems="data.totaling"
               :dataCols="columns.totaling"
               dataAction="all"
@@ -92,6 +97,7 @@
                     v-for="(column, index) in columns.totaling"
                     :key="index"
                     :class="column.class"
+                    :data-filter="column.id"
                   >
                     <span v-if="'end_time' == column.id">Total:</span>
                     <span v-else-if="'total' == column.id" v-html="data.totaling.total.text"></span>
@@ -114,6 +120,11 @@
 
       <add-time />
       <edit-time />
+       <view-table-option
+        dataTable="jobs"
+        :dataItems="data.totaling"
+        :dataCols="columns.totaling"
+      />
     </div>
   </div>
 </template>
@@ -126,6 +137,8 @@ import TblDefault from "../../components/Table";
 import AddTime from "./AddTime";
 import EditTime from "./EditTime";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
+import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
+import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -136,6 +149,8 @@ export default {
     AddTime,
     EditTime,
     Select2,
+    ButtonViewTableOption,
+    ViewTableOption
   },
   computed: {
     ...mapGetters("jobs", {
@@ -217,14 +232,21 @@ export default {
 .time-record tr:last-child button {
   display: none;
 }
-.table-responsive:not(.path-team) {
-  .note {
-    display: none;
-  }
-}
-.table-responsive.path-team {
-    .year-of-issue {
-        display: none;
+.table-responsive {
+  // .note, .year-of-issue, .quantity {
+  //   display: none;
+  // }
+
+  // &.web, &.path {
+  //   .note, .year-of-issue {
+  //     display: table-cell;
+  //   }
+  // }
+
+  &:not(.path) {
+    .quantity {
+      display: none;
     }
+  }
 }
 </style>

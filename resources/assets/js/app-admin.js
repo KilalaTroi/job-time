@@ -51,16 +51,18 @@ import Ckeditor from './admin/pages/Ckeditor';
 import Reports from './admin/pages/Reports';
 import Finish from './admin/pages/Finish';
 import Uploaded from './admin/pages/Finish/Uploaded';
+import OffDays from './admin/pages/OffDays';
+import Jobs from './admin/pages/Jobs';
 
 const routes = [{
         path: '/',
         component: DashboardLayout,
-        redirect: '/overview'
+        redirect: '/schedules'
     },
     {
         path: '/',
         component: DashboardLayout,
-        redirect: '/overview',
+        redirect: '/schedules',
         children: [{
                 path: 'overview',
                 name: 'Overview',
@@ -145,6 +147,16 @@ const routes = [{
                 path: 'uploaded',
                 name: 'Uploaded',
                 component: Uploaded
+            },
+            {
+                path: 'off-days',
+                name: 'OffDays',
+                component: OffDays
+            },
+            {
+                path: 'jobs',
+                name: 'Jobs',
+                component: Jobs
             },
             {
                 path: '*',

@@ -187,9 +187,12 @@ table {
   background-color: transparent;
   text-align: left;
   max-width: 280px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+
+  &.convert-html {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 }
 
 .table-responsive {
@@ -232,22 +235,22 @@ table {
   opacity: 0;
 }
 
-.vdp-datepicker__clear-button{
+.vdp-datepicker__clear-button {
   position: absolute;
   top: 50%;
   right: 15px;
   transform: translateY(-50%);
 }
 
-#viewTableOption{
-  .tableColumns{
+#viewTableOption {
+  .tableColumns {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     list-style: none;
     padding: 0;
     margin: 0 -8px -10px;
-    li{
+    li {
       flex: 0 0 25%;
       max-width: 25%;
       padding: {
@@ -255,7 +258,7 @@ table {
         right: 8px;
       }
       margin-bottom: 10px;
-      label{
+      label {
         margin: 0;
         padding-left: 5px;
       }
@@ -263,13 +266,36 @@ table {
   }
 }
 
+.multiselect__placeholder {
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+
+.multiselect__tags .multiselect__tags-wrap:not(:empty) {
+  display: inline-block;
+  .multiselect__tag {
+    margin-top: 4px;
+    margin-bottom: -5px;
+    position: relative;
+    top: -4px;
+  }
+}
+
 /* Safari */
 @-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
