@@ -87,12 +87,25 @@
                     </div>
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                            <a class="nav-item nav-link active" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
-                            <a class="nav-item nav-link" id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
+                            <a class="nav-item nav-link active" id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
+                            <a class="nav-item nav-link" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
                         </div>
                     </nav>
                      <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade show active" id="timeallocation" role="tabpanel" aria-labelledby="timeallocation-tab">
+                         <div class="tab-pane fade show active" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
+                                        <template slot="footer">
+                                            <div class="legend loading">
+                                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
+                                            </div>
+                                        </template>
+                                    </chart-card>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="timeallocation" role="tabpanel" aria-labelledby="timeallocation-tab">
                             <div class="row">
                                 <div class="col-md-12">
                                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id" v-on:chart-loaded="chartLoaded">
@@ -111,19 +124,6 @@
                                 </div>
                             </div>
 
-                        </div>
-                        <div class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
-                                        <template slot="footer">
-                                            <div class="legend loading">
-                                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
-                                            </div>
-                                        </template>
-                                    </chart-card>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
