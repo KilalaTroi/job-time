@@ -244,9 +244,10 @@ export default {
       state.action.new = state.action.preview = state.action.edit = false;
       dispatch('resetSelectedItem');
       delete state.filters['page'];
+      dispatch('resetFilters', 'all');
+
       dispatch('getAll');
       // if (1 == flag) {
-      //   dispatch('resetFilters', 'all');
       // }
     },
 
