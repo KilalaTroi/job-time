@@ -30,6 +30,11 @@ class ReportsController extends Controller
 	{
 		$data = $request->all();
 		$data['seen'] = $this->user['id'];
+
+		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
+		$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
+		$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
+
 		$issue_id =  DB::table('issues')
 			->select('id')
 			->where('project_id', $data['projects'])
@@ -56,6 +61,11 @@ class ReportsController extends Controller
 	{
 		$report = Report::findOrFail($id);
 		$data = $request->all();
+
+		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
+		$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
+		$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
+
 		$issue_id =  DB::table('issues')
 			->select('id')
 			->where('project_id', $data['projects'])
