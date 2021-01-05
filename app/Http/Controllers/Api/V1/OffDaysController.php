@@ -57,6 +57,7 @@ class OffDaysController extends Controller
             ->select(
                 'off_days.id as id',
                 'users.name as name',
+                'users.id as user_id',
                 'off_days.type as type',
                 'off_days.date as date'
             )

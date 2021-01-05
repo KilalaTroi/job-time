@@ -1,13 +1,18 @@
 <template>
   <card>
-    <h4 slot="header" class="card-title">
-      {{ $ml.with("VueJS").get("txtMyOffDay") }}
-    </h4>
+    <template slot="header">
+      <div class="d-flex justify-content-between">
+          <h4 class="card-title">{{ $ml.with("VueJS").get("txtStaffOffDay") }}</h4>
+          <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 100px">
+            <select-2 :options="options.team" v-model="filters.team" class="select2" />
+          </div>
+      </div>
+    </template>
     <div class="row">
       <div class="col-sm-12 col-lg-2">
         <card>
           <template slot="header">
-            <h4 class="card-title">{{ $ml.with("VueJS").get("txtType") }}</h4>
+            <h4 class="card-title">{{ $ml.with("VueJS").get("txtMyOffDay") }}</h4>
           </template>
           <div id="external-events">
             <div id="external-events-list">
@@ -28,7 +33,8 @@
         </card>
       </div>
       <div class="col-sm-12 col-lg-10">
-        <FullCalendar
+
+         <FullCalendar
           class="off-days"
           defaultView="dayGridMonth"
           :plugins="calendarPlugins"
@@ -36,22 +42,20 @@
           :business-hours="businessHours"
           :editable="false"
           :droppable="false"
-          :events="offDays"
+          :events="allOffDays"
           :all-day-slot="false"
           height="auto"
           :hidden-days="[0]"
           @eventReceive="addEvent"
           @eventClick="clickEvent"
           :locale="getLanguage(this.$ml)"
-          :datesRender="handleMonthChange"
+          :datesRender="handleMonthChangeAll"
         />
       </div>
     </div>
-
     <edit-event />
   </card>
 </template>
-
 
 <script>
 import FullCalendar from "@fullcalendar/vue";
@@ -60,12 +64,36 @@ import timeGridPlugin from "@fullcalendar/timeGrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import Card from "../../components/Cards/Card";
+import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import EditEvent from "./Edit";
-import moment from "moment";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
-  name: "off-days",
+  name: "all-in-one-off-days",
+  components: {
+    FullCalendar, // make the <FullCalendar> tag available
+    Card,
+    Select2,
+    EditEvent
+  },
+
+  computed: {
+    ...mapGetters({
+      setBackground: "setBackground",
+      getLanguage: "getLanguage",
+      currentTeamOption: "currentTeamOption",
+      currentTeam: "currentTeam",
+    }),
+
+    ...mapGetters('offdays',{
+      allOffDays: "allOffDays",
+      offDayTypes: "offDayTypes",
+      currentEvent: "currentEvent",
+      filters: "filters",
+    })
+
+  },
+
   data() {
     return {
       calendarPlugins: [
@@ -74,11 +102,17 @@ export default {
         dayGridPlugin,
         timeGridPlugin,
       ],
+
+      options: {
+        team: [],
+      },
+
       calendarHeader: {
         left: "prev",
         center: "title",
         right: "next",
       },
+
       businessHours: [
         {
           // days of week. an array of zero-based day of week integers (0=Sunday)
@@ -92,32 +126,20 @@ export default {
     };
   },
 
-  components: {
-    FullCalendar, // make the <FullCalendar> tag available
-    Card,
-    EditEvent,
-  },
-
-  computed: {
-    ...mapGetters({
-      offDayTypes: "offdays/offDayTypes",
-      offDays: "offdays/offDays",
-      currentEvent: "offdays/currentEvent",
-      setBackground: "setBackground",
-      getLanguage: "getLanguage"
-    }),
-  },
-
   methods: {
     ...mapActions({
-      handleMonthChange: "offdays/handleMonthChange",
-      addEvent: "offdays/addEvent",
-      clickEvent: "offdays/clickEvent",
-      getOffDays: "offdays/getOffDays",
-      deleteEvent: "offdays/deleteEvent",
+      setCurrentTeam: "setCurrentTeam",
     }),
 
-    makeDraggable() {
+    ...mapActions('offdays',{
+      handleMonthChangeAll: "handleMonthChangeAll",
+      getAllOffDays: "getAllOffDays",
+      addEvent: "addEvent",
+      clickEvent: "clickEvent",
+      deleteEvent: "deleteEvent",
+    }),
+
+     makeDraggable() {
       let draggableEl = document.getElementById("external-events-list");
 
       new Draggable(draggableEl, {
@@ -132,11 +154,32 @@ export default {
         },
       });
     },
+
   },
 
-  mounted() {
+   mounted() {
     this.makeDraggable();
-  }
+  },
+
+  async created() {
+    const _this = this;
+    _this.filters.team = _this.currentTeam.id;
+    _this.options.team = [{id: '', text: 'ALL'}].concat(_this.currentTeamOption);
+  },
+
+  watch: {
+    filters: [
+      {
+        handler: function (value) {
+          if (value.team != this.currentTeam.id) {
+            this.setCurrentTeam(value.team);
+          }
+          this.getAllOffDays();
+        },
+        deep: true,
+      },
+    ],
+  },
 };
 </script>
 
@@ -153,6 +196,7 @@ export default {
 .fc-event {
   cursor: move;
   color: rgba(0, 0, 0, 0.8);
+  min-height: 0;
 }
 
 .fc-time-grid-event .fc-time,

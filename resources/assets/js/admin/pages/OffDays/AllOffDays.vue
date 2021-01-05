@@ -43,6 +43,7 @@ export default {
   computed: {
     ...mapGetters({
       allOffDays: "offdays/allOffDays",
+      filters: "offdays/filters"
     }),
   },
 
@@ -101,7 +102,8 @@ export default {
     team: [
       {
         handler: function() {
-          this.setTeam(this.team)
+          this.filters.team = this.team;
+          // this.setTeam(this.team)
           this.getAllOffDays();
         }
       },
