@@ -251,20 +251,22 @@ export default {
       // }
     },
 
-    updateSeen({ state, dispatch, commit }) {
-      let uri = "/data/update-seen";
-      axios
-        .post(uri, {
-          reportID: state.selectedItem.id,
-        })
-        .then((res) => {
-          dispatch('updateReportNotify', null, { root: true });
-          commit('UPDATE_SEEN');
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("Could not load data");
-        });
+    updateSeen({ state, dispatch, commit, rootState }) {
+      if (-1 == state.selectedItem.seen.indexOf(rootState.loginUser.id)) {
+        const uri = "/data/update-seen";
+        axios
+          .post(uri, {
+            reportID: state.selectedItem.id,
+          })
+          .then((res) => {
+            dispatch('updateReportNotify', null, { root: true });
+            commit('UPDATE_SEEN');
+          })
+          .catch((err) => {
+            console.log(err);
+            alert("Could not load data");
+          });
+      }
     },
 
     addNew({ state, dispatch, commit, rootGetters }) {
@@ -300,9 +302,9 @@ export default {
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
           dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
           dataSend.projects = state.filters.project.id;
           dataSend.issue = state.filters.issue.id;
           dataSend.issueYear = state.filters.issue_year.id;
@@ -350,9 +352,9 @@ export default {
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
           dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
           dataSend.projects = state.filters.project.id;
           dataSend.issue = state.filters.issue.id;
           dataSend.issueYear = state.filters.issue_year.id;
@@ -369,6 +371,19 @@ export default {
               this.errors = err.response.data;
             }
           });
+      }
+    },
+
+    deleteReport({ state, rootGetters, dispatch }, item) {
+      if (confirm(rootGetters['getTranslate']('msgConfirmDelete'))) {
+        const uri = "/data/reports-action/" + item.id;
+        axios
+          .delete(uri)
+          .then((res) => {
+            state.action.new = state.action.preview = state.action.edit = false;
+            dispatch('backToList');
+          })
+          .catch((err) => console.log(err));
       }
     },
 

@@ -288,20 +288,6 @@ export default {
     //   this.currentReport = this.getObjectByID(this.reports.data, id);
     //   this.currentReport.isSeen = seen;
     // },
-
-    deleteReport(id) {
-      if (confirm(this.$ml.with("VueJS").get("msgConfirmDelete"))) {
-        let uri = "/data/reports-action/" + id;
-        axios
-          .delete(uri)
-          .then((res) => {
-            this.action.new = this.action.preview = this.action.edit = false;
-            this.currentReport = {};
-            this.fetchDataFilter();
-          })
-          .catch((err) => console.log(err));
-      }
-    },
   },
   async created() {
     const _this = this;

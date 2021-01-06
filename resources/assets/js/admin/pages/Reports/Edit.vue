@@ -13,7 +13,7 @@
           </button>
             <!-- @click="$emit('delete-report', currentReport.id)" -->
 
-          <button class="btn btn-danger mr-3">
+          <button @click="deleteReport(selectedItem)" class="btn btn-danger mr-3">
             {{ $ml.with("VueJS").get("txtDelete") }}
           </button>
           <button  @click="backToList()" class="btn btn-primary">
@@ -460,6 +460,7 @@ export default {
       resetValidate : "resetValidate",
       updateReport: "updateReport",
       updateSeen: "updateSeen",
+      deleteReport: "deleteReport",
     }),
     checkTranslate() {
       return (!this.selectedItem.translatable && this.selectedItem.language != this.editLanguage);
