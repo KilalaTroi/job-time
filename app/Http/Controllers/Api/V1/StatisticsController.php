@@ -321,6 +321,7 @@ class StatisticsController extends Controller
 		$data = array();
 		$daysOfMonth = array();
 		$monthsText = array();
+		$monthYearText = array();
 		$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
 		$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
 		$totalMonths = $startMonth->diffInMonths($endMonth) + 1;
@@ -341,6 +342,7 @@ class StatisticsController extends Controller
 			$inYearMonth = $getM->year . $getM->format('m');
 
 			$monthsText[] = $getM->format('M');
+			$monthYearText[$inYearMonth] = $getM->format('M');
 			$daysOfMonth[$inYearMonth] = array(
 				'start' => $startM,
 				'end' => $endM
@@ -381,6 +383,7 @@ class StatisticsController extends Controller
 		ksort($daysOfMonth);
 
 		$data['monthsText'] = $monthsText;
+		$data['monthYearText'] = $monthYearText;
 		$data['days_of_month'] = $daysOfMonth;
 
 		return $data;
@@ -761,19 +764,17 @@ class StatisticsController extends Controller
 
 		$data['totals'] = array_merge($dataFinsh, $dataQuantity);
 		$data = array_merge($data, $this->handleMonthYear($startMonth, $endMonth, $teamID));
-		unset($data['off_days']);
-		unset($data['monthsText']);
 		$results = array();
 		foreach ($data['days_of_month'] as $key => $value) {
 			$startDate = date("Ymd", strtotime($value['start']));
 			$endDate = date("Ymd", strtotime($value['end']));
-			foreach($data['totals'] as $total){
+			foreach ($data['totals'] as $total) {
 				$total->date = date("Ymd", strtotime($total->date));
-				if($startDate <= $total->date && $total->date <= $endDate){
+				if ($startDate <= $total->date && $total->date <= $endDate) {
 					$page = $total->page * 1;
-					if(isset($results[$total->id.'_'.$key]['page']) && !empty($results[$total->id.'_'.$key]['page']))	$page = $results[$total->id.'_'.$key]['page'] + $total->page;
+					if (isset($results[$total->id . '_' . $key]['page']) && !empty($results[$total->id . '_' . $key]['page']))	$page = $results[$total->id . '_' . $key]['page'] + $total->page;
 
-					$results[$total->id.'_'.$key] = array(
+					$results[$total->id . '_' . $key] = array(
 						'id' => $total->id,
 						'page' => $page,
 						'yearMonth' => $key,
@@ -781,7 +782,37 @@ class StatisticsController extends Controller
 				}
 			}
 		}
-		return array_values($results);
+
+		$totalPage = DB::table('total_page')->select('type_id','page','date')
+		->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
+			return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
+				$query->where('total_page.date', ">=", str_replace(array('/','-'), '', $startMonthCar))->where('total_page.date', "<=", str_replace(array('/','-'), '', $endMonthCar));
+			});
+		})
+		->when($teamID, function ($query, $teamID) {
+			return $query->where(function ($query) use ($teamID) {
+				$query->where('team_id', '=', $teamID)
+					->orWhere('team_id', 'LIKE', $teamID . ',%')
+					->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
+					->orWhere('team_id', 'LIKE', '%,' . $teamID);
+			});
+		})->get()->toArray();
+
+		foreach($totalPage as $v){
+			$results[$v->type_id . '_' . $v->date] = array(
+				'id' => $v->type_id,
+				'page' => $v->page,
+				'yearMonth' => $v->date,
+			);
+		}
+
+		$datas = array(
+			'totalpage' =>  array_values($results),
+			'table' => $results,
+			'monthYearText' => $data['monthYearText']
+		);
+
+		return $datas;
 	}
 
 	function usersIgnore($teamID)

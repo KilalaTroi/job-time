@@ -87,24 +87,12 @@
                     </div>
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                            <a class="nav-item nav-link active" id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
                             <a class="nav-item nav-link" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
+                            <a class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
+                            <a v-if="2 == team" class="nav-item nav-link active" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">Table</a>
                         </div>
                     </nav>
                      <div class="tab-content" id="nav-tabContent">
-                         <div class="tab-pane fade show active" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
-                                        <template slot="footer">
-                                            <div class="legend loading">
-                                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
-                                            </div>
-                                        </template>
-                                    </chart-card>
-                                </div>
-                            </div>
-                        </div>
                         <div class="tab-pane fade" id="timeallocation" role="tabpanel" aria-labelledby="timeallocation-tab">
                             <div class="row">
                                 <div class="col-md-12">
@@ -124,6 +112,37 @@
                                 </div>
                             </div>
 
+                        </div>
+                        <div class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
+                                        <template slot="footer">
+                                            <div class="legend loading">
+                                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
+                                            </div>
+                                        </template>
+                                    </chart-card>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="2 == team" class="tab-pane fade show active" id="table" role="tabpanel" aria-labelledby="table-tab">
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <th></th>
+                                            <th class="text-center" v-for="(month, index) in data.totalpage.monthYearText" :key="index">{{ month }}</th>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(type, index) in types" :key="index">
+                                                <td>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</td>
+                                                <td class="text-center" v-for="(month, indexMonth) in data.totalpage.monthYearText" :key="indexMonth">{{ data.totalpage.table[type.id+'_'+indexMonth] ? data.totalpage.table[type.id+'_'+indexMonth].page : 0 }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -218,6 +237,10 @@
                     ]
                 },
 
+                data: {
+                    'totalpage' : []
+                },
+
                 pageChart: {
                     id: 'page-chart',
                     data: {
@@ -300,7 +323,8 @@
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-                        this.getPageSeries(this.types, this.pageData, this.totalHoursPerMonth);
+                        this.getPageSeries(this.types, this.pageData.totalpage, this.totalHoursPerMonth);
+                        this.data.totalpage = this.pageData;
                     })
                     .catch(err => {
                         console.log(err);
@@ -331,7 +355,8 @@
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-                        this.getPageSeries(this.types, this.pageData, this.totalHoursPerMonth);
+                        this.getPageSeries(this.types, this.pageData.totalpage, this.totalHoursPerMonth);
+                        this.data.totalpage = this.pageData;
                     })
                     .catch(err => {
                         console.log(err);
@@ -555,5 +580,8 @@ $chart-tooltip-color: #fff;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     border-top-color: transparent;
+}
+.table-bordered th, .table-bordered td{
+  border-bottom: 1px solid #f1eded !important;
 }
 </style>

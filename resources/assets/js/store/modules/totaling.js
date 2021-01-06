@@ -97,7 +97,7 @@ export default {
         { id: "date", value: rootGetters['getTranslate']('lblDate'), width: "120", class: "" },
         { id: "start_time", value: rootGetters['getTranslate']('lblStartTime'), width: "120", class: "" },
         { id: "end_time", value: rootGetters['getTranslate']('lblEndTime'), width: "120", class: "" },
-        { id: "total", value: rootGetters['getTranslate']('lblTime'), width: "120", class: "" },
+        { id: "total", value: rootGetters['getTranslate']('lblTime'), width: "120", class: "", filter: true },
         { id: "d_name", value: rootGetters['getTranslate']('txtDepartment'), width: "", class: "", filter: true },
         { id: "p_name", value: rootGetters['getTranslate']('txtProject'), width: "", class: "", filter: true },
         { id: "i_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "120", filter: true },
