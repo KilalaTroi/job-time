@@ -131,6 +131,7 @@ export default {
     handleGetItem({ state, commit, rootGetters }, data) {
       let item = rootGetters['getObjectByID'](state.data.data, data.id);
       item.isSeen = data.seen;
+      item.attendPerson = null;
       item.time = item.date_time ? rootGetters['dateFormat'](item.date_time, 'HH:mm') : 'HH:mm';
       const filters = {
         start_date: new Date(moment().subtract(1, "years").startOf("month").format("YYYY/MM/DD")),
@@ -140,6 +141,7 @@ export default {
         project: item ? { id: item.project_id, text: item.project_name } : null,
         issue: item ? { id: item.issue_name_key, text: item.issue_name_text } : null,
         issue_year: item ? { id: item.issue_year_key, text: item.issue_year_text } : null,
+        user_id: null,
         team: item.team_id,
       }
       commit('SET_FILTERS', filters)
@@ -237,7 +239,16 @@ export default {
     },
 
     resetSelectedItem({ commit }) {
-      commit('SET_SELECTED_ITEM', {})
+      commit('SET_SELECTED_ITEM', {
+        language: '',
+        time: 'HH:mm',
+        attendPerson: null,
+        attendPersonOther: '',
+        title: '',
+        title_ja: '',
+        content: '',
+        content_ja: ''
+      })
     },
 
     backToList({ state, dispatch }) {

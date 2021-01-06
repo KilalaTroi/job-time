@@ -391,7 +391,6 @@ export default {
       currentTeam: "currentTeam",
       getLangCode: "getLangCode",
       customFormatter: "customFormatter",
-      disabledStartDates: "disabledStartDates",
       disabledEndDates: "disabledEndDates"
     }),
 

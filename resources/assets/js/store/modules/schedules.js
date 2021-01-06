@@ -92,8 +92,8 @@ export default {
 
             // Get log time detail for schedule
             if ( response.data.schedulesDetail.length && !item.all_date ) sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
-            const codition = sDetail.length && (state.filters.team == 2) && ! arrProjectsPV.includes(item.p_id)
-            const textTime = sDetail.length && (state.filters.team == 2) && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
+            const codition = sDetail.length && (state.filters.team == 2 || state.filters.team == 3) && ! arrProjectsPV.includes(item.p_id)
+            const textTime = sDetail.length && (state.filters.team == 2 || state.filters.team == 3) && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
             const endTime = codition ? sDetail[sDetail.length - 1].end_time : item.end_time;
             const classHideTime = textTime ? ' hide-fc-time' : '';
