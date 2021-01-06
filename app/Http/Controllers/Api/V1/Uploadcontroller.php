@@ -139,12 +139,6 @@ class Uploadcontroller extends Controller
 		}
 
 		$projectSelects = $request->get('projectSelects');
-		$projectArr = array();
-		if ($projectSelects) {
-			$projectArr = array_map(function ($obj) {
-				return $obj['id'];
-			}, $projectSelects);
-		}
 		// End POST data
 
 		// Get departments
@@ -180,6 +174,9 @@ class Uploadcontroller extends Controller
 			})
 			->when($typeArr, function ($query, $typeArr) {
 				return $query->whereIn('p.type_id', $typeArr);
+			})
+			->when($projectSelects, function ($query, $projectSelects) {
+				return $query->where('p.name', 'like', '%' . $projectSelects . '%');
 			})
 			->when($issueFilter, function ($query, $issueFilter) {
 				return $query->where('i.name', 'like', '%' . $issueFilter . '%');
@@ -240,8 +237,8 @@ class Uploadcontroller extends Controller
 			->when($typeArr, function ($query, $typeArr) {
 				return $query->whereIn('pr.type_id', $typeArr);
 			})
-			->when($projectArr, function ($query, $projectArr) {
-				return $query->whereIn('pr.id', $projectArr);
+			->when($projectSelects, function ($query, $projectSelects) {
+				return $query->where('pr.name', 'like', '%' . $projectSelects . '%');
 			})
 			->when($issueFilter, function ($query, $issueFilter) {
 				return $query->where('i.name', 'like', '%' . $issueFilter . '%');
@@ -251,11 +248,13 @@ class Uploadcontroller extends Controller
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
 						->orWhere('t.email', '!=', NULL);
-			})
-			->paginate(20);
+			})->get();
+			// ->paginate(20);
 
 		// Get issues IDs
 		$issueIds = $processesUploaded->pluck('id')->toArray();
+
+		$processesUploaded = $processesUploaded->toArray();
 
 		// Get process details
 		$processDetails = array();
