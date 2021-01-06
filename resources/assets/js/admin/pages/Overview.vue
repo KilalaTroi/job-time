@@ -509,8 +509,10 @@
                         this.fetch();
                         if ( value != this.currentTeam.id ) {
                             this.setCurrentTeam(value);
-                            $('#timeallocation-tab').addClass('active');
+                            $('#timeallocation-tab').addClass('active').attr('aria-selected',true);
+                            $('#totalpage-tab').removeClass('active').attr('aria-selected',false);
                             $('#timeallocation').addClass('active').addClass('show');
+                            $('#totalpage').removeClass('active').removeClass('show');
                         }
                     }
                 }
