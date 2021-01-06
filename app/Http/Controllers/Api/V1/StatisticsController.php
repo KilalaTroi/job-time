@@ -690,23 +690,30 @@ class StatisticsController extends Controller
 
 	private function getReport($teamID)
 	{
-		return DB::table('issues as i')
-			->select(
-				't.id as id',
-				DB::raw('IF( i.start_date != "", concat(year(i.start_date),"", LPAD(month(i.start_date), 2, "0")), concat(year(i.created_at),"", LPAD(month(i.created_at), 2, "0")) ) as yearMonth'),
-				DB::raw('SUM(page) as page')
-			)
-			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-			->leftJoin('types as t', 't.id', '=', 'p.type_id')
-			->where('page', '>', 0)
-			->when($teamID, function ($query, $teamID) {
-				return $query->where(function ($query) use ($teamID) {
-					$query->where('team', '=', $teamID)
-						->orWhere('team', 'LIKE', $teamID . ',%')
-						->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
-						->orWhere('team', 'LIKE', '%,' . $teamID);
-				});
-			})->groupBy('t.id', 'yearMonth')->get()->toArray();
+
+		$results = DB::table('issues as i')
+		->select(
+			't.id as id',
+			DB::raw('IF( i.start_date != "", concat(year(i.start_date),"", LPAD(month(i.start_date), 2, "0")), concat(year(i.created_at),"", LPAD(month(i.created_at), 2, "0")) ) as yearMonth'),
+			DB::raw('SUM(page) as page')
+		)
+		->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+		->leftJoin('types as t', 't.id', '=', 'p.type_id')
+		->where('page', '>', 0)
+		->when($teamID, function ($query, $teamID) {
+			return $query->where(function ($query) use ($teamID) {
+				$query->where('team', '=', $teamID)
+					->orWhere('team', 'LIKE', $teamID . ',%')
+					->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
+					->orWhere('team', 'LIKE', '%,' . $teamID);
+			});
+		})->groupBy('t.id', 'yearMonth')->get()->toArray();
+
+		$datas = array(
+			'totalpage' =>  $results,
+		);
+
+		return $datas;
 	}
 
 	private function getReportPath($teamID, $startMonth, $endMonth)
