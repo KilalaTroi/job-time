@@ -251,20 +251,22 @@ export default {
       // }
     },
 
-    updateSeen({ state, dispatch, commit }) {
-      let uri = "/data/update-seen";
-      axios
-        .post(uri, {
-          reportID: state.selectedItem.id,
-        })
-        .then((res) => {
-          dispatch('updateReportNotify', null, { root: true });
-          commit('UPDATE_SEEN');
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("Could not load data");
-        });
+    updateSeen({ state, dispatch, commit, rootState }) {
+      if (-1 == state.selectedItem.seen.indexOf(rootState.loginUser.id)) {
+        const uri = "/data/update-seen";
+        axios
+          .post(uri, {
+            reportID: state.selectedItem.id,
+          })
+          .then((res) => {
+            dispatch('updateReportNotify', null, { root: true });
+            commit('UPDATE_SEEN');
+          })
+          .catch((err) => {
+            console.log(err);
+            alert("Could not load data");
+          });
+      }
     },
 
     addNew({ state, dispatch, commit, rootGetters }) {
