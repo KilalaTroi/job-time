@@ -836,7 +836,7 @@ class StatisticsController extends Controller
 			->where(function ($query) {
 				$query->where(function ($query) {
 					$query->whereIn('roles.name', ['admin', 'japanese_planner'])
-						->orWhereIn('users.username', ['furuoya_vn_planner', 'furuoya_employee', 'hoa', 'nancy']);
+						->orWhereIn('users.username', ['furuoya_vn_planner', 'furuoya_employee', 'hoa', 'nancy', 'luan']);
 				});
 			})
 			->get()->pluck('id')->toArray();

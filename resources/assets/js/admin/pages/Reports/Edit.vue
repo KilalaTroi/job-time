@@ -150,7 +150,7 @@
       <div class="col-sm-9" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
           <label><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong></label>
-          <input v-model="selectedItem.attendPersonOther" type="text" class="form-control" />
+          <input v-model="selectedItem.attend_other_person" type="text" class="form-control" />
         </div>
       </div>
 
@@ -417,7 +417,7 @@ export default {
   },
   data() {
     return {
-      editLanguage: this.$ml.current,
+      editLanguage: '',
       isEditing: false,
       editor: DecoupledEditor,
       editorConfig: {
@@ -450,7 +450,11 @@ export default {
     if(_this.selectedItem.attend_person) _this.selectedItem.attendPerson = this.getReporter(_this.selectedItem.attend_person);
     _this.page = -1;
     _this.updateSeen();
-	},
+  },
+
+  mounted() {
+    this.editLanguage = this.selectedItem.language;
+  },
 
   methods: {
     ...mapActions('reports', {
@@ -462,7 +466,7 @@ export default {
       deleteReport: "deleteReport",
     }),
     checkTranslate() {
-      return (!this.selectedItem.translatable && this.selectedItem.language != this.editLanguage);
+      return (!this.selectedItem.translatable && (this.selectedItem.language != this.editLanguage));
     },
 
     getObjectValue(data, id) {
