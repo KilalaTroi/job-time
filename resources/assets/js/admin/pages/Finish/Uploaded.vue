@@ -75,16 +75,7 @@
                     $ml.with("VueJS").get("txtProjects")
                   }}</label>
                   <div>
-                    <multiselect
-                      :multiple="true"
-                      v-model="projectSelects"
-                      :options="projects"
-                      :clear-on-select="false"
-                      :preserve-search="true"
-                      :placeholder="$ml.with('VueJS').get('txtPickSome')"
-                      label="text"
-                      track-by="text"
-                    ></multiselect>
+                    <input type="text" v-model="projectSelects"  class="form-control">
                   </div>
                 </div>
               </div>
@@ -175,14 +166,14 @@
               :arrCurrentProcess="arrCurrentProcess"
               v-on:reset-validation="resetValidate"
             ></process-detail-modal>
-            <pagination
+            <!-- <pagination
               :data="processesUploaded"
               :show-disabled="jShowDisabled"
               :limit="jLimit"
               :align="jAlign"
               :size="jSize"
               @pagination-change-page="fetchData"
-            ></pagination>
+            ></pagination> -->
           </card>
         </div>
       </div>
@@ -315,7 +306,7 @@ export default {
       end_date: new Date(),
       deptSelects: [],
       typeSelects: [],
-      projectSelects: [],
+      projectSelects: '',
       issue: "",
       team: "",
       departments: [],
@@ -373,13 +364,13 @@ export default {
         },
         {
           id: "page",
-          value: _this.$ml.with("VueJS").get("txtPagesWorked"),
+          value: _this.$ml.with("VueJS").get("txtPages"),
           width: "",
           class: "",
         },
         {
           id: "file",
-          value: _this.$ml.with("VueJS").get("txtFilesWorked"),
+          value: _this.$ml.with("VueJS").get("txtFiles"),
           width: "",
           class: "",
         },
@@ -425,12 +416,8 @@ export default {
     },
     fetchData(page = 1, loading = true) {
       this.page = page;
-      const uri = "/data/finish/uploaded?page=" + page;
+      const uri = "/data/finish/uploaded";
       this.loading = loading;
-      this.total = {
-        page: 0,
-        file: 0,
-      }
       axios
         .post(uri, {
           user_id: this.user_id,
@@ -450,17 +437,21 @@ export default {
           this.processesUploaded = res.data.processesUploaded;
           this.processDetails = res.data.processDetails;
           this.firstLoad++;
-
-          if (res.data.processesUploaded.data.length) {
-            this.items = res.data.processesUploaded.data.map((item, index) => {
+          this.total = {
+            page: 0,
+            file: 0,
+          }
+          if (res.data.processesUploaded.length) {
+            this.items = res.data.processesUploaded.map((item, index) => {
               const arrProcess = this.processDetails.length ? this.getProcessObjectValue( this.processDetails, item.id, item.phase ) : [];
               if (arrProcess.length) {
-                this.total.page += arrProcess.reduce((total, item) => {
-                  return total + item.page * 1;
-                }, 0);
-                this.total.file += arrProcess.reduce((total, item) => {
-                  return total + item.file * 1;
-                }, 0);
+                const _this = this;
+                arrProcess.forEach(function(item){
+                  if('Finished Work' == item.status){
+                    _this.total.page += item.page * 1;
+                    _this.total.file += item.file * 1;
+                  }
+                } );
 							}
               const lastProcess = arrProcess[arrProcess.length - 1];
               return Object.assign({}, item, {
