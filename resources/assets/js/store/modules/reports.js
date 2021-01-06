@@ -300,9 +300,9 @@ export default {
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
           dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
           dataSend.projects = state.filters.project.id;
           dataSend.issue = state.filters.issue.id;
           dataSend.issueYear = state.filters.issue_year.id;
@@ -350,9 +350,9 @@ export default {
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
           dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
           dataSend.projects = state.filters.project.id;
           dataSend.issue = state.filters.issue.id;
           dataSend.issueYear = state.filters.issue_year.id;
@@ -369,6 +369,19 @@ export default {
               this.errors = err.response.data;
             }
           });
+      }
+    },
+
+    deleteReport({ state, rootGetters, dispatch }, item) {
+      if (confirm(rootGetters['getTranslate']('msgConfirmDelete'))) {
+        const uri = "/data/reports-action/" + item.id;
+        axios
+          .delete(uri)
+          .then((res) => {
+            state.action.new = state.action.preview = state.action.edit = false;
+            dispatch('backToList');
+          })
+          .catch((err) => console.log(err));
       }
     },
 
