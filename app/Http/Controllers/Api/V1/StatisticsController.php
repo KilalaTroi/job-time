@@ -790,11 +790,11 @@ class StatisticsController extends Controller
 			}
 		}
 
-		$totalPage = DB::table('total_page')->select('type_id','page','date')
+		$totalPage = DB::table('total_pages')->select('type_id','page','date')
 		->where('page', '>', 0)
 		->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
 			return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
-				$query->where('total_page.date', ">=", str_replace(array('/','-'), '', $startMonthCar))->where('total_page.date', "<=", str_replace(array('/','-'), '', $endMonthCar));
+				$query->where('total_pages.date', ">=", str_replace(array('/','-'), '', $startMonthCar))->where('total_pages.date', "<=", str_replace(array('/','-'), '', $endMonthCar));
 			});
 		})
 		->when($teamID, function ($query, $teamID) {
