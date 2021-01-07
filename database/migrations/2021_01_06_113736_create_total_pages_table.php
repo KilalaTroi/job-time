@@ -13,7 +13,7 @@ class CreateTotalPageTable extends Migration
      */
     public function up()
     {
-        Schema::create('total_page', function (Blueprint $table) {
+        Schema::create('total_pages', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('type_id');
             $table->integer('team_id');
@@ -30,6 +30,6 @@ class CreateTotalPageTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('total_page');
+        Schema::dropIfExists('total_pages');
     }
 }

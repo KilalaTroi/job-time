@@ -45,6 +45,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('types', 'TypesController', ['except' => ['create', 'edit']]);
     Route::resource('teams', 'TeamsController', ['except' => ['create', 'edit']]);
     Route::resource('projects', 'ProjectsController', ['except' => ['create', 'edit']]);
+    Route::resource('totalpage', 'TotalPageController', ['except' => ['create', 'edit']]);
     Route::resource('issues', 'IssuesController', ['except' => ['create', 'edit', 'show', 'index']]);
     Route::get('issues/getpage/{id}', 'IssuesController@getpage');
     Route::get('issues/archive/{id}/{status}', 'IssuesController@archive');

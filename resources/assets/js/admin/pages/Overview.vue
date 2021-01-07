@@ -126,8 +126,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="2 == team" class="tab-pane fade" id="table" role="tabpanel" aria-labelledby="table-tab">
+                        <div v-if="2 == team" class="tab-pane fade" :class="checkUser() ? 'flag' : ''" id="table" role="tabpanel" aria-labelledby="table-tab">
                             <div class="row mt-3">
+                                <button v-if="checkUser()" type="button" class="btn btn-primary" data-toggle="modal" data-target="#totalpageAction" data-backdrop="static" data-keyboard="false">
+                                    <i class="fa fa-plus"></i>
+                                    <slot name="title"></slot>
+                                </button>
                                 <div class="col-md-12">
                                     <table class="table table-bordered">
                                         <thead>
@@ -143,12 +147,12 @@
                                     </table>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
             </div>
-
-
+            <total-update v-if="checkUser()" />
         </div>
     </div>
 </template>
@@ -162,6 +166,7 @@
     import { vi, ja, en } from 'vuejs-datepicker/dist/locale'
     import Select2 from '../components/SelectTwo/SelectTwo.vue'
     import moment from 'moment'
+    import TotalUpdate from './TotalPage/Update'
     import { mapGetters, mapActions } from "vuex"
 
     export default {
@@ -171,12 +176,14 @@
             datepicker: Datepicker,
             StatsCard,
             Select2,
+            TotalUpdate
         },
         computed: {
             ...mapGetters({
                 currentTeamOption: 'currentTeamOption',
                 currentTeam: 'currentTeam',
                 currentLang: 'currentLang',
+                loginUser: 'loginUser',
             }),
         },
         data() {
@@ -488,6 +495,10 @@
                         $('.ct-chart, .card-footer .legend').removeClass('loading');
                     }, 1000);
                 }
+            },
+            checkUser(){
+                if(-1 != ('1,24,49').indexOf(this.loginUser.id)) return true;
+                return false;
             }
         },
         watch: {
@@ -579,8 +590,17 @@ $chart-tooltip-color: #fff;
     }
 }
 #table{
+    position: relative;
+    &.flag{
+        padding-top: 60px;
+    }
     .ct-series-f{
         display: none;
+    }
+    button[data-toggle="modal"]{
+        position: absolute;
+        top: 15px;
+        right: 0;
     }
 }
 .ct-area, .ct-line {

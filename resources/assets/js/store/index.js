@@ -17,6 +17,7 @@ import offdays from './modules/offdays'
 import schedules from './modules/schedules'
 import totaling from './modules/totaling'
 import reports from './modules/reports'
+import totalpage from './modules/totalpage'
 
 Vue.use(Vuex)
 
@@ -36,7 +37,8 @@ export default new Vuex.Store({
     offdays,
     schedules,
     totaling,
-    reports
+    reports,
+    totalpage
   },
 })
 
