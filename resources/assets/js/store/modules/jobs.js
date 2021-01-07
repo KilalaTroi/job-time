@@ -95,7 +95,7 @@ export default {
 				],
 				'totaling': [
 					{ id: "project", value: rootGetters['getTranslate']('txtProject'), width: "", class: "" },
-					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "100", class: "text-center year-of-issue", filter: false },
+					{ id: "issue_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "120", class: "text-center year-of-issue", filter: false },
 					{ id: "issue", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "text-center" },
 					{ id: 'quantity', value: rootGetters['getTranslate']('txtQuantity'), width: '80', class: 'quantity' },
 					{ id: 'note', value: rootGetters['getTranslate']('txtWork'), width: '', class: 'note', filter: true },
