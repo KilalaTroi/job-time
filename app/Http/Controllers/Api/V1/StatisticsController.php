@@ -791,6 +791,7 @@ class StatisticsController extends Controller
 		}
 
 		$totalPage = DB::table('total_page')->select('type_id','page','date')
+		->where('page', '>', 0)
 		->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
 			return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
 				$query->where('total_page.date', ">=", str_replace(array('/','-'), '', $startMonthCar))->where('total_page.date', "<=", str_replace(array('/','-'), '', $endMonthCar));
@@ -836,7 +837,7 @@ class StatisticsController extends Controller
 			->where(function ($query) {
 				$query->where(function ($query) {
 					$query->whereIn('roles.name', ['admin', 'japanese_planner'])
-						->orWhereIn('users.username', ['furuoya_vn_planner', 'furuoya_employee', 'hoa', 'nancy']);
+						->orWhereIn('users.username', ['furuoya_vn_planner', 'furuoya_employee', 'hoa', 'nancy', 'luan']);
 				});
 			})
 			->get()->pluck('id')->toArray();

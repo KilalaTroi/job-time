@@ -135,7 +135,7 @@
                                             <th class="text-center" v-for="(month, index) in data.totalpage.monthYearText" :key="index">{{ month }}</th>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(type, index) in types" :key="index">
+                                            <tr v-for="(type, index) in types" :key="index" :class="type.class">
                                                 <td>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</td>
                                                 <td class="text-center" v-for="(month, indexMonth) in data.totalpage.monthYearText" :key="indexMonth">{{ data.totalpage.table[type.id+'_'+indexMonth] ? data.totalpage.table[type.id+'_'+indexMonth].page : 0 }}</td>
                                             </tr>
@@ -507,9 +507,14 @@
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
                         this.fetch();
-
                         if ( value != this.currentTeam.id ) {
                             this.setCurrentTeam(value);
+                            if(!$('#timeallocation-tab, #totalpage-tab').hasClass('active')){
+                                $('#timeallocation-tab').addClass('active').attr('aria-selected',true);
+                                $('#totalpage-tab').removeClass('active').attr('aria-selected',false);
+                                $('#timeallocation').addClass('active').addClass('show');
+                                $('#totalpage').removeClass('active').removeClass('show');
+                            }
                         }
                     }
                 }
@@ -571,6 +576,11 @@ $chart-tooltip-color: #fff;
     }
     span:last-child {
         font-size: 14px;
+    }
+}
+#table{
+    .ct-series-f{
+        display: none;
     }
 }
 .ct-area, .ct-line {

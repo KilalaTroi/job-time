@@ -312,7 +312,7 @@ export default {
         }
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
-          dataSend.attend_other_person = state.selectedItem.attendPersonOther;
+          dataSend.attend_other_person = state.selectedItem.attend_other_person;
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
@@ -362,7 +362,7 @@ export default {
         }
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
-          dataSend.attend_other_person = state.selectedItem.attendPersonOther;
+          dataSend.attend_other_person = state.selectedItem.attend_other_person;
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');

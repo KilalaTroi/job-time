@@ -175,7 +175,7 @@
     <div class="d-flex">
       <div style="min-width: 180px; position: relative">
         <p>Yours sincerely,</p>
-        <span style="width: 180px; line-height: 31px; position: absolute; bottom: -8px; left: 0;" class="d-inline-block overflow-x-hidden">................................................................</span>
+        <span style="width: 180px; line-height: 31px; position: absolute; bottom: -8px; left: 0; {{ isset($data['name']) && !empty($data['name']) ? 'font-size: 20px' : '' }}" class="d-inline-block overflow-x-hidden">{{ $contentName }}</span>
       </div>
       <div style="width: 700px; padding-left: 90px;">
         <p style="font-weight: 700" class="text-center">Company’s Approval</p>
