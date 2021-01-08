@@ -109,7 +109,7 @@ export default {
         if(userID == 1) if(team) teamDefault = team
         _this.setCurrentTeam(teamDefault)
 
-        // await _this.setLoginUser(userID)
+        await _this.setLoginUser(userID)
 
         _this.setReportNotify(this.currentTeam.id)
 
