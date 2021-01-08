@@ -18,6 +18,8 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next, $guard = null)
     {
         if (Auth::guard($guard)->check()) {
+            $user = \App\User::findOrFail(Auth::user()->id);
+            $request->session()->push('Auth', $user->toArray());
             return redirect('/dashboard');
         }
 
