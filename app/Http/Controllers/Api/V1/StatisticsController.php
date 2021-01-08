@@ -360,7 +360,7 @@ class StatisticsController extends Controller
 				->when($user_id, function ($query, $user_id) {
 					return $query->where('user_id', $user_id);
 				})
-				->whereNotIn('users.id', $this->usersIgnore($teamID))
+				->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 				->count();
 
 			// Half day off
@@ -375,7 +375,7 @@ class StatisticsController extends Controller
 				->when($user_id, function ($query, $user_id) {
 					return $query->where('user_id', $user_id);
 				})
-				->whereNotIn('users.id', $this->usersIgnore($teamID))
+				->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 				->count();
 		}
 
@@ -424,7 +424,7 @@ class StatisticsController extends Controller
 			)
 			->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
 			->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
-			->whereNotIn('user.id', $this->usersIgnore($teamID))
+			->whereNotIn('user.id', $this->usersIgnoreAdmin($teamID))
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
@@ -444,7 +444,7 @@ class StatisticsController extends Controller
 				$query->where('disable_date', '=',  NULL)
 					->orWhere('disable_date', '>=', str_replace('/', '-', $startMonth));
 			})
-			->whereNotIn('users.id', $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->where('users.created_at', "<", str_replace('/', '-', $startMonth))
 			->count();
 
@@ -471,7 +471,7 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('users.id', $user_id);
 			})
-			->whereNotIn('users.id', $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
@@ -544,7 +544,7 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('user_id', $user_id);
 			})
-			->whereNotIn('jobs.user_id', $this->usersIgnore($teamID))
+			->whereNotIn('jobs.user_id', $this->usersIgnoreAdmin($teamID))
 			->where('jobs.date', ">=", $currentDate->startOfMonth()->format('Y-m-d'))
 			->get();
 
@@ -566,7 +566,7 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('user_id', $user_id);
 			})
-			->whereNotIn('users.id', $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->where('type', '=', 'all_day')
 			->where('date', '<=', $endDate)
 			->where('date', '>=',  $startDate)
@@ -581,7 +581,7 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('user_id', $user_id);
 			})
-			->whereNotIn('users.id', $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->where('type', '<>', 'all_day')
 			->where('date', '<=', $endDate)
 			->where('date', '>=',  $startDate)
@@ -592,7 +592,7 @@ class StatisticsController extends Controller
 			->select('users.id')
 			->join('users', 'users.id', '=', 'role_user.user_id')
 			->join('roles', 'roles.id', '=', 'role_user.role_id')
-			->whereNotIn('users.id', $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
