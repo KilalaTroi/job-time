@@ -251,7 +251,6 @@ export default {
     filters: [
       {
         handler: function(value,valueOld){
-          console.log(value,valueOld)
 					if (value.team != this.currentTeam.id) {
 						this.setCurrentTeam(value.team);
 					}

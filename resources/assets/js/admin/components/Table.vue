@@ -9,10 +9,11 @@
             :width="column.width"
             :class="column.class"
             :data-filter="column.id"
+            :style="{minWidth: column.width+'px', maxWidth: column.width+'px'}"
           >
             {{ column.value }}
           </th>
-          <th v-if="dataAction && dataPath" width="110" class="text-center">
+          <th v-if="dataAction && dataPath" width="110" class="text-center" :style="{minWidth: '110px', maxWidth: '110px'}">
             {{ $ml.with("VueJS").get("txtAction") }}
           </th>
           <slot name="th"></slot>

@@ -31,7 +31,7 @@ export default {
     const _this = this;
 
     setTimeout(function(){
-      _this.resetValidation();
+      // _this.resetValidation();
       _this.checkTableColumns();
       _this.hanldeFliterColumns(_this.checkColumns);
     },100)
@@ -53,28 +53,29 @@ export default {
 		},
 		resetValidation(){
 			const fliterColumns = localStorage.getItem("filter_" + this.dataTable);
-			if(fliterColumns) this.checkColumns = fliterColumns.split(",");
-			else {
-        const _this = this;
-				_this.dataCols.map(function (value,index) {
-          _this.checkColumns.push(value.id)
-          if(false === value.filter){ delete _this.checkColumns[index]; }
-        });
-				localStorage.setItem("filter_" + _this.dataTable, _this.checkColumns);
-			}
+      if(fliterColumns) this.checkColumns = fliterColumns.split(",");
     },
     checkTableColumns(){
+      console.log('bbb');
+      const _this = this;
       let colsNew = '', colsOld = localStorage.getItem("cols_" + this.dataTable);
       if(!colsOld) colsOld = '';
       this.dataCols.map(function (value) { colsNew += value.id+','; });
       if(colsOld != colsNew){
-        const _this = this;
-        this.dataCols.map(function (value) {
-          if(-1 == colsOld.indexOf(value.id) && -1 == _this.checkColumns.indexOf(value.id)) _this.checkColumns.push(value.id)
+        this.dataCols.map(function (value, index) {
+          if(-1 == colsOld.indexOf(value.id) && -1 == _this.checkColumns.indexOf(value.id))  _this.setFilterColumns(index, value);
         });
-        localStorage.setItem("filter_" + this.dataTable, this.checkColumns);
-        localStorage.setItem("cols_" + this.dataTable, colsNew)
+        localStorage.setItem("cols_" + _this.dataTable, colsNew)
+      }else{
+        const fliterColumns = localStorage.getItem("filter_" + this.dataTable);
+        if(fliterColumns) this.checkColumns = fliterColumns.split(",");
+        else _this.dataCols.map(function (value, index) { _this.setFilterColumns(index, value); });
       }
+      localStorage.setItem("filter_" + _this.dataTable, _this.checkColumns);
+    },
+    setFilterColumns(index, value){
+      this.checkColumns.push(value.id)
+      if(false === value.filter) this.checkColumns.splice(index, 1);
     }
   },
   watch: {

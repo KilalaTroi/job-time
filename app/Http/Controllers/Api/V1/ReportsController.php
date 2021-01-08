@@ -61,6 +61,7 @@ class ReportsController extends Controller
 	{
 		$report = Report::findOrFail($id);
 		$data = $request->all();
+		$data['seen'] = $this->user['id'];
 
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
 		$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;

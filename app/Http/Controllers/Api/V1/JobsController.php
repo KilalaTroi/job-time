@@ -310,7 +310,11 @@ class JobsController extends Controller
     ->select(
       'i.page',
     )
-    ->where('id', $_GET['issue_id'])
+    ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+    ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+    ->where('t.line_room', '=', NULL)
+    ->where('t.email', '=', NULL)
+    ->where('i.id', $_GET['issue_id'])
     ->get()->pluck('page')->toArray();
   }
 

@@ -138,7 +138,7 @@
       <div class="col-sm-9" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
           <label><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong></label>
-          <input v-model="selectedItem.attendPersonOther" type="text" class="form-control" />
+          <input v-model="selectedItem.attend_other_person" type="text" class="form-control" />
         </div>
       </div>
       <div class="col-sm-3" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
@@ -391,7 +391,6 @@ export default {
       currentTeam: "currentTeam",
       getLangCode: "getLangCode",
       customFormatter: "customFormatter",
-      disabledStartDates: "disabledStartDates",
       disabledEndDates: "disabledEndDates"
     }),
 
@@ -469,7 +468,7 @@ export default {
       if ('Meeting' == this.filters.type || 'Notice' == this.filters.type)  this.filters.department = null;
       else {
         this.selectedItem.attendPerson = null;
-        this.selectedItem.attendPersonOther = "";
+        this.selectedItem.attend_other_person = "";
       }
     },
     languageChange() {

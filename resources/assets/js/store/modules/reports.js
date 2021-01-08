@@ -131,6 +131,7 @@ export default {
     handleGetItem({ state, commit, rootGetters }, data) {
       let item = rootGetters['getObjectByID'](state.data.data, data.id);
       item.isSeen = data.seen;
+      item.attendPerson = null;
       item.time = item.date_time ? rootGetters['dateFormat'](item.date_time, 'HH:mm') : 'HH:mm';
       const filters = {
         start_date: new Date(moment().subtract(1, "years").startOf("month").format("YYYY/MM/DD")),
@@ -140,6 +141,7 @@ export default {
         project: item ? { id: item.project_id, text: item.project_name } : null,
         issue: item ? { id: item.issue_name_key, text: item.issue_name_text } : null,
         issue_year: item ? { id: item.issue_year_key, text: item.issue_year_text } : null,
+        user_id: null,
         team: item.team_id,
       }
       commit('SET_FILTERS', filters)
@@ -237,33 +239,45 @@ export default {
     },
 
     resetSelectedItem({ commit }) {
-      commit('SET_SELECTED_ITEM', {})
+      commit('SET_SELECTED_ITEM', {
+        language: '',
+        time: 'HH:mm',
+        attendPerson: null,
+        attendPersonOther: '',
+        title: '',
+        title_ja: '',
+        content: '',
+        content_ja: ''
+      })
     },
 
     backToList({ state, dispatch }) {
       state.action.new = state.action.preview = state.action.edit = false;
       dispatch('resetSelectedItem');
       delete state.filters['page'];
+      dispatch('resetFilters', 'all');
+
       dispatch('getAll');
       // if (1 == flag) {
-      //   dispatch('resetFilters', 'all');
       // }
     },
 
-    updateSeen({ state, dispatch, commit }) {
-      let uri = "/data/update-seen";
-      axios
-        .post(uri, {
-          reportID: state.selectedItem.id,
-        })
-        .then((res) => {
-          dispatch('updateReportNotify', null, { root: true });
-          commit('UPDATE_SEEN');
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("Could not load data");
-        });
+    updateSeen({ state, dispatch, commit, rootState }) {
+      if (-1 == state.selectedItem.seen.indexOf(rootState.loginUser.id)) {
+        const uri = "/data/update-seen";
+        axios
+          .post(uri, {
+            reportID: state.selectedItem.id,
+          })
+          .then((res) => {
+            dispatch('updateReportNotify', null, { root: true });
+            commit('UPDATE_SEEN');
+          })
+          .catch((err) => {
+            console.log(err);
+            alert("Could not load data");
+          });
+      }
     },
 
     addNew({ state, dispatch, commit, rootGetters }) {
@@ -298,10 +312,10 @@ export default {
         }
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
-          dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
+          dataSend.attend_other_person = state.selectedItem.attend_other_person;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
           dataSend.projects = state.filters.project.id;
           dataSend.issue = state.filters.issue.id;
           dataSend.issueYear = state.filters.issue_year.id;
@@ -348,10 +362,10 @@ export default {
         }
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
-          dataSend.attend_other_person = state.selectedItem.attendPersonOther;
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD') + " " + state.selectedItem.time;
+          dataSend.attend_other_person = state.selectedItem.attend_other_person;
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
-          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date,'YYYY-MM-DD HH:mm');
+          dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
           dataSend.projects = state.filters.project.id;
           dataSend.issue = state.filters.issue.id;
           dataSend.issueYear = state.filters.issue_year.id;
@@ -368,6 +382,19 @@ export default {
               this.errors = err.response.data;
             }
           });
+      }
+    },
+
+    deleteReport({ state, rootGetters, dispatch }, item) {
+      if (confirm(rootGetters['getTranslate']('msgConfirmDelete'))) {
+        const uri = "/data/reports-action/" + item.id;
+        axios
+          .delete(uri)
+          .then((res) => {
+            state.action.new = state.action.preview = state.action.edit = false;
+            dispatch('backToList');
+          })
+          .catch((err) => console.log(err));
       }
     },
 

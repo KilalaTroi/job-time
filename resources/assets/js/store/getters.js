@@ -78,14 +78,16 @@ export default {
 	},
 
 	disabledStartDates() {
-		return (date) => {
-			return { to: new Date(date), from: new Date() };
+		return (date = false) => {
+			if ( date ) return { to: new Date(date), from: new Date() };
+			return { from: new Date() };
 		}
 	},
 
 	disabledEndDates() {
-		return (date) => {
-			return { from: new Date(date) };
+		return (date = false) => {
+			if ( date ) return { from: new Date(date) };
+			return { from: new Date() };
 		}
 	},
 

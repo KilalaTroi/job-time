@@ -211,7 +211,7 @@ export default {
 						newOffDay: res.data.event
 					}
 					commit('ADD_OFF_DAY', data)
-					state.filters.team = '';
+					if(rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
 					info.event.remove();
 					dispatch('getAllOffDays')
 				})

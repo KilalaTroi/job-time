@@ -13,7 +13,7 @@
           </button>
             <!-- @click="$emit('delete-report', currentReport.id)" -->
 
-          <button class="btn btn-danger mr-3">
+          <button @click="deleteReport(selectedItem)" class="btn btn-danger mr-3">
             {{ $ml.with("VueJS").get("txtDelete") }}
           </button>
           <button  @click="backToList()" class="btn btn-primary">
@@ -150,7 +150,7 @@
       <div class="col-sm-9" v-if="'Meeting' == filters.type || 'Notice' == filters.type">
         <div class="form-group">
           <label><strong>{{ $ml.with("VueJS").get("txtAttendPerson") }} (Other)</strong></label>
-          <input v-model="selectedItem.attendPersonOther" type="text" class="form-control" />
+          <input v-model="selectedItem.attend_other_person" type="text" class="form-control" />
         </div>
       </div>
 
@@ -405,7 +405,6 @@ export default {
       currentTeam: "currentTeam",
       getLangCode: "getLangCode",
       customFormatter: "customFormatter",
-      disabledStartDates: "disabledStartDates",
       disabledEndDates: "disabledEndDates"
     }),
     ...mapGetters('reports',{
@@ -418,7 +417,7 @@ export default {
   },
   data() {
     return {
-      editLanguage: this.$ml.current,
+      editLanguage: '',
       isEditing: false,
       editor: DecoupledEditor,
       editorConfig: {
@@ -451,7 +450,11 @@ export default {
     if(_this.selectedItem.attend_person) _this.selectedItem.attendPerson = this.getReporter(_this.selectedItem.attend_person);
     _this.page = -1;
     _this.updateSeen();
-	},
+  },
+
+  mounted() {
+    this.editLanguage = this.selectedItem.language;
+  },
 
   methods: {
     ...mapActions('reports', {
@@ -460,9 +463,10 @@ export default {
       resetValidate : "resetValidate",
       updateReport: "updateReport",
       updateSeen: "updateSeen",
+      deleteReport: "deleteReport",
     }),
     checkTranslate() {
-      return (!this.selectedItem.translatable && this.selectedItem.language != this.editLanguage);
+      return (!this.selectedItem.translatable && (this.selectedItem.language != this.editLanguage));
     },
 
     getObjectValue(data, id) {
