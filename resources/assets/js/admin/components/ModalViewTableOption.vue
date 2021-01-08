@@ -31,7 +31,7 @@ export default {
     const _this = this;
 
     setTimeout(function(){
-      _this.resetValidation();
+      // _this.resetValidation();
       _this.checkTableColumns();
       _this.hanldeFliterColumns(_this.checkColumns);
     },100)
@@ -53,9 +53,10 @@ export default {
 		},
 		resetValidation(){
 			const fliterColumns = localStorage.getItem("filter_" + this.dataTable);
-			if(fliterColumns) this.checkColumns = fliterColumns.split(",");
+      if(fliterColumns) this.checkColumns = fliterColumns.split(",");
     },
     checkTableColumns(){
+      console.log('bbb');
       const _this = this;
       let colsNew = '', colsOld = localStorage.getItem("cols_" + this.dataTable);
       if(!colsOld) colsOld = '';
