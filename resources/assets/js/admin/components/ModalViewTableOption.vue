@@ -56,7 +56,6 @@ export default {
       if(fliterColumns) this.checkColumns = fliterColumns.split(",");
     },
     checkTableColumns(){
-      console.log('bbb');
       const _this = this;
       let colsNew = '', colsOld = localStorage.getItem("cols_" + this.dataTable);
       if(!colsOld) colsOld = '';

@@ -18,11 +18,12 @@ export default {
 		commit('SET_CURRENT_LANG', lang)
 	},
 
-	setCurrentTeam({ state, commit, getters }, data) {
+	setCurrentTeam({ state, commit, getters, dispatch }, data) {
 		if (data) {
 			const team = getters['getObjectByID'](state.currentTeamOption, +data);
 			localStorage.setItem('team', team.id)
 			commit('SET_CURRENT_TEAM', team)
+			dispatch('setReportNotify', team.id)
 		}
 	},
 
