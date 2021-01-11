@@ -69,16 +69,7 @@
             <div class="form-group">
               <label class>{{ $ml.with("VueJS").get("txtProjects") }}</label>
               <div>
-                <multiselect
-                  :multiple="true"
-                  v-model="filters.projects"
-                  :options="options.projects"
-                  :clear-on-select="false"
-                  :preserve-search="true"
-                  :placeholder="$ml.with('VueJS').get('txtPickSome')"
-                  label="text"
-                  track-by="text"
-                ></multiselect>
+                 <input type="text" v-model="filters.projects"  class="form-control">
               </div>
             </div>
           </div>

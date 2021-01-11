@@ -86,9 +86,9 @@ class StatisticsController extends Controller
 			'end_date' =>  $request->input('end_date'),
 			'issue' =>  $request->input('issue'),
 			'team' =>  $request->input('team'),
+			'projects' => $request->input('projects'),
 			'departments' => array(),
 			'types' => array(),
-			'projects' => array()
 		);
 
 		foreach ($request->input('user_id') as $value) {
@@ -99,9 +99,6 @@ class StatisticsController extends Controller
 		}
 		foreach ($request->input('types') as $value) {
 			$filters['types'][] = $value['id'];
-		}
-		foreach ($request->input('projects') as $value) {
-			$filters['projects'][] = $value['id'];
 		}
 
 		return response()->json([
@@ -1000,7 +997,6 @@ class StatisticsController extends Controller
 
 	private function getTotaling($filters)
 	{
-
 		$team = DB::table('teams')->select('name')->where('id', $filters['team'])->first()->name;
 
 		$totaling =  DB::table('jobs as j')
@@ -1035,7 +1031,7 @@ class StatisticsController extends Controller
 				return $query->whereIn('p.type_id', $types);
 			})
 			->when($filters['projects'], function ($query, $projects) {
-				return $query->whereIn('p.id', $projects);
+				return $query->where('p.name', 'like', '%' . $projects . '%');
 			})
 			->when($filters['issue'], function ($query, $issue) {
 				return $query->where('i.name', 'like', '%' . $issue . '%');
