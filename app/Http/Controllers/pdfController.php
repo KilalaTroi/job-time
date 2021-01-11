@@ -65,22 +65,30 @@ class pdfController extends Controller
 
 	private function absenceByDate($start_date, $end_date)
 	{
-		$offDay = DB::table('off_days')->where('user_id', $this->user['id'])->where('date', '>=', $start_date)->where('date', '<=', $end_date)->orderBy('date','ASC')->get()->toArray();
+		$offDay = DB::table('off_days')->where('user_id', $this->user['id'])->where('date', '>=', $start_date)->where('date', '<=', $end_date)->orderBy('date', 'ASC')->get()->toArray();
 		$arr['status'] = 0;
 		if ($offDay) {
 			$type = $offDay[0]->type;
-			$date = str_replace('-','',$offDay[0]->date);
+			$date = str_replace('-', '', $offDay[0]->date);
 			$totalOff = 0;
-			foreach ($offDay as $item) {
-				if($date != str_replace('-','',$item->date) || $type != $item->type || "Sun" == date("D", strtotime($item->date))) return array('status' => 0);
+			foreach ($offDay as $key => $item) {
+				if ($key > 0) {
+					$wod = date("D", strtotime($offDay[$key]->date));
+					$wodold = date("D", strtotime($offDay[$key - 1]->date));
+					$type = $offDay[$key]->type;
+					$typeOld = $offDay[$key - 1]->type;
+					$date = str_replace('-', '', $offDay[$key]->date);
+					$dateOld = str_replace('-', '', $offDay[$key - 1]->date);
+					if ($date != ($dateOld + 1) || $type !== $typeOld || ('Sat' == $wodold && 'Mon' == $wod)) return array('status' => 0);
+				}
 				$totalOff = "all_day" == $item->type ? ($totalOff + 1) : ($totalOff + 0.5);
 				$date++;
 			}
 			$arr = array(
 				'status' => 1,
 				'type' => $type,
-				'totalOff' => str_replace('.',',',$totalOff),
-				'date' => date("d/m/Y", strtotime($offDay[0]->date)). ' - ' . date("d/m/Y", strtotime($offDay[count($offDay) - 1]->date))
+				'totalOff' => str_replace('.', ',', $totalOff),
+				'date' => date("d/m/Y", strtotime($offDay[0]->date)) . ' - ' . date("d/m/Y", strtotime($offDay[count($offDay) - 1]->date))
 			);
 		}
 		return $arr;
