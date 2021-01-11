@@ -263,7 +263,7 @@ export default {
   }
 }
 .type-color {
-  width: 60px;
+  width: 60px !important;
   height: 20px;
   margin-right: 5px;
   display: inline-block;
