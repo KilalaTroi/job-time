@@ -351,7 +351,7 @@ export default {
           translatable: state.selectedItem.translatable,
           type: state.filters.type,
           author: state.filters.user_id.map((item, index) => { return item.id; }).toString(),
-          team_id: state.filters.team,
+          team_id: state.filters.team
         }
         if (state.selectedItem.language == "vi") {
           dataSend.title = state.selectedItem.title;
@@ -366,9 +366,10 @@ export default {
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
-          dataSend.projects = state.filters.project.id;
+          dataSend.projects = dataSend.project_id = state.filters.project.id;
+          dataSend.dept_id = state.filters.department.id;
           dataSend.issue = state.filters.issue.id;
-          dataSend.issueYear = state.filters.issue_year.id;
+          dataSend.issueYear = dataSend.issue_year = state.filters.issue_year.id;
         }
 
         axios
