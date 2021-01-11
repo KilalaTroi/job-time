@@ -89,6 +89,7 @@
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
                             <a class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
+                            <a v-if="3 == team" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalproject" role="tab" aria-controls="totalproject" aria-selected="false">Total jobs</a>
                             <a v-if="2 == team" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">Table</a>
                         </div>
                     </nav>
@@ -111,12 +112,24 @@
                                     </chart-card>
                                 </div>
                             </div>
-
                         </div>
                         <div class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
                             <div class="row">
                                 <div class="col-md-12">
                                     <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
+                                        <template slot="footer">
+                                            <div class="legend loading">
+                                                <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class) + (type.slug == 'other' || type.slug == 'yuidea_other' ? ' d-none' : '') "><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
+                                            </div>
+                                        </template>
+                                    </chart-card>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="3 == team" class="tab-pane fade" id="totalproject" role="tabpanel" aria-labelledby="totalproject-tab">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <chart-card :chart-data="projectChart.data" :chart-options="projectChart.options" chart-type="Bar" :chart-id="projectChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
                                                 <span v-for="(type, index) in types" :key="index" :class="circleClass(type.class)"><i class="fa fa-circle ct-legend"></i>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</span>
@@ -129,7 +142,7 @@
                         <div v-if="2 == team" class="tab-pane fade" :class="checkUser() ? 'flag' : ''" id="table" role="tabpanel" aria-labelledby="table-tab">
                             <div class="row mt-3">
                                 <button v-if="checkUser()" type="button" class="btn btn-primary" data-toggle="modal" data-target="#totalpageAction" data-backdrop="static" data-keyboard="false">
-                                    <i class="fa fa-plus"></i>
+                                    Update
                                     <slot name="title"></slot>
                                 </button>
                                 <div class="col-md-12">
@@ -139,7 +152,7 @@
                                             <th class="text-center" v-for="(month, index) in data.totalpage.monthYearText" :key="index">{{ month }}</th>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(type, index) in types" :key="index" :class="type.class">
+                                            <tr v-for="(type, index) in types" :key="index" :class="type.class + (type.slug == 'other' || type.slug == 'yuidea_other' ? ' d-none' : '')">
                                                 <td>{{ 'ja' == currentLang ? type.slug_ja : type.slug_vi }}</td>
                                                 <td class="text-center" v-for="(month, indexMonth) in data.totalpage.monthYearText" :key="indexMonth">{{ data.totalpage.table[type.id+'_'+indexMonth] ? data.totalpage.table[type.id+'_'+indexMonth].page : 0 }}</td>
                                             </tr>
@@ -196,6 +209,7 @@
                 totalHoursPerMonth: {},
                 hoursPerProject: [],
                 pageData: [],
+                projectData: [],
                 jobs: 0,
 
                 startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
@@ -267,6 +281,25 @@
                     }
                 },
 
+                projectChart: {
+                    id: 'project-chart',
+                    data: {
+                        labels: [],
+                        series: []
+                    },
+                    options: {
+                        seriesBarDistance: 30,
+                        stackBars: true,
+                        axisX: {
+                            showGrid: true
+                        },
+                        height: '360px',
+                        plugins: [
+                            Chartist.plugins.tooltip()
+                        ]
+                    }
+                },
+
                 dataLang: {
                     vi: vi,
                     ja: ja,
@@ -304,18 +337,30 @@
 
             fetch() {
                 let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+
                 let uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+
+                let uriProject = '/data/statistic/get-project-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 axios.get(uriPage)
-                    .then(res => {
-                        this.pageData = res.data;
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load data");
-                    });
+                .then(res => {
+                    this.pageData = res.data;
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load data");
+                });
+
+                axios.get(uriProject)
+                .then(res => {
+                    this.projectData = res.data;
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load data");
+                });
 
                 axios.get(uri)
                     .then(res => {
@@ -328,9 +373,10 @@
                         this.currentMonth = res.data.currentMonth;
                         this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
-                        this.monthsText = this.pageChart.data.labels = this.barChart.data.labels = res.data.monthsText;
+                        this.monthsText = this.pageChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
                         this.getPageSeries(this.types, this.pageData.totalpage, this.totalHoursPerMonth);
+                        this.getProjectSeries(this.types, this.projectData.totalproject, this.totalHoursPerMonth);
                         this.data.totalpage = this.pageData;
                     })
                     .catch(err => {
@@ -360,9 +406,10 @@
                         this.currentMonth = res.data.currentMonth;
                         this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
-                        this.monthsText = this.pageChart.data.labels = this.barChart.data.labels = res.data.monthsText;
+                        this.monthsText = this.pageChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
                         this.getPageSeries(this.types, this.pageData.totalpage, this.totalHoursPerMonth);
+                        this.getProjectSeries(this.types, this.projectData.totalproject, this.totalHoursPerMonth);
                         this.data.totalpage = this.pageData;
                     })
                     .catch(err => {
@@ -447,6 +494,27 @@
                     return row;
                 });
                 this.pageChart.data.series = series;
+            },
+            getProjectSeries(type, projectData, totalHoursPerMonth) {
+                let _this = this;
+                let series = type.map((item, index) => {
+                    let _item = item;
+                    let row = Object.keys(totalHoursPerMonth).map((key, index) => {
+                        if ( _this.hasObjectValue(projectData, _item.id, key) ) {
+                            return {
+                                value: _this.hasObjectValue(projectData, _item.id, key).issue,
+                                meta: _item.slug
+                            };
+                        } else {
+                            return {
+                                value: 0,
+                                meta: _item.slug
+                            };
+                        }
+                    })
+                    return row;
+                });
+                this.projectChart.data.series = series;
             },
             dateFormatter(date) {
                 return moment(date).format('YYYY-MM-DD');
@@ -593,9 +661,6 @@ $chart-tooltip-color: #fff;
     position: relative;
     &.flag{
         padding-top: 60px;
-    }
-    .ct-series-f{
-        display: none;
     }
     button[data-toggle="modal"]{
         position: absolute;

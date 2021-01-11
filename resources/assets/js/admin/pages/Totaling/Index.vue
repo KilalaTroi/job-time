@@ -69,16 +69,7 @@
             <div class="form-group">
               <label class>{{ $ml.with("VueJS").get("txtProjects") }}</label>
               <div>
-                <multiselect
-                  :multiple="true"
-                  v-model="filters.projects"
-                  :options="options.projects"
-                  :clear-on-select="false"
-                  :preserve-search="true"
-                  :placeholder="$ml.with('VueJS').get('txtPickSome')"
-                  label="text"
-                  track-by="text"
-                ></multiselect>
+                 <input type="text" v-model="filters.projects"  class="form-control">
               </div>
             </div>
           </div>
@@ -144,11 +135,11 @@
               {{ $ml.with("VueJS").get("txtTimeRecord") }}
             </h4>
             <div class="align-self-end">
-              <button-view-table-option class="mt-0" />
-              <button @click="exportExcel" class="btn btn-primary">
+              <button @click="exportExcel" class="btn btn-primary mt-0">
                 <i class="fa fa-download"></i>
                 {{ $ml.with("VueJS").get("txtExportExcel") }}
               </button>
+              <button-view-table-option class="mt-0" />
             </div>
           </div>
         </template>

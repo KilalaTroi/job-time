@@ -93,7 +93,7 @@ export default {
 
     setColumns({ commit, rootGetters }) {
       const columns = [
-        { id: "username", value: rootGetters['getTranslate']('lblUsername'), width: "", class: "" },
+        { id: "username", value: rootGetters['getTranslate']('lblUser'), width: "", class: "" },
         { id: "date", value: rootGetters['getTranslate']('lblDate'), width: "120", class: "" },
         { id: "start_time", value: rootGetters['getTranslate']('lblStartTime'), width: "120", class: "" },
         { id: "end_time", value: rootGetters['getTranslate']('lblEndTime'), width: "120", class: "" },
@@ -104,8 +104,8 @@ export default {
         { id: "i_name", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "", filter: true },
         { id: "note", value: rootGetters['getTranslate']('txtWork'), width: "", class: "note", filter: true },
         { id: "image", value: rootGetters['getTranslate']('txtImage'), width: "120", class: "image text-center" },
-        { id: "t_value", value: rootGetters['getTranslate']('txtColor'), width: "110", class: "text-center", filter: true },
         { id: "t_name", value: rootGetters['getTranslate']('txtJobType'), width: "120", class: "", filter: true },
+        { id: "t_value", value: rootGetters['getTranslate']('txtColor'), width: "110", class: "text-center", filter: true },
         { id: 'html_team', value: rootGetters['getTranslate']('txtTeam'), width: '', class: 'text-center', filter: true },
       ]
 

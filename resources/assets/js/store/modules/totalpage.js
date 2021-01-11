@@ -41,7 +41,7 @@ export default {
         response.data.types.forEach(function (element) {
           if (!response.data[element.id]) {
             state.selectedItem[element.id] = {
-              page: 0,
+              page: '',
               team_id: 2,
               type_id: element.id
             }
@@ -57,7 +57,7 @@ export default {
         state.options.types.forEach(function (element) {
           if (!response.data[element.id]) {
             response.data[element.id] = {
-              page: 0,
+              page: '',
               team_id: 2,
               type_id: element.id
             }

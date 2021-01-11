@@ -9,7 +9,7 @@
       </div>
     </template>
     <div class="row">
-      <div class="col-sm-12 col-lg-2">
+      <div class="col-sm-12 row--left">
         <card>
           <template slot="header">
             <h4 class="card-title">{{ $ml.with("VueJS").get("txtMyOffDay") }}</h4>
@@ -32,7 +32,7 @@
           </div>
         </card>
       </div>
-      <div class="col-sm-12 col-lg-10">
+      <div class="col-sm-12 row--right">
 
          <FullCalendar
           class="off-days"
@@ -191,6 +191,19 @@ export default {
 
 .fc-time-grid .fc-event {
   padding: 5px;
+}
+
+@media (min-width: 992px){
+  .row{
+    &--left {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+    &--right{
+      flex: 0 0 80%;
+      max-width: 80%;
+    }
+  }
 }
 
 .fc-event {
