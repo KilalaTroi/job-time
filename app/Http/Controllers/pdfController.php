@@ -69,10 +69,12 @@ class pdfController extends Controller
 		$arr['status'] = 0;
 		if ($offDay) {
 			$type = $offDay[0]->type;
+			$date = str_replace('-','',$offDay[0]->date);
 			$totalOff = 0;
 			foreach ($offDay as $item) {
-				if ($type != $item->type || "Sun" == date("D", strtotime($item->date))) return array('status' => 0);
+				if($date != str_replace('-','',$item->date) || $type != $item->type || "Sun" == date("D", strtotime($item->date))) return array('status' => 0);
 				$totalOff = "all_day" == $item->type ? ($totalOff + 1) : ($totalOff + 0.5);
+				$date++;
 			}
 			$arr = array(
 				'status' => 1,
