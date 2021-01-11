@@ -28,35 +28,74 @@ class pdfController extends Controller
 
 	public function absence(Request $request)
 	{
-		$offDay = DB::table('off_days')->where('id', $request->input('id'))->first();
-		if (isset($offDay) && !empty($offDay)) {
+		$data = array(
+			'name' => $this->user['fullname'],
+			'type' => '',
+			'totalOff' => '',
+			'date' => '',
+			'now_date' => date("d/m/Y"),
+		);
+
+		if (!empty($request->input('id')) && NULL !== $request->input('id')) $offDay = $this->absenceByID($request->input('id'));
+		else $offDay = $this->absenceByDate($request->input('start_date'), $request->input('end_date'));
+
+		if (0 == $offDay['status']) return array('status' => 0);
+
+		else {
 			$data = array(
 				'name' => $this->user['fullname'],
-				'type' => $offDay->type,
-				'totalOff' => "all_day" == $offDay->type ? "1" : "0,5",
-				'date' => date("d/m/Y", strtotime($offDay->date)),
-				'now_date' => date("d/m/Y"),
-			);
-		} else {
-			$data = array(
-				'name' => $this->user['fullname'],
-				'type' => '',
-				'totalOff' => '',
-				'date' => '',
+				'type' => $offDay['type'],
+				'totalOff' => $offDay['totalOff'],
+				'date' => $offDay['date'],
 				'now_date' => date("d/m/Y"),
 			);
 		}
-
-		$file_name = 'absence-' . $this->user['id']. '_'. $data['type']. '_' . str_replace('/','',$data['date']) . '_' . str_replace('/','',$data['now_date']) . '.pdf';
-
+		$file_name = 'absence-' . $this->user['id'] . '_' . $data['type'] . '_' . str_replace(array('/', ' - '), '', $data['date']) . '_' . str_replace('/', '', $data['now_date']) . '.pdf';
 		// if(!File::exists(storage_path($file_name))){
-			$pdf = PDFSNAPPY::loadView('pdf.absence',  compact('data'))->setTemporaryFolder(storage_path('app/absence/tmp'));
-			Storage::put('public/pdf/' . $file_name, $pdf->output());
+		$pdf = PDFSNAPPY::loadView('pdf.absence',  compact('data'))->setTemporaryFolder(storage_path('app/absence/tmp'));
+		Storage::put('public/pdf/' . $file_name, $pdf->output());
 		// }
 
 		return response()->json(array(
+			'status' => $offDay['status'],
 			'file_name' => url('data/pdf/' . $file_name),
 			'data' => $data
 		), 200);
+	}
+
+	private function absenceByDate($start_date, $end_date)
+	{
+		$offDay = DB::table('off_days')->where('user_id', $this->user['id'])->where('date', '>=', $start_date)->where('date', '<=', $end_date)->orderBy('date','ASC')->get()->toArray();
+		$arr['status'] = 0;
+		if ($offDay) {
+			$type = $offDay[0]->type;
+			$totalOff = 0;
+			foreach ($offDay as $item) {
+				if ($type != $item->type || "Sun" == date("D", strtotime($item->date))) return array('status' => 0);
+				$totalOff = "all_day" == $item->type ? ($totalOff + 1) : ($totalOff + 0.5);
+			}
+			$arr = array(
+				'status' => 1,
+				'type' => $type,
+				'totalOff' => str_replace('.',',',$totalOff),
+				'date' => date("d/m/Y", strtotime($offDay[0]->date)). ' - ' . date("d/m/Y", strtotime($offDay[count($offDay) - 1]->date))
+			);
+		}
+		return $arr;
+	}
+
+	private function absenceByID($id)
+	{
+		$offDay = DB::table('off_days')->where('id', $id)->first();
+		$arr['status'] = 0;
+		if (isset($offDay) && !empty($offDay)) {
+			$arr = array(
+				'status' => 1,
+				'type' => $offDay->type,
+				'totalOff' => "all_day" == $offDay->type ? "1" : "0,5",
+				'date' => date("d/m/Y", strtotime($offDay->date))
+			);
+		}
+		return $arr;
 	}
 }
