@@ -682,32 +682,91 @@ class StatisticsController extends Controller
 		$endMonth = $_GET['endMonth'];
 
 
-		if (2 == $teamID) $data = $this->getReportPath($teamID, $startMonth, $endMonth);
-		else $data = $this->getReport($teamID);
+		if (2 == $teamID) $data = $this->getPageReportPath($teamID, $startMonth, $endMonth);
+		else $data = $this->getPageReportAll($teamID);
 
 		return response()->json($data);
 	}
 
-	private function getReport($teamID)
+	function getProjectReport()
+	{
+		// $teamID = isset($_GET['team_id']) && $_GET['team_id'] ? $_GET['team_id'] : 0;
+		$teamID = 3;
+		$startMonth = $_GET['startMonth'];
+		$endMonth = $_GET['endMonth'];
+
+		$data = $this->getProjectReportAll($teamID);
+
+		// if (2 == $teamID) $data = $this->getReportPath($teamID, $startMonth, $endMonth);
+		// else $data = $this->getReport($teamID);
+
+		return response()->json($data);
+	}
+
+	private function getProjectReportAll($teamID)
+	{
+
+		$results = DB::table('jobs as j')
+			->select(
+				't.id as id',
+				'i.id as issue_id',
+				DB::raw('CONCAT(year(j.date),"", LPAD(month(j.date), 2, "0")) as yearMonth')
+			)
+			->leftJoin('issues as i', 'j.issue_id', '=', 'i.id')
+			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+			->leftJoin('types as t', 't.id', '=', 'p.type_id')
+			->whereNotIn('t.slug', array('other', 'yuidea_other'))
+			->when($teamID, function ($query, $teamID) {
+				return $query->where(function ($query) use ($teamID) {
+					$query->where('p.team', '=', $teamID)
+						->orWhere('p.team', 'LIKE', $teamID . ',%')
+						->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+						->orWhere('p.team', 'LIKE', '%,' . $teamID);
+				});
+			})->groupBy('i.id', 'yearMonth')->get()->toArray();
+
+
+		$totalIssue = array();
+		foreach ($results as $result) {
+			$str = $result->id . '_' . $result->yearMonth;
+			if (isset($totalIssue[$str]) && !empty($totalIssue[$str])) $totalIssue[$str]->issue++;
+			else {
+				$totalIssue[$str] = (object) array(
+					'id' => $result->id,
+					'yearMonth' => $result->yearMonth,
+					'issue' => 1,
+				);
+			}
+		}
+
+		$datas = array(
+			'totalproject' =>  array_values($totalIssue),
+		);
+
+		return $datas;
+	}
+
+	private function getPageReportAll($teamID)
 	{
 
 		$results = DB::table('issues as i')
-		->select(
-			't.id as id',
-			DB::raw('IF( i.start_date != "", concat(year(i.start_date),"", LPAD(month(i.start_date), 2, "0")), concat(year(i.created_at),"", LPAD(month(i.created_at), 2, "0")) ) as yearMonth'),
-			DB::raw('SUM(page) as page')
-		)
-		->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-		->leftJoin('types as t', 't.id', '=', 'p.type_id')
-		->where('page', '>', 0)
-		->when($teamID, function ($query, $teamID) {
-			return $query->where(function ($query) use ($teamID) {
-				$query->where('team', '=', $teamID)
-					->orWhere('team', 'LIKE', $teamID . ',%')
-					->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
-					->orWhere('team', 'LIKE', '%,' . $teamID);
-			});
-		})->groupBy('t.id', 'yearMonth')->get()->toArray();
+			->select(
+				't.id as id',
+				DB::raw('IF( i.start_date != "", concat(year(i.start_date),"", LPAD(month(i.start_date), 2, "0")), concat(year(i.created_at),"", LPAD(month(i.created_at), 2, "0")) ) as yearMonth'),
+				DB::raw('SUM(page) as page')
+			)
+			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+			->leftJoin('types as t', 't.id', '=', 'p.type_id')
+			->where('page', '>', 0)
+			->whereNotIn('t.slug', array('other', 'yuidea_other'))
+			->when($teamID, function ($query, $teamID) {
+				return $query->where(function ($query) use ($teamID) {
+					$query->where('team', '=', $teamID)
+						->orWhere('team', 'LIKE', $teamID . ',%')
+						->orWhere('team', 'LIKE', '%,' . $teamID . ',%')
+						->orWhere('team', 'LIKE', '%,' . $teamID);
+				});
+			})->groupBy('t.id', 'yearMonth')->get()->toArray();
 
 		$datas = array(
 			'totalpage' =>  $results,
@@ -716,7 +775,7 @@ class StatisticsController extends Controller
 		return $datas;
 	}
 
-	private function getReportPath($teamID, $startMonth, $endMonth)
+	private function getPageReportPath($teamID, $startMonth, $endMonth)
 	{
 
 		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
@@ -730,6 +789,7 @@ class StatisticsController extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->where('pr.page', '>', 0)
+			->whereNotIn('t.slug', array('other', 'yuidea_other'))
 			->where('t.email', '!=', NULL)
 			->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
 				return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
@@ -752,6 +812,7 @@ class StatisticsController extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->where('j.quantity', '>', 0)
+			->whereNotIn('t.slug', array('other', 'yuidea_other'))
 			->where('t.email', NULL)
 			->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
 				return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
@@ -790,23 +851,23 @@ class StatisticsController extends Controller
 			}
 		}
 
-		$totalPage = DB::table('total_pages')->select('type_id','page','date')
-		->where('page', '>', 0)
-		->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
-			return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
-				$query->where('total_pages.date', ">=", str_replace(array('/','-'), '', $startMonthCar))->where('total_pages.date', "<=", str_replace(array('/','-'), '', $endMonthCar));
-			});
-		})
-		->when($teamID, function ($query, $teamID) {
-			return $query->where(function ($query) use ($teamID) {
-				$query->where('team_id', '=', $teamID)
-					->orWhere('team_id', 'LIKE', $teamID . ',%')
-					->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
-					->orWhere('team_id', 'LIKE', '%,' . $teamID);
-			});
-		})->get()->toArray();
+		$totalPage = DB::table('total_pages')->select('type_id', 'page', 'date')
+			->where('page', '>', 0)
+			->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
+				return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
+					$query->where('total_pages.date', ">=", str_replace(array('/', '-'), '', $startMonthCar))->where('total_pages.date', "<=", str_replace(array('/', '-'), '', $endMonthCar));
+				});
+			})
+			->when($teamID, function ($query, $teamID) {
+				return $query->where(function ($query) use ($teamID) {
+					$query->where('team_id', '=', $teamID)
+						->orWhere('team_id', 'LIKE', $teamID . ',%')
+						->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
+						->orWhere('team_id', 'LIKE', '%,' . $teamID);
+				});
+			})->get()->toArray();
 
-		foreach($totalPage as $v){
+		foreach ($totalPage as $v) {
 			$results[$v->type_id . '_' . $v->date] = array(
 				'id' => $v->type_id,
 				'page' => $v->page,
