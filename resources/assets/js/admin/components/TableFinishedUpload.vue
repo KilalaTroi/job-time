@@ -1,5 +1,5 @@
 <template>
-  <table class="table">
+  <table id="finsh" class="table">
     <thead>
       <slot name="columns">
         <tr>
@@ -9,6 +9,7 @@
             :key="index"
             :width="column.width"
             :class="column.class"
+            :data-filter="column.id"
           >
             {{ column.value }}
           </th>
@@ -26,6 +27,7 @@
             v-for="(column, index) in columns"
             :key="index"
             :class="column.class"
+            :data-filter="column.id"
           >
             <span
               :class="getStatusClass(item, column)"
@@ -53,6 +55,7 @@
           v-for="(column, index) in columns"
           :key="index"
           :class="column.class"
+          :data-filter="column.id"
         >
           <span v-if="'user_name' == column.id">Total:</span>
           <span v-if="'page' == column.id" v-html="total.page"></span>

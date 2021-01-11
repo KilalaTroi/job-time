@@ -109,6 +109,7 @@ export default {
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       dateFormat: "dateFormat",
+      disabledEndDates: "disabledEndDates",
     }),
   },
 
@@ -126,6 +127,12 @@ export default {
           value: this.$ml.with("VueJS").get("txtJobType"),
           width: "120",
           class: "",
+        },
+        {
+          id: "t_value",
+          value: this.$ml.with("VueJS").get("txtColor"),
+          width: "120",
+          class: "text-center",
         },
         {
           id: "p_name",
@@ -223,6 +230,12 @@ export default {
           class: "",
         },
         {
+          id: "t_value",
+          value: _this.$ml.with("VueJS").get("txtColor"),
+          width: "120",
+          class: "text-center",
+        },
+        {
           id: "p_name",
           value: _this.$ml.with("VueJS").get("txtProject"),
           width: "",
@@ -315,25 +328,11 @@ export default {
               const lastProcess = arrProcess[arrProcess.length - 1];
 
               return Object.assign({}, item, {
-                d_name: item.department === "All" ? "" : item.department,
-                p_name: item.project,
-                i_name: item.issue,
-                t_name: item.job_type,
                 status: arrProcess.length ? lastProcess.status : "",
-                page: arrProcess.length
-                  ? arrProcess.reduce((total, item) => {
-                      return total + item.page * 1;
-                    }, 0)
-                  : "",
-                file: arrProcess.length
-                  ? arrProcess.reduce((total, item) => {
-                      return total + item.file * 1;
-                    }, 0)
-                  : "",
+                page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.page * 1; }, 0) : "",
+                file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.file * 1; }, 0) : "",
                 user_name: arrProcess.length ? lastProcess.user_name : "",
-                date: arrProcess.length
-                  ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm")
-                  : "",
+                date: arrProcess.length ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm") : "",
               });
             });
           } else {
@@ -359,22 +358,10 @@ export default {
     },
     getProcess(item) {
       this.currentProcess = Object.assign({}, item, { status: null });
-      this.arrCurrentProcess = this.processDetails.length
-        ? this.getProcessObjectValue(
-            this.processDetails,
-            this.currentProcess.id,
-            this.currentProcess.phase
-          )
-        : [];
+      this.arrCurrentProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, this.currentProcess.id, this.currentProcess.phase) : [];
     },
     customFormatter(date) {
       return moment(date).format("YYYY/MM/DD");
-    },
-    disabledEndDates() {
-      const obj = {
-        from: new Date(),
-      };
-      return obj;
     },
     resetValidate() {
       this.currentProcess = {};
@@ -425,7 +412,7 @@ export default {
 	}
 }
 .type-color {
-  width: 30px;
+  width: 60px !important;
   height: 20px;
   margin-right: 5px;
   display: inline-block;
