@@ -51,14 +51,14 @@
             }}</strong></label
           >
           <select-2 v-model="filters.type" class="select2">
+            <option value="Notice">
+              {{ $ml.with("VueJS").get("txtNotice") }}
+            </option>
             <option value="Trouble">
               {{ $ml.with("VueJS").get("txtTrouble") }}
             </option>
             <option value="Meeting">
               {{ $ml.with("VueJS").get("txtMeeting") }}
-            </option>
-            <option value="Notice">
-              {{ $ml.with("VueJS").get("txtNotice") }}
             </option>
           </select-2>
         </div>

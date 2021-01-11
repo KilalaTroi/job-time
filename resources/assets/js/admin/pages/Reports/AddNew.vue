@@ -35,18 +35,18 @@
         <div class="form-group">
           <label class="text-uppercase"
             ><strong>{{
-              $ml.with("VueJS").get("txtReportType")
+              $ml.with("VueJS").get("txtType")
             }}</strong></label
           >
           <select-2 v-model="filters.type" class="select2">
+            <option value="Notice">
+              {{ $ml.with("VueJS").get("txtNotice") }}
+            </option>
             <option value="Trouble">
               {{ $ml.with("VueJS").get("txtTrouble") }}
             </option>
             <option value="Meeting">
               {{ $ml.with("VueJS").get("txtMeeting") }}
-            </option>
-            <option value="Notice">
-              {{ $ml.with("VueJS").get("txtNotice") }}
             </option>
           </select-2>
         </div>
@@ -391,7 +391,8 @@ export default {
       currentTeam: "currentTeam",
       getLangCode: "getLangCode",
       customFormatter: "customFormatter",
-      disabledEndDates: "disabledEndDates"
+      disabledEndDates: "disabledEndDates",
+      loginUser: 'loginUser',
     }),
 
     ...mapGetters('reports',{
@@ -434,8 +435,18 @@ export default {
 
   async created() {
     const _this = this;
+
     _this.filters.page = -1;
-    _this.filters.type = "Trouble";
+    _this.filters.type = "Notice";
+    if(_this.currentTeam == _this.loginUser.team && _this.loginUser.id != 1){
+      _this.filters.user_id = [
+        {
+          id : _this.loginUser.id,
+          text: _this.loginUser.name,
+        }
+      ]
+    }
+
     _this.selectedItem.language =  _this.selectedItemOld.language = this.$ml.current;
 	},
   methods: {

@@ -433,8 +433,8 @@ export default {
 
     setColumns({ commit, rootGetters }, language) {
       const columns = [
-        { id: "type", value: rootGetters['getTranslate']("txtReportType"), width: "120", class: "" },
-        { id: "date_time", value: rootGetters['getTranslate']("txtReportDate"), width: "100", class: "" },
+        { id: "type", value: rootGetters['getTranslate']("txtType"), width: "120", class: "" },
+        { id: "date_time", value: rootGetters['getTranslate']("txtDateTime"), width: "100", class: "" },
         { id: "update_date", value: rootGetters['getTranslate']("txtUpdateDate"), width: "", class: "no-wrap" },
         { id: "dept_name", value: rootGetters['getTranslate']("txtDepartment"), width: "100", class: "" },
         { id: "team_name", value: rootGetters['getTranslate']("txtTeam"), width: "100", class: "" },
