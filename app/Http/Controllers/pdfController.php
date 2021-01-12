@@ -57,9 +57,9 @@ class pdfController extends Controller
 
 	private function absenceByDate($start_date, $end_date)
 	{
-		$offDay = DB::table('off_days')->where('user_id', $this->user['id'])->where('date', '>=', $start_date)->where('date', '<=', $end_date)->orderBy('date', 'ASC')->get()->toArray();
-
-		if ($offDay) {
+		$offDay = DB::table('off_days')->where('user_id', $this->user['id'])->where('date', '>=', $start_date)->where('date', '<=', $end_date)->orderBy('date', 'ASC');
+		if ($offDay->count() > 0) {
+			$offDay = $offDay->get()->toArray();
 			$totalOff = 0;
 			foreach ($offDay as $key => $item) {
 				if ($key > 0) {
