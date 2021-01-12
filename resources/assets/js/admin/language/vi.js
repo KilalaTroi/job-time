@@ -103,6 +103,7 @@ export default {
     txtEditTime: 'Update Time',
     txtExcludeLunchBreak: 'Exclude lunch break',
     txtJobsList: 'Jobs List',
+    txtTasksList: 'Tasks List',
     txtShowBySchedule: 'Show by schedule',
     txtShowAll: 'Show all',
     msgOverTime: 'You work over 8 hours!!!',
