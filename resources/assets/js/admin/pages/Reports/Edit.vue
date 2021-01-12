@@ -399,6 +399,7 @@ export default {
     ErrorItem,
     VueTimepicker,
   },
+
   computed: {
     ...mapGetters({
       currentTeamOption: "currentTeamOption",
@@ -407,6 +408,7 @@ export default {
       customFormatter: "customFormatter",
       disabledEndDates: "disabledEndDates"
     }),
+
     ...mapGetters('reports',{
       filters: "filters",
       selectedItem: "selectedItem",
@@ -415,6 +417,7 @@ export default {
       validationErrors: "validationErrors"
     }),
   },
+
   data() {
     return {
       editLanguage: '',
@@ -435,6 +438,7 @@ export default {
       window.removeEventListener("beforeunload", this.preventNav);
     });
   },
+
   beforeRouteLeave(to, from, next) {
     if (this.isEditing) {
       if (!window.confirm("Leave without saving?")) {
@@ -448,7 +452,6 @@ export default {
     const _this = this;
     _this.filters.user_id = this.getReporter(_this.selectedItem.reporter);
     if(_this.selectedItem.attend_person) _this.selectedItem.attendPerson = this.getReporter(_this.selectedItem.attend_person);
-    _this.page = -1;
     _this.updateSeen();
   },
 
@@ -457,14 +460,20 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      setCurrentTeam: "setCurrentTeam",
+    }),
+
     ...mapActions('reports', {
+      getAll: "getAll",
       translateContent: "translateContent",
       backToList: "backToList",
-      resetValidate : "resetValidate",
       updateReport: "updateReport",
       updateSeen: "updateSeen",
       deleteReport: "deleteReport",
+      resetFilters: "resetFilters",
     }),
+    
     checkTranslate() {
       return (!this.selectedItem.translatable && (this.selectedItem.language != this.editLanguage));
     },
@@ -476,6 +485,7 @@ export default {
 
       if (obj.length > 0) return obj[0];
     },
+
     getReporter(data) {
       if (!data) return [];
 
@@ -491,6 +501,7 @@ export default {
       const toolbarContainer = document.querySelector("#toolbar-container");
       toolbarContainer.appendChild(editor.ui.view.toolbar.element);
     },
+
     preventNav(event) {
       if (!this.isEditing) return;
       event.preventDefault();
@@ -502,7 +513,9 @@ export default {
       {
         handler: function (value,valueOld) {
           const _this = this;
-          if(value.content || value.content_ja) _this.isEditing = true;
+          if(_this.action.edit) {
+            if(value.content || value.content_ja) _this.isEditing = true;
+          }
         },
         deep: true
       },
@@ -510,10 +523,21 @@ export default {
     filters: [
       {
         handler: function (value) {
-          // if(value.type != this.typeOld){
-          //   this.typeOld = value.type;
-          //   this.typeReportChange();
-          // }
+          const _this = this;
+          if(_this.action.edit && !_this.action.reset) {
+            _this.getAll(-1);
+
+            if (value.team != _this.currentTeam.id) {
+              _this.setCurrentTeam(value.team);
+              _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
+            } else {
+              setTimeout(function(){ 
+                _this.action.reset = true;
+                _this.resetFilters();
+              }, 1500);
+            }
+            
+          }
         },
         deep: true
       },

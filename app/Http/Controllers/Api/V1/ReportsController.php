@@ -32,16 +32,20 @@ class ReportsController extends Controller
 		$data['seen'] = $this->user['id'];
 
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
-		$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
-		$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
 
-		$issue_id =  DB::table('issues')
-			->select('id')
-			->where('project_id', $data['projects'])
-			->where('name', $data['issue'])
-			->where('year', $data['issueYear'])
-			->first();
-		if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		// Nếu có data project mới check issue
+		if ( $data['projects'] ) {
+			$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
+			$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
+
+			$issue_id =  DB::table('issues')
+				->select('id')
+				->where('project_id', $data['projects'])
+				->where('name', $data['issue'])
+				->where('year', $data['issueYear'])
+				->first();
+			if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		}
 
 		$report = Report::create($data);
 
@@ -64,16 +68,20 @@ class ReportsController extends Controller
 		$data['seen'] = $this->user['id'];
 
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
-		$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
-		$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
 
-		$issue_id =  DB::table('issues')
-			->select('id')
-			->where('project_id', $data['projects'])
-			->where('name', $data['issue'])
-			->where('year', $data['issueYear'])
-			->first();
-		if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		// Nếu có data project mới check issue
+		if ( $data['projects'] ) {
+			$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
+			$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
+
+			$issue_id =  DB::table('issues')
+				->select('id')
+				->where('project_id', $data['projects'])
+				->where('name', $data['issue'])
+				->where('year', $data['issueYear'])
+				->first();
+			if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		}
 
 		$report->update($data);
 
