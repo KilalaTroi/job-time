@@ -73,10 +73,11 @@ class pdfController extends Controller
 				}
 				$totalOff = "all_day" == $item->type ? ($totalOff + 1) : ($totalOff + 0.5);
 			}
+
 			return array(
-				'type' => $type,
+				'type' => $offDay[0]->type,
 				'totalOff' => str_replace('.', ',', $totalOff),
-				'date' => date("d/m/Y", strtotime($offDay[0]->date)) . ' - ' . date("d/m/Y", strtotime($offDay[count($offDay) - 1]->date))
+				'date' => $offDay[0]->date == $offDay[count($offDay) - 1]->date ? date("d/m/Y", strtotime($offDay[0]->date)) : date("d/m/Y", strtotime($offDay[0]->date)) . ' - ' . date("d/m/Y", strtotime($offDay[count($offDay) - 1]->date))
 			);
 		}
 		return false;
