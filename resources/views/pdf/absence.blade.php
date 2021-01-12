@@ -173,11 +173,11 @@
     </ul>
     <p style="margin-bottom: 60px">I commits that I will arrange and finish my tasks as soon as returning to work.</p>
     <div class="d-flex">
-      <div style="min-width: 220px; position: relative">
+      <div style="min-width: 270px; position: relative">
         <p>Yours sincerely,</p>
         <span style="width: 100%;  white-space: nowrap; line-height: 31px; position: absolute; bottom: -8px; left: 0; {{ isset($data['name']) && !empty($data['name']) ? 'font-size: 20px' : '' }}" class="d-inline-block overflow-x-hidden">{{ $contentName }}</span>
       </div>
-      <div style="width: 680px; padding-left: 90px;">
+      <div style="width: 680px; padding-left: 40px;">
         <p style="font-weight: 680" class="text-center">Company’s Approval</p>
         <table class="table table-border">
           <thead>
