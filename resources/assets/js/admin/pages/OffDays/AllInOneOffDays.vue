@@ -2,19 +2,30 @@
   <card>
     <template slot="header">
       <div class="d-flex justify-content-between">
-          <h4 class="card-title">{{ $ml.with("VueJS").get("txtStaffOffDay") }}</h4>
-          <div class="form-group mb-0 d-flex justify-content-between" style="min-width: 100px">
-            <select-2 :options="options.team" v-model="filters.team" class="select2" />
-          </div>
+        <h4 class="card-title">
+          {{ $ml.with("VueJS").get("txtStaffOffDay") }}
+        </h4>
+        <div
+          class="form-group mb-0 d-flex justify-content-between"
+          style="min-width: 100px"
+        >
+          <select-2
+            :options="options.team"
+            v-model="filters.team"
+            class="select2"
+          />
+        </div>
       </div>
     </template>
     <div class="row">
       <div class="col-sm-12 row--left">
         <card>
           <template slot="header">
-            <h4 class="card-title">{{ $ml.with("VueJS").get("txtMyOffDay") }}</h4>
+            <h4 class="card-title">
+              {{ $ml.with("VueJS").get("txtMyOffDay") }}
+            </h4>
           </template>
-          <div id="external-events">
+          <div class="mb-3" id="external-events">
             <div id="external-events-list">
               <div
                 class="alert alert-success fc-event"
@@ -24,17 +35,53 @@
                 :color="item.color"
                 :style="setBackground(item.color)"
               >
-                <span
-                  ><b>{{ item.name }}</b></span
-                >
+                <span><b>{{ item.name }}</b></span>
               </div>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class>{{ $ml.with("VueJS").get("txtStartDate") }}</label>
+                <datepicker
+                  name="startDate"
+                  input-class="form-control"
+                  placeholder="Select Date"
+                  v-model="selectedItem.start_date"
+                  :format="dateFormat(selectedItem.start_date, 'YYYY-MM-DD')"
+                  :language="getLangCode(this.$ml)"
+                ></datepicker>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class>{{ $ml.with("VueJS").get("txtEndDate") }}</label>
+                <datepicker
+                  name="endDate"
+                  input-class="form-control"
+                  placeholder="Select Date"
+                  v-model="selectedItem.end_date"
+                  :format="dateFormat(selectedItem.end_date, 'YYYY-MM-DD')"
+                  :disabled-dates="disabledStartDates(selectedItem.start_date)"
+                  :language="getLangCode(this.$ml)"
+                ></datepicker>
+              </div>
+            </div>
+            <div class="col-12 col-sm-auto ml-auto">
+               <button
+                @click="printEvents(selectedItem)"
+                type="button"
+                class="btn btn-primary"
+              >
+                {{ $ml.with("VueJS").get("txtPrint") }}
+              </button>
             </div>
           </div>
         </card>
       </div>
       <div class="col-sm-12 row--right">
-
-         <FullCalendar
+        <FullCalendar
           class="off-days"
           defaultView="dayGridMonth"
           :plugins="calendarPlugins"
@@ -63,6 +110,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timeGrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+import Datepicker from "vuejs-datepicker";
 import Card from "../../components/Cards/Card";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import EditEvent from "./Edit";
@@ -74,7 +122,8 @@ export default {
     FullCalendar, // make the <FullCalendar> tag available
     Card,
     Select2,
-    EditEvent
+    EditEvent,
+    Datepicker
   },
 
   computed: {
@@ -83,15 +132,17 @@ export default {
       getLanguage: "getLanguage",
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
+      getLangCode: "getLangCode",
+      dateFormat: "dateFormat"
     }),
 
-    ...mapGetters('offdays',{
+    ...mapGetters("offdays", {
       allOffDays: "allOffDays",
       offDayTypes: "offDayTypes",
       currentEvent: "currentEvent",
       filters: "filters",
-    })
-
+      selectedItem: "selectedItem"
+    }),
   },
 
   data() {
@@ -102,6 +153,10 @@ export default {
         dayGridPlugin,
         timeGridPlugin,
       ],
+
+      selectedItemOld: {
+        'start_date': new Date
+      },
 
       options: {
         team: [],
@@ -131,15 +186,21 @@ export default {
       setCurrentTeam: "setCurrentTeam",
     }),
 
-    ...mapActions('offdays',{
+    ...mapActions("offdays", {
       handleMonthChangeAll: "handleMonthChangeAll",
       getAllOffDays: "getAllOffDays",
+      printEvents: "printEvents",
       addEvent: "addEvent",
       clickEvent: "clickEvent",
       deleteEvent: "deleteEvent",
     }),
 
-     makeDraggable() {
+    disabledStartDates(date) {
+      if ( date ) return { to: new Date(date) };
+      return { from: new Date() };
+    },
+
+    makeDraggable() {
       let draggableEl = document.getElementById("external-events-list");
 
       new Draggable(draggableEl, {
@@ -154,20 +215,32 @@ export default {
         },
       });
     },
-
   },
 
-   mounted() {
+  mounted() {
     this.makeDraggable();
   },
 
   async created() {
     const _this = this;
     _this.filters.team = _this.currentTeam.id;
-    _this.options.team = [{id: '', text: 'ALL'}].concat(_this.currentTeamOption);
+    _this.options.team = [{ id: "", text: "ALL" }].concat(
+      _this.currentTeamOption
+    );
   },
 
   watch: {
+    selectedItem: [
+      {
+        handler: function (value) {
+          if(value.start_date !== this.selectedItemOld.start_date && value.start_date > this.selectedItem.end_date){
+            this.selectedItem.end_date = '';
+            this.selectedItemOld.start_date = value.start_date
+          }
+        },
+        deep: true,
+      },
+    ],
     filters: [
       {
         handler: function (value) {
@@ -193,13 +266,13 @@ export default {
   padding: 5px;
 }
 
-@media (min-width: 992px){
-  .row{
+@media (min-width: 992px) {
+  .row {
     &--left {
-        flex: 0 0 20%;
-        max-width: 20%;
+      flex: 0 0 20%;
+      max-width: 20%;
     }
-    &--right{
+    &--right {
       flex: 0 0 80%;
       max-width: 80%;
     }

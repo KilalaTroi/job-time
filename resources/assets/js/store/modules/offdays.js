@@ -6,16 +6,19 @@ export default {
 			{
 				id: "morning",
 				name: "[AM] Half-day (8:00 - 12:00)",
+				text: "[AM] Half-day (8:00 - 12:00)",
 				color: "#00AEEF",
 			},
 			{
 				id: "afternoon",
 				name: "[PM] Half-day (13:00 - 17:00)",
+				text: "[PM] Half-day (13:00 - 17:00)",
 				color: "#FFDD00",
 			},
 			{
 				id: "all_day",
 				name: "Full-day (8:00 - 17:00)",
+				text: "Full-day (8:00 - 17:00)",
 				color: "#F55555",
 			},
 		],
@@ -27,6 +30,11 @@ export default {
 		filters: {
 			team: '',
 			user_id: document.querySelector("meta[name='user-id']").getAttribute('content')
+		},
+		selectedItem: {
+			'start_date': new Date,
+			'end_date': '',
+			'type': 'morning'
 		}
 	},
 
@@ -35,6 +43,7 @@ export default {
 		allOffDays: state => state.allOffDays,
 		filters: state => state.filters,
 		offDays: state => state.offDays,
+		selectedItem: state => state.selectedItem,
 		currentEvent: state => state.currentEvent,
 		currentStart: state => state.currentStart,
 		currentEnd: state => state.currentEnd,
@@ -187,7 +196,7 @@ export default {
 			}
 		},
 
-		addEvent({ dispatch ,commit, state,rootState, rootGetters }, info) {
+		addEvent({ dispatch, commit, state, rootState, rootGetters }, info) {
 			const { event } = info;
 			const { id, start, end, borderColor, backgroundColor, title } = event;
 			const uri = '/data/offdays?user_id=' + rootState.loginUser.id;
@@ -211,7 +220,7 @@ export default {
 						newOffDay: res.data.event
 					}
 					commit('ADD_OFF_DAY', data)
-					if(rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
+					if (rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
 					info.event.remove();
 					dispatch('getAllOffDays')
 				})
@@ -225,6 +234,19 @@ export default {
 			axios.get(uri)
 				.then(res => {
 					window.open(res.data.file_name, "_blank");
+				})
+				.catch(err => {
+					console.log(err);
+					alert("Could not load data");
+				});
+		},
+
+		printEvents({ rootGetters }, selectItem) {
+			const uri = "/pdf/absence?start_date=" + rootGetters['dateFormat'](selectItem.start_date, 'YYYY-MM-DD') + "&end_date=" + rootGetters['dateFormat'](selectItem.end_date, 'YYYY-MM-DD') ;
+			axios.get(uri)
+				.then(res => {
+					if(res.data.status == 1)	window.open(res.data.file_name, "_blank");
+					else alert('Error Print');
 				})
 				.catch(err => {
 					console.log(err);

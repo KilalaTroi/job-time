@@ -103,6 +103,7 @@ export default {
     txtEditTime: '時間を更新',
     txtExcludeLunchBreak: '昼休みを除く',
     txtJobsList: 'ジョブ一覧',
+    txtTaksList: 'ジョブ一覧',
     txtShowBySchedule: 'スケジュールによる表示',
     txtShowAll: '全部で表示',
     msgOverTime: '8時間以上働きました！',

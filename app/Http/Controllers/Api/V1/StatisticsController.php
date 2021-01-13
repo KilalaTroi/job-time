@@ -24,9 +24,10 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y-m-d');
-			$endMonthCar = $endMonthCar->day(20)->format('Y-m-d');
+			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
+			$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
 		}
+
 		// Return project type
 		$data['types'] = $this->typeWithClass($teamID);
 
@@ -623,9 +624,23 @@ class StatisticsController extends Controller
 			$ckHoursDisableUser = 0;
 			$arrayStart = explode('-', $value['start']);
 			$monthYear = Carbon::createFromFormat('Y-m-d', $value['start']);
-			for ($d = 1; $d <= $monthYear->daysInMonth; $d++) {
-				$day = Carbon::createFromDate($arrayStart[0], $arrayStart[1] * 1, $d);
-				if ($day->isWeekday()) $daysInMonth++;
+
+			if ( $teamID != 2 ) {
+				for ($d = 1; $d <= $monthYear->daysInMonth; $d++) {
+					$day = Carbon::createFromDate($arrayStart[0], $arrayStart[1] * 1, $d);
+					if ($day->isWeekday()) $daysInMonth++;
+				}
+			} else {
+				for ($d = 21; $d <= $monthYear->daysInMonth; $d++) {
+					$day = Carbon::createFromDate($arrayStart[0], $arrayStart[1] * 1, $d);
+					if ($day->isWeekday()) $daysInMonth++;
+				}
+
+				$arrayStartEnd = explode('-', $value['end']);
+				for ($d = 1; $d <= 20; $d++) {
+					$day = Carbon::createFromDate($arrayStartEnd[0], $arrayStartEnd[1] * 1, $d);
+					if ($day->isWeekday()) $daysInMonth++;
+				}
 			}
 
 			if (isset($newUsersPerMonth[$key])) {
@@ -663,6 +678,7 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('jobs.user_id', $user_id);
 			})
+			->whereNotIn('jobs.user_id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->orderBy('id', 'asc')
 			->groupBy('id', 'yearMonth')
 			->get()->toArray();
