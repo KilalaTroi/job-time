@@ -26,6 +26,9 @@ class StatisticsController extends Controller
 		if (2 == $teamID) {
 			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
 			$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+		} else {
+			$startMonthCar = $startMonthCar->format('Y/m/d');
+			$endMonthCar = $endMonthCar->format('Y/m/d');
 		}
 
 		// Return project type
@@ -61,9 +64,13 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y-m-d');
-			$endMonthCar = $endMonthCar->day(20)->format('Y-m-d');
+			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
+			$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+		} else {
+			$startMonthCar = $startMonthCar->format('Y/m/d');
+			$endMonthCar = $endMonthCar->format('Y/m/d');
 		}
+
 		// Return months, monthsText, startEndYear, off days
 		$data = $this->handleMonthYear($startMonth, $endMonth, $teamID, $user_id);
 
@@ -119,6 +126,17 @@ class StatisticsController extends Controller
 		$endMonth = $_GET['endMonth'];
 		$teamID = $_GET['team_id'];
 
+		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
+		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
+
+		if (2 == $teamID) {
+			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
+			$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+		} else {
+			$startMonthCar = $startMonthCar->format('Y/m/d');
+			$endMonthCar = $endMonthCar->format('Y/m/d');
+		}
+
 		// Return project type
 		$types = $this->typeWithClass($teamID);
 
@@ -126,10 +144,10 @@ class StatisticsController extends Controller
 		$data = $this->handleMonthYear($startMonth, $endMonth, $teamID, $user_id, true);
 
 		// Get users
-		$users = $this->getUsers($startMonth, $endMonth, $teamID, $user_id);
+		$users = $this->getUsers($startMonthCar, $endMonthCar, $teamID, $user_id);
 
 		// Return totals
-		$totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $users['disableUsersInMonth'], $users['hoursOfDisableUser'], $data['off_days'], $startMonth, $endMonth, $user_id, $teamID);
+		$totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $users['disableUsersInMonth'], $users['hoursOfDisableUser'], $data['off_days'], $startMonthCar, $endMonthCar, $user_id, $teamID);
 
 		// infoUser
 		$infoUser = false;

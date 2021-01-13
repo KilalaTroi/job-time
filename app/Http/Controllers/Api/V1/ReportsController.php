@@ -707,13 +707,17 @@ class ReportsController extends Controller
 				->paginate(20);
 		}
 
+		$projects = $filters['department'] ? $this->getProject( $filters['department']['id'], $filters['team']) : array();
+		$issues = $filters['project'] ? $this->getIssue( $filters['project']['id'], $filters['issueYear'] ? $filters['issueYear']['id'] : null ) : array();
+		$issuesYear = $filters['project'] ? $this->getIssueYear( $filters['project']['id'], $filters['issue'] ? $filters['issue']['id'] : null ) : array();
+
 		return response()->json([
 			'reports' => isset($dataReports) && !empty($dataReports) ? $dataReports : '',
 			'users' => $this->getUsers($filters['team']),
 			'departments' => $this->getDepartments($filters['team']),
-			'projects' => $this->getProject($filters['department']['id'], $filters['team']),
-			'issues' => $this->getIssue($filters['project']['id'], $filters['issueYear']['id']),
-			'issuesYear' => $this->getIssueYear($filters['project']['id'], $filters['issue']['id'])
+			'projects' => $projects,
+			'issues' => $issues,
+			'issuesYear' => $issuesYear
 		]);
 	}
 

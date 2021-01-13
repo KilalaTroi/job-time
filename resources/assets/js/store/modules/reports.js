@@ -297,7 +297,7 @@ export default {
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
       if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (!state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
+        if (state.selectedItem.attendPerson && !state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
       } 
 
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
@@ -348,7 +348,7 @@ export default {
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
       if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (!state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
+        if (state.selectedItem.attendPerson && !state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
       }
       
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
