@@ -263,6 +263,12 @@ export default {
   async created() {
     const _this = this;
     _this.filters.team = _this.currentTeam.id;
+
+    if ( _this.action.preview || _this.action.new || _this.action.edit || _this.action.reset ) {
+      _this.action.preview = _this.action.new = _this.action.edit = _this.action.reset = false;
+      _this.resetFilters('all');
+    }
+
     _this.setColumns(_this.$ml.current);
     $(document).on("click", ".languages button", function () {
       _this.setColumns(_this.$ml.current);
@@ -272,21 +278,20 @@ export default {
   watch: {
     filters: [
       {
-        handler: function (value, oldValue) {
+        handler: async function (value, oldValue) {
           const _this = this;
-          if(!_this.action.preview && !_this.action.new && !_this.action.edit && !_this.action.reset){
-            _this.getAll();
+
+          if ( !_this.action.preview && !_this.action.new && !_this.action.edit && !_this.action.reset ) {
+            let data = await _this.getAll();
 
             if (value.team != _this.currentTeam.id) {
-              _this.setCurrentTeam(value.team);
               _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
+              _this.setCurrentTeam(value.team);
+              
             } else {
-              setTimeout(function(){ 
-                _this.action.reset = true;
-                _this.resetFilters();
-              }, 1500);
-            }
-            
+              _this.action.reset = true;
+              _this.resetFilters();
+            } 
           }
         },
         deep: true

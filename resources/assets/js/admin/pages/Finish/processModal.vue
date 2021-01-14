@@ -216,6 +216,7 @@ export default {
             p_name: this.currentProcess.project,
             i_name: this.currentProcess.i_name,
             page: this.currentProcess.page,
+            file: this.currentProcess.file,
             page_number: this.currentProcess.page_number,
             phase: this.currentProcess.phase,
             status: this.currentProcess.status,

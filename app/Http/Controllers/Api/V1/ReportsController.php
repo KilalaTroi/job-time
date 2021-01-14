@@ -643,6 +643,7 @@ class ReportsController extends Controller
 			'issue'	=> $request->get('issue'),
 			'issueYear'	=> $request->get('issue_year'),
 		);
+
 		if ($request->get('page') != -1) {
 			$dataReports =  DB::table('reports as r')
 				->select(
@@ -674,13 +675,13 @@ class ReportsController extends Controller
 					'r.translatable as translatable',
 					'seen',
 					'r.issue',
-					'i.project_id',
+					'p.id as project_id',
 					'p.dept_id'
 				)
 				->leftJoin('teams as t', 't.id', '=', 'r.team_id')
 				->leftJoin('issues as i', 'i.id', '=', 'r.issue')
-				->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-				->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+				->leftJoin('projects as p', 'p.id', '=', 'r.project_id')
+				->leftJoin('departments as d', 'd.id', '=', 'r.dept_id')
 				->when($filters['type'], function ($query,  $type) {
 					return $query->where('r.type', $type);
 				})

@@ -109,7 +109,7 @@ export default {
   },
 
   actions: {
-    getAll({ state, commit, rootGetters }, page = 1) {
+    async getAll({ state, commit, rootGetters }, page = 1) {
       const uri = "/data/reports";
       const dataSend = {
         page: page,
@@ -123,7 +123,7 @@ export default {
         issue_year: state.filters.issue_year,
       }
 
-      axios
+      await axios
         .post(uri, dataSend)
         .then((res) => {
           commit('SET_DATA', res.data.reports)
@@ -133,9 +133,11 @@ export default {
           console.log(err);
           alert("Could not load data");
         });
+      
+      return true;
     },
 
-    handleGetItem({ state, commit, rootGetters }, data) {
+    async handleGetItem({ state, commit, rootGetters, dispatch }, data) {
       let item = rootGetters['getObjectByID'](state.data.data, data.id);
       item.isSeen = data.seen;
       item.attendPerson = null;
@@ -153,8 +155,11 @@ export default {
         user_id: null,
         team: item.team_id,
       }
-      commit('SET_FILTERS', filters)
-      
+
+      state.action.reset = true;
+      await commit('SET_FILTERS', filters)
+      await dispatch('getAll', -1);
+      state.action.reset = false;
     },
 
     editReport({ state, dispatch }, data) {
@@ -200,7 +205,7 @@ export default {
         let flagIssue = false;
         let flagIssueYear = false;
 
-        const checkProject = state.filters.project ? state.filters.project.id : "";
+        const checkProject = state.filters.project ? state.filters.project.id : "not-found";
         (state.options.projects).forEach(function (item) {
           if (item.id == checkProject) {
             flagProject = true;
@@ -208,7 +213,7 @@ export default {
           }
         });
 
-        const checkIssue = state.filters.issue ? state.filters.issue.id : "";
+        const checkIssue = state.filters.issue ? state.filters.issue.id : "not-found";
         (state.options.issues).forEach(function (item) {
           if (item.id == checkIssue) {
             flagIssue = true;
@@ -216,7 +221,7 @@ export default {
           }
         });
 
-        const checkIssueYear = state.filters.issue_year ? state.filters.issue_year.id : "";
+        const checkIssueYear = state.filters.issue_year ? state.filters.issue_year.id : "not-found";
         (state.options.issues_year).forEach(function (item) {
           if (item.id == checkIssueYear) {
             flagIssueYear = true;
@@ -225,12 +230,11 @@ export default {
         });
 
         if (!flagProject) state.filters.project = null;
-        if (!flagIssue || !flagProject) state.filters.issue = null;
-        if (!flagIssueYear || !flagProject) state.filters.issue_year = null;
-
-        state.action.reset = false;
-        
+        if (!flagIssue) state.filters.issue = null;
+        if (!flagIssueYear) state.filters.issue_year = null;
       }
+
+      state.action.reset = false;
     },
 
     translateContent({ state, commit }) {
@@ -267,8 +271,10 @@ export default {
     },
 
     backToList({ state, dispatch }) {
-      state.action.new = state.action.preview = state.action.edit = false;
+      state.action.new = state.action.preview = state.action.edit = false;  
       dispatch('resetSelectedItem');
+      dispatch('resetValidate'); 
+      state.action.reset = true; 
       dispatch('resetFilters', 'all');
     },
 
@@ -295,9 +301,10 @@ export default {
 
       if (!state.selectedItem.title && !state.selectedItem.title_ja) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
-      if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
+      if (!state.filters.user_id) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (state.selectedItem.attendPerson && !state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
+        if ( !state.selectedItem.attendPerson ) 
+        state.validationErrors = [["Please choosing the user attend or destination"], ...state.validationErrors];
       } 
 
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
@@ -346,9 +353,10 @@ export default {
 
       if (!state.selectedItem.title && !state.selectedItem.title_ja) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
-      if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
+      if (!state.filters.user_id) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (state.selectedItem.attendPerson && !state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
+        if (!state.selectedItem.attendPerson) 
+        state.validationErrors = [["Please choosing the user attend or destination"], ...state.validationErrors];
       }
       
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];

@@ -522,21 +522,21 @@ export default {
     ],
     filters: [
       {
-        handler: function (value) {
+        handler: async function (value) {
           const _this = this;
-          if(_this.action.edit && !_this.action.reset) {
-            _this.getAll(-1);
 
+          if ( _this.action.edit && !_this.action.reset ) {
+            let data = await _this.getAll(-1);
+            
             if (value.team != _this.currentTeam.id) {
               _this.setCurrentTeam(value.team);
-              _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
+              _this.action.reset = true;
+              _this.resetFilters('all');
+              
             } else {
-              setTimeout(function(){ 
-                _this.action.reset = true;
-                _this.resetFilters();
-              }, 1500);
-            }
-            
+              _this.action.reset = true;
+              _this.resetFilters();
+            } 
           }
         },
         deep: true
