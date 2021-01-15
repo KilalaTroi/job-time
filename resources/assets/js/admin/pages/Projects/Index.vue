@@ -20,8 +20,6 @@
                     :placeholder="$ml.with('VueJS').get('txtKeyword')"
                     type="text"
                     class="form-control"
-                    v-on:keyup="getAllProject"
-                    v-on:keyup.enter="getAllProject"
                   />
                 </div>
               </div>
@@ -290,7 +288,7 @@ export default {
     if (!_this.deptOptions.length) await _this.getOptionsDept(true);
     if (!_this.typeOptions.length) await _this.getOptionsType(true);
     _this.filters.team = _this.currentTeam.id;
-    await _this.getAllProject();
+    // await _this.getAllProject();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
@@ -303,7 +301,7 @@ export default {
           if ( value.team != this.currentTeam.id ) {
             this.setCurrentTeam(value.team);
           }
-          this.getAllProject(1)
+          this.getAllProject()
         },
         deep: true
       },
