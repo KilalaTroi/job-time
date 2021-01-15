@@ -235,10 +235,11 @@ class Uploadcontroller extends Controller
 			->leftJoin('projects as pr', 'pr.id', '=', 'i.project_id')
 			->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
 			->leftJoin('types as t', 't.id', '=', 'pr.type_id')
-			->where(function ($query) {
-				$query->where('p.status', 'Finished Upload')
-					->orWhere('p.status', 'Finished Work');
-			})
+			->where('p.status', 'Finished Upload')
+			// ->where(function ($query) {
+			// 	$query->where('p.status', 'Finished Upload')
+			// 		->orWhere('p.status', 'Finished Work');
+			// })
 			->where(function ($query) use ($teamFilter) {
 				$query->where('pr.team', '=', $teamFilter)
 					->orWhere('pr.team', 'LIKE', $teamFilter . ',%')
