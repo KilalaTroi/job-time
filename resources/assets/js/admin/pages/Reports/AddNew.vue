@@ -435,8 +435,6 @@ export default {
 
   async created() {
     const _this = this;
-
-    _this.filters.page = -1;
     _this.filters.type = "Notice";
     if(_this.currentTeam == _this.loginUser.team && _this.loginUser.id != 1){
       _this.filters.user_id = [
@@ -450,6 +448,10 @@ export default {
     _this.selectedItem.language =  _this.selectedItemOld.language = this.$ml.current;
 	},
   methods: {
+    ...mapActions({
+      setCurrentTeam: "setCurrentTeam",
+    }),
+
     ...mapActions('reports', {
       getAll: "getAll",
       resetFilters: "resetFilters",
@@ -495,10 +497,12 @@ export default {
       {
         handler: function (value,valueOld) {
           const _this = this;
-          if(value.content || value.content_ja) _this.isEditing = true;
-          if(value.language != this.selectedItemOld.language){
-            this.selectedItemOld.language = value.language;
-            _this.languageChange();
+          if(_this.action.new) {
+            if(value.content || value.content_ja) _this.isEditing = true;
+            if(value.language != _this.selectedItemOld.language){
+              _this.selectedItemOld.language = value.language;
+              _this.languageChange();
+            }
           }
         },
         deep: true
@@ -506,10 +510,28 @@ export default {
     ],
     filters: [
       {
-        handler: function (value) {
-          if(value.type != this.typeOld){
-            this.typeOld = value.type;
-            this.typeReportChange();
+        handler: async function (value) {
+          const _this = this;
+
+          if(value.type != _this.typeOld){
+            if(_this.action.new) {
+              _this.typeOld = value.type;
+              _this.typeReportChange();
+            }
+          }
+
+          if(_this.action.new && !_this.action.reset) {
+            let data = await _this.getAll(-1);
+
+            if (value.team != _this.currentTeam.id) {
+              _this.setCurrentTeam(value.team);
+              _this.action.reset = true;
+              _this.resetFilters('all');
+
+            } else {
+              _this.action.reset = true;
+              _this.resetFilters();
+            } 
           }
         },
         deep: true

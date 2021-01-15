@@ -235,7 +235,10 @@ class Uploadcontroller extends Controller
 			->leftJoin('projects as pr', 'pr.id', '=', 'i.project_id')
 			->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
 			->leftJoin('types as t', 't.id', '=', 'pr.type_id')
-			->where('p.status', 'Finished Upload')
+			->where(function ($query) {
+				$query->where('p.status', 'Finished Upload')
+					->orWhere('p.status', 'Finished Work');
+			})
 			->where(function ($query) use ($teamFilter) {
 				$query->where('pr.team', '=', $teamFilter)
 					->orWhere('pr.team', 'LIKE', $teamFilter . ',%')
@@ -262,7 +265,7 @@ class Uploadcontroller extends Controller
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
 					->orWhere('t.email', '!=', NULL);
-			})->get();
+			})->groupBy('p.id')->get();
 		// ->paginate(20);
 
 		// Get issues IDs
@@ -604,6 +607,7 @@ class Uploadcontroller extends Controller
 				'p_name' => $request->get('p_name'),
 				'i_name' => $request->get('i_name'),
 				'page' => $request->get('page'),
+				'file' => $request->get('file'),
 				'phase' => $request->get('phase'),
 				'status' => $request->get('status')
 			], function ($message) use ($emails, $from, $request) {

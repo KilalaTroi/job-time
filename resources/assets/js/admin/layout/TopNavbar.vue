@@ -72,7 +72,6 @@ export default {
             setLoginUser: 'setLoginUser',
             setCurrentLang: 'setCurrentLang',
             setCurrentTeam: 'setCurrentTeam',
-            // setReportNotify: 'setReportNotify',
         }),
 
         activeLanguage(language) {

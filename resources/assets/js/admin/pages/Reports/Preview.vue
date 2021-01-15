@@ -70,15 +70,6 @@
       <div class="col-sm-9">
         <div class="form-group">
           <label><strong>{{ $ml.with("VueJS").get("txtReporter") }}</strong></label>
-					 <!-- <multiselect
-              :multiple="true"
-              v-model="filters.user_id"
-              :options="options.users"
-							:disabled="true"
-              :placeholder="$ml.with('VueJS').get('txtPickSome')"
-              label="text"
-              track-by="text"
-            ></multiselect> -->
           <input
             :value="selectedItem.reporter"
             type="text"
@@ -202,19 +193,10 @@ export default {
 	},
 
 	computed: {
-    ...mapGetters({
-      currentTeamOption: "currentTeamOption",
-      // currentTeam: "currentTeam",
-      getLangCode: "getLangCode",
-      customFormatter: "customFormatter",
-      // disabledStartDates: "disabledStartDates",
-      // disabledEndDates: "disabledEndDates"
-    }),
     ...mapGetters('reports',{
       filters: "filters",
       selectedItem: "selectedItem",
       options: "options",
-      action: "action",
     }),
   },
 
@@ -236,25 +218,26 @@ export default {
     ...mapActions("reports", {
       backToList: "backToList",
 			updateSeen: "updateSeen",
-			viewReport: "viewReport",
 			exportPDF: "exportPDF"
     }),
+
     getObjectValue(data, id) {
       let obj = data.filter((elem) => {
         if (elem.id == id) return elem;
       });
 
       if (obj.length > 0) return obj[0];
-		},
-		 getReporter(data) {
-				let result = [];
-				if(data){
-					let arrData = data.split(',');
-					result = arrData.map((item, index) => {
-							return this.getObjectValue(this.options.users, item).text;
-					});
-					return result.join(', ');
-				}
+    },
+    
+		getReporter(data) {
+      let result = [];
+      if(data){
+        let arrData = data.split(',');
+        result = arrData.map((item, index) => {
+            return this.getObjectValue(this.options.users, item).text;
+        });
+        return result.join(', ');
+      }
 		},
   },
 };
