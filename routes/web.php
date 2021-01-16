@@ -54,6 +54,8 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
     Route::get('all-off-days', 'OffDaysController@allOffDays');
+    Route::get('all-off-day-week', 'OffDaysController@allOffDayWeek');
+
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::get('issue-pages', 'JobsController@getIssuePages');
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
