@@ -94,14 +94,8 @@ class OffDaysController extends Controller
 			$offDay = $offDay->toArray();
 			$dataStartWeekDay = $dataEndWeekDay = array();
 
-			if ('all_day' == $offDay['type']) {
-				$dataStartWeekDay = $this->getOffDayStartWeek($offDay['date']);
-				$dataEndWeekDay = $this->getOffDayEndWeek($offDay['date']);
-			} elseif ('afternoon' == $offDay['type']) {
-				$dataEndWeekDay = $this->getOffDayEndWeek($offDay['date']);
-			}	elseif ('morning' == $offDay['type']) {
-				$dataStartWeekDay = $this->getOffDayMorning($offDay['date']);
-			}
+			$dataStartWeekDay = $this->getOffDayStartWeek($offDay['date']);
+			$dataEndWeekDay = $this->getOffDayEndWeek($offDay['date']);
 
 			$dataDate = array_merge($dataStartWeekDay, $dataEndWeekDay);
 
