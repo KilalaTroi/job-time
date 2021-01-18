@@ -227,6 +227,23 @@ export default {
   cursor: move;
   color: rgba(0, 0, 0, 0.8);
   min-height: 0;
+  &.printed{
+    position: relative;
+    padding-right: 25px;
+    &::after{
+      content: "\f046";
+      display: inline-block;
+      font: normal normal normal 14px/1 FontAwesome;
+      font-size: inherit;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-top: 1px;
+    }
+  }
 }
 
 .fc-time-grid-event .fc-time,

@@ -25,9 +25,10 @@ class OffDaysController extends Controller
 			->select(
 				'id',
 				'type',
-				'date'
+				'date',
+				'status'
 			)
-			->where('status', '=', 'approved')
+			->whereIn('status', array('approved', 'printed'))
 			->where('user_id', '=', $userID)
 			->where('date', '>=',  $startDate)
 			->where('date', '<',  $endDate)
@@ -60,6 +61,7 @@ class OffDaysController extends Controller
 				'users.name as name',
 				'users.id as user_id',
 				'off_days.type as type',
+				'off_days.status as status',
 				'off_days.date as date'
 			)
 			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
@@ -68,7 +70,7 @@ class OffDaysController extends Controller
 			}, function ($query) {
 				return $query;
 			})
-			->where('off_days.status', '=', 'approved')
+			->whereIn('off_days.status', array('approved', 'printed'))
 			->where('off_days.date', '>=',  $startDate)
 			->where('off_days.date', '<',  $endDate)
 			->get()->toArray();
@@ -88,7 +90,8 @@ class OffDaysController extends Controller
 	{
 		$offDay = OffDay::findOrFail($request->input('id'));
 		$results = array(
-			'total' => 0
+			'total' => 0,
+			'ids' => ''
 		);
 		if ($offDay->count() > 0) {
 			$offDay = $offDay->toArray();
@@ -103,10 +106,12 @@ class OffDaysController extends Controller
 				if ($key == 0) {
 					$results['total'] = "all_day" == $item['type'] ? ($results['total'] + 1) : ($results['total'] + 0.5);
 					$results[$item['type']][] = date("d/m/Y", strtotime($item['date']));
+					$results['ids'] .= $item['id'] . ',';
 				} else {
 					if ($dataDate[$key - 1]['date'] != $item['date']) {
 						$results['total'] = "all_day" == $item['type'] ? ($results['total'] + 1) : ($results['total'] + 0.5);
 						$results[$item['type']][] = date("d/m/Y", strtotime($item['date']));
+						$results['ids'] .= $item['id'] . ',';
 					}
 				}
 			}
@@ -114,10 +119,12 @@ class OffDaysController extends Controller
 			$results['morning'] = isset($results['morning']) && !empty($results['morning']) ? array_shift($results['morning']) : '';
 			$results['afternoon'] = isset($results['afternoon']) && !empty($results['afternoon']) ? array_shift($results['afternoon']) : '';
 
-			if (count($results['all_day']) > 1)	$results['all_day'] = $results['all_day'][0] . ' - ' . $results['all_day'][count($results['all_day']) - 1];
-			else $results['all_day'] = $results['all_day'][0];
+			if (isset($results['all_day'])) {
+				if (count($results['all_day']) > 1)	$results['all_day'] = $results['all_day'][0] . ' - ' . $results['all_day'][count($results['all_day']) - 1];
+				else $results['all_day'] = $results['all_day'][0];
+			}
 
-			if($dataDate[0]['date'] != $dataDate[count($dataDate) - 1]['date']) $results['date'] = date("d/m/Y", strtotime($dataDate[0]['date'])) . ' - '. date("d/m/Y", strtotime($dataDate[count($dataDate) - 1]['date']));
+			if ($dataDate[0]['date'] != $dataDate[count($dataDate) - 1]['date']) $results['date'] = date("d/m/Y", strtotime($dataDate[0]['date'])) . ' - ' . date("d/m/Y", strtotime($dataDate[count($dataDate) - 1]['date']));
 			else $results['date'] = date("d/m/Y", strtotime($dataDate[0]['date']));
 		}
 
@@ -195,10 +202,10 @@ class OffDaysController extends Controller
 		$data = array();
 		for ($i = 0; $i <= $intDate - $intDateWeek; $i++) {
 			$dataDate = $dateCab->copy()->subDay($i);
-			$offDay = OffDay::select('type', 'date')
+			$offDay = OffDay::select('id', 'type', 'date')
 				->where('user_id', $this->user['id'])
 				->where('date', date("Y-m-d", strtotime($dataDate)))
-				->where('status', '=', 'approved')->first();
+				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
 			$offDay = $offDay->toArray();
 			if (isset($data) && !empty($data)) {
@@ -222,10 +229,10 @@ class OffDaysController extends Controller
 		$data = array();
 		for ($i = 0; $i <= $intDateWeek - $intDate; $i++) {
 			$dataDate = $dateCab->copy()->addDay($i);
-			$offDay = OffDay::select('type', 'date')
+			$offDay = OffDay::select('id', 'type', 'date')
 				->where('user_id', $this->user['id'])
 				->where('date', date("Y-m-d", strtotime($dataDate)))
-				->where('status', '=', 'approved')->first();
+				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
 			$offDay = $offDay->toArray();
 			if (isset($data) && !empty($data)) {

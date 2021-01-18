@@ -134,10 +134,10 @@ export default {
 				.then(res => {
 					if (res.data.offDays.length) {
 						res.data.offDays = res.data.offDays.map((item, index) => {
-							let type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
-
+							const type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
 							return Object.assign({}, item, {
 								title: getters['recapTime'](item.type, rootState.translateTexts) + getters['recapName'](item.name),
+								className: 'printed' == item.status ? 'printed' : '',
 								borderColor: type.color,
 								backgroundColor: type.color,
 								start: rootGetters['dateFormat'](item.date),
@@ -262,7 +262,7 @@ export default {
 		},
 
 		printEvents({ }, selectItem) {
-			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date;
+			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date + '&ids=' + selectItem.ids;
 			axios.get(uri)
 				.then(res => {
 					if (res.data.status == 1) window.open(res.data.file_name, "_blank");
