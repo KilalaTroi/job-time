@@ -39,45 +39,6 @@
               </div>
             </div>
           </div>
-          <hr>
-          <div class="row">
-            <div class="col-sm-6">
-              <div class="form-group">
-                <label class>{{ $ml.with("VueJS").get("txtStartDate") }}</label>
-                <datepicker
-                  name="startDate"
-                  input-class="form-control"
-                  placeholder="Select Date"
-                  v-model="selectedItem.start_date"
-                  :format="dateFormat(selectedItem.start_date, 'YYYY-MM-DD')"
-                  :language="getLangCode(this.$ml)"
-                ></datepicker>
-              </div>
-            </div>
-            <div class="col-sm-6">
-              <div class="form-group">
-                <label class>{{ $ml.with("VueJS").get("txtEndDate") }}</label>
-                <datepicker
-                  name="endDate"
-                  input-class="form-control"
-                  placeholder="Select Date"
-                  v-model="selectedItem.end_date"
-                  :format="dateFormat(selectedItem.end_date, 'YYYY-MM-DD')"
-                  :disabled-dates="disabledStartDates(selectedItem.start_date)"
-                  :language="getLangCode(this.$ml)"
-                ></datepicker>
-              </div>
-            </div>
-            <div class="col-12 col-sm-auto ml-auto">
-               <button
-                @click="printEvents(selectedItem)"
-                type="button"
-                class="btn btn-primary"
-              >
-                {{ $ml.with("VueJS").get("txtPrint") }}
-              </button>
-            </div>
-          </div>
         </card>
       </div>
       <div class="col-sm-12 row--right">
@@ -141,7 +102,6 @@ export default {
       offDayTypes: "offDayTypes",
       currentEvent: "currentEvent",
       filters: "filters",
-      selectedItem: "selectedItem"
     }),
   },
 
@@ -153,10 +113,6 @@ export default {
         dayGridPlugin,
         timeGridPlugin,
       ],
-
-      selectedItemOld: {
-        'start_date': new Date
-      },
 
       options: {
         team: [],
@@ -189,7 +145,6 @@ export default {
     ...mapActions("offdays", {
       handleMonthChangeAll: "handleMonthChangeAll",
       getAllOffDays: "getAllOffDays",
-      printEvents: "printEvents",
       addEvent: "addEvent",
       clickEvent: "clickEvent",
       deleteEvent: "deleteEvent",
@@ -230,17 +185,6 @@ export default {
   },
 
   watch: {
-    selectedItem: [
-      {
-        handler: function (value) {
-          if(value.start_date !== this.selectedItemOld.start_date && value.start_date > this.selectedItem.end_date){
-            this.selectedItem.end_date = '';
-            this.selectedItemOld.start_date = value.start_date
-          }
-        },
-        deep: true,
-      },
-    ],
     filters: [
       {
         handler: function (value) {

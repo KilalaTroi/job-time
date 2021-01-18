@@ -5,20 +5,20 @@ export default {
 		offDayTypes: [
 			{
 				id: "morning",
-				name: "[AM] Half-day (8:00 - 12:00)",
-				text: "[AM] Half-day (8:00 - 12:00)",
+				name: "[AM] Half-day (08:00 - 12:00)",
+				text: "Half-day (08:00 - 12:00)",
 				color: "#00AEEF",
 			},
 			{
 				id: "afternoon",
 				name: "[PM] Half-day (13:00 - 17:00)",
-				text: "[PM] Half-day (13:00 - 17:00)",
+				text: "Half-day (13:00 - 17:00)",
 				color: "#FFDD00",
 			},
 			{
 				id: "all_day",
-				name: "Full-day (8:00 - 17:00)",
-				text: "Full-day (8:00 - 17:00)",
+				name: "Full-day (08:00 - 17:00)",
+				text: "Full-day (08:00 - 17:00)",
 				color: "#F55555",
 			},
 		],
@@ -32,10 +32,11 @@ export default {
 			user_id: document.querySelector("meta[name='user-id']").getAttribute('content')
 		},
 		selectedItem: {
-			'start_date': new Date,
-			'end_date': '',
-			'type': 'morning'
-		}
+			afternoon: '',
+			all_day: '',
+			morning: '',
+			total: 0,
+		},
 	},
 
 	getters: {
@@ -91,6 +92,10 @@ export default {
 
 		SET_TEAM: (state, data) => {
 			state.team = data
+		},
+
+		SET_SELECTED_ITEM: (state, data) => {
+			state.selectedItem = Object.assign({}, data)
 		},
 
 		UPDATE_CURRENT_EVENT: (state, data) => {
@@ -174,6 +179,19 @@ export default {
 				});
 		},
 
+		getAllOffDayWeek({ commit }, id) {
+			const uri = '/data/all-off-day-week?id=' + id;
+
+			axios.get(uri)
+				.then(res => {
+					commit('SET_SELECTED_ITEM', res.data);
+				})
+				.catch(err => {
+					console.log(err);
+					alert("Could not load Off days");
+				});
+		},
+
 		setTeam({ commit }, data) {
 			commit('SET_TEAM', data)
 		},
@@ -188,9 +206,11 @@ export default {
 			}).catch(err => console.log(err));
 		},
 
-		clickEvent({ commit, rootGetters, state }, item) {
+		clickEvent({ commit, rootGetters, state, dispatch }, item) {
 			const user_id = rootGetters['getObjectByID'](state.allOffDays, item.event.id * 1)['user_id'];
 			if (user_id == state.filters.user_id) {
+				if ('morning' != item.event._def.extendedProps.type) dispatch('getAllOffDayWeek', item.event.id);
+				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 })
 				commit('UPDATE_CURRENT_EVENT', item.event);
 				$('#editEvent').modal('show');
 			}
@@ -241,11 +261,11 @@ export default {
 				});
 		},
 
-		printEvents({ rootGetters }, selectItem) {
-			const uri = "/pdf/absence?start_date=" + rootGetters['dateFormat'](selectItem.start_date, 'YYYY-MM-DD') + "&end_date=" + rootGetters['dateFormat'](selectItem.end_date, 'YYYY-MM-DD') ;
+		printEvents({ }, selectItem) {
+			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date;
 			axios.get(uri)
 				.then(res => {
-					if(res.data.status == 1)	window.open(res.data.file_name, "_blank");
+					if (res.data.status == 1) window.open(res.data.file_name, "_blank");
 					else alert('Error Print');
 				})
 				.catch(err => {
