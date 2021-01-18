@@ -42,6 +42,16 @@ class pdfController extends Controller
 		}
 		if (false == $offDay) return response()->json(array('status' => 0), 200);
 
+		$ids = NULL !== $request->input('ids') && !empty($request->input('ids')) ? explode(',', $request->input('ids')) : explode(',', $request->input('id'));
+
+		foreach ($ids as $id) {
+			if (isset($id) && !empty($id)) {
+				DB::table('off_days')
+					->where('id', $id)
+					->update(array('status' => 'printed'));
+			}
+		}
+
 		$data = array(
 			'name' => $this->user['fullname'],
 			'off' => $offDay['off'],
