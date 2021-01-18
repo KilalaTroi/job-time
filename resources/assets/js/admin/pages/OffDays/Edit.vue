@@ -15,7 +15,7 @@
       </div>
       <hr />
       <div class="form-group text-right">
-        <div class="d-inline-flex align-items-center" v-if="currentEvent.extendedProps &&  'morning' != currentEvent.extendedProps.type">
+        <div class="d-inline-flex align-items-center" v-if="multiplePrints && currentEvent.extendedProps &&  'morning' != currentEvent.extendedProps.type">
           <input class="mr-2" v-model="multiplePrints" id="multiple_days" type="checkbox">
           <label class="mb-0" :style="{ position: 'relative', top: '1px' }" for="multiple_days">Multiple Days</label>
         </div>
@@ -68,7 +68,7 @@ export default {
       {
         handler: function (value) {
           this.multiplePrints = false
-          if(value.total > 0) this.multiplePrints = true;
+          if(value.total > 0 && value.ids.split(',').length > 2) this.multiplePrints = true;
         },
         deep: true,
       },
