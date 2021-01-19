@@ -88,10 +88,10 @@
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
-                            <a v-show="3 != team" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
-                            <a v-show="3 == team" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">Total projects</a>
-                            <a v-show="3 == team" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">Total jobs</a>
-                            <a v-show="2 == team" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">Table</a>
+                            <a v-if="3 != team" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
+                            <a v-if="3 == team" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">Total projects</a>
+                            <a v-if="3 == team" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">Total jobs</a>
+                            <a v-if="2 == team" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">Table</a>
                         </div>
                     </nav>
                      <div class="tab-content" id="nav-tabContent">
@@ -114,7 +114,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-show="3 != team" class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
+                        <div v-if="3 != team" class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
                             <div class="row">
                                 <div class="col-md-12">
                                     <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
@@ -127,7 +127,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-show="3 == team" class="tab-pane fade" id="totalprojects" role="tabpanel" aria-labelledby="totalprojects-tab">
+                        <div v-if="3 == team" class="tab-pane fade" id="totalprojects" role="tabpanel" aria-labelledby="totalprojects-tab">
                             <div class="row">
                                 <div class="col-md-12">
                                     <chart-card :chart-data="projectChart.data" :chart-options="projectChart.options" chart-type="Bar" :chart-id="projectChart.id" v-on:chart-loaded="chartLoaded">
@@ -140,7 +140,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-show="3 == team" class="tab-pane fade" id="totaljobs" role="tabpanel" aria-labelledby="totaljobs-tab">
+                        <div v-if="3 == team" class="tab-pane fade" id="totaljobs" role="tabpanel" aria-labelledby="totaljobs-tab">
                             <div class="row">
                                 <div class="col-md-12">
                                     <chart-card :chart-data="jobChart.data" :chart-options="jobChart.options" chart-type="Bar" :chart-id="jobChart.id" v-on:chart-loaded="chartLoaded">
@@ -153,7 +153,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-show="2 == team" class="tab-pane fade" :class="checkUser() ? 'flag' : ''" id="table" role="tabpanel" aria-labelledby="table-tab">
+                        <div v-if="2 == team" class="tab-pane fade" :class="checkUser() ? 'flag' : ''" id="table" role="tabpanel" aria-labelledby="table-tab">
                             <div class="row mt-3">
                                 <button v-if="checkUser()" type="button" class="btn btn-primary" data-toggle="modal" data-target="#totalpageAction" data-backdrop="static" data-keyboard="false">
                                     Update
