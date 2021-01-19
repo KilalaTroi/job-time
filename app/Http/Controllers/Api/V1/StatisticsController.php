@@ -719,22 +719,69 @@ class StatisticsController extends Controller
 		return response()->json($data);
 	}
 
+	function getJobReport()
+	{
+		$teamID = 3;
+
+		$data = array(
+			'totaljob' => $this->getJobReportAll($teamID),
+		);
+
+		return response()->json($data);
+	}
+
 	function getProjectReport()
 	{
-		// $teamID = isset($_GET['team_id']) && $_GET['team_id'] ? $_GET['team_id'] : 0;
 		$teamID = 3;
-		$startMonth = $_GET['startMonth'];
-		$endMonth = $_GET['endMonth'];
 
-		$data = $this->getProjectReportAll($teamID);
-
-		// if (2 == $teamID) $data = $this->getReportPath($teamID, $startMonth, $endMonth);
-		// else $data = $this->getReport($teamID);
+		$data = array(
+			'totalproject' => $this->getProjectReportAll($teamID)
+		);
 
 		return response()->json($data);
 	}
 
 	private function getProjectReportAll($teamID)
+	{
+
+		$results = DB::table('jobs as j')
+			->select(
+				't.id as id',
+				'i.id as issue_id',
+				'p.id as project_id',
+				DB::raw('CONCAT(year(j.date),"", LPAD(month(j.date), 2, "0")) as yearMonth')
+			)
+			->leftJoin('issues as i', 'j.issue_id', '=', 'i.id')
+			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+			->leftJoin('types as t', 't.id', '=', 'p.type_id')
+			->whereNotIn('t.slug', array('other', 'yuidea_other'))
+			->when($teamID, function ($query, $teamID) {
+				return $query->where(function ($query) use ($teamID) {
+					$query->where('p.team', '=', $teamID)
+						->orWhere('p.team', 'LIKE', $teamID . ',%')
+						->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
+						->orWhere('p.team', 'LIKE', '%,' . $teamID);
+				});
+			})->groupBy('p.id', 'yearMonth')->get()->toArray();
+
+
+		$totalProject = array();
+		foreach ($results as $result) {
+			$str = $result->id . '_' . $result->yearMonth;
+			if (isset($totalProject[$str]) && !empty($totalProject[$str])) $totalProject[$str]->project++;
+			else {
+				$totalProject[$str] = (object) array(
+					'id' => $result->id,
+					'yearMonth' => $result->yearMonth,
+					'project' => 1,
+				);
+			}
+		}
+
+		return array_values($totalProject);
+	}
+
+	private function getJobReportAll($teamID)
 	{
 
 		$results = DB::table('jobs as j')
@@ -770,11 +817,7 @@ class StatisticsController extends Controller
 			}
 		}
 
-		$datas = array(
-			'totalproject' =>  array_values($totalIssue),
-		);
-
-		return $datas;
+		return array_values($totalIssue);
 	}
 
 	private function getPageReportAll($teamID)
