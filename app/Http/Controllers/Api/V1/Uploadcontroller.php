@@ -59,16 +59,16 @@ class Uploadcontroller extends Controller
 						});
 				});
 			})
-			->when(!$filters['showFilter'], function ($query) use ($filters) {
-				return $query->where(function ($query) use ($filters) {
-					$query->where('i.start_date', '<=',  $filters['date'])
-						->orWhere('i.start_date', '=',  NULL);
-				})
-					->where(function ($query) use ($filters) {
-						$query->where('i.end_date', '>=',  $filters['date'])
-							->orWhere('i.end_date', '=',  NULL);
-					});
-			})
+			// ->when(!$filters['showFilter'], function ($query) use ($filters) {
+			// 	return $query->where(function ($query) use ($filters) {
+			// 		$query->where('i.start_date', '<=',  $filters['date'])
+			// 			->orWhere('i.start_date', '=',  NULL);
+			// 	})
+			// 		->where(function ($query) use ($filters) {
+			// 			$query->where('i.end_date', '>=',  $filters['date'])
+			// 				->orWhere('i.end_date', '=',  NULL);
+			// 		});
+			// })
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
 					->orWhere('t.email', '!=', NULL);
@@ -235,11 +235,11 @@ class Uploadcontroller extends Controller
 			->leftJoin('projects as pr', 'pr.id', '=', 'i.project_id')
 			->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
 			->leftJoin('types as t', 't.id', '=', 'pr.type_id')
-			->where('p.status', 'Finished Upload')
-			// ->where(function ($query) {
-			// 	$query->where('p.status', 'Finished Upload')
-			// 		->orWhere('p.status', 'Finished Work');
-			// })
+			// ->where('p.status', 'Finished Upload')
+			->where(function ($query) {
+				$query->where('p.status', 'Finished Upload')
+					->orWhere('p.status', 'Finished Work');
+			})
 			->where(function ($query) use ($teamFilter) {
 				$query->where('pr.team', '=', $teamFilter)
 					->orWhere('pr.team', 'LIKE', $teamFilter . ',%')
