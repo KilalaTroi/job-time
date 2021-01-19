@@ -42,7 +42,7 @@
           <div class="col-sm-4" v-if="filters.team == 2">
             <label>{{ $ml.with("VueJS").get("txtQuantity") }}:</label>
             <span class="w-100 vue__time-picker">
-              <input :disabled="selectedItemJob.email || selectedItemJob.room_id" type="number" v-model="selectedItemJob.quantity" class="w-100 display-time all-selected" />
+              <input :disabled="selectedItemJob.email || selectedItemJob.room_id || loginUser.username === 'nancy'" type="number" v-model="selectedItemJob.quantity" class="w-100 display-time all-selected" />
             </span>
           </div>
         </div>
@@ -98,6 +98,7 @@ export default {
 
     ...mapGetters({
       dateFormat: "dateFormat",
+      loginUser: "loginUser",
     }),
 
   },

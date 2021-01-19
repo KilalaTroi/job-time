@@ -130,14 +130,14 @@ export default {
 			})
 		},
 
-		async getItemJob({ state, commit, rootGetters }, id) {
+		async getItemJob({ state, rootState, commit, rootGetters }, id) {
 			let item = rootGetters['getObjectByID'](state.data.jobs.data, id);
 			item.date = state.filters.currentDate;
 			item.start_time = item.end_time = { 'HH': '', 'mm': '' }
 			item.exceptLunchBreak = true;
 			item.showLunchBreak = false;
 
-			if (state.filters.team == 2) {
+			if (state.filters.team == 2 && rootState.loginUser.username != 'nancy') {
 				await axios
 					.get("/data/issue-pages?issue_id=" + item.id)
 					.then((res) => {
