@@ -4,6 +4,7 @@ export default {
 
   state: {
     columns: [],
+
     filters: {
       type: 0,
       start_date: new Date(moment().subtract(1, "years").startOf("month").format("YYYY/MM/DD")),
@@ -15,7 +16,9 @@ export default {
       user_id: null,
       team: "",
     },
+
     data: {},
+
     options: {
       projects: [],
       departments: [],
@@ -29,7 +32,9 @@ export default {
       new: false,
       edit: false,
       preview: false,
+      reset: false,
     },
+
     selectedItem: {
       language: '',
       time: 'HH:mm',
@@ -40,6 +45,7 @@ export default {
       content: '',
       content_ja: ''
     },
+
     validationErrors: '',
     validationSuccess: ''
   },
@@ -103,7 +109,7 @@ export default {
   },
 
   actions: {
-    getAll({ state, commit, rootGetters }, page = 1) {
+    async getAll({ state, commit, rootGetters }, page = 1) {
       const uri = "/data/reports";
       const dataSend = {
         page: page,
@@ -116,7 +122,8 @@ export default {
         issue: state.filters.issue,
         issue_year: state.filters.issue_year,
       }
-      axios
+
+      await axios
         .post(uri, dataSend)
         .then((res) => {
           commit('SET_DATA', res.data.reports)
@@ -126,13 +133,17 @@ export default {
           console.log(err);
           alert("Could not load data");
         });
+      
+      return true;
     },
 
-    handleGetItem({ state, commit, rootGetters }, data) {
+    async handleGetItem({ state, commit, rootGetters, dispatch }, data) {
       let item = rootGetters['getObjectByID'](state.data.data, data.id);
       item.isSeen = data.seen;
       item.attendPerson = null;
       item.time = item.date_time ? rootGetters['dateFormat'](item.date_time, 'HH:mm') : 'HH:mm';
+      commit('SET_SELECTED_ITEM', item)
+
       const filters = {
         start_date: new Date(moment().subtract(1, "years").startOf("month").format("YYYY/MM/DD")),
         end_date: new Date(moment().add(1, "days").format("YYYY/MM/DD")),
@@ -144,8 +155,11 @@ export default {
         user_id: null,
         team: item.team_id,
       }
-      commit('SET_FILTERS', filters)
-      commit('SET_SELECTED_ITEM', item)
+
+      state.action.reset = true;
+      await commit('SET_FILTERS', filters)
+      await dispatch('getAll', -1);
+      state.action.reset = false;
     },
 
     editReport({ state, dispatch }, data) {
@@ -161,6 +175,7 @@ export default {
     sendReport() {
       if (confirm("Send members about this update?")) {
         let uri = "/data/send-report";
+
         axios
           .post(uri)
           .then((res) => {
@@ -190,7 +205,7 @@ export default {
         let flagIssue = false;
         let flagIssueYear = false;
 
-        const checkProject = state.filters.project ? state.filters.project.id : "";
+        const checkProject = state.filters.project ? state.filters.project.id : "not-found";
         (state.options.projects).forEach(function (item) {
           if (item.id == checkProject) {
             flagProject = true;
@@ -198,7 +213,7 @@ export default {
           }
         });
 
-        const checkIssue = state.filters.issue ? state.filters.issue.id : "";
+        const checkIssue = state.filters.issue ? state.filters.issue.id : "not-found";
         (state.options.issues).forEach(function (item) {
           if (item.id == checkIssue) {
             flagIssue = true;
@@ -206,21 +221,25 @@ export default {
           }
         });
 
-        const checkIssueYear = state.filters.issue_year ? state.filters.issue_year.id : "";
+        const checkIssueYear = state.filters.issue_year ? state.filters.issue_year.id : "not-found";
         (state.options.issues_year).forEach(function (item) {
           if (item.id == checkIssueYear) {
             flagIssueYear = true;
             return;
           }
         });
+
         if (!flagProject) state.filters.project = null;
         if (!flagIssue) state.filters.issue = null;
         if (!flagIssueYear) state.filters.issue_year = null;
       }
+
+      state.action.reset = false;
     },
 
     translateContent({ state, commit }) {
       const uri = "/data/translate-content";
+
       axios
         .post(uri, {
           lang: state.selectedItem.language,
@@ -252,14 +271,11 @@ export default {
     },
 
     backToList({ state, dispatch }) {
-      state.action.new = state.action.preview = state.action.edit = false;
+      state.action.new = state.action.preview = state.action.edit = false;  
       dispatch('resetSelectedItem');
-      delete state.filters['page'];
+      dispatch('resetValidate'); 
+      state.action.reset = true; 
       dispatch('resetFilters', 'all');
-
-      dispatch('getAll');
-      // if (1 == flag) {
-      // }
     },
 
     updateSeen({ state, dispatch, commit, rootState }) {
@@ -282,20 +298,19 @@ export default {
 
     addNew({ state, dispatch, commit, rootGetters }) {
       commit('SET_VALIDATE', { error: '', success: '' });
+
       if (!state.selectedItem.title && !state.selectedItem.title_ja) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
-      if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
+      if (!state.filters.user_id) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (!state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
-      } else {
-        if (!state.filters.department) state.validationErrors = [["Please choosing the department"], ...state.validationErrors];
-        if (!state.filters.project) state.validationErrors = [["Please choosing the project"], ...state.validationErrors];
-        if (!state.filters.issue) state.validationErrors = [["Please choosing the issue"], ...state.validationErrors];
-        if (!state.filters.issue_year) state.validationErrors = [["Please choosing the issue year"], ...state.validationErrors];
-      }
+        if ( !state.selectedItem.attendPerson ) 
+        state.validationErrors = [["Please choosing the user attend or destination"], ...state.validationErrors];
+      } 
+
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
       if (!state.validationErrors.length) {
         const uri = "/data/reports-action";
+
         let dataSend = {
           language: state.selectedItem.language,
           translatable: 0,
@@ -303,6 +318,7 @@ export default {
           author: state.filters.user_id.map((item, index) => { return item.id; }).toString(),
           team_id: state.filters.team,
         }
+
         if (state.selectedItem.language == "vi") {
           dataSend.title = dataSend.title_ja = state.selectedItem.title;
           dataSend.content = dataSend.content_ja = state.selectedItem.content;
@@ -310,15 +326,17 @@ export default {
           dataSend.title = dataSend.title_ja = state.selectedItem.title_ja;
           dataSend.content = dataSend.content_ja = state.selectedItem.content_ja;
         }
+
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
           dataSend.attend_other_person = state.selectedItem.attend_other_person;
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
-          dataSend.projects = state.filters.project.id;
-          dataSend.issue = state.filters.issue.id;
-          dataSend.issueYear = state.filters.issue_year.id;
+          dataSend.projects = dataSend.project_id = state.filters.project ? state.filters.project.id : null;
+          dataSend.dept_id = state.filters.department ? state.filters.department.id : null;
+          dataSend.issue = state.filters.issue ? state.filters.issue.id : null;
+          dataSend.issueYear = dataSend.issue_year = state.filters.issue_year ? state.filters.issue_year.id : null;
         }
 
         axios
@@ -332,17 +350,15 @@ export default {
 
     updateReport({ state, dispatch, commit, rootGetters }) {
       commit('SET_VALIDATE', { error: '', success: '' });
+
       if (!state.selectedItem.title && !state.selectedItem.title_ja) state.validationErrors = [["Please typing the title"], ...state.validationErrors];
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
-      if (!state.filters.user_id.length) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
+      if (!state.filters.user_id) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (!state.selectedItem.attendPerson.length) state.validationErrors = [["Please choosing the user attend"], ...state.validationErrors];
-      } else {
-        if (!state.filters.department) state.validationErrors = [["Please choosing the department"], ...state.validationErrors];
-        if (!state.filters.project) state.validationErrors = [["Please choosing the project"], ...state.validationErrors];
-        if (!state.filters.issue) state.validationErrors = [["Please choosing the issue"], ...state.validationErrors];
-        if (!state.filters.issue_year) state.validationErrors = [["Please choosing the issue year"], ...state.validationErrors];
+        if (!state.selectedItem.attendPerson) 
+        state.validationErrors = [["Please choosing the user attend or destination"], ...state.validationErrors];
       }
+      
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
       if (!state.validationErrors.length) {
         let uri = "/data/reports-action/" + state.selectedItem.id;
@@ -351,8 +367,9 @@ export default {
           translatable: state.selectedItem.translatable,
           type: state.filters.type,
           author: state.filters.user_id.map((item, index) => { return item.id; }).toString(),
-          team_id: state.filters.team,
+          team_id: state.filters.team
         }
+
         if (state.selectedItem.language == "vi") {
           dataSend.title = state.selectedItem.title;
           dataSend.content = state.selectedItem.content;
@@ -360,15 +377,17 @@ export default {
           dataSend.title_ja = state.selectedItem.title_ja;
           dataSend.content_ja = state.selectedItem.content_ja;
         }
+
         if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
           dataSend.attend_person = state.selectedItem.attendPerson.map((item, index) => { return item.id; }).toString();
           dataSend.attend_other_person = state.selectedItem.attend_other_person;
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD') + " " + state.selectedItem.time;
         } else {
           dataSend.date_time = rootGetters['dateFormat'](state.selectedItem.date, 'YYYY-MM-DD HH:mm');
-          dataSend.projects = state.filters.project.id;
-          dataSend.issue = state.filters.issue.id;
-          dataSend.issueYear = state.filters.issue_year.id;
+          dataSend.projects = dataSend.project_id = state.filters.project ? state.filters.project.id : null;
+          dataSend.dept_id = state.filters.department ? state.filters.department.id : null;
+          dataSend.issue = state.filters.issue ? state.filters.issue.id : null;
+          dataSend.issueYear = dataSend.issue_year = state.filters.issue_year ? state.filters.issue_year.id : null;
         }
 
         axios
@@ -388,6 +407,7 @@ export default {
     deleteReport({ state, rootGetters, dispatch }, item) {
       if (confirm(rootGetters['getTranslate']('msgConfirmDelete'))) {
         const uri = "/data/reports-action/" + item.id;
+
         axios
           .delete(uri)
           .then((res) => {
@@ -400,6 +420,7 @@ export default {
 
     exportPDF({ state }) {
       const uri = "/pdf/report";
+
       const data = {
         is_metting: 'Meeting' == state.filters.type || 'Notice' == state.filters.type ? 1 : 0,
         title: state.selectedItem.language == "vi" ? state.selectedItem.title : state.selectedItem.title_ja,
@@ -433,8 +454,8 @@ export default {
 
     setColumns({ commit, rootGetters }, language) {
       const columns = [
-        { id: "type", value: rootGetters['getTranslate']("txtReportType"), width: "120", class: "" },
-        { id: "date_time", value: rootGetters['getTranslate']("txtReportDate"), width: "100", class: "" },
+        { id: "type", value: rootGetters['getTranslate']("txtType"), width: "120", class: "" },
+        { id: "date_time", value: rootGetters['getTranslate']("txtDateTime"), width: "100", class: "" },
         { id: "update_date", value: rootGetters['getTranslate']("txtUpdateDate"), width: "", class: "no-wrap" },
         { id: "dept_name", value: rootGetters['getTranslate']("txtDepartment"), width: "100", class: "" },
         { id: "team_name", value: rootGetters['getTranslate']("txtTeam"), width: "100", class: "" },

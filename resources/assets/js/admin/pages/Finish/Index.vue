@@ -11,7 +11,7 @@
                 </h4>
 
                 <div
-                  class="form-group mb-0 d-flex justify-content-between"
+                  class="form-group mb-0 d-flex justify-content-between align-items-center"
                   style="min-width: 160px"
                 >
                   <select-2
@@ -38,6 +38,7 @@
                     >
                     </datepicker>
                   </div>
+                  <button-view-table-option class="mt-0 ml-2" />
                 </div>
               </div>
             </template>
@@ -79,6 +80,11 @@
           </card>
         </div>
       </div>
+       <view-table-option
+         dataTable="finsh"
+        :dataItems="items"
+        :dataCols="columns"
+      />
     </div>
   </div>
 </template>
@@ -92,6 +98,8 @@ import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
+import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
+import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -102,6 +110,8 @@ export default {
     Select2,
     ProcessModal,
     ProcessDetailModal,
+    ButtonViewTableOption,
+    ViewTableOption,
   },
 
   computed: {
@@ -109,6 +119,7 @@ export default {
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       dateFormat: "dateFormat",
+      disabledEndDates: "disabledEndDates",
     }),
   },
 
@@ -120,60 +131,77 @@ export default {
           value: this.$ml.with("VueJS").get("txtDepartment"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "t_name",
           value: this.$ml.with("VueJS").get("txtJobType"),
           width: "120",
           class: "",
+          filter: true
+        },
+        {
+          id: "t_value",
+          value: this.$ml.with("VueJS").get("txtColor"),
+          width: "120",
+          class: "text-center",
+          filter: true
         },
         {
           id: "p_name",
           value: this.$ml.with("VueJS").get("txtProject"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "i_name",
           value: this.$ml.with("VueJS").get("txtIssue"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "phase",
           value: this.$ml.with("VueJS").get("txtPhase"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "date",
           value: this.$ml.with("VueJS").get("txtDateTime"),
           width: "160",
           class: "",
+          filter: true
         },
         {
           id: "user_name",
           value: this.$ml.with("VueJS").get("txtReporter"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "page",
           value: this.$ml.with("VueJS").get("txtPages"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "file",
           value: this.$ml.with("VueJS").get("txtFiles"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "status",
           value: this.$ml.with("VueJS").get("txtStatus"),
           width: "135",
           class: "",
+          filter: true
         },
       ],
       loading: true,
@@ -215,60 +243,77 @@ export default {
           value: _this.$ml.with("VueJS").get("txtDepartment"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "t_name",
           value: _this.$ml.with("VueJS").get("txtJobType"),
           width: "120",
           class: "",
+          filter: true
+        },
+        {
+          id: "t_value",
+          value: _this.$ml.with("VueJS").get("txtColor"),
+          width: "120",
+          class: "text-center",
+          filter: true
         },
         {
           id: "p_name",
           value: _this.$ml.with("VueJS").get("txtProject"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "i_name",
           value: _this.$ml.with("VueJS").get("txtIssue"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "phase",
           value: _this.$ml.with("VueJS").get("txtPhase"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "date",
           value: _this.$ml.with("VueJS").get("txtDateTime"),
           width: "160",
           class: "",
+          filter: true
         },
         {
           id: "user_name",
           value: _this.$ml.with("VueJS").get("txtReporter"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "page",
           value: _this.$ml.with("VueJS").get("txtPages"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "file",
           value: _this.$ml.with("VueJS").get("txtFiles"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "status",
           value: _this.$ml.with("VueJS").get("txtStatus"),
           width: "135",
           class: "",
+          filter: true
         },
       ];
       _this.getOptions();
@@ -315,25 +360,11 @@ export default {
               const lastProcess = arrProcess[arrProcess.length - 1];
 
               return Object.assign({}, item, {
-                d_name: item.department === "All" ? "" : item.department,
-                p_name: item.project,
-                i_name: item.issue,
-                t_name: item.job_type,
                 status: arrProcess.length ? lastProcess.status : "",
-                page: arrProcess.length
-                  ? arrProcess.reduce((total, item) => {
-                      return total + item.page * 1;
-                    }, 0)
-                  : "",
-                file: arrProcess.length
-                  ? arrProcess.reduce((total, item) => {
-                      return total + item.file * 1;
-                    }, 0)
-                  : "",
+                page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.page * 1; }, 0) : "",
+                file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.file * 1; }, 0) : "",
                 user_name: arrProcess.length ? lastProcess.user_name : "",
-                date: arrProcess.length
-                  ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm")
-                  : "",
+                date: arrProcess.length ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm") : "",
               });
             });
           } else {
@@ -359,22 +390,10 @@ export default {
     },
     getProcess(item) {
       this.currentProcess = Object.assign({}, item, { status: null });
-      this.arrCurrentProcess = this.processDetails.length
-        ? this.getProcessObjectValue(
-            this.processDetails,
-            this.currentProcess.id,
-            this.currentProcess.phase
-          )
-        : [];
+      this.arrCurrentProcess = this.processDetails.length ? this.getProcessObjectValue(this.processDetails, this.currentProcess.id, this.currentProcess.phase) : [];
     },
     customFormatter(date) {
       return moment(date).format("YYYY/MM/DD");
-    },
-    disabledEndDates() {
-      const obj = {
-        from: new Date(),
-      };
-      return obj;
     },
     resetValidate() {
       this.currentProcess = {};
@@ -425,7 +444,7 @@ export default {
 	}
 }
 .type-color {
-  width: 30px;
+  width: 60px !important;
   height: 20px;
   margin-right: 5px;
   display: inline-block;

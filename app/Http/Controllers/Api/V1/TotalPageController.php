@@ -52,7 +52,10 @@ class TotalPageController extends Controller
 	{
 		$totalpage = TotalPage::select('id', 'page', 'team_id', 'type_id')->where('date', '=', $date)->where('page', '>=', 0)->get()->toArray();
 		$data = array();
-		foreach ($totalpage as $page) $data[$page['type_id']] = $page;
+		foreach ($totalpage as $page){
+			$page['page'] = isset($page['page']) && !empty($page['page']) ? $page['page'] : '';
+			$data[$page['type_id']] = $page;
+		}
 		return response()->json($data);
 	}
 

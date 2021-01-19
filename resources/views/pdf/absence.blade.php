@@ -104,34 +104,50 @@
     <ul>
       @php
         $styleType = "width: 300px; padding-top: 6px;";
-        $contentType[0] = $contentType[1] = $contentType[2] = "................................................................................................................";
-        if(isset($data['date']) && !empty($data['date'])) {
+        $contentType[0]['text'] = $contentType[1]['text'] = $contentType[2]['text'] = "................................................................................................................";
+        $contentType[0]['img'] = $contentType[1]['img'] = $contentType[2]['img'] = asset('images/uncheck.gif');
+        if(isset($data['off']) && !empty($data['off'])) {
           $styleType= "width: 300px; font-size:22px";
-          if('morning' === $data['type']) $contentType[0] = $data['date'];
-          if('afternoon' === $data['type']) $contentType[1] = $data['date'];
-          if('all_day' === $data['type']) $contentType[2] = $data['date'];
+          if(isset($data['off']['morning']) && !empty($data['off']['morning'])){
+            $contentType[0] = array(
+              'text' => $data['off']['morning'],
+              'img' => asset('images/check.gif')
+            );
+          }
+          if(isset($data['off']['afternoon']) && !empty($data['off']['afternoon'])){
+            $contentType[1] = array(
+              'text' => $data['off']['afternoon'],
+              'img' => asset('images/check.gif')
+            );
+          }
+          if(isset($data['off']['all_day']) && !empty($data['off']['all_day'])){
+            $contentType[2] = array(
+              'text' => $data['off']['all_day'],
+              'img' => asset('images/check.gif')
+            );
+          }
         }
       @endphp
       <li class="d-flex" style="margin-bottom: 10px;">
         <div class="d-flex align-items-center" style="margin-right: 60px; width: 260px">
-          <img style="position: relative; top: -5px" class="mr-2" src="{{ 'morning' === $data['type'] ? asset('images/check.gif') : asset('images/uncheck.gif') }}">
+          <img style="position: relative; top: -5px" class="mr-2" src="{{ $contentType[0]['img'] }}">
           <p class='mb-0'>Half-day (08:00 - 12:00)</p>
         </div>
-        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[0] }}</span>
+        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[0]['text'] }}</span>
       </li>
       <li class="d-flex" style="margin-bottom: 10px;">
         <div class="d-flex align-items-center" style="margin-right: 60px; width: 260px">
-          <img style="position: relative; top: -5px" class="mr-2" src="{{ 'afternoon' === $data['type'] ? asset('images/check.gif') : asset('images/uncheck.gif') }}">
+          <img style="position: relative; top: -5px" class="mr-2" src="{{ $contentType[1]['img'] }}">
           <p class='mb-0'>Half-day (13:00 - 17:00)</p>
         </div>
-        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[1] }}</span>
+        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[1]['text'] }}</span>
       </li>
       <li class="d-flex">
         <div class="d-flex align-items-center" style="margin-right: 60px; width: 260px">
-          <img style="position: relative; top: -5px" class="mr-2" src="{{ 'all_day' === $data['type'] ? asset('images/check.gif') : asset('images/uncheck.gif') }}">
+          <img style="position: relative; top: -5px" class="mr-2" src="{{ $contentType[2]['img'] }}">
           <p class='mb-0'>Full-day (08:00 - 17:00)</p>
         </div>
-        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[2] }}</span>
+        <span style="{{ $styleType }}" class="d-inline-block overflow-x-hidden">{{ $contentType[2]['text'] }}</span>
       </li>
     </ul>
     @php
@@ -173,11 +189,11 @@
     </ul>
     <p style="margin-bottom: 60px">I commits that I will arrange and finish my tasks as soon as returning to work.</p>
     <div class="d-flex">
-      <div style="min-width: 220px; position: relative">
+      <div style="min-width: 270px; position: relative">
         <p>Yours sincerely,</p>
         <span style="width: 100%;  white-space: nowrap; line-height: 31px; position: absolute; bottom: -8px; left: 0; {{ isset($data['name']) && !empty($data['name']) ? 'font-size: 20px' : '' }}" class="d-inline-block overflow-x-hidden">{{ $contentName }}</span>
       </div>
-      <div style="width: 680px; padding-left: 90px;">
+      <div style="width: 680px; padding-left: 40px;">
         <p style="font-weight: 680" class="text-center">Company’s Approval</p>
         <table class="table table-border">
           <thead>

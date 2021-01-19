@@ -28,35 +28,65 @@ class pdfController extends Controller
 
 	public function absence(Request $request)
 	{
-		$offDay = DB::table('off_days')->where('id', $request->input('id'))->first();
-		if (isset($offDay) && !empty($offDay)) {
-			$data = array(
-				'name' => $this->user['fullname'],
-				'type' => $offDay->type,
-				'totalOff' => "all_day" == $offDay->type ? "1" : "0,5",
-				'date' => date("d/m/Y", strtotime($offDay->date)),
-				'now_date' => date("d/m/Y"),
+		$offDay = false;
+		if (!empty($request->input('id')) && NULL !== $request->input('id')) $offDay = $this->absenceByID($request->input('id'));
+		else if (!empty($request->input('total')) && NULL !== $request->input('total')) {
+			$offDay = array(
+				'totalOff' => $request->input('total'),
+				'type' => 1,
+				'date' => $request->input('date')
 			);
-		} else {
-			$data = array(
-				'name' => $this->user['fullname'],
-				'type' => '',
-				'totalOff' => '',
-				'date' => '',
-				'now_date' => date("d/m/Y"),
-			);
+			if (NULL !== $request->input('morning') && !empty($request->input('morning'))) $offDay['off']['morning'] = $request->input('morning');
+			if (NULL !== $request->input('afternoon') && !empty($request->input('afternoon'))) $offDay['off']['afternoon'] = $request->input('afternoon');
+			if (NULL !== $request->input('allDay') && !empty($request->input('allDay'))) $offDay['off']['all_day'] = $request->input('allDay');
+		}
+		if (false == $offDay) return response()->json(array('status' => 0), 200);
+
+		$ids = NULL !== $request->input('ids') && !empty($request->input('ids')) ? explode(',', $request->input('ids')) : explode(',', $request->input('id'));
+
+		foreach ($ids as $id) {
+			if (isset($id) && !empty($id)) {
+				DB::table('off_days')
+					->where('id', $id)
+					->update(array('status' => 'printed'));
+			}
 		}
 
-		$file_name = 'absence-' . $this->user['id']. '_'. $data['type']. '_' . str_replace('/','',$data['date']) . '_' . str_replace('/','',$data['now_date']) . '.pdf';
+		$data = array(
+			'name' => $this->user['fullname'],
+			'off' => $offDay['off'],
+			'type' => $offDay['type'],
+			'date' => $offDay['date'],
+			'totalOff' => $offDay['totalOff'],
+			'now_date' => date("d/m/Y"),
+		);
 
+		$file_name = 'absence-' . $this->user['id'] . '_' . $data['type'] . '_' . str_replace(array('/', ' - '), '', $data['date']) . '_' . str_replace('/', '', date("Y/m/d")) . '.pdf';
 		// if(!File::exists(storage_path($file_name))){
-			$pdf = PDFSNAPPY::loadView('pdf.absence',  compact('data'))->setTemporaryFolder(storage_path('app/absence/tmp'));
-			Storage::put('public/pdf/' . $file_name, $pdf->output());
+		$pdf = PDFSNAPPY::loadView('pdf.absence',  compact('data'))->setTemporaryFolder(storage_path('app/absence/tmp'));
+		Storage::put('public/pdf/' . $file_name, $pdf->output());
 		// }
 
 		return response()->json(array(
+			'status' => 1,
 			'file_name' => url('data/pdf/' . $file_name),
 			'data' => $data
 		), 200);
+	}
+
+	private function absenceByID($id)
+	{
+		$offDay = DB::table('off_days')->where('id', $id)->first();
+
+		if (isset($offDay) && !empty($offDay)) {
+			$data['totalOff'] =  "all_day" == $offDay->type ? "1" : "0,5";
+			if ('morning' == $offDay->type) $data['off']['morning'] = date("d/m/Y", strtotime($offDay->date));
+			if ('afternoon' == $offDay->type) $data['off']['afternoon'] = date("d/m/Y", strtotime($offDay->date));
+			if ('all_day' == $offDay->type) $data['off']['all_day'] = date("d/m/Y", strtotime($offDay->date));
+			$data['date'] = date("d/m/Y", strtotime($offDay->date));
+			$data['type'] = $offDay->type;
+			return $data;
+		}
+		return false;
 	}
 }

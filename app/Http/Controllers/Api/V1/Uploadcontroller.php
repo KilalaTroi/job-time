@@ -15,10 +15,12 @@ class Uploadcontroller extends Controller
 	public function getData(Request $request)
 	{
 		// POST data
-		$selectDate = $request->get('start_date');
-		$showFilter = $request->get('showFilter') == 'showSchedule' ? true : false;
-		$selectTeam = $request->get('selectTeam');
-		$defaultProjects = array(10, 58, 59, 67, 68, 69);
+		$filters = array(
+			'date' => $request->get('start_date'),
+			'showFilter' => $request->get('showFilter') == 'showSchedule' ? true : false,
+			'team' => $request->get('selectTeam'),
+			'projects' => array(10, 58, 59, 67, 68, 69)
+		);
 		// End POST data
 
 		// Get Issue with processes
@@ -30,6 +32,7 @@ class Uploadcontroller extends Controller
 				'i.name as issue',
 				'i.page as page_number',
 				't.slug as job_type',
+				't.value as job_color',
 				't.line_room as room_id',
 				't.email as email',
 				's.memo as phase'
@@ -38,43 +41,53 @@ class Uploadcontroller extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
-			->where(function ($query) use ($selectTeam) {
-				$query->where('p.team', '=', $selectTeam)
-					->orWhere('p.team', 'LIKE', $selectTeam . ',%')
-					->orWhere('p.team', 'LIKE', '%,' . $selectTeam . ',%')
-					->orWhere('p.team', 'LIKE', '%,' . $selectTeam);
+			->where(function ($query) use ($filters) {
+				$query->where('p.team', '=', $filters['team'])
+					->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
 			})
-			->whereNotIn('p.id', $defaultProjects)
-			->when($showFilter, function ($query) use ($selectDate) {
-				return $query->where(function ($query) use ($selectDate) {
-					$query->where(function ($query) use ($selectDate) {
-						$query->where('s.date', '=',  $selectDate);
+			->whereNotIn('p.id', $filters['projects'])
+			->when($filters['showFilter'], function ($query) use ($filters) {
+				return $query->where(function ($query) use ($filters) {
+					$query->where(function ($query) use ($filters) {
+						$query->where('s.date', '=',  $filters['date']);
 					})
-					->orWhere(function ($query) use ($selectDate) {
-						$query->where('s.date', '<=',  $selectDate)
-						->where('s.end_date', '>=',  $selectDate);
-					});
+						->orWhere(function ($query) use ($filters) {
+							$query->where('s.date', '<=',  $filters['date'])
+								->where('s.end_date', '>=',  $filters['date']);
+						});
 				});
 			})
-			->when(!$showFilter, function ($query) use ($selectDate) {
-				return $query->where(function ($query) use ($selectDate) {
-					$query->where('i.start_date', '<=',  $selectDate)
-						->orWhere('i.start_date', '=',  NULL);
-				})
-					->where(function ($query) use ($selectDate) {
-						$query->where('i.end_date', '>=',  $selectDate)
-							->orWhere('i.end_date', '=',  NULL);
-					});
-			})
+			// ->when(!$filters['showFilter'], function ($query) use ($filters) {
+			// 	return $query->where(function ($query) use ($filters) {
+			// 		$query->where('i.start_date', '<=',  $filters['date'])
+			// 			->orWhere('i.start_date', '=',  NULL);
+			// 	})
+			// 		->where(function ($query) use ($filters) {
+			// 			$query->where('i.end_date', '>=',  $filters['date'])
+			// 				->orWhere('i.end_date', '=',  NULL);
+			// 		});
+			// })
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
-						->orWhere('t.email', '!=', NULL);
+					->orWhere('t.email', '!=', NULL);
 			})
-			->where('i.created_at', '<=',  $selectDate . ' 23:59:59')
+			->where('i.created_at', '<=',  $filters['date'] . ' 23:59:59')
 			->orderBy('i.created_at', 'desc')
 			->orderBy('s.created_at', 'desc')
 			->groupBy('i.id', 's.memo')
 			->paginate(20);
+
+		$issueProcesses->transform(function ($item, $key) {
+			$item->t_name = $item->job_type;
+			$item->i_name = $item->issue;
+			$item->p_name = $item->project;
+			$item->d_name = 'All' === $item->department ? '' : $item->department;
+			$item->t_value = '<span class="type-color cl-value" style="margin-right: 0;background-color:' . $item->job_color . ' "></span>';
+			return $item;
+		});
+
 
 		// Get issues IDs
 		$issueIds = $issueProcesses->pluck('id')->toArray();
@@ -167,7 +180,7 @@ class Uploadcontroller extends Controller
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
-						->orWhere('t.email', '!=', NULL);
+					->orWhere('t.email', '!=', NULL);
 			})
 			->when($deptArr, function ($query, $deptArr) {
 				return $query->whereIn('p.dept_id', $deptArr);
@@ -213,7 +226,8 @@ class Uploadcontroller extends Controller
 				'd.name as department',
 				'pr.name as project',
 				'i.name as issue',
-				't.slug as job_type'
+				't.slug as job_type',
+				't.value as job_color'
 			)
 			->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
 			->leftJoin('users as u', 'u.id', '=', 'p.user_id')
@@ -221,7 +235,11 @@ class Uploadcontroller extends Controller
 			->leftJoin('projects as pr', 'pr.id', '=', 'i.project_id')
 			->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
 			->leftJoin('types as t', 't.id', '=', 'pr.type_id')
-			->where('p.status', 'Finished Upload')
+			// ->where('p.status', 'Finished Upload')
+			->where(function ($query) {
+				$query->where('p.status', 'Finished Upload')
+					->orWhere('p.status', 'Finished Work');
+			})
 			->where(function ($query) use ($teamFilter) {
 				$query->where('pr.team', '=', $teamFilter)
 					->orWhere('pr.team', 'LIKE', $teamFilter . ',%')
@@ -247,14 +265,22 @@ class Uploadcontroller extends Controller
 			->where('p.date', '<=', $end_time . ' 23:59:59')
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
-						->orWhere('t.email', '!=', NULL);
-			})->get();
-			// ->paginate(20);
+					->orWhere('t.email', '!=', NULL);
+			})->groupBy('p.id')->get();
+		// ->paginate(20);
 
 		// Get issues IDs
 		$issueIds = $processesUploaded->pluck('id')->toArray();
 
 		$processesUploaded = $processesUploaded->toArray();
+
+		foreach ($processesUploaded as $item) {
+			$item->t_name = $item->job_type;
+			$item->i_name = $item->issue;
+			$item->p_name = $item->project;
+			$item->d_name = 'All' === $item->department ? '' : $item->department;
+			$item->t_value = '<span class="type-color cl-value" style="margin-right: 0;background-color:' . $item->job_color . ' "></span>';
+		}
 
 		// Get process details
 		$processDetails = array();
@@ -389,7 +415,7 @@ class Uploadcontroller extends Controller
 			->where('p.date', '<=', $end_time . ' 23:59:59')
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
-						->orWhere('t.email', '!=', NULL);
+					->orWhere('t.email', '!=', NULL);
 			})
 			->get();
 
@@ -484,7 +510,7 @@ class Uploadcontroller extends Controller
 					$cells->setBackground('#ffd05b');
 				});
 
-				$sheet->cell('G'.($numberRows + 1).':' . $columnName . ($numberRows + 1), function ($cells) {
+				$sheet->cell('G' . ($numberRows + 1) . ':' . $columnName . ($numberRows + 1), function ($cells) {
 					$cells->setAlignment('right');
 					// Set font
 					$cells->setFont([
@@ -566,7 +592,7 @@ class Uploadcontroller extends Controller
 	public function submitMessage(Request $request)
 	{
 		// Send Mail
-		if ( $request->get('email') ) {
+		if ($request->get('email')) {
 			$from = array(
 				'email' => $request->get('user')['email'],
 				'name' => $request->get('user')['name']
@@ -582,6 +608,7 @@ class Uploadcontroller extends Controller
 				'p_name' => $request->get('p_name'),
 				'i_name' => $request->get('i_name'),
 				'page' => $request->get('page'),
+				'file' => $request->get('file'),
 				'phase' => $request->get('phase'),
 				'status' => $request->get('status')
 			], function ($message) use ($emails, $from, $request) {
@@ -594,7 +621,7 @@ class Uploadcontroller extends Controller
 		}
 
 		// Send message Line Work
-		if ( $request->get('roomId') ) {
+		if ($request->get('roomId')) {
 			$client = new Client([
 				'headers' => [
 					'Access-Control-Allow-Origin' => '*',
@@ -619,8 +646,8 @@ class Uploadcontroller extends Controller
 		}
 
 		return response()->json(array(
-            'message' => 'Successfully.'
-        ), 200);
+			'message' => 'Successfully.'
+		), 200);
 	}
 
 	public function sendMessage($url, $data)
@@ -680,5 +707,9 @@ class Uploadcontroller extends Controller
 
 		// Return result
 		return $result;
+	}
+
+	private function issueProcesses()
+	{
 	}
 }

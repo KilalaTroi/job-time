@@ -54,6 +54,8 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
     Route::get('all-off-days', 'OffDaysController@allOffDays');
+    Route::get('all-off-day-week', 'OffDaysController@allOffDayWeek');
+
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::get('issue-pages', 'JobsController@getIssuePages');
     Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
@@ -65,6 +67,8 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::get('statistic/export-report/{file_extension}', 'StatisticsController@exportReport');
     Route::post('statistic/datatotaling', 'StatisticsController@getDataTotaling');
     Route::get('statistic/get-page-report', 'StatisticsController@getPageReport');
+    Route::get('statistic/get-job-report', 'StatisticsController@getJobReport');
+    Route::get('statistic/get-project-report', 'StatisticsController@getProjectReport');
 
     Route::get('notify', 'ReportsController@getNotify');
     Route::post('export-report-time-user', 'ReportsController@exportReportTimeUser');

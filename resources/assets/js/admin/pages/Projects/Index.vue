@@ -8,7 +8,7 @@
           </div>
         </template>
         <div class="row">
-          <div class="col-sm-5">
+          <div class="col-sm-6">
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group">
@@ -20,8 +20,6 @@
                     :placeholder="$ml.with('VueJS').get('txtKeyword')"
                     type="text"
                     class="form-control"
-                    v-on:keyup="getAllProject"
-                    v-on:keyup.enter="getAllProject"
                   />
                 </div>
               </div>
@@ -40,7 +38,7 @@
             </div>
           </div>
 
-          <div class="col-sm-5">
+          <div class="col-sm-6">
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group">
@@ -73,7 +71,7 @@
             </div>
           </div>
 
-          <div class="col-sm-2 align-self-end">
+          <!-- <div class="col-sm-2 align-self-end">
             <div class="form-group d-flex">
               <button
                 class="btn btn-primary btn-block"
@@ -90,7 +88,7 @@
                 Reset
               </button>
             </div>
-          </div>
+          </div> -->
         </div>
       </card>
       <div class="form-group">
@@ -103,19 +101,7 @@
             </button-create>
           </div>
           <div class="col-12 col-sm-auto ml-auto">
-            <button-view-table-option class="mt-0 mr-3" />
-            <button
-              type="button"
-              class="btn btn-primary mr-3"
-              data-toggle="modal"
-              data-target="#issueImport"
-              data-backdrop="static"
-              data-keyboard="false"
-            >
-              <i class="fa fa-plus"></i>
-              {{ $ml.with("VueJS").get("txtImportIssue") }}
-            </button>
-            <button
+             <button
               type="button"
               class="btn btn-danger"
               data-toggle="modal"
@@ -126,6 +112,18 @@
               <i class="fa fa-plus"></i>
               {{ $ml.with("VueJS").get("txtAddIssue") }}
             </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-toggle="modal"
+              data-target="#issueImport"
+              data-backdrop="static"
+              data-keyboard="false"
+            >
+              <i class="fa fa-plus"></i>
+              {{ $ml.with("VueJS").get("txtImportIssue") }}
+            </button>
+            <button-view-table-option class="mt-0" />
           </div>
         </div>
       </div>
@@ -271,14 +269,14 @@ export default {
       this.checkItem = data;
     },
 
-    resetFilter() {
-      this.filters.keyword = "";
-      this.filters.team = this.currentTeam.id;
-      this.filters.type_id = 0;
-      this.filters.dept_id = 0;
-      this.filters.showArchive = false;
-      this.getAllProject(1);
-    },
+    // resetFilter() {
+      // this.filters.keyword = "";
+      // this.filters.team = this.currentTeam.id;
+      // this.filters.type_id = 0;
+      // this.filters.dept_id = 0;
+      // this.filters.showArchive = false;
+      // this.getAllProject(1);
+    // },
 
     resetImport() {
       this.getAllProject(1);
@@ -290,7 +288,7 @@ export default {
     if (!_this.deptOptions.length) await _this.getOptionsDept(true);
     if (!_this.typeOptions.length) await _this.getOptionsType(true);
     _this.filters.team = _this.currentTeam.id;
-    await _this.getAllProject();
+    // await _this.getAllProject();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
@@ -303,6 +301,7 @@ export default {
           if ( value.team != this.currentTeam.id ) {
             this.setCurrentTeam(value.team);
           }
+          this.getAllProject()
         },
         deep: true
       },

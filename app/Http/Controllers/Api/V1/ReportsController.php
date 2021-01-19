@@ -32,16 +32,20 @@ class ReportsController extends Controller
 		$data['seen'] = $this->user['id'];
 
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
-		$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
-		$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
 
-		$issue_id =  DB::table('issues')
-			->select('id')
-			->where('project_id', $data['projects'])
-			->where('name', $data['issue'])
-			->where('year', $data['issueYear'])
-			->first();
-		if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		// Nếu có data project mới check issue
+		if ( $data['projects'] ) {
+			$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
+			$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
+
+			$issue_id =  DB::table('issues')
+				->select('id')
+				->where('project_id', $data['projects'])
+				->where('name', $data['issue'])
+				->where('year', $data['issueYear'])
+				->first();
+			if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		}
 
 		$report = Report::create($data);
 
@@ -64,16 +68,20 @@ class ReportsController extends Controller
 		$data['seen'] = $this->user['id'];
 
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
-		$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
-		$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
 
-		$issue_id =  DB::table('issues')
-			->select('id')
-			->where('project_id', $data['projects'])
-			->where('name', $data['issue'])
-			->where('year', $data['issueYear'])
-			->first();
-		if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		// Nếu có data project mới check issue
+		if ( $data['projects'] ) {
+			$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
+			$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
+
+			$issue_id =  DB::table('issues')
+				->select('id')
+				->where('project_id', $data['projects'])
+				->where('name', $data['issue'])
+				->where('year', $data['issueYear'])
+				->first();
+			if (isset($issue_id) && !empty($issue_id))	$data['issue'] = $issue_id->id;
+		}
 
 		$report->update($data);
 
@@ -543,7 +551,9 @@ class ReportsController extends Controller
 
 		$report = Report::findOrFail($reportID);
 		$seenArr = explode(',', $report->seen);
-		if (!in_array($userID, $seenArr)) $seenData = $report->seen . ',' . $userID;
+		if (!in_array($userID, $seenArr)) {
+			$seenData = $report->seen . ',' . $userID;
+		}
 
 		if ($seenData) {
 			$report->timestamps = false;
@@ -635,6 +645,7 @@ class ReportsController extends Controller
 			'issue'	=> $request->get('issue'),
 			'issueYear'	=> $request->get('issue_year'),
 		);
+
 		if ($request->get('page') != -1) {
 			$dataReports =  DB::table('reports as r')
 				->select(
@@ -666,13 +677,13 @@ class ReportsController extends Controller
 					'r.translatable as translatable',
 					'seen',
 					'r.issue',
-					'i.project_id',
+					'p.id as project_id',
 					'p.dept_id'
 				)
 				->leftJoin('teams as t', 't.id', '=', 'r.team_id')
 				->leftJoin('issues as i', 'i.id', '=', 'r.issue')
-				->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-				->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+				->leftJoin('projects as p', 'p.id', '=', 'r.project_id')
+				->leftJoin('departments as d', 'd.id', '=', 'r.dept_id')
 				->when($filters['type'], function ($query,  $type) {
 					return $query->where('r.type', $type);
 				})
@@ -699,13 +710,17 @@ class ReportsController extends Controller
 				->paginate(20);
 		}
 
+		$projects = $filters['department'] ? $this->getProject( $filters['department']['id'], $filters['team']) : array();
+		$issues = $filters['project'] ? $this->getIssue( $filters['project']['id'], $filters['issueYear'] ? $filters['issueYear']['id'] : null ) : array();
+		$issuesYear = $filters['project'] ? $this->getIssueYear( $filters['project']['id'], $filters['issue'] ? $filters['issue']['id'] : null ) : array();
+
 		return response()->json([
 			'reports' => isset($dataReports) && !empty($dataReports) ? $dataReports : '',
 			'users' => $this->getUsers($filters['team']),
 			'departments' => $this->getDepartments($filters['team']),
-			'projects' => $this->getProject($filters['department']['id'], $filters['team']),
-			'issues' => $this->getIssue($filters['project']['id'], $filters['issueYear']['id']),
-			'issuesYear' => $this->getIssueYear($filters['project']['id'], $filters['issue']['id'])
+			'projects' => $projects,
+			'issues' => $issues,
+			'issuesYear' => $issuesYear
 		]);
 	}
 

@@ -147,6 +147,7 @@ export default {
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       typeOptions: "types/options",
+      getLanguage: "getLanguage",
     }),
   },
 
@@ -166,10 +167,6 @@ export default {
       getOptionType: "types/getOptions",
       setCurrentTeam: "setCurrentTeam"
     }),
-
-    getLanguage(data) {
-      return data.current;
-    },
 
     makeDraggable() {
       let draggableEl = document.getElementById("external-events-list")

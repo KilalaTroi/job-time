@@ -23,7 +23,7 @@
             <template slot="header">
               <div class="d-flex justify-content-between">
                 <h4 class="card-title">
-                  {{ $ml.with("VueJS").get("txtJobsList") }}
+                  {{ $ml.with("VueJS").get("txtTasksList") }}
                 </h4>
                 <div
                   class="form-group mb-0 d-flex justify-content-between"

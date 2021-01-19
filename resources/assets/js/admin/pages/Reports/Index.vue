@@ -14,13 +14,13 @@
           <div class="col-sm-4">
             <div class="form-group">
               <label class="">{{
-                $ml.with("VueJS").get("txtReportType")
+                $ml.with("VueJS").get("txtType")
               }}</label>
               <select-2 v-model="filters.type" class="select2">
                 <option value="0">All</option>
+                <option value="Notice">{{ $ml.with("VueJS").get("txtNotice") }}</option>
                 <option value="Trouble">{{ $ml.with("VueJS").get("txtTrouble") }}</option>
                 <option value="Meeting">{{ $ml.with("VueJS").get("txtMeeting") }}</option>
-                <option value="Notice">{{ $ml.with("VueJS").get("txtNotice") }}</option>
               </select-2>
             </div>
           </div>
@@ -150,29 +150,6 @@
           <add-new v-if="action.new" />
           <edit v-if="action.edit" />
           <preview v-if="action.preview" />
-
-          <!-- <edit
-            :projectsParent="projects"
-            :issuesParent="issues"
-            :issuesYearParent="issuesYear"
-            :currentReport="currentReport"
-            :userID="userID"
-            :departmentsParent="departments"
-            :userOptionsParent="userOptions"
-            v-if="actionEdit"
-            v-on:back-to-list="backToList"
-            v-on:update-seen="updateSeen"
-            v-on:delete-report="deleteReport"
-          ></edit>
-
-          <preview
-            :userOptions="userOptions"
-            :currentReport="currentReport"
-            v-if="actionPreview"
-            v-on:back-to-list="backToList"
-            v-on:update-seen="updateSeen"
-            v-on:send-report="sendReport"
-          ></preview> -->
         </div>
       </div>
 
@@ -237,12 +214,11 @@ export default {
     Select2,
     TableReport,
   },
+
   computed: {
     ...mapGetters({
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
-      getObjectByID: "getObjectByID",
-      getTeamText: "getTeamText",
       getLangCode: "getLangCode",
       customFormatter: "customFormatter",
       disabledStartDates: "disabledStartDates",
@@ -258,6 +234,7 @@ export default {
     }),
 
   },
+
   data() {
     return {
       userID: document.querySelector("meta[name='user-id']").getAttribute("content"),
@@ -268,9 +245,8 @@ export default {
   methods: {
     ...mapActions({
       setCurrentTeam: "setCurrentTeam",
-      updateReportNotify: "updateReportNotify",
-      setReportNotify: "setReportNotify",
     }),
+
     ...mapActions('reports',{
       setColumns: "setColumns",
       getAll: "getAll",
@@ -282,35 +258,40 @@ export default {
     addNewReport() {
       this.action.new = true;
     },
-
-    // viewReport(id, seen) {
-    //   this.action.preview = true;
-    //   this.currentReport = this.getObjectByID(this.reports.data, id);
-    //   this.currentReport.isSeen = seen;
-    // },
   },
+
   async created() {
     const _this = this;
     _this.filters.team = _this.currentTeam.id;
+
+    if ( _this.action.preview || _this.action.new || _this.action.edit || _this.action.reset ) {
+      _this.action.preview = _this.action.new = _this.action.edit = _this.action.reset = false;
+      _this.resetFilters('all');
+    }
+
     _this.setColumns(_this.$ml.current);
     $(document).on("click", ".languages button", function () {
       _this.setColumns(_this.$ml.current);
     })
-	},
+  },
+  
   watch: {
     filters: [
       {
-        handler: function (value) {
+        handler: async function (value, oldValue) {
           const _this = this;
-          if(!_this.action.preview){
-            if(-1 == _this.filters.page) _this.getAll(-1);
-            else if(!_this.filters.page) _this.getAll();
+
+          if ( !_this.action.preview && !_this.action.new && !_this.action.edit && !_this.action.reset ) {
+            let data = await _this.getAll();
 
             if (value.team != _this.currentTeam.id) {
-              _this.setCurrentTeam(value.team);
-              _this.setReportNotify(value.team);
               _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
-            }else  setTimeout(function(){ _this.resetFilters() }, 200)
+              _this.setCurrentTeam(value.team);
+              
+            } else {
+              _this.action.reset = true;
+              _this.resetFilters();
+            } 
           }
         },
         deep: true

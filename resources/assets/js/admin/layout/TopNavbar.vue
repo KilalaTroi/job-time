@@ -72,7 +72,6 @@ export default {
             setLoginUser: 'setLoginUser',
             setCurrentLang: 'setCurrentLang',
             setCurrentTeam: 'setCurrentTeam',
-            setReportNotify: 'setReportNotify',
         }),
 
         activeLanguage(language) {
@@ -111,7 +110,7 @@ export default {
 
         await _this.setLoginUser(userID)
 
-        _this.setReportNotify(this.currentTeam.id)
+        // _this.setReportNotify(this.currentTeam.id)
 
         $(document).on("click", ".languages button", function () {
            _this.setCurrentLang(_this.$ml.current)

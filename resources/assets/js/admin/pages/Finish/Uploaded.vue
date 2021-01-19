@@ -144,6 +144,7 @@
                     <i class="fa fa-download"></i>
                     {{ $ml.with("VueJS").get("txtExportExcel") }}
                   </button>
+                  <button-view-table-option class="mt-0" />
                 </div>
               </div>
             </template>
@@ -177,6 +178,11 @@
           </card>
         </div>
       </div>
+       <view-table-option
+         dataTable="finsh_totaling"
+        :dataItems="processesUploaded"
+        :dataCols="columns"
+      />
     </div>
   </div>
 </template>
@@ -189,6 +195,8 @@ import Datepicker from "vuejs-datepicker";
 import { vi, ja, en } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
+import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
+import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -199,6 +207,8 @@ export default {
     Select2,
     ProcessDetailModal,
     Multiselect,
+    ButtonViewTableOption,
+    ViewTableOption,
   },
 
   computed: {
@@ -206,6 +216,7 @@ export default {
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       dateFormat: "dateFormat",
+      disabledEndDates: "disabledEndDates",
     }),
   },
 
@@ -217,60 +228,77 @@ export default {
           value: this.$ml.with("VueJS").get("txtDepartment"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "t_name",
           value: this.$ml.with("VueJS").get("txtJobType"),
           width: "120",
           class: "",
+          filter: true
+        },
+        {
+          id: "t_value",
+          value: this.$ml.with("VueJS").get("txtColor"),
+          width: "120",
+          class: "text-center",
+          filter: true
         },
         {
           id: "p_name",
           value: this.$ml.with("VueJS").get("txtProject"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "i_name",
           value: this.$ml.with("VueJS").get("txtIssue"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "phase",
           value: this.$ml.with("VueJS").get("txtPhase"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "date",
           value: this.$ml.with("VueJS").get("txtDateTime"),
           width: "160",
           class: "",
+          filter: true
         },
         {
           id: "user_name",
           value: this.$ml.with("VueJS").get("txtReporter"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "page",
-          value: this.$ml.with("VueJS").get("txtPagesWorked"),
+          value: this.$ml.with("VueJS").get("txtPages"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "file",
-          value: this.$ml.with("VueJS").get("txtFilesWorked"),
+          value: this.$ml.with("VueJS").get("txtFiles"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "status",
           value: this.$ml.with("VueJS").get("txtStatus"),
           width: "135",
           class: "",
+          filter: true
         },
       ],
       loading: true,
@@ -325,60 +353,77 @@ export default {
           value: _this.$ml.with("VueJS").get("txtDepartment"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "t_name",
           value: _this.$ml.with("VueJS").get("txtJobType"),
           width: "120",
           class: "",
+          filter: true
+        },
+        {
+          id: "t_value",
+          value: _this.$ml.with("VueJS").get("txtColor"),
+          width: "120",
+          class: "text-center",
+          filter: true
         },
         {
           id: "p_name",
           value: _this.$ml.with("VueJS").get("txtProject"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "i_name",
           value: _this.$ml.with("VueJS").get("txtIssue"),
           width: "120",
           class: "",
+          filter: true
         },
         {
           id: "phase",
           value: _this.$ml.with("VueJS").get("txtPhase"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "date",
           value: _this.$ml.with("VueJS").get("txtDateTime"),
           width: "160",
           class: "",
+          filter: true
         },
         {
           id: "user_name",
           value: _this.$ml.with("VueJS").get("txtReporter"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "page",
           value: _this.$ml.with("VueJS").get("txtPages"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "file",
           value: _this.$ml.with("VueJS").get("txtFiles"),
           width: "",
           class: "",
+          filter: true
         },
         {
           id: "status",
           value: _this.$ml.with("VueJS").get("txtStatus"),
           width: "135",
           class: "",
+          filter: true
         },
       ];
     });
@@ -455,10 +500,6 @@ export default {
 							}
               const lastProcess = arrProcess[arrProcess.length - 1];
               return Object.assign({}, item, {
-                d_name: item.department === "All" ? "" : item.department,
-                p_name: item.project,
-                i_name: item.issue,
-                t_name: item.job_type,
                 status: arrProcess.length ? lastProcess.status : "",
                 page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.page * 1; }, 0) : "",
                 file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.file * 1; }, 0) : "",
@@ -490,12 +531,6 @@ export default {
     customFormatter(date) {
       return moment(date).format("YYYY/MM/DD");
     },
-    disabledEndDates() {
-      const obj = {
-        from: new Date(),
-      };
-      return obj;
-    },
     dateFormatter(date) {
       return moment(date).format("YYYY-MM-DD") !== "Invalid date"
         ? moment(date).format("YYYY-MM-DD")
@@ -512,13 +547,6 @@ export default {
       const obj = {
         to: new Date(this.start_date), // Disable all dates after specific date
         from: new Date(), // Disable all dates after specific date
-        // days: [0], // Disable Saturday's and Sunday's
-      };
-      return obj;
-    },
-    disabledEndDates() {
-      const obj = {
-        from: new Date(this.end_date), // Disable all dates after specific date
         // days: [0], // Disable Saturday's and Sunday's
       };
       return obj;
@@ -598,7 +626,7 @@ export default {
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
 .type-color {
-  width: 30px;
+  width: 60px !important;
   height: 20px;
   margin-right: 5px;
   display: inline-block;

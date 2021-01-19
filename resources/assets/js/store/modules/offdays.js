@@ -5,17 +5,20 @@ export default {
 		offDayTypes: [
 			{
 				id: "morning",
-				name: "[AM] Half-day (8:00 - 12:00)",
+				name: "[AM] Half-day (08:00 - 12:00)",
+				text: "Half-day (08:00 - 12:00)",
 				color: "#00AEEF",
 			},
 			{
 				id: "afternoon",
 				name: "[PM] Half-day (13:00 - 17:00)",
+				text: "Half-day (13:00 - 17:00)",
 				color: "#FFDD00",
 			},
 			{
 				id: "all_day",
-				name: "Full-day (8:00 - 17:00)",
+				name: "Full-day (08:00 - 17:00)",
+				text: "Full-day (08:00 - 17:00)",
 				color: "#F55555",
 			},
 		],
@@ -27,7 +30,13 @@ export default {
 		filters: {
 			team: '',
 			user_id: document.querySelector("meta[name='user-id']").getAttribute('content')
-		}
+		},
+		selectedItem: {
+			afternoon: '',
+			all_day: '',
+			morning: '',
+			total: 0,
+		},
 	},
 
 	getters: {
@@ -35,6 +44,7 @@ export default {
 		allOffDays: state => state.allOffDays,
 		filters: state => state.filters,
 		offDays: state => state.offDays,
+		selectedItem: state => state.selectedItem,
 		currentEvent: state => state.currentEvent,
 		currentStart: state => state.currentStart,
 		currentEnd: state => state.currentEnd,
@@ -84,6 +94,10 @@ export default {
 			state.team = data
 		},
 
+		SET_SELECTED_ITEM: (state, data) => {
+			state.selectedItem = Object.assign({}, data)
+		},
+
 		UPDATE_CURRENT_EVENT: (state, data) => {
 			state.currentEvent = data
 		},
@@ -120,10 +134,10 @@ export default {
 				.then(res => {
 					if (res.data.offDays.length) {
 						res.data.offDays = res.data.offDays.map((item, index) => {
-							let type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
-
+							const type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
 							return Object.assign({}, item, {
 								title: getters['recapTime'](item.type, rootState.translateTexts) + getters['recapName'](item.name),
+								className: 'printed' == item.status ? 'printed' : '',
 								borderColor: type.color,
 								backgroundColor: type.color,
 								start: rootGetters['dateFormat'](item.date),
@@ -165,6 +179,19 @@ export default {
 				});
 		},
 
+		getAllOffDayWeek({ commit }, id) {
+			const uri = '/data/all-off-day-week?id=' + id;
+
+			axios.get(uri)
+				.then(res => {
+					commit('SET_SELECTED_ITEM', res.data);
+				})
+				.catch(err => {
+					console.log(err);
+					alert("Could not load Off days");
+				});
+		},
+
 		setTeam({ commit }, data) {
 			commit('SET_TEAM', data)
 		},
@@ -179,15 +206,17 @@ export default {
 			}).catch(err => console.log(err));
 		},
 
-		clickEvent({ commit, rootGetters, state }, item) {
+		clickEvent({ commit, rootGetters, state, dispatch }, item) {
 			const user_id = rootGetters['getObjectByID'](state.allOffDays, item.event.id * 1)['user_id'];
 			if (user_id == state.filters.user_id) {
+				if ('morning' != item.event._def.extendedProps.type) dispatch('getAllOffDayWeek', item.event.id);
+				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 })
 				commit('UPDATE_CURRENT_EVENT', item.event);
 				$('#editEvent').modal('show');
 			}
 		},
 
-		addEvent({ dispatch ,commit, state,rootState, rootGetters }, info) {
+		addEvent({ dispatch, commit, state, rootState, rootGetters }, info) {
 			const { event } = info;
 			const { id, start, end, borderColor, backgroundColor, title } = event;
 			const uri = '/data/offdays?user_id=' + rootState.loginUser.id;
@@ -211,7 +240,7 @@ export default {
 						newOffDay: res.data.event
 					}
 					commit('ADD_OFF_DAY', data)
-					if(rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
+					if (rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
 					info.event.remove();
 					dispatch('getAllOffDays')
 				})
@@ -225,6 +254,19 @@ export default {
 			axios.get(uri)
 				.then(res => {
 					window.open(res.data.file_name, "_blank");
+				})
+				.catch(err => {
+					console.log(err);
+					alert("Could not load data");
+				});
+		},
+
+		printEvents({ }, selectItem) {
+			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date + '&ids=' + selectItem.ids;
+			axios.get(uri)
+				.then(res => {
+					if (res.data.status == 1) window.open(res.data.file_name, "_blank");
+					else alert('Error Print');
 				})
 				.catch(err => {
 					console.log(err);
