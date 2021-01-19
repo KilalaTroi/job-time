@@ -1,5 +1,5 @@
 <template>
-  <table id="finsh" class="table">
+  <table id="finsh_totaling" class="table">
     <thead>
       <slot name="columns">
         <tr>

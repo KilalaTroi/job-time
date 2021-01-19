@@ -1,10 +1,10 @@
 <template>
-    <table class="table">
+    <table id="finsh" class="table">
         <thead>
             <slot name="columns">
                 <tr>
                     <!-- <th width="110" class="text-center">{{$ml.with('VueJS').get('txtFinish')}}</th> -->
-                    <th v-for="(column, index) in columns" :key="index" :width="column.width" :class="column.class">{{ column.value }}</th>
+                    <th v-for="(column, index) in columns" :key="index"  :width="column.width" :class="column.class" :data-filter="column.id">{{ column.value }}</th>
                     <th width="110" class="text-center">{{$ml.with('VueJS').get('txtDetails')}}</th>
                     <th width="110" class="text-center">{{$ml.with('VueJS').get('txtAction')}}</th>
                 </tr>
@@ -14,15 +14,15 @@
             <tr v-for="(item, index) in data" :key="index">
                 <!-- <td class="text-center"><i @click="$emit('change-status-process', item)" :class="itemClassActive(item)"></i></td> -->
                 <slot :row="item">
-                    <td v-for="(column, index) in columns" :key="index" :class="column.class">
+                    <td v-for="(column, index) in columns" :key="index" :class="column.class" :data-filter="column.id">
                         <span :class="getStatusClass(item, column)" v-html="itemValue(item, column)"></span>
                     </td>
                 </slot>
                 <td class="text-center">
-                    <button @click="$emit('get-process', item)" class="btn text-white bg-secondary" data-toggle="modal" data-target="#processDetailModal" data-backdrop="static" data-keyboard="false">{{$ml.with('VueJS').get('txtDetails')}}</button> 
+                    <button @click="$emit('get-process', item)" class="btn text-white bg-secondary" data-toggle="modal" data-target="#processDetailModal" data-backdrop="static" data-keyboard="false">{{$ml.with('VueJS').get('txtDetails')}}</button>
                 </td>
                 <td class="text-center">
-                    <i @click="$emit('update-process', item)" class="fa fa-paper-plane btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i> 
+                    <i @click="$emit('update-process', item)" class="fa fa-paper-plane btn-process" data-toggle="modal" data-target="#processModal" data-backdrop="static" data-keyboard="false"></i>
                 </td>
             </tr>
         </tbody>

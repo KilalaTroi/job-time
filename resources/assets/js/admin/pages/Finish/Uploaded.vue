@@ -179,7 +179,7 @@
         </div>
       </div>
        <view-table-option
-         dataTable="finsh"
+         dataTable="finsh_totaling"
         :dataItems="processesUploaded"
         :dataCols="columns"
       />
