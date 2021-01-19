@@ -551,7 +551,9 @@ class ReportsController extends Controller
 
 		$report = Report::findOrFail($reportID);
 		$seenArr = explode(',', $report->seen);
-		if (!in_array($userID, $seenArr)) $seenData = $report->seen . ',' . $userID;
+		if (!in_array($userID, $seenArr)) {
+			$seenData = $report->seen . ',' . $userID;
+		}
 
 		if ($seenData) {
 			$report->timestamps = false;

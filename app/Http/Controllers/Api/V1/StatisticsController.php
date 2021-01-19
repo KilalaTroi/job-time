@@ -986,6 +986,7 @@ class StatisticsController extends Controller
 			->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
 			->whereNotIn('user.id', $this->usersIgnoreAdmin($team))
 			->where('team', $team)
+			->where('disable_date', NULL)
 			->get()->toArray();
 	}
 
