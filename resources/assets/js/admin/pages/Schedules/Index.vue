@@ -147,7 +147,6 @@ export default {
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       typeOptions: "types/options",
-      getLanguage: "getLanguage",
     }),
   },
 
@@ -187,6 +186,12 @@ export default {
           };
         },
       });
+    },
+
+    getLanguage(data) {
+      let lang = data.current;
+      // if(lang == 'vi') lang = 'en';
+      return lang;
     },
 
     tooltipFunc(info) {
