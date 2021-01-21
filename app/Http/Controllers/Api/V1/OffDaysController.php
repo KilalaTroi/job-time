@@ -140,28 +140,26 @@ class OffDaysController extends Controller
 	 */
 	public function store(Request $request)
 	{
-		$ids = array(); // ids ngày nghĩ bị trùng
+		$data = array(
+			'message' => 'Successfully.',
+			'oldEvent' => array(),
+			'event' => array()
+		);
 
-		// lấy ngày nghĩ bị trùng
 		$oldOffDay = DB::table('off_days')
-			->select(
-				'id'
-			)
+			->select('id', 'status')
 			->where('user_id', '=', $request->get('user_id'))
 			->where('date', '=',  $request->get('date'))
-			->get()->toArray();
-
+			->first();
 		if ($oldOffDay) {
-			foreach ($oldOffDay as $value) {
-				$ids[] = $value->id; // ids ngày nghĩ bị trùng
+			if ('approved' == $oldOffDay->status) {
+				OffDay::where('id', $oldOffDay->id)->delete();
+				$data['oldEvent'] = array($oldOffDay->id);
+				$offDay = OffDay::create($request->all());
 			}
-			OffDay::destroy($ids);
-		}
-
-		$offDay = OffDay::create($request->all());
-
-		return response()->json(array(
-			'event' => array(
+		} else	$offDay = OffDay::create($request->all());
+		if (isset($offDay) && !empty($offDay)) {
+			$data['event'] = array(
 				'id' => $offDay->id,
 				'type' => $request->get('type'),
 				'start' => $request->get('start'),
@@ -169,10 +167,11 @@ class OffDaysController extends Controller
 				'borderColor' => $request->get('borderColor'),
 				'backgroundColor' => $request->get('backgroundColor'),
 				'title' => $request->get('title')
-			),
-			'oldEvent' => $ids, // ids ngày nghĩ bị trùng
-			'message' => 'Successfully.'
-		), 200);
+			);
+		}
+
+
+		return response()->json($data, 200);
 	}
 
 	/**
