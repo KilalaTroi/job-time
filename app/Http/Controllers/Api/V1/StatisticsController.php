@@ -723,9 +723,9 @@ class StatisticsController extends Controller
 	function getJobReport()
 	{
 		$teamID = 3;
-
+		$userID = isset($_GET['user_id']) && $_GET['user_id'] ? $_GET['user_id'] : 0;
 		$data = array(
-			'totaljob' => $this->getJobReportAll($teamID),
+			'totaljob' => $this->getJobReportAll($teamID, $userID),
 		);
 
 		return response()->json($data);
@@ -734,15 +734,15 @@ class StatisticsController extends Controller
 	function getProjectReport()
 	{
 		$teamID = 3;
-
+		$userID = isset($_GET['user_id']) && $_GET['user_id'] ? $_GET['user_id'] : 0;
 		$data = array(
-			'totalproject' => $this->getProjectReportAll($teamID)
+			'totalproject' => $this->getProjectReportAll($teamID, $userID)
 		);
 
 		return response()->json($data);
 	}
 
-	private function getProjectReportAll($teamID)
+	private function getProjectReportAll($teamID, $userID)
 	{
 
 		$results = DB::table('jobs as j')
@@ -756,6 +756,11 @@ class StatisticsController extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
+			->when($userID, function ($query) use ($userID){
+				return $query->where(function ($query) use ($userID) {
+					$query->where('j.user_id', $userID);
+				});
+			})
 			->when($teamID, function ($query, $teamID) {
 				return $query->where(function ($query) use ($teamID) {
 					$query->where('p.team', '=', $teamID)
@@ -782,7 +787,7 @@ class StatisticsController extends Controller
 		return array_values($totalProject);
 	}
 
-	private function getJobReportAll($teamID)
+	private function getJobReportAll($teamID, $userID)
 	{
 
 		$results = DB::table('jobs as j')
@@ -795,6 +800,11 @@ class StatisticsController extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
+			->when($userID, function ($query) use ($userID){
+				return $query->where(function ($query) use ($userID) {
+					$query->where('j.user_id', $userID);
+				});
+			})
 			->when($teamID, function ($query, $teamID) {
 				return $query->where(function ($query) use ($teamID) {
 					$query->where('p.team', '=', $teamID)
