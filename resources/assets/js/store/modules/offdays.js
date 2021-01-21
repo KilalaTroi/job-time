@@ -115,7 +115,7 @@ export default {
 		},
 
 		ADD_OFF_DAY: (state, data) => {
-			if (data.oldOffDays) {
+			if (data.oldOffDays.length > 0) {
 				state.offDays = state.offDays.filter((elem) => {
 					if (data.oldOffDays.indexOf(elem.id) === -1) {
 						return elem
@@ -242,18 +242,19 @@ export default {
 					commit('ADD_OFF_DAY', data)
 					if (rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
 					info.event.remove();
-					dispatch('getAllOffDays')
+					dispatch('getAllOffDays');
 				})
 				.catch(err => {
 					console.log(err);
 				});
 		},
 
-		printEvent({ }, event) {
+		printEvent({ dispatch }, event) {
 			const uri = "/pdf/absence?id=" + event.id;
 			axios.get(uri)
 				.then(res => {
 					window.open(res.data.file_name, "_blank");
+					dispatch('getAllOffDays')
 				})
 				.catch(err => {
 					console.log(err);
@@ -261,12 +262,13 @@ export default {
 				});
 		},
 
-		printEvents({ }, selectItem) {
+		printEvents({ dispatch }, selectItem) {
 			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date + '&ids=' + selectItem.ids + '&user_id=' + selectItem.user_id;
 			axios.get(uri)
 				.then(res => {
 					if (res.data.status == 1) window.open(res.data.file_name, "_blank");
 					else alert('Error Print');
+					dispatch('getAllOffDays');
 				})
 				.catch(err => {
 					console.log(err);
