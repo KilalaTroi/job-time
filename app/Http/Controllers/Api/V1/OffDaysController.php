@@ -90,6 +90,7 @@ class OffDaysController extends Controller
 	{
 		$offDay = OffDay::findOrFail($request->input('id'));
 		$results = array(
+			'user_id' => $offDay['user_id'],
 			'total' => 0,
 			'ids' => ''
 		);
@@ -97,8 +98,8 @@ class OffDaysController extends Controller
 			$offDay = $offDay->toArray();
 			$dataStartWeekDay = $dataEndWeekDay = array();
 
-			if ( $offDay['type'] != 'afternoon' ) $dataStartWeekDay = $this->getOffDayStartWeek($offDay['date']);
-			if ( $offDay['type'] != 'morning' ) $dataEndWeekDay = $this->getOffDayEndWeek($offDay['date']);
+			if ($offDay['type'] != 'afternoon') $dataStartWeekDay = $this->getOffDayStartWeek($offDay['date'], $offDay['user_id']);
+			if ($offDay['type'] != 'morning') $dataEndWeekDay = $this->getOffDayEndWeek($offDay['date'], $offDay['user_id']);
 
 			$dataDate = array_merge($dataStartWeekDay, $dataEndWeekDay);
 
@@ -190,7 +191,7 @@ class OffDaysController extends Controller
 		), 200);
 	}
 
-	private function getOffDayStartWeek($date)
+	private function getOffDayStartWeek($date, $user_id)
 	{
 		$dateCab = Carbon::createFromFormat('Y-m-d', $date);
 		$startDateWeek = Carbon::createFromFormat('Y-m-d', $date)->startOfWeek()->format('Y-m-d');
@@ -202,11 +203,11 @@ class OffDaysController extends Controller
 		for ($i = 0; $i <= $intDate - $intDateWeek; $i++) {
 			$dataDate = $dateCab->copy()->subDay($i)->format('Y-m-d');
 			$offDay = OffDay::select('id', 'type', 'date')
-				->where('user_id', $this->user['id'])
+				->where('user_id', $user_id)
 				->where('date', $dataDate)
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
-			$offDay = $offDay->toArray();			
+			$offDay = $offDay->toArray();
 			if (isset($data) && !empty($data)) {
 				if ('all_day' == $data[$i - 1]['type'] && $offDay['type'] == 'morning') break;
 				else if ('afternoon' == $data[$i - 1]['type'] && $offDay['type'] == 'all_day') break;
@@ -215,12 +216,12 @@ class OffDaysController extends Controller
 			}
 			$data[] = $offDay;
 		}
-		
+
 		krsort($data);
 		return $data;
 	}
 
-	private function getOffDayEndWeek($date)
+	private function getOffDayEndWeek($date, $user_id)
 	{
 		$dateCab = Carbon::createFromFormat('Y-m-d', $date);
 		$endDateWeek = Carbon::createFromFormat('Y-m-d', $date)->endOfWeek()->subDay(1)->format('Y-m-d');
@@ -231,7 +232,7 @@ class OffDaysController extends Controller
 		for ($i = 0; $i <= $intDateWeek - $intDate; $i++) {
 			$dataDate = $dateCab->copy()->addDay($i)->format('Y-m-d');;
 			$offDay = OffDay::select('id', 'type', 'date')
-				->where('user_id', $this->user['id'])
+				->where('user_id', $user_id)
 				->where('date', $dataDate)
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;

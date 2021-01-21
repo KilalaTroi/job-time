@@ -31,7 +31,10 @@ class pdfController extends Controller
 		$offDay = false;
 		if (!empty($request->input('id')) && NULL !== $request->input('id')) $offDay = $this->absenceByID($request->input('id'));
 		else if (!empty($request->input('total')) && NULL !== $request->input('total')) {
+			$users = DB::table('users')->select('fullname')->where('id',$request->input('user_id'))->first();
 			$offDay = array(
+				'user_id' => $request->input('user_id'),
+				'user_fullname' => $users->fullname,
 				'totalOff' => $request->input('total'),
 				'type' => 1,
 				'date' => $request->input('date')
@@ -53,7 +56,7 @@ class pdfController extends Controller
 		}
 
 		$data = array(
-			'name' => $this->user['fullname'],
+			'name' => $offDay['user_fullname'],
 			'off' => $offDay['off'],
 			'type' => $offDay['type'],
 			'date' => $offDay['date'],
@@ -61,7 +64,7 @@ class pdfController extends Controller
 			'now_date' => date("d/m/Y"),
 		);
 
-		$file_name = 'absence-' . $this->user['id'] . '_' . $data['type'] . '_' . str_replace(array('/', ' - '), '', $data['date']) . '_' . str_replace('/', '', date("Y/m/d")) . '.pdf';
+		$file_name = 'absence-' . $offDay['user_id'] . '_' . $data['type'] . '_' . str_replace(array('/', ' - '), '', $data['date']) . '_' . str_replace('/', '', date("Y/m/d")) . '.pdf';
 		// if(!File::exists(storage_path($file_name))){
 		$pdf = PDFSNAPPY::loadView('pdf.absence',  compact('data'))->setTemporaryFolder(storage_path('app/absence/tmp'));
 		Storage::put('public/pdf/' . $file_name, $pdf->output());
@@ -79,12 +82,15 @@ class pdfController extends Controller
 		$offDay = DB::table('off_days')->where('id', $id)->first();
 
 		if (isset($offDay) && !empty($offDay)) {
+			$users = DB::table('users')->select('fullname')->where('id',$offDay->user_id)->first();
 			$data['totalOff'] =  "all_day" == $offDay->type ? "1" : "0,5";
 			if ('morning' == $offDay->type) $data['off']['morning'] = date("d/m/Y", strtotime($offDay->date));
 			if ('afternoon' == $offDay->type) $data['off']['afternoon'] = date("d/m/Y", strtotime($offDay->date));
 			if ('all_day' == $offDay->type) $data['off']['all_day'] = date("d/m/Y", strtotime($offDay->date));
 			$data['date'] = date("d/m/Y", strtotime($offDay->date));
 			$data['type'] = $offDay->type;
+			$data['user_id'] = $offDay->user_id;
+			$data['user_fullname'] = $users->fullname;
 			return $data;
 		}
 		return false;

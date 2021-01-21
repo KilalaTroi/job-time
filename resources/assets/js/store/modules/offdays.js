@@ -206,9 +206,9 @@ export default {
 			}).catch(err => console.log(err));
 		},
 
-		clickEvent({ commit, rootGetters, state, dispatch }, item) {
+		clickEvent({ commit, rootGetters, state, dispatch, rootState }, item) {
 			const user_id = rootGetters['getObjectByID'](state.allOffDays, item.event.id * 1)['user_id'];
-			if (user_id == state.filters.user_id) {
+			if (user_id == state.filters.user_id || 1 == rootState.loginUser.role.id) {
 				if ('morning' != item.event._def.extendedProps.type) dispatch('getAllOffDayWeek', item.event.id);
 				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 })
 				commit('UPDATE_CURRENT_EVENT', item.event);
@@ -262,7 +262,7 @@ export default {
 		},
 
 		printEvents({ }, selectItem) {
-			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date + '&ids=' + selectItem.ids;
+			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date + '&ids=' + selectItem.ids + '&user_id=' + selectItem.user_id;
 			axios.get(uri)
 				.then(res => {
 					if (res.data.status == 1) window.open(res.data.file_name, "_blank");
