@@ -222,7 +222,10 @@
                 newUsersPerMonth: {},
                 totalHoursPerMonth: {},
                 hoursPerProject: [],
-                pageData: [],
+                pageData: {
+                    'totalpage' : [],
+                    'table' : [],
+                },
                 jobsData: [],
                 projectsData: [],
                 jobs: 0,
@@ -370,45 +373,10 @@
             }),
 
             fetch() {
-                let uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
-                if(this.team != 3){
-                    const uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                    axios.get(uriPage)
-                    .then(res => {
-                        this.pageData = res.data;
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load data");
-                    });
-                }
-
-                if(this.team == 3){
-                    const uriJobs = '/data/statistic/get-job-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-
-                    const uriProject = '/data/statistic/get-project-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-
-                    axios.get(uriJobs)
-                    .then(res => {
-                        this.jobsData = res.data;
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load data");
-                    });
-
-                    axios.get(uriProject)
-                    .then(res => {
-                        this.projectsData = res.data;
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load data");
-                    });
-                }
+                const uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 axios.get(uri)
                     .then(res => {
@@ -423,39 +391,31 @@
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-                        if(this.team != 3){
-                            this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page',this.totalHoursPerMonth)
-                            this.data.totalpage = this.pageData;
+
+                        if(3 != this.team){
+                            const uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                            this.getPageData(uriPage);
                         }
-                        if(this.team == 3){
-                            this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue',this.totalHoursPerMonth);
-                            this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project',this.totalHoursPerMonth);
+
+                        if(3 == this.team){
+                            const uriJobs = '/data/statistic/get-job-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                            this.getJobData(uriJobs);
+
+                            const uriProject = '/data/statistic/get-project-report?startMonth=' + this.customFormatterStr(this.startMonth)
+                            this.getProjectData(uriProject);
                         }
                     })
                     .catch(err => {
                         console.log(err);
                         alert("Could not load data");
                     });
+
             },
             getFilterData() {
 
-                let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-
-                if(this.team != 3){
-                const uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                axios.get(uriPage)
-                    .then(res => {
-                        this.pageData = res.data;
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load data");
-                    });
-
-                }
-
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
+                const uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
                 axios.get(uri)
                     .then(res => {
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
@@ -465,13 +425,17 @@
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-                        if(this.team != 3){
-                            this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page',this.totalHoursPerMonth)
-                            this.data.totalpage = this.pageData;
+                        if(3 == this.team){
+                            const uriJobs = '/data/statistic/get-job-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                            this.getJobData(uriJobs);
+
+                            const uriProject = '/data/statistic/get-project-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth)
+                            this.getProjectData(uriProject);
                         }
-                        if(this.team == 3){
-                            this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue',this.totalHoursPerMonth);
-                            this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project',this.totalHoursPerMonth);
+
+                        if(3 != this.team){
+                            const uriPage = '/data/statistic/get-page-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                            this.getPageData(uriPage)
                         }
                     })
                     .catch(err => {
@@ -479,14 +443,47 @@
                         alert("Could not load data");
                     });
             },
-            hasObjectValue(data, id, yearMonth) {
-                let obj = data.filter((elem) => {
-                    if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem;
+
+            getPageData(url){
+                axios.get(url)
+                .then(res => {
+                    this.pageData = res.data;
+                    this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page',this.totalHoursPerMonth)
+                    this.data.totalpage = this.pageData;
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load data");
                 });
+            },
 
-                if (obj.length > 0)
-                    return obj[0];
+            getJobData(url){
+                axios.get(url)
+                .then(res => {
+                    this.jobsData = res.data;
+                    this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue',this.totalHoursPerMonth);
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load data");
+                });
+            },
 
+            getProjectData(url){
+                axios.get(url)
+                .then(res => {
+                    this.projectsData = res.data;
+                    this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project',this.totalHoursPerMonth);
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not load data");
+                });
+            },
+
+            hasObjectValue(data, id, yearMonth) {
+                let obj = data.filter((elem) => { if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem; });
+                if (obj.length > 0) return obj[0];
                 return false;
             },
             customFormatterEnd(date) {
