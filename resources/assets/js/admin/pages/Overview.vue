@@ -442,7 +442,7 @@
                 let uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 if(this.team != 3){
-                const uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                const uriPage = '/data/statistic/get-page-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
                 axios.get(uriPage)
                     .then(res => {
                         this.pageData = res.data;
@@ -480,13 +480,8 @@
                     });
             },
             hasObjectValue(data, id, yearMonth) {
-                let obj = data.filter((elem) => {
-                    if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem;
-                });
-
-                if (obj.length > 0)
-                    return obj[0];
-
+                let obj = data.filter((elem) => { if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem; });
+                if (obj.length > 0) return obj[0];
                 return false;
             },
             customFormatterEnd(date) {

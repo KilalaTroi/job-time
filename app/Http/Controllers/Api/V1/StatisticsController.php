@@ -643,7 +643,7 @@ class StatisticsController extends Controller
 			$arrayStart = explode('-', $value['start']);
 			$monthYear = Carbon::createFromFormat('Y-m-d', $value['start']);
 
-			if ( $teamID != 2 ) {
+			if ($teamID != 2) {
 				for ($d = 1; $d <= $monthYear->daysInMonth; $d++) {
 					$day = Carbon::createFromDate($arrayStart[0], $arrayStart[1] * 1, $d);
 					if ($day->isWeekday()) $daysInMonth++;
@@ -709,11 +709,12 @@ class StatisticsController extends Controller
 	function getPageReport()
 	{
 		$teamID = isset($_GET['team_id']) && $_GET['team_id'] ? $_GET['team_id'] : 0;
+		$userID = isset($_GET['user_id']) && $_GET['user_id'] ? $_GET['user_id'] : 0;
 		$startMonth = $_GET['startMonth'];
 		$endMonth = $_GET['endMonth'];
 
 
-		if (2 == $teamID) $data = $this->getPageReportPath($teamID, $startMonth, $endMonth);
+		if (2 == $teamID) $data = $this->getPageReportPath($teamID, $userID, $startMonth, $endMonth);
 		else $data = $this->getPageReportAll($teamID);
 
 		return response()->json($data);
@@ -849,7 +850,7 @@ class StatisticsController extends Controller
 		return $datas;
 	}
 
-	private function getPageReportPath($teamID, $startMonth, $endMonth)
+	private function getPageReportPath($teamID, $userID, $startMonth, $endMonth)
 	{
 
 		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
@@ -865,6 +866,11 @@ class StatisticsController extends Controller
 			->where('pr.page', '>', 0)
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
 			->where('t.email', '!=', NULL)
+			->when($userID, function ($query) use ($userID){
+				return $query->where(function ($query) use ($userID) {
+					$query->where('pr.user_id', $userID);
+				});
+			})
 			->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
 				return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
 					$query->where('pr.date', ">=", str_replace('/', '-', $startMonthCar) . ' 00:00:00')->where('pr.date', "<=", str_replace('/', '-', $endMonthCar) . ' 23:59:59');
@@ -888,6 +894,11 @@ class StatisticsController extends Controller
 			->where('j.quantity', '>', 0)
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
 			->where('t.email', NULL)
+			->when($userID, function ($query) use ($userID){
+				return $query->where(function ($query) use ($userID) {
+					$query->where('j.user_id', $userID);
+				});
+			})
 			->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
 				return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
 					$query->where('j.date', ">=", str_replace('/', '-', $startMonthCar))->where('j.date', "<=", str_replace('/', '-', $endMonthCar));
@@ -925,28 +936,31 @@ class StatisticsController extends Controller
 			}
 		}
 
-		$totalPage = DB::table('total_pages')->select('type_id', 'page', 'date')
-			->where('page', '>', 0)
-			->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
-				return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
-					$query->where('total_pages.date', ">=", str_replace(array('/', '-'), '', $startMonthCar))->where('total_pages.date', "<=", str_replace(array('/', '-'), '', $endMonthCar));
-				});
-			})
-			->when($teamID, function ($query, $teamID) {
-				return $query->where(function ($query) use ($teamID) {
-					$query->where('team_id', '=', $teamID)
-						->orWhere('team_id', 'LIKE', $teamID . ',%')
-						->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
-						->orWhere('team_id', 'LIKE', '%,' . $teamID);
-				});
-			})->get()->toArray();
 
-		foreach ($totalPage as $v) {
-			$results[$v->type_id . '_' . $v->date] = array(
-				'id' => $v->type_id,
-				'page' => $v->page,
-				'yearMonth' => $v->date,
-			);
+		if (0 == $userID) {
+			$totalPage = DB::table('total_pages')->select('type_id', 'page', 'date')
+				->where('page', '>', 0)
+				->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
+					return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
+						$query->where('total_pages.date', ">=", str_replace(array('/', '-'), '', $startMonthCar))->where('total_pages.date', "<=", str_replace(array('/', '-'), '', $endMonthCar));
+					});
+				})
+				->when($teamID, function ($query, $teamID) {
+					return $query->where(function ($query) use ($teamID) {
+						$query->where('team_id', '=', $teamID)
+							->orWhere('team_id', 'LIKE', $teamID . ',%')
+							->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
+							->orWhere('team_id', 'LIKE', '%,' . $teamID);
+					});
+				})->get()->toArray();
+
+			foreach ($totalPage as $v) {
+				$results[$v->type_id . '_' . $v->date] = array(
+					'id' => $v->type_id,
+					'page' => $v->page,
+					'yearMonth' => $v->date,
+				);
+			}
 		}
 
 		$datas = array(
