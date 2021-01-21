@@ -18,7 +18,7 @@
       </div>
     </template>
     <div class="row">
-      <div v-show="(loginUser.role && 1 != loginUser.role.id)" class="col-sm-12 row--left">
+      <div class="col-sm-12 row--left">
         <card>
           <template slot="header">
             <h4 class="card-title">
@@ -41,7 +41,7 @@
           </div>
         </card>
       </div>
-      <div class="col-sm-12" :class="(loginUser.role && 1 == loginUser.role.id) ? '' : 'row--right'">
+      <div class="col-sm-12 row--right">
         <FullCalendar
           class="off-days"
           defaultView="dayGridMonth"
@@ -94,8 +94,7 @@ export default {
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       getLangCode: "getLangCode",
-      dateFormat: "dateFormat",
-      loginUser: "loginUser",
+      dateFormat: "dateFormat"
     }),
 
     ...mapGetters("offdays", {
