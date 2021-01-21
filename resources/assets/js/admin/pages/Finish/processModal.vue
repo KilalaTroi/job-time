@@ -32,10 +32,10 @@
               <label class="">{{ $ml.with("VueJS").get("txtStatus") }}</label>
               <select-2 v-model="currentProcess.status" class="select2">
                 <option value="">--</option>
-                <option :disabled="dataProcess.length" value="Start Working">Start Working</option>
-                <option :disabled="dataProcess.length !== 1" value="Finished Work">Finished Work</option>
-                <option :disabled="dataProcess.length !== 2" value="Start Uploading">Start Uploading</option>
-                <option :disabled="dataProcess.length !== 3" value="Finished Upload">Finished Upload</option>
+                <option :disabled="arrCurrentProcess.length !== 0" value="Start Working">Start Working</option>
+                <option :disabled="arrCurrentProcess.length !== 1" value="Finished Work">Finished Work</option>
+                <option :disabled="arrCurrentProcess.length !== 2" value="Start Uploading">Start Uploading</option>
+                <option :disabled="arrCurrentProcess.length !== 3" value="Finished Upload">Finished Upload</option>
               </select-2>
             </div>
           </div>
