@@ -184,4 +184,8 @@ export default {
     txtPrint: 'Print',
     txtQuantity: '量',
     txtImage: 'ページ数',
+    txtData: 'Data',
+    txtInkiet: 'Inkjet',
+    txtFinishRQ: 'Finish RQ',
+    txtNotFinished: 'Not Finished'
 }

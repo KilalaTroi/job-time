@@ -17,7 +17,7 @@ class Uploadcontroller extends Controller
 		// POST data
 		$filters = array(
 			'date' => $request->get('start_date'),
-			'showFilter' => $request->get('showFilter') == 'showSchedule' ? true : false,
+			'showFilter' => $request->get('showFilter'),
 			'team' => $request->get('selectTeam'),
 			'projects' => array(10, 58, 59, 67, 68, 69)
 		);
@@ -35,6 +35,7 @@ class Uploadcontroller extends Controller
 				't.value as job_color',
 				't.line_room as room_id',
 				't.email as email',
+				's.id as schedule_id',
 				's.memo as phase'
 			)
 			->join('schedules as s', 'i.id', '=', 's.issue_id')
@@ -49,26 +50,24 @@ class Uploadcontroller extends Controller
 			})
 			->whereNotIn('p.id', $filters['projects'])
 			->when($filters['showFilter'], function ($query) use ($filters) {
-				return $query->where(function ($query) use ($filters) {
-					$query->where(function ($query) use ($filters) {
-						$query->where('s.date', '=',  $filters['date']);
-					})
-						->orWhere(function ($query) use ($filters) {
-							$query->where('s.date', '<=',  $filters['date'])
-								->where('s.end_date', '>=',  $filters['date']);
-						});
-				});
+				if ( $filters['showFilter'] === 'showSchedule' ) {
+					return $query->where(function ($query) use ($filters) {
+						$query->where(function ($query) use ($filters) {
+							$query->where('s.date', '=',  $filters['date']);
+						})
+							->orWhere(function ($query) use ($filters) {
+								$query->where('s.date', '<=',  $filters['date'])
+									->where('s.end_date', '>=',  $filters['date']);
+							});
+					});
+				}
+
+				if ( $filters['showFilter'] === 'notFinished' ) {
+					return $query->join('processes as pr', 'pr.issue_id', '=', 'i.id');
+				}
+
+				return $query;
 			})
-			// ->when(!$filters['showFilter'], function ($query) use ($filters) {
-			// 	return $query->where(function ($query) use ($filters) {
-			// 		$query->where('i.start_date', '<=',  $filters['date'])
-			// 			->orWhere('i.start_date', '=',  NULL);
-			// 	})
-			// 		->where(function ($query) use ($filters) {
-			// 			$query->where('i.end_date', '>=',  $filters['date'])
-			// 				->orWhere('i.end_date', '=',  NULL);
-			// 		});
-			// })
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
 					->orWhere('t.email', '!=', NULL);
@@ -77,6 +76,17 @@ class Uploadcontroller extends Controller
 			->orderBy('i.created_at', 'desc')
 			->orderBy('s.created_at', 'desc')
 			->groupBy('i.id', 's.memo')
+			->when($filters['showFilter'], function ($query) use ($filters) {
+				if ( $filters['showFilter'] === 'notFinished' ) {
+					return $query->orderBy('pr.created_at', 'desc')
+					->groupBy('i.id', 's.memo')
+					->havingRaw('COUNT(*) < 2');
+				}
+
+				return $query->orderBy('i.created_at', 'desc')
+				->orderBy('s.created_at', 'desc')
+				->groupBy('i.id', 's.memo');
+			})
 			->paginate(20);
 
 		$issueProcesses->transform(function ($item, $key) {
@@ -104,6 +114,9 @@ class Uploadcontroller extends Controller
 					's.memo as phase',
 					'p.date',
 					'u.name as user_name',
+					'p.data as data',
+					'p.inkjet as inkjet',
+					'p.finish_rq as finish_rq',
 					'p.status as status'
 				)
 				->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
@@ -600,16 +613,20 @@ class Uploadcontroller extends Controller
 
 			$emails[] = $request->get('email');
 
-			$contentArr = explode('---- ', $request->get('content'));
+			// $contentArr = explode('---- ', $request->get('content'));
 
 			Mail::send('emails.finish', [
-				'content' => count($contentArr) > 1 ? $contentArr[1] : '',
+				'content' => $request->get('content'),
 				'user' => $request->get('user'),
+				'type' => $request->get('type'),
 				'p_name' => $request->get('p_name'),
 				'i_name' => $request->get('i_name'),
 				'page' => $request->get('page'),
 				'file' => $request->get('file'),
 				'phase' => $request->get('phase'),
+				'data' => $request->get('data'),
+				'inkjet' => $request->get('inkjet'),
+				'finish_rq' => $request->get('finish_rq'),
 				'status' => $request->get('status')
 			], function ($message) use ($emails, $from, $request) {
 				$message->from($from['email'], $from['name']);
