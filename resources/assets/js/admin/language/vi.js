@@ -184,4 +184,8 @@ export default {
     txtPrint: 'Print',
     txtQuantity: 'Quantity',
     txtImage: 'Image',
+    txtData: 'Data',
+    txtInkiet: 'Inkjet',
+    txtFinishRQ: 'Finish RQ',
+    txtNotFinished: 'Not Finished'
 }
