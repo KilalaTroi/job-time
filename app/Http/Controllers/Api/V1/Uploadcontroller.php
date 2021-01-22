@@ -72,7 +72,7 @@ class Uploadcontroller extends Controller
 				$query->where('t.line_room', '!=', NULL)
 					->orWhere('t.email', '!=', NULL);
 			})
-			->where('i.created_at', '<=',  $filters['date'] . ' 23:59:59')
+			->where('i.status', 'publish')
 			->orderBy('i.created_at', 'desc')
 			->orderBy('s.created_at', 'desc')
 			->groupBy('i.id', 's.memo')
