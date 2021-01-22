@@ -80,7 +80,7 @@ class Uploadcontroller extends Controller
 				if ( $filters['showFilter'] === 'notFinished' ) {
 					return $query->orderBy('pr.created_at', 'desc')
 					->groupBy('i.id', 's.memo')
-					->havingRaw('COUNT(*) < 2');
+					->havingRaw('COUNT(*) = 1 OR COUNT(*) = 3');
 				}
 
 				return $query->orderBy('i.created_at', 'desc')
