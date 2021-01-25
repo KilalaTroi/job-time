@@ -385,6 +385,7 @@ export default {
           text: this.$ml.with("VueJS").get("txtShowBySchedule"),
         },
         { id: "all", text: this.$ml.with("VueJS").get("txtShowAll") },
+        { id: "notFinished", text: this.$ml.with("VueJS").get("txtNotFinished") },
       ];
       this.optionsFilter = [...arr];
     },
@@ -396,7 +397,7 @@ export default {
       return moment(date).format("YYYY/MM/DD");
     },
     resetValidate() {
-      this.currentProcess = {};
+      this.currentProcess = { status: null };
       this.fetchData(this.page, false);
     },
     getLanguage(data) {
