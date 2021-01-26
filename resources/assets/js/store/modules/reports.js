@@ -279,7 +279,8 @@ export default {
     },
 
     updateSeen({ state, dispatch, commit, rootState }) {
-      if (-1 == state.selectedItem.seen.indexOf(rootState.loginUser.id)) {
+      const arrSeen = state.selectedItem.seen.split(",");
+      if (-1 == arrSeen.indexOf(rootState.loginUser.id)) {
         const uri = "/data/update-seen";
         axios
           .post(uri, {
