@@ -1116,9 +1116,11 @@ class StatisticsController extends Controller
 				'j.note as note',
 				't.slug as t_name',
 				't.value as t_value',
-				'p.team as team'
+				'p.team as team',
+				's.memo as memo'
 			)
 			->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
+			->leftJoin('schedules as s', 's.issue_id', '=', 'i.id')
 			->leftJoin('users as u', 'u.id', '=', 'j.user_id')
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')

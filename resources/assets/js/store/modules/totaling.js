@@ -102,6 +102,7 @@ export default {
         { id: "p_name", value: rootGetters['getTranslate']('txtProject'), width: "", class: "", filter: true },
         { id: "i_year", value: rootGetters['getTranslate']('txtYearOfIssue'), width: "120", filter: true },
         { id: "i_name", value: rootGetters['getTranslate']('txtIssue'), width: "", class: "", filter: true },
+        { id: "memo", value: rootGetters['getTranslate']('txtPhase'), width: "", class: "memo", filter: true },
         { id: "note", value: rootGetters['getTranslate']('txtWork'), width: "", class: "note", filter: true },
         { id: "image", value: rootGetters['getTranslate']('txtImage'), width: "120", class: "image text-center" },
         { id: "t_name", value: rootGetters['getTranslate']('txtJobType'), width: "120", class: "", filter: true },
