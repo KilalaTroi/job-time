@@ -73,7 +73,7 @@ class ReportsController extends Controller
 		$report = Report::findOrFail($id);
 		$data = $request->all();
 		$data['seen'] = $this->user['id'];
-		$data['report_id'] = str_replace(array('tb', 'nt', 'mt'), $this->reportTypes[$data['type']], $report['report_id']);
+		$data['report_id'] = str_replace(array_values($this->reportTypes), $this->reportTypes[$data['type']], $report['report_id']);
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
 
 		// Nếu có data project mới check issue
