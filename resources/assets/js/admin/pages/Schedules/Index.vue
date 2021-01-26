@@ -55,6 +55,7 @@
             defaultView="timeGridWeek"
             scroll-time="7:00:00"
             :plugins="calendarPlugins"
+            :slotLabelFormat="{ 'hour12': false, 'hour': '2-digit', 'minute': '2-digit'}"
             :header="calendarHeader"
             :business-hours="businessHours"
             :editable="fullCalendar.editable"
@@ -65,7 +66,7 @@
             min-time="07:00:00"
             max-time="19:00:00"
             height="auto"
-            :hidden-days="hiddenDays"
+            :hidden-days="[0]"
             @eventReceive="addSchedule"
             @datesRender="handleMonthChange"
             @eventDrop="dropSchedule"
@@ -130,7 +131,6 @@ export default {
           endTime: "12:00", // an end time (6pm in this example)
         },
       ],
-      hiddenDays: [0],
       search: "",
     };
   },
@@ -147,6 +147,7 @@ export default {
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       typeOptions: "types/options",
+      getLanguage: "getLanguage"
     }),
   },
 
@@ -186,12 +187,6 @@ export default {
           };
         },
       });
-    },
-
-    getLanguage(data) {
-      let lang = data.current;
-      // if(lang == 'vi') lang = 'en';
-      return lang;
     },
 
     tooltipFunc(info) {
