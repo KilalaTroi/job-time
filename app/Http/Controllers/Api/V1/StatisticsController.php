@@ -1120,7 +1120,7 @@ class StatisticsController extends Controller
 				's.memo as memo'
 			)
 			->leftJoin('issues as i', 'i.id', '=', 'j.issue_id')
-			->leftJoin('schedules as s', 's.issue_id', '=', 'i.id')
+			->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
 			->leftJoin('users as u', 'u.id', '=', 'j.user_id')
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
