@@ -721,6 +721,33 @@ class StatisticsController extends Controller
 				);
 			}
 		}
+
+		if(2 == $teamID && 0 == $user_id){
+			$totalTime = DB::table('total_times')->select('type_id', 'time', 'date')
+				->where('time', '>', 0)
+				->when($teamID, function ($query) use ($startMonth, $endMonth) {
+					return $query->where(function ($query) use ($startMonth, $endMonth) {
+						$query->where('total_times.date', ">=", str_replace(array('/', '-'), '', $startMonth))->where('total_times.date', "<=", str_replace(array('/', '-'), '', $endMonth));
+					});
+				})
+				->when($teamID, function ($query, $teamID) {
+					return $query->where(function ($query) use ($teamID) {
+						$query->where('team_id', '=', $teamID)
+							->orWhere('team_id', 'LIKE', $teamID . ',%')
+							->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
+							->orWhere('team_id', 'LIKE', '%,' . $teamID);
+					});
+				})->get()->toArray();
+
+			foreach ($totalTime as $v) {
+				$dataHoursPerProject[$v->type_id . '_' . $v->date] = array(
+					'id' => $v->type_id,
+					'total' => $v->time,
+					'yearMonth' => $v->date,
+				);
+			}
+		}
+
 		$data['hoursPerProject'] = array_values($dataHoursPerProject);
 		return $data;
 	}
@@ -1223,13 +1250,5 @@ class StatisticsController extends Controller
 			$strTime .= ":" . (10 > $minutes ? "0" . $minutes : $minutes);
 		}
 		return $strTime;
-	}
-
-	private function timeToSec($time)
-	{
-		$hours = substr($time, 0, -6);
-		$minutes = substr($time, -5, 2);
-		$seconds = substr($time, -2);
-		return ($hours * 3600 + $minutes * 60 + $seconds) * 1;
 	}
 }
