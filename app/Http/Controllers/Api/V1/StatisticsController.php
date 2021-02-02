@@ -364,8 +364,15 @@ class StatisticsController extends Controller
 				'end' => $endM
 			);
 
+			// Ngày nghỉ chung
+			$generalOffDay = DB::connection('mysql')->table('off_days')
+			->where('type', '=', 'offday')
+			->where('date', '<=', $endM)
+			->where('date', '>=',  $startM)
+			->count();
+
 			// Full day off
-			$data['off_days'][$inYearMonth]['full'] = DB::connection('mysql')->table('off_days')
+			$data['off_days'][$inYearMonth]['full'] = $generalOffDay + DB::connection('mysql')->table('off_days')
 				->leftJoin('users', 'users.id', '=', 'off_days.user_id')
 				->where('type', '=', 'all_day')
 				->where('date', '<=', $endM)
