@@ -684,8 +684,7 @@ class StatisticsController extends Controller
 			->select(
 				'projects.type_id as id',
 				'jobs.date as jdate',
-				'start_time',
-				'end_time'
+				DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
 			)
 			->join('issues', 'issues.id', '=', 'jobs.issue_id')
 			->join('projects', 'projects.id', '=', 'issues.project_id')
@@ -699,21 +698,26 @@ class StatisticsController extends Controller
 			})
 			->whereNotIn('jobs.user_id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->orderBy('id', 'asc')
+			->groupBy('id', 'jdate')
 			->get()->toArray();
 
 		$dataHoursPerProject = array();
 		foreach ($hoursPerProject as $key => $value) {
-			$date = date('d', strtotime($value->jdate));
-			$yearMonth = $value->jdate;
-			if (21 <= $date && 31 >= $date && 2 == $teamID) $yearMonth = Carbon::createFromFormat('Y-m-d', $value->jdate)->copy()->addMonth()->format('Y-m-d');
-			$yearMonth = date('Ym', strtotime($yearMonth));
+			$dateCarbon = Carbon::createFromFormat('Y-m-d', $value->jdate);
+			$date = $dateCarbon->day;
+			$yearMonth = $dateCarbon->format('Ym');
+			// Từ ngày 21 đến ngày <=31 chuyển qua tháng mới
+			if (21 <= $date && 31 >= $date && 2 == $teamID) {
+				$yearMonth = $dateCarbon->copy()->addMonth()->format('Ym');
+			}
+			// create key
 			$str = $value->id . '_' . $yearMonth;
-			if (isset($dataHoursPerProject[$str]) && !empty($dataHoursPerProject[$str])) $dataHoursPerProject[$str]['total'] += ($this->timeToSec($value->end_time) - $this->timeToSec($value->start_time)) / 3600;
+			if (isset($dataHoursPerProject[$str]) && !empty($dataHoursPerProject[$str])) $dataHoursPerProject[$str]['total'] += $value->total;
 			else {
 				$dataHoursPerProject[$str] = array(
 					'id' => $value->id,
 					'yearMonth' => $yearMonth,
-					'total' => ($this->timeToSec($value->end_time) - $this->timeToSec($value->start_time)) / 3600
+					'total' => $value->total
 				);
 			}
 		}
