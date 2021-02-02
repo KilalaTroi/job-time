@@ -56,6 +56,8 @@
             scroll-time="7:00:00"
             :plugins="calendarPlugins"
             :slotLabelFormat="{ 'hour12': false, 'hour': '2-digit', 'minute': '2-digit'}"
+            :eventTimeFormat="{ 'hour12': false, 'hour': '2-digit', 'minute': '2-digit'}"
+            timeFormat= 'H(:mm)'
             :header="calendarHeader"
             :business-hours="businessHours"
             :editable="fullCalendar.editable"

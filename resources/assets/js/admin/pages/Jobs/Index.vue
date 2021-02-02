@@ -5,7 +5,7 @@
         <div class="col col-sm-auto">
           <card>
             <template slot="header">
-              <h4 class="card-title text-center">{{ dateFormat(new Date(),'DD MMM YYYY','') }}</h4>
+              <h4 class="card-title text-center">{{ dateFormat(filters.currentDate,'DD MMM YYYY','') }}</h4>
             </template>
 
             <datepicker

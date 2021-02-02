@@ -678,13 +678,14 @@ class StatisticsController extends Controller
 		}
 
 		$data['hoursPerMonth'] = $totalHoursPerMonth;
-
 		// Return total hours in month of per project type
+
 		$hoursPerProject = DB::table('jobs')
 			->select(
 				'projects.type_id as id',
-				DB::raw('concat(year(jobs.date),"", LPAD(month(jobs.date), 2, "0")) as yearMonth'),
-				DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
+				'jobs.date as jdate',
+				'start_time',
+				'end_time'
 			)
 			->join('issues', 'issues.id', '=', 'jobs.issue_id')
 			->join('projects', 'projects.id', '=', 'issues.project_id')
@@ -698,11 +699,25 @@ class StatisticsController extends Controller
 			})
 			->whereNotIn('jobs.user_id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
 			->orderBy('id', 'asc')
-			->groupBy('id', 'yearMonth')
 			->get()->toArray();
 
-		$data['hoursPerProject'] = $hoursPerProject;
-
+		$dataHoursPerProject = array();
+		foreach ($hoursPerProject as $key => $value) {
+			$date = date('d', strtotime($value->jdate));
+			$yearMonth = $value->jdate;
+			if (21 <= $date && 31 >= $date && 2 == $teamID) $yearMonth = Carbon::createFromFormat('Y-m-d', $value->jdate)->copy()->addMonth()->format('Y-m-d');
+			$yearMonth = date('Ym', strtotime($yearMonth));
+			$str = $value->id . '_' . $yearMonth;
+			if (isset($dataHoursPerProject[$str]) && !empty($dataHoursPerProject[$str])) $dataHoursPerProject[$str]['total'] += ($this->timeToSec($value->end_time) - $this->timeToSec($value->start_time)) / 3600;
+			else {
+				$dataHoursPerProject[$str] = array(
+					'id' => $value->id,
+					'yearMonth' => $yearMonth,
+					'total' => ($this->timeToSec($value->end_time) - $this->timeToSec($value->start_time)) / 3600
+				);
+			}
+		}
+		$data['hoursPerProject'] = array_values($dataHoursPerProject);
 		return $data;
 	}
 
@@ -756,7 +771,7 @@ class StatisticsController extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
-			->when($userID, function ($query) use ($userID){
+			->when($userID, function ($query) use ($userID) {
 				return $query->where(function ($query) use ($userID) {
 					$query->where('j.user_id', $userID);
 				});
@@ -800,7 +815,7 @@ class StatisticsController extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
-			->when($userID, function ($query) use ($userID){
+			->when($userID, function ($query) use ($userID) {
 				return $query->where(function ($query) use ($userID) {
 					$query->where('j.user_id', $userID);
 				});
@@ -876,7 +891,7 @@ class StatisticsController extends Controller
 			->where('pr.page', '>', 0)
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
 			->where('t.email', '!=', NULL)
-			->when($userID, function ($query) use ($userID){
+			->when($userID, function ($query) use ($userID) {
 				return $query->where(function ($query) use ($userID) {
 					$query->where('pr.user_id', $userID);
 				});
@@ -904,7 +919,7 @@ class StatisticsController extends Controller
 			->where('j.quantity', '>', 0)
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
 			->where('t.email', NULL)
-			->when($userID, function ($query) use ($userID){
+			->when($userID, function ($query) use ($userID) {
 				return $query->where(function ($query) use ($userID) {
 					$query->where('j.user_id', $userID);
 				});
@@ -1204,5 +1219,13 @@ class StatisticsController extends Controller
 			$strTime .= ":" . (10 > $minutes ? "0" . $minutes : $minutes);
 		}
 		return $strTime;
+	}
+
+	private function timeToSec($time)
+	{
+		$hours = substr($time, 0, -6);
+		$minutes = substr($time, -5, 2);
+		$seconds = substr($time, -2);
+		return ($hours * 3600 + $minutes * 60 + $seconds) * 1;
 	}
 }
