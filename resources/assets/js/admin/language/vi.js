@@ -142,6 +142,8 @@ export default {
     txtRCFullDay: 'Full',
     txtRCAM: 'AM',
     txtRCPM: 'PM',
+    txtRCOff: 'Off',
+    txtRCHoliday: 'Holiday',
     txtReportFilter: 'Filter',
     txtReportType: 'Report type',
     txtReportCreate: 'Create New Report',

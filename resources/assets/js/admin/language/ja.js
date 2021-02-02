@@ -142,6 +142,8 @@ export default {
     txtRCFullDay: 'Full',
     txtRCAM: 'AM',
     txtRCPM: 'PM',
+    txtRCOff: 'Off',
+    txtRCHoliday: 'Holiday',
     txtReportFilter: 'フィルタ',
     txtReportType: '種類',
     txtReportCreate: '新規レポートの作成',
