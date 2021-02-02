@@ -27,16 +27,18 @@
           </template>
           <div class="mb-3" id="external-events">
             <div id="external-events-list">
-              <div
-                class="alert alert-success fc-event"
-                v-for="(item, index) in offDayTypes"
-                :data-type="item.id"
-                :key="index"
-                :color="item.color"
-                :style="setBackground(item.color)"
-              >
-                <span><b>{{ item.name }}</b></span>
-              </div>
+               <template v-for="(item, index) in offDayTypes">
+                <div
+                  class="alert alert-success fc-event"
+                  v-if="!(item.permission && loginUser.role && -1 == item.permission.user_id.indexOf(loginUser.id) && -1 == item.permission.role.indexOf(loginUser.role.name))"
+                  :data-type="item.id"
+                  :key="index"
+                  :color="item.color"
+                  :style="setBackground(item.color)"
+                >
+                  <span><b>{{ item.name }}</b></span>
+                </div>
+               </template>
             </div>
           </div>
         </card>
@@ -91,6 +93,7 @@ export default {
     ...mapGetters({
       setBackground: "setBackground",
       getLanguage: "getLanguage",
+      loginUser: "loginUser",
       currentTeamOption: "currentTeamOption",
       currentTeam: "currentTeam",
       getLangCode: "getLangCode",
@@ -178,10 +181,10 @@ export default {
 
   async created() {
     const _this = this;
-    _this.filters.team = _this.currentTeam.id;
     _this.options.team = [{ id: "", text: "ALL" }].concat(
       _this.currentTeamOption
     );
+    _this.filters.team = _this.currentTeam.id;
   },
 
   watch: {
@@ -192,6 +195,14 @@ export default {
             this.setCurrentTeam(value.team);
           }
           this.getAllOffDays();
+        },
+        deep: true,
+      },
+    ],
+    loginUser: [
+      {
+        handler: function (value) {
+          if('admin' == value.role.name) this.filters.team = '';
         },
         deep: true,
       },
@@ -242,6 +253,35 @@ export default {
       top: 50%;
       transform: translateY(-50%);
       margin-top: 1px;
+    }
+  }
+  &.holiday, &.offday{
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 53px;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    &:after{
+      content: "";
+      position: absolute;
+      top: -31px;
+      z-index: -1;
+      left: -3px;
+      height: 120px;
+      width: calc(100% + 6px);
+    }
+  }
+  &.offday{
+    &:after{
+      background-color: #eaeaea;
+    }
+  }
+  &.holiday{
+    &:after{
+      background-color: #ffd6fb;
     }
   }
 }
