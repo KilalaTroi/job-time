@@ -16,6 +16,7 @@ class CreateTotalTimesTable extends Migration
         Schema::create('total_times', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('type_id');
+            $table->integer('user_id')->default(0);
             $table->integer('team_id');
             $table->float('time',8,4);
             $table->string('date',6);
