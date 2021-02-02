@@ -371,6 +371,10 @@ class StatisticsController extends Controller
 			->where('date', '>=',  $startM)
 			->count();
 
+			if ( ! $user_id ) {
+				$generalOffDay = $generalOffDay * count($this->usersNotIgnore($teamID));
+			}
+
 			// Full day off
 			$data['off_days'][$inYearMonth]['full'] = $generalOffDay + DB::connection('mysql')->table('off_days')
 				->leftJoin('users', 'users.id', '=', 'off_days.user_id')
@@ -389,7 +393,7 @@ class StatisticsController extends Controller
 			// Half day off
 			$data['off_days'][$inYearMonth]['half'] = DB::connection('mysql')->table('off_days')
 				->leftJoin('users', 'users.id', '=', 'off_days.user_id')
-				->where('type', '<>', 'all_day')
+				->whereIn('type', array('morning', 'afternoon'))
 				->where('date', '<=', $endM)
 				->where('date', '>=',  $startM)
 				->when($teamID, function ($query, $teamID) {
@@ -1080,6 +1084,28 @@ class StatisticsController extends Controller
 				$query->where(function ($query) {
 					$query->whereIn('roles.name', ['admin', 'japanese_planner'])
 						->orWhereIn('users.username', ['furuoya_vn_planner', 'furuoya_employee', 'hoa', 'nancy', 'luan']);
+				});
+			})
+			->get()->pluck('id')->toArray();
+
+		return $usersIgnore;
+	}
+
+	function usersNotIgnore($teamID)
+	{
+		$usersIgnore = DB::connection('mysql')->table('users')
+			->select(
+				'users.id as id'
+			)
+			->join('role_user', 'users.id', '=', 'role_user.user_id')
+			->join('roles', 'roles.id', '=', 'role_user.role_id')
+			->when($teamID, function ($query, $teamID) {
+				return $query->where('team', $teamID);
+			})
+			->where(function ($query) {
+				$query->where(function ($query) {
+					$query->whereNotIn('roles.name', ['admin', 'japanese_planner'])
+						->whereNotIn('users.username', ['furuoya_vn_planner', 'furuoya_employee', 'hoa', 'nancy', 'luan']);
 				});
 			})
 			->get()->pluck('id')->toArray();
