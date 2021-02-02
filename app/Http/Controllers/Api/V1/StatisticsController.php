@@ -680,6 +680,14 @@ class StatisticsController extends Controller
 		$data['hoursPerMonth'] = $totalHoursPerMonth;
 		// Return total hours in month of per project type
 
+		$dataNowMonthHoursPerProject = $dataHoursPerProject = array();
+		$dataHoursPerProject = $this->getTotalTimes($teamID, $user_id, $startMonth, $endMonth);
+
+		if(isset($dataHoursPerProject) && !empty($dataHoursPerProject)){
+			$totalTime = array_values($dataHoursPerProject);
+			$startMonth = substr($totalTime[0]['yearMonth'], 0, 4) . '/' . substr($totalTime[0]['yearMonth'], -2) . '/' . substr($startMonth, -2);
+		}
+
 		$hoursPerProject = DB::table('jobs')
 			->select(
 				'projects.type_id as id',
@@ -701,26 +709,44 @@ class StatisticsController extends Controller
 			->groupBy('id', 'jdate')
 			->get()->toArray();
 
-		$dataHoursPerProject = array();
 		foreach ($hoursPerProject as $key => $value) {
 			$dateCarbon = Carbon::createFromFormat('Y-m-d', $value->jdate);
 			$date = $dateCarbon->day;
 			$yearMonth = $dateCarbon->format('Ym');
 			// Từ ngày 21 đến ngày <=31 chuyển qua tháng mới
 			if (21 <= $date && 31 >= $date && 2 == $teamID) {
-				$yearMonth = $dateCarbon->copy()->addMonth()->format('Ym');
+				$yearMonth = $dateCarbon->copy()->startOfMonth()->addMonth()->format('Ym');
 			}
 			// create key
 			$str = $value->id . '_' . $yearMonth;
-			if (isset($dataHoursPerProject[$str]) && !empty($dataHoursPerProject[$str])) $dataHoursPerProject[$str]['total'] += $value->total;
-			else {
-				$dataHoursPerProject[$str] = array(
+			if (isset($dataNowMonthHoursPerProject[$str]) && !empty($dataNowMonthHoursPerProject[$str])) {
+				$dataHoursPerProject[$str]['total'] += $value->total;
+				$dataNowMonthHoursPerProject[$str]['total'] += $value->total;
+			} else {
+				$dataHoursPerProject[$str] = $dataNowMonthHoursPerProject[$str] = array(
 					'id' => $value->id,
 					'yearMonth' => $yearMonth,
 					'total' => $value->total
 				);
 			}
 		}
+
+		foreach ($dataNowMonthHoursPerProject as $item) {
+			if ($item['yearMonth'] < date('Ym')) {
+				DB::table('total_times')->insert(
+					array(
+						'type_id' => $item['id'],
+						'team_id' => $teamID,
+						'user_id' => $user_id,
+						'time' => $item['total'],
+						'date' => $item['yearMonth'],
+						'created_at' => date('Y-m-d H:i:s'),
+						'updated_at' => date('Y-m-d H:i:s'),
+					)
+				);
+			}
+		}
+
 		$data['hoursPerProject'] = array_values($dataHoursPerProject);
 		return $data;
 	}
@@ -759,6 +785,37 @@ class StatisticsController extends Controller
 		);
 
 		return response()->json($data);
+	}
+
+	private function getTotalTimes($teamID, $user_id, $startMonth, $endMonth)
+	{
+		$dataHoursPerProject = array();
+		$totalTime = DB::table('total_times')->select('type_id', 'time', 'date')
+			->where('time', '>', 0)
+			->where('user_id', $user_id)
+			->when($teamID, function ($query) use ($startMonth, $endMonth) {
+				return $query->where(function ($query) use ($startMonth, $endMonth) {
+					$query->where('total_times.date', ">=", str_replace(array('/', '-'), '', $startMonth))->where('total_times.date', "<=", str_replace(array('/', '-'), '', $endMonth));
+				});
+			})
+			->when($teamID, function ($query, $teamID) {
+				return $query->where(function ($query) use ($teamID) {
+					$query->where('team_id', '=', $teamID)
+						->orWhere('team_id', 'LIKE', $teamID . ',%')
+						->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
+						->orWhere('team_id', 'LIKE', '%,' . $teamID);
+				});
+			})->orderBy('date', 'DESC')->get()->toArray();
+
+		foreach ($totalTime as $v) {
+			$dataHoursPerProject[$v->type_id . '_' . $v->date] = array(
+				'id' => $v->type_id,
+				'total' => $v->time,
+				'yearMonth' => $v->date,
+			);
+		}
+
+		return $dataHoursPerProject;
 	}
 
 	private function getProjectReportAll($teamID, $userID)
@@ -1223,13 +1280,5 @@ class StatisticsController extends Controller
 			$strTime .= ":" . (10 > $minutes ? "0" . $minutes : $minutes);
 		}
 		return $strTime;
-	}
-
-	private function timeToSec($time)
-	{
-		$hours = substr($time, 0, -6);
-		$minutes = substr($time, -5, 2);
-		$seconds = substr($time, -2);
-		return ($hours * 3600 + $minutes * 60 + $seconds) * 1;
 	}
 }
