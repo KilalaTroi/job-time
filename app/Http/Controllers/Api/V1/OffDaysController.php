@@ -71,12 +71,33 @@ class OffDaysController extends Controller
 				return $query;
 			})
 			->whereIn('off_days.status', array('approved', 'printed'))
+			->whereNotIn('off_days.type', array('holiday', 'offday'))
 			->where('off_days.date', '>=',  $startDate)
 			->where('off_days.date', '<',  $endDate)
 			->get()->toArray();
 
+		if (NULL === $offDays || empty($offDays)) $offDays = array();
+
+		$holiDays = DB::table('off_days')
+			->select(
+				'off_days.id as id',
+				'users.name as name',
+				'users.id as user_id',
+				'off_days.type as type',
+				'off_days.status as status',
+				'off_days.date as date'
+			)
+			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
+			->whereIn('off_days.type', array('holiday', 'offday'))
+			->where('off_days.date', '>=',  $startDate)
+			->where('off_days.date', '<',  $endDate)
+			->get()->toArray();
+
+		if (NULL === $holiDays || empty($holiDays)) $holiDays = array();
+
+
 		return response()->json([
-			'offDays' => $offDays,
+			'offDays' => array_merge($offDays, $holiDays),
 			'codition' => $codition
 		]);
 	}
@@ -146,28 +167,36 @@ class OffDaysController extends Controller
 			'event' => array()
 		);
 
-		$oldOffDay = DB::table('off_days')
+		$holiDays = DB::table('off_days')
 			->select('id', 'status')
-			->where('user_id', '=', $request->get('user_id'))
+			->whereIn('off_days.type', array('holiday', 'offday'))
 			->where('date', '=',  $request->get('date'))
-			->first();
-		if ($oldOffDay) {
-			if ('approved' == $oldOffDay->status) {
-				OffDay::where('id', $oldOffDay->id)->delete();
-				$data['oldEvent'] = array($oldOffDay->id);
-				$offDay = OffDay::create($request->all());
+			->count();
+
+		if ($holiDays == 0 || 'holiday' == $request->get('type') || 'offday' == $request->get('type')) {
+			$oldOffDay = DB::table('off_days')
+				->select('id', 'status')
+				->where('user_id', '=', $request->get('user_id'))
+				->where('date', '=',  $request->get('date'))
+				->first();
+			if ($oldOffDay) {
+				if ('approved' == $oldOffDay->status) {
+					OffDay::where('id', $oldOffDay->id)->delete();
+					$data['oldEvent'] = array($oldOffDay->id);
+					$offDay = OffDay::create($request->all());
+				}
+			} else	$offDay = OffDay::create($request->all());
+			if (isset($offDay) && !empty($offDay)) {
+				$data['event'] = array(
+					'id' => $offDay->id,
+					'type' => $request->get('type'),
+					'start' => $request->get('start'),
+					'end' => $request->get('end'),
+					'borderColor' => $request->get('borderColor'),
+					'backgroundColor' => $request->get('backgroundColor'),
+					'title' => $request->get('title')
+				);
 			}
-		} else	$offDay = OffDay::create($request->all());
-		if (isset($offDay) && !empty($offDay)) {
-			$data['event'] = array(
-				'id' => $offDay->id,
-				'type' => $request->get('type'),
-				'start' => $request->get('start'),
-				'end' => $request->get('end'),
-				'borderColor' => $request->get('borderColor'),
-				'backgroundColor' => $request->get('backgroundColor'),
-				'title' => $request->get('title')
-			);
 		}
 
 
