@@ -279,7 +279,7 @@ class Uploadcontroller extends Controller
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
 					->orWhere('t.email', '!=', NULL);
-			})->groupBy('p.id')->get();
+			})->orderBy('p.date', 'desc')->groupBy('p.issue_id', 's.memo')->get();
 		// ->paginate(20);
 
 		// Get issues IDs
