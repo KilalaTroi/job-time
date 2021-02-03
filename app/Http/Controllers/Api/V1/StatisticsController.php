@@ -1043,7 +1043,7 @@ class StatisticsController extends Controller
 					return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
 						$_startMonthCar = str_replace(array('/', '-'), '', $startMonthCar);
 						$_endMonthCar = str_replace(array('/', '-'), '', $endMonthCar);
-						$query->where('total_times.date', ">=", substr($_startMonthCar, 0, 6))->where('total_times.date', "<=", substr($_endMonthCar, 0, 6));
+						$query->where('total_pages.date', ">=", substr($_startMonthCar, 0, 6))->where('total_pages.date', "<=", substr($_endMonthCar, 0, 6));
 					});
 				})
 				->when($teamID, function ($query, $teamID) {
