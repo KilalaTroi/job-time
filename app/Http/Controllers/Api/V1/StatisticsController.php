@@ -366,12 +366,12 @@ class StatisticsController extends Controller
 
 			// Ngày nghỉ chung
 			$generalOffDay = DB::connection('mysql')->table('off_days')
-			->where('type', '=', 'offday')
-			->where('date', '<=', $endM)
-			->where('date', '>=',  $startM)
-			->count();
+				->where('type', '=', 'offday')
+				->where('date', '<=', $endM)
+				->where('date', '>=',  $startM)
+				->count();
 
-			if ( ! $user_id ) {
+			if (!$user_id) {
 				$generalOffDay = $generalOffDay * count($this->usersNotIgnore($teamID));
 			}
 
@@ -694,7 +694,7 @@ class StatisticsController extends Controller
 		$dataNowMonthHoursPerProject = $dataHoursPerProject = array();
 		$dataHoursPerProject = $this->getTotalTimes($teamID, $user_id, $startMonth, $endMonth);
 
-		if(isset($dataHoursPerProject) && !empty($dataHoursPerProject)){
+		if (isset($dataHoursPerProject) && !empty($dataHoursPerProject)) {
 			$totalTime = array_values($dataHoursPerProject);
 			$startMonth = substr($totalTime[0]['yearMonth'], 0, 4) . '/' . substr($totalTime[0]['yearMonth'], -2) . '/' . substr($startMonth, -2);
 		}
@@ -806,7 +806,9 @@ class StatisticsController extends Controller
 			->where('user_id', $user_id)
 			->when($teamID, function ($query) use ($startMonth, $endMonth) {
 				return $query->where(function ($query) use ($startMonth, $endMonth) {
-					$query->where('total_times.date', ">=", str_replace(array('/', '-'), '', $startMonth))->where('total_times.date', "<=", str_replace(array('/', '-'), '', $endMonth));
+					$_startMonth = str_replace(array('/', '-'), '', $startMonth);
+					$_endMonth = str_replace(array('/', '-'), '', $endMonth);
+					$query->where('total_times.date', ">=", substr($_startMonth, 0, 6))->where('total_times.date', "<=", substr($_endMonth, 0, 6));
 				});
 			})
 			->when($teamID, function ($query, $teamID) {
@@ -1039,7 +1041,9 @@ class StatisticsController extends Controller
 				->where('page', '>', 0)
 				->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
 					return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
-						$query->where('total_pages.date', ">=", str_replace(array('/', '-'), '', $startMonthCar))->where('total_pages.date', "<=", str_replace(array('/', '-'), '', $endMonthCar));
+						$_startMonthCar = str_replace(array('/', '-'), '', $startMonthCar);
+						$_endMonthCar = str_replace(array('/', '-'), '', $endMonthCar);
+						$query->where('total_times.date', ">=", substr($_startMonthCar, 0, 6))->where('total_times.date', "<=", substr($_endMonthCar, 0, 6));
 					});
 				})
 				->when($teamID, function ($query, $teamID) {
