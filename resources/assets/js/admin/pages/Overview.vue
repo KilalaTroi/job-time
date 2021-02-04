@@ -97,7 +97,7 @@
                      <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="timeallocation" role="tabpanel" aria-labelledby="timeallocation-tab">
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-12" v-if="barChart.data">
                                     <chart-card :chart-data="barChart.data" :chart-options="barChart.options" :chart-responsive-options="barChart.responsiveOptions" chart-type="Bar" :chart-id="barChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend">
@@ -116,7 +116,7 @@
                         </div>
                         <div v-if="3 != team" class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-12" v-if="pageChart.data">
                                     <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -129,7 +129,7 @@
                         </div>
                         <div v-if="3 == team" class="tab-pane fade" id="totalprojects" role="tabpanel" aria-labelledby="totalprojects-tab">
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-12" v-if="projectChart.data">
                                     <chart-card :chart-data="projectChart.data" :chart-options="projectChart.options" chart-type="Bar" :chart-id="projectChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -142,7 +142,7 @@
                         </div>
                         <div v-if="3 == team" class="tab-pane fade" id="totaljobs" role="tabpanel" aria-labelledby="totaljobs-tab">
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-12" v-if="jobChart.data">
                                     <chart-card :chart-data="jobChart.data" :chart-options="jobChart.options" chart-type="Bar" :chart-id="jobChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">

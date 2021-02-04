@@ -989,7 +989,7 @@ class StatisticsController extends Controller
 						->orWhere('p.team', 'LIKE', '%,' . $teamID);
 				});
 			})
-			->groupBy('proc.issue_id, s.memo')
+			->groupBy('proc.issue_id', 's.memo')
 			->havingRaw("SUM(proc.page) > 0 AND MIN(proc.date) >= '{$startMonthCarFull}' AND MIN(proc.date) <= '{$endMonthCarFull}'")
 			->get()->toArray();
 
