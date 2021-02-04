@@ -261,7 +261,6 @@ export default {
     align-items: center;
     justify-content: center;
     height: 53px;
-    font-size: 20px;
     font-weight: 600;
     text-transform: uppercase;
     &:after{
