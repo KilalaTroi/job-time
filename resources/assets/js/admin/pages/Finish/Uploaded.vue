@@ -501,10 +501,10 @@ export default {
               const lastProcess = arrProcess[arrProcess.length - 1];
               return Object.assign({}, item, {
                 status: arrProcess.length ? lastProcess.status : "",
-                page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.page * 1; }, 0) : "",
-                file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.file * 1; }, 0) : "",
+                // page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.page * 1; }, 0) : "",
+                // file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.file * 1; }, 0) : "",
                 user_name: arrProcess.length ? lastProcess.user_name : "",
-                date: arrProcess.length ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm") : "",
+                // date: arrProcess.length ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm") : "",
               });
             });
           } else {

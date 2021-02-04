@@ -955,24 +955,30 @@ class StatisticsController extends Controller
 		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 		$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y-m-d');
+		$startMonthCarFull = $startMonthCar . ' 00:00:00';
 		$endMonthCar = $endMonthCar->day(20)->format('Y-m-d');
+		$endMonthCarFull = $endMonthCar . ' 23:59:59';
 
-		$dataFinsh = DB::table('processes as pr')
-			->select('t.id as id', 'pr.page as page', 'pr.date as date')
-			->leftJoin('issues as i', 'i.id', '=', 'pr.issue_id')
+		$dataFinsh = DB::table('processes as proc')
+			->select(
+				DB::raw("t.id as id, SUM(proc.page) as page, MIN(proc.date) as date")
+			)
+			->leftJoin('schedules as s', 's.id', '=', 'proc.schedule_id')
+			->leftJoin('issues as i', 'i.id', '=', 'proc.issue_id')
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
-			->where('pr.page', '>', 0)
+			// ->where('proc.page', '>', 0)
+			->where(function ($query) {
+				$query->where('proc.status', 'Start Working')
+					->orWhere('proc.status', 'Finished Work');
+			})
+			// ->where('proc.date', ">=", $startMonthCarFull)
+			// ->where('proc.date', "<=", $endMonthCarFull)
 			->whereNotIn('t.slug', array('other', 'yuidea_other'))
 			->where('t.email', '!=', NULL)
 			->when($userID, function ($query) use ($userID) {
 				return $query->where(function ($query) use ($userID) {
-					$query->where('pr.user_id', $userID);
-				});
-			})
-			->when($teamID, function ($query) use ($startMonthCar, $endMonthCar) {
-				return $query->where(function ($query) use ($startMonthCar, $endMonthCar) {
-					$query->where('pr.date', ">=", str_replace('/', '-', $startMonthCar) . ' 00:00:00')->where('pr.date', "<=", str_replace('/', '-', $endMonthCar) . ' 23:59:59');
+					$query->where('proc.user_id', $userID);
 				});
 			})
 			->when($teamID, function ($query, $teamID) {
@@ -982,7 +988,10 @@ class StatisticsController extends Controller
 						->orWhere('p.team', 'LIKE', '%,' . $teamID . ',%')
 						->orWhere('p.team', 'LIKE', '%,' . $teamID);
 				});
-			})->get()->toArray();
+			})
+			->groupBy('proc.issue_id', 's.memo')
+			->havingRaw("SUM(proc.page) > 0 AND MIN(proc.date) >= '{$startMonthCarFull}' AND MIN(proc.date) <= '{$endMonthCarFull}'")
+			->get()->toArray();
 
 		if (count($dataFinsh) < 1) $dataFinsh = array();
 		$dataQuantity = DB::table('jobs as j')

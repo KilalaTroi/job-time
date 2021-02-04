@@ -374,6 +374,7 @@ export default {
           inkjet: checkStatusStart ? this.currentProcess.inkjet : null,
           finish_rq: checkStatusStart ? this.currentProcess.finish_rq : null,
           status: this.currentProcess.status ? this.currentProcess.status : "null",
+          message: this.newMessage,
         };
 
         const uri = "/data/processes";

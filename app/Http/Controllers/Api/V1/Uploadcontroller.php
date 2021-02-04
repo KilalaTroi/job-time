@@ -63,7 +63,7 @@ class Uploadcontroller extends Controller
 				}
 
 				if ( $filters['showFilter'] === 'notFinished' ) {
-					return $query->join('processes as pr', 'pr.issue_id', '=', 'i.id');
+					return $query->join('processes as proc', 'proc.issue_id', '=', 'i.id');
 				}
 
 				return $query;
@@ -78,7 +78,7 @@ class Uploadcontroller extends Controller
 			->groupBy('i.id', 's.memo')
 			->when($filters['showFilter'], function ($query) use ($filters) {
 				if ( $filters['showFilter'] === 'notFinished' ) {
-					return $query->orderBy('pr.created_at', 'desc')
+					return $query->orderBy('proc.created_at', 'desc')
 					->groupBy('i.id', 's.memo')
 					->havingRaw('COUNT(*) = 1 OR COUNT(*) = 3');
 				}
@@ -227,59 +227,63 @@ class Uploadcontroller extends Controller
 			->get()->toArray();
 
 		// Get processes
-		$processesUploaded = DB::table('processes as p')
+		$start_time_full = $start_time . ' 00:00:00';
+		$end_time_full = $end_time . ' 23:59:59';
+		$processesUploaded = DB::table('processes as proc')
 			->select(
-				'p.issue_id as id',
-				'p.page as page',
-				'p.file as file',
+				'proc.issue_id as id',
 				's.memo as phase',
-				'p.date as date',
 				'u.name as user_name',
-				'p.status as status',
+				'proc.status as status',
 				'd.name as department',
-				'pr.name as project',
+				'p.name as project',
 				'i.name as issue',
 				't.slug as job_type',
-				't.value as job_color'
+				't.value as job_color',
+				DB::raw("SUM(proc.page) as page, SUM(proc.file) as file, MIN(proc.date) as date")
 			)
-			->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
-			->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-			->leftJoin('issues as i', 'i.id', '=', 'p.issue_id')
-			->leftJoin('projects as pr', 'pr.id', '=', 'i.project_id')
-			->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
-			->leftJoin('types as t', 't.id', '=', 'pr.type_id')
-			// ->where('p.status', 'Finished Upload')
+			->leftJoin('schedules as s', 's.id', '=', 'proc.schedule_id')
+			->leftJoin('users as u', 'u.id', '=', 'proc.user_id')
+			->leftJoin('issues as i', 'i.id', '=', 'proc.issue_id')
+			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+			->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+			->leftJoin('types as t', 't.id', '=', 'p.type_id')
+			// ->where('proc.status', 'Finished Upload')
 			->where(function ($query) {
-				$query->where('p.status', 'Finished Upload')
-					->orWhere('p.status', 'Finished Work');
+				$query->where('proc.status', 'Start Working')
+					->orWhere('proc.status', 'Finished Work');
 			})
 			->where(function ($query) use ($teamFilter) {
-				$query->where('pr.team', '=', $teamFilter)
-					->orWhere('pr.team', 'LIKE', $teamFilter . ',%')
-					->orWhere('pr.team', 'LIKE', '%,' . $teamFilter . ',%')
-					->orWhere('pr.team', 'LIKE', '%,' . $teamFilter);
+				$query->where('p.team', '=', $teamFilter)
+					->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
 			})
 			->when($userArr, function ($query, $userArr) {
-				return $query->whereIn('p.user_id', $userArr);
+				return $query->whereIn('proc.user_id', $userArr);
 			})
 			->when($deptArr, function ($query, $deptArr) {
-				return $query->whereIn('pr.dept_id', $deptArr);
+				return $query->whereIn('p.dept_id', $deptArr);
 			})
 			->when($typeArr, function ($query, $typeArr) {
-				return $query->whereIn('pr.type_id', $typeArr);
+				return $query->whereIn('p.type_id', $typeArr);
 			})
 			->when($projectSelects, function ($query, $projectSelects) {
-				return $query->where('pr.name', 'like', '%' . $projectSelects . '%');
+				return $query->where('p.name', 'like', '%' . $projectSelects . '%');
 			})
 			->when($issueFilter, function ($query, $issueFilter) {
 				return $query->where('i.name', 'like', '%' . $issueFilter . '%');
 			})
-			->where('p.date', '>=', $start_time . ' 00:00:00')
-			->where('p.date', '<=', $end_time . ' 23:59:59')
+			// ->where('proc.date', '>=', $start_time_full)
+			// ->where('proc.date', '<=', $end_time_full)
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
 					->orWhere('t.email', '!=', NULL);
-			})->orderBy('p.date', 'desc')->groupBy('p.issue_id', 's.memo')->get();
+			})
+			->orderBy('proc.date', 'desc')
+			->groupBy('proc.issue_id', 's.memo')
+			->havingRaw("SUM(proc.page) > 0 AND MIN(proc.date) >= '{$start_time_full}' AND MIN(proc.date) <= '{$end_time_full}'")
+			->get();
 		// ->paginate(20);
 
 		// Get issues IDs
@@ -382,97 +386,104 @@ class Uploadcontroller extends Controller
 		// End POST data
 
 		// Get processes
-		$processesUploaded = DB::table('processes as p')
+		$start_time_full = $start_time . ' 00:00:00';
+		$end_time_full = $end_time . ' 23:59:59';
+		$processesUploaded = DB::table('processes as proc')
 			->select(
-				'p.id as id',
-				'p.issue_id as issue_id',
+				'proc.id as id',
+				'proc.issue_id as issue_id',
 				'd.name as department',
 				't.slug as job_type',
-				'pr.name as project',
+				'p.name as project',
 				'i.name as issue',
 				's.memo as phase',
-				'p.date as date',
 				'u.name as user_name',
-				'p.page as page',
-				'p.file as file'
+				DB::raw("SUM(proc.page) as page, SUM(proc.file) as file, MIN(proc.date) as date")
 			)
-			->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
-			->leftJoin('users as u', 'u.id', '=', 'p.user_id')
-			->join('issues as i', 'i.id', '=', 'p.issue_id')
-			->join('projects as pr', 'pr.id', '=', 'i.project_id')
-			->leftJoin('departments as d', 'd.id', '=', 'pr.dept_id')
-			->leftJoin('types as t', 't.id', '=', 'pr.type_id')
-			->where('p.status', 'Finished Upload')
+			->leftJoin('schedules as s', 's.id', '=', 'proc.schedule_id')
+			->leftJoin('users as u', 'u.id', '=', 'proc.user_id')
+			->join('issues as i', 'i.id', '=', 'proc.issue_id')
+			->join('projects as p', 'p.id', '=', 'i.project_id')
+			->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+			->leftJoin('types as t', 't.id', '=', 'p.type_id')
+			// ->where('proc.status', 'Finished Upload')
+			->where(function ($query) {
+				$query->where('proc.status', 'Start Working')
+					->orWhere('proc.status', 'Finished Work');
+			})
 			->where(function ($query) use ($teamFilter) {
-				$query->where('pr.team', '=', $teamFilter)
-					->orWhere('pr.team', 'LIKE', $teamFilter . ',%')
-					->orWhere('pr.team', 'LIKE', '%,' . $teamFilter . ',%')
-					->orWhere('pr.team', 'LIKE', '%,' . $teamFilter);
+				$query->where('p.team', '=', $teamFilter)
+					->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
 			})
 			->when($userArr, function ($query, $userArr) {
-				return $query->whereIn('p.user_id', $userArr);
+				return $query->whereIn('proc.user_id', $userArr);
 			})
 			->when($deptArr, function ($query, $deptArr) {
-				return $query->whereIn('pr.dept_id', $deptArr);
+				return $query->whereIn('p.dept_id', $deptArr);
 			})
 			->when($typeArr, function ($query, $typeArr) {
-				return $query->whereIn('pr.type_id', $typeArr);
+				return $query->whereIn('p.type_id', $typeArr);
 			})
 			->when($projectArr, function ($query, $projectArr) {
-				return $query->whereIn('pr.id', $projectArr);
+				return $query->whereIn('p.id', $projectArr);
 			})
 			->when($issueFilter, function ($query, $issueFilter) {
 				return $query->where('i.name', 'like', '%' . $issueFilter . '%');
 			})
-			->where('p.date', '>=', $start_time . ' 00:00:00')
-			->where('p.date', '<=', $end_time . ' 23:59:59')
+			// ->where('proc.date', '>=', $start_time . ' 00:00:00')
+			// ->where('proc.date', '<=', $end_time . ' 23:59:59')
 			->where(function ($query) {
 				$query->where('t.line_room', '!=', NULL)
 					->orWhere('t.email', '!=', NULL);
 			})
+			->orderBy('proc.date', 'desc')
+			->groupBy('proc.issue_id', 's.memo')
+			->havingRaw("SUM(proc.page) > 0 AND MIN(proc.date) >= '{$start_time_full}' AND MIN(proc.date) <= '{$end_time_full}'")
 			->get();
 
 		// get array process ids
-		$issueIds = $processesUploaded->pluck('issue_id')->toArray();
+		// $issueIds = $processesUploaded->pluck('issue_id')->toArray();
 
 		// get total page of process
-		$processePage = DB::table('processes as p')
-			->select(
-				DB::raw("MAX(p.id) as id"),
-				DB::raw("SUM(p.page) as page"),
-				DB::raw("SUM(p.file) as file"),
-				'p.issue_id as issue_id',
-				's.memo as phase'
-			)
-			->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
-			->whereIn('p.issue_id', $issueIds)
-			->groupBy('p.issue_id', 'memo')
-			->get()->toArray();
+		// $processePage = DB::table('processes as p')
+		// 	->select(
+		// 		DB::raw("MAX(p.id) as id"),
+		// 		DB::raw("SUM(p.page) as page"),
+		// 		DB::raw("SUM(p.file) as file"),
+		// 		'p.issue_id as issue_id',
+		// 		's.memo as phase'
+		// 	)
+		// 	->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
+		// 	->whereIn('p.issue_id', $issueIds)
+		// 	->groupBy('p.issue_id', 'memo')
+		// 	->get()->toArray();
 
-		$processePage = collect($processePage)->map(function ($x) {
-			$x->phase = $x->phase ? $x->phase : false;
-			return (array) $x;
-		})->toArray();
+		// $processePage = collect($processePage)->map(function ($x) {
+		// 	$x->phase = $x->phase ? $x->phase : false;
+		// 	return (array) $x;
+		// })->toArray();
 
 		// Get total page
 		$processesUploaded = collect($processesUploaded)->map(function ($x) use ($processePage) {
-			$pages = 0;
-			$files = 0;
-			$x->phase = $x->phase ? $x->phase : false;
+			// $pages = 0;
+			// $files = 0;
+			// $x->phase = $x->phase ? $x->phase : false;
 
-			if (count($processePage)) {
-				// Define search list with multiple key=>value pair
-				$search_items = array('issue_id' => $x->issue_id, 'phase' => $x->phase);
+			// if (count($processePage)) {
+			// 	// Define search list with multiple key=>value pair
+			// 	$search_items = array('issue_id' => $x->issue_id, 'phase' => $x->phase);
 
-				// Call search and pass the array and
-				// the search list
-				$res = $this->search($processePage, $search_items);
-				$pages = count($res) ? $res[0]['page'] : 0;
-				$files = count($res) ? $res[0]['file'] : 0;
-			}
+			// 	// Call search and pass the array and
+			// 	// the search list
+			// 	$res = $this->search($processePage, $search_items);
+			// 	$pages = count($res) ? $res[0]['page'] : 0;
+			// 	$files = count($res) ? $res[0]['file'] : 0;
+			// }
 
-			$x->page = $pages ? $pages * 1 : '--';
-			$x->file = $files ? $files * 1 : '--';
+			// $x->page = $pages ? $pages * 1 : '--';
+			// $x->file = $files ? $files * 1 : '--';
 			$x->issue = $x->issue ? $x->issue : '--';
 			$x->phase = $x->phase ? $x->phase : '--';
 			unset($x->id);
@@ -665,32 +676,6 @@ class Uploadcontroller extends Controller
 		return response()->json(array(
 			'message' => 'Successfully.'
 		), 200);
-	}
-
-	public function sendMessage($url, $data)
-	{
-		$curl = curl_init();
-		// curl_setopt ($curl, CURLOPT_CAINFO, "D:/Project/_Working/jobtime/www/cacert.pem"); // on server.
-		curl_setopt($curl, CURLOPT_POST, 1);
-		if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-		// OPTIONS:
-		curl_setopt($curl, CURLOPT_URL, $url);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-			'Access-Control-Allow-Origin: *',
-			'Content-Type: application/json',
-			'consumerKey: dcn0NgAygjFgGVL584hJ',
-			'Authorization: Bearer AAAA+e5dRuH73M2tJoZjpYQsVssxby429kiSN68VbNsZpdzUwP+vJi8rW1HEIpkzEJ7Q07bCwyAXavkER17PWic6V8Hj9zgoGqzc+UiOhhqJRiWQrC6BzrmRHTZXngf39pbV71ZcwmcfqDs++Nx6Qfx1FBZrA0odCx+Uqne8nTS/0Y1qWLhPVIkw8kT85hWAwvhCmT/k4Mmou5xGeW+isg1/2z/z5SlQioCXDBXU9YzXCe1ecHkFe27Ry/eu5HgrhZWz3JDX3P6eihExFhwVuyNuwrj/tr97krvOENrtjkuU7ZnuPizlE8oJJC98LReEvfKZVkvUpILROgQwt+hkl2cZ/qQ=',
-		));
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		// EXECUTE:
-		$result = curl_exec($curl);
-		// dd($curl);
-		if (!$result) {
-			die("Connection Failure");
-		}
-		curl_close($curl);
-		return $result;
 	}
 
 	// PHP program to search for multiple
