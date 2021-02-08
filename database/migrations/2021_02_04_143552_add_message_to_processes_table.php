@@ -14,7 +14,7 @@ class AddMessageToProcessesTable extends Migration
     public function up()
     {
         Schema::table('processes', function (Blueprint $table) {
-            $table->string('message', 255)->after('data');
+            $table->string('message', 255)->nullable()->after('data');
         });
     }
 

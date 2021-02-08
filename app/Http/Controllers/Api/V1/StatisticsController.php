@@ -147,7 +147,7 @@ class StatisticsController extends Controller
 		$users = $this->getUsers($startMonthCar, $endMonthCar, $teamID, $user_id);
 
 		// Return totals
-		$totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $users['disableUsersInMonth'], $users['hoursOfDisableUser'], $data['off_days'], $startMonthCar, $endMonthCar, $user_id, $teamID);
+		$totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $users['disableUsersInMonth'], $users['hoursOfDisableUser'], $data['off_days'], $startMonthCar, $endMonthCar, $user_id, $teamID, true);
 
 		// infoUser
 		$infoUser = false;
@@ -170,16 +170,10 @@ class StatisticsController extends Controller
 
 		foreach ($types as $index => $type) {
 			$childIndex = 0;
-
+			
 			foreach ($totals['hoursPerMonth'] as $key => $month) {
-				$hours = array_filter($totals['hoursPerProject'], function ($obj) use ($type, $key) {
-					if ($obj->id == $type->id && $obj->yearMonth == $key) {
-						return true;
-					}
-					return false;
-				});
-				$hours = array_values($hours);
-				$percent = isset($hours[0]) && $month ? round($hours[0]->total / $month * 100, 1) : 0;
+				$hours = isset( $totals['hoursPerProject'][$type->id . '_' . $key] ) ? $totals['hoursPerProject'][$type->id . '_' . $key] : false;
+				$percent = $hours && $month ? round($hours['total'] / $month * 100, 1) : 0;
 				$mainTable[$type->slug]['slug'] = $type->slug;
 				$mainTable[$type->slug]['slug_ja'] = $type->slug_ja;
 				$mainTable[$type->slug][$data['monthsText'][$childIndex]] = $percent;
@@ -643,7 +637,7 @@ class StatisticsController extends Controller
 		return $data;
 	}
 
-	function getTotals($days_of_month, $usersOld, $newUsersPerMonth, $disableUsersInMonth, $hoursOfDisableUser, $off_days, $startMonth, $endMonth, $user_id = 0, $teamID = 0)
+	function getTotals($days_of_month, $usersOld, $newUsersPerMonth, $disableUsersInMonth, $hoursOfDisableUser, $off_days, $startMonth, $endMonth, $user_id = 0, $teamID = 0, $export = false)
 	{
 		$totalHoursPerMonth = array();
 
@@ -685,7 +679,13 @@ class StatisticsController extends Controller
 				$ckHoursDisableUser = isset($hoursDisableUser[$key]) ? $hoursDisableUser[$key] : 0;
 			}
 
-			$totalHoursPerMonth[$key] = $usersOld * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + round($ckHoursDisableUser);
+			// Nguyen off 5 months
+			$offMonth = 0;
+			if ( $teamID == 1 && in_array( $key, ['202008', '202009', '202010', '202011', '202012'] ) ) {
+				$offMonth = 1;
+			}
+
+			$totalHoursPerMonth[$key] = ($usersOld - $offMonth) * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + round($ckHoursDisableUser);
 		}
 
 		$data['hoursPerMonth'] = $totalHoursPerMonth;
@@ -758,7 +758,12 @@ class StatisticsController extends Controller
 			}
 		}
 
-		$data['hoursPerProject'] = array_values($dataHoursPerProject);
+		if ( $export ) {
+			$data['hoursPerProject'] = $dataHoursPerProject;
+		} else {
+			$data['hoursPerProject'] = array_values($dataHoursPerProject);
+		}
+
 		return $data;
 	}
 
