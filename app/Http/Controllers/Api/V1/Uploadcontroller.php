@@ -646,6 +646,31 @@ class Uploadcontroller extends Controller
 				if ($request->get('page_number')) $subject .= '_' . $request->get('page_number') . 'p';
 				$message->to($emails)->subject($subject);
 			});
+
+			// send again
+			if( count(Mail::failures()) > 0 ) {
+				$emails[] = 'troi.hoang@kilala.vn';
+				Mail::send('emails.finish', [
+					'content' => $request->get('content'),
+					'user' => $request->get('user'),
+					'type' => $request->get('type'),
+					'p_name' => $request->get('p_name'),
+					'i_name' => $request->get('i_name'),
+					'page' => $request->get('page'),
+					'file' => $request->get('file'),
+					'phase' => $request->get('phase'),
+					'data' => $request->get('data'),
+					'inkjet' => $request->get('inkjet'),
+					'finish_rq' => $request->get('finish_rq'),
+					'status' => $request->get('status')
+				], function ($message) use ($emails, $from, $request) {
+					$message->from($from['email'], $from['name']);
+					$message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
+					$subject = 'JOBTIME : Updated invitation [' . $request->get('status') . '_' . ucfirst($request->get('user')['username']) . '] ' . $request->get('p_name');
+					if ($request->get('page_number')) $subject .= '_' . $request->get('page_number') . 'p';
+					$message->to($emails)->subject($subject);
+				});
+			 }
 		}
 
 		// Send message Line Work
