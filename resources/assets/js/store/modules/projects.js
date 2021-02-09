@@ -199,11 +199,11 @@ export default {
 			axios.patch(uri, data).then((res) => {
 				commit('SET_VALIDATE', { error: '', success: res.data.message })
 			})
-				.catch(err => {
-					if (err.response.status === 422) {
-						commit('SET_VALIDATE', { error: err.response.data, success: '' })
-					}
-				});
+			.catch(err => {
+				if (err.response.status === 422) {
+					commit('SET_VALIDATE', { error: err.response.data, success: '' })
+				}
+			});
 		},
 
 		updateIssue({ commit, rootGetters }, item) {
@@ -238,6 +238,7 @@ export default {
 			let uri = '/data/projects';
 			axios.post(uri, data)
 				.then(res => {
+					console.log(data);
 					commit('SET_SELECTED_ITEM', { type_id: 0 })
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})

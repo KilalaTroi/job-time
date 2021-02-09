@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Team;
+use App\Process;
 use App\Department;
+use App\Schedule;
 use App\Imports\ProjectsImport;
 use App\Type;
 use Carbon\Carbon;
@@ -120,6 +122,7 @@ class ProjectsController extends Controller
      */
     public function store(Request $request)
     {
+        $user_id = $request->session()->get('Auth')[0]['id'];
         $request->merge(['name' => $request->get('project_name')]);
 
         $this->validate($request, [
@@ -162,6 +165,36 @@ class ProjectsController extends Controller
                 'end_date' => $end_date,
                 'status' => 'publish',
             ]);
+        }
+
+        if ( $request->get('schedule_date') != null && $request->get('schedule_date') ) {
+            $schedule_date = explode('T', $request->get('schedule_date'));
+            $schedule_date = $schedule_date[0];
+            $schedule_start_time = $request->get('schedule_start_time');
+            $schedule_end_time = $request->get('schedule_end_time');
+
+            $schedule = Schedule::create([
+                'issue_id' => $issue->id,
+                'team_id' => $request->get('team'),
+                'start_time' => $schedule_start_time ? $schedule_start_time['HH'].':'.$schedule_start_time['mm'] : '07:00',
+                'end_time' => $schedule_end_time ? $schedule_end_time['HH'].':'.$schedule_end_time['mm'] : '07:00',
+                'date' => $schedule_date,
+            ]);
+
+            if ( $request->get('start_working') != null && $request->get('start_working') ) {
+                $process = Process::create([
+                    'user_id' => $user_id,
+                    'issue_id' => $issue->id,
+                    'schedule_id' => $schedule->id,
+                    'finish_rq' => $request->get('work_rq'),
+                    'inkjet' => $request->get('work_inkjet'),
+                    'data' => $request->get('work_data'),
+                    'message' => $request->get('work_message'),
+                    'status' => 'Start Working',
+                ]);
+
+                // send email
+            }
         }
 
         return response()->json(array(
