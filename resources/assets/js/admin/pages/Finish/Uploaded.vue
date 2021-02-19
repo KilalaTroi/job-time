@@ -562,6 +562,7 @@ export default {
   },
   async created() {
     this.team = 2;
+    if(this.currentTeam.id == 2) await this.fetchData();
     // this.team = this.currentTeam ? this.currentTeam.id : "";
 		// await this.fetchData();
 	},
