@@ -181,19 +181,16 @@ export default {
 
   async created() {
     const _this = this;
-    _this.options.team = [{ id: "", text: "ALL" }].concat(
-      _this.currentTeamOption
-    );
-    _this.filters.team = _this.currentTeam.id;
+    _this.options.team = [{ id: "", text: "ALL" }].concat(_this.currentTeamOption);
+    if(_this.loginUser.role && ('admin' == _this.loginUser.role.name || -1 !== [1, 49].indexOf(_this.loginUser.id))) _this.filters.team = ''
+    else _this.filters.team = _this.currentTeam.id;
   },
 
   watch: {
     filters: [
       {
         handler: function (value) {
-          if (value.team != this.currentTeam.id) {
-            this.setCurrentTeam(value.team);
-          }
+          if (value.team != this.currentTeam.id) this.setCurrentTeam(value.team);
           this.getAllOffDays();
         },
         deep: true,
@@ -202,7 +199,7 @@ export default {
     loginUser: [
       {
         handler: function (value) {
-          if('admin' == value.role.name) this.filters.team = '';
+          if('admin' == value.role.name || -1 !== [1, 49].indexOf(value.id)) this.filters.team = '';
         },
         deep: true,
       },

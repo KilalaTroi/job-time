@@ -405,15 +405,15 @@ export default {
     },
   },
   async created() {
-    this.selectTeam = this.currentTeam.id;
-    await this.fetchData();
+    // this.selectTeam = this.currentTeam.id;
+    this.selectTeam = 2;
   },
   watch: {
     selectTeam: [
       {
         handler: function (value) {
           if (value != this.currentTeam.id) {
-            this.setCurrentTeam(value);
+            // this.setCurrentTeam(value);
             this.fetchData();
           }
         },
