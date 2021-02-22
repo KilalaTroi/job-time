@@ -561,8 +561,10 @@ export default {
     },
   },
   async created() {
-    this.team = this.currentTeam ? this.currentTeam.id : "";
-		await this.fetchData();
+    this.team = 2;
+    if(this.currentTeam.id == 2) await this.fetchData();
+    // this.team = this.currentTeam ? this.currentTeam.id : "";
+		// await this.fetchData();
 	},
   watch: {
     users: [
@@ -614,7 +616,7 @@ export default {
       {
         handler: function (value) {
           if ( value != this.currentTeam.id ){
-            this.setCurrentTeam(value);
+            // this.setCurrentTeam(value);
             this.fetchData();
           }
         },
