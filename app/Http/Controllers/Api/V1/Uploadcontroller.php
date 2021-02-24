@@ -344,7 +344,7 @@ class Uploadcontroller extends Controller
 		]);
 	}
 
-	public function exportExcel(Request $request)
+	public function exportExcelOld(Request $request)
 	{
 		// POST data
 		$start_time = $request->get('start_date');
@@ -481,8 +481,8 @@ class Uploadcontroller extends Controller
 			// 	$files = count($res) ? $res[0]['file'] : 0;
 			// }
 
-			// $x->page = $pages ? $pages * 1 : '--';
-			// $x->file = $files ? $files * 1 : '--';
+			$x->page = $x->page ? $x->page * 1 : '--';
+			$x->file = $x->file ? $x->file * 1 : '--';
 			$x->issue = $x->issue ? $x->issue : '--';
 			$x->phase = $x->phase ? $x->phase : '--';
 			unset($x->id);
@@ -570,6 +570,193 @@ class Uploadcontroller extends Controller
 				// Format column
 				$sheet->setColumnFormat(array(
 					'H6:I' . $numberRows => '0'
+				));
+			});
+		})->store('xlsx');
+
+		return url('data/exports/' . $results->filename) . '.' . $results->ext;
+	}
+
+	public function exportExcel(Request $request)
+	{
+		// POST data
+		$start_time = $request->get('start_date');
+		$end_time = $request->get('end_date');
+		$issueFilter = $request->get('issueFilter');
+		$teamFilter = $request->get('team');
+
+		$user_id = $request->get('user_id');
+		$userArr = array();
+		if ($user_id) {
+			$userArr = array_map(function ($obj) {
+				return $obj['id'];
+			}, $user_id);
+		}
+
+		$deptSelects = $request->get('deptSelects');
+		$deptArr = array();
+		if ($deptSelects) {
+			$deptArr = array_map(function ($obj) {
+				return $obj['id'];
+			}, $deptSelects);
+		}
+
+		$typeSelects = $request->get('typeSelects');
+		$typeArr = array();
+		if ($typeSelects) {
+			$typeArr = array_map(function ($obj) {
+				return $obj['id'];
+			}, $typeSelects);
+		}
+
+		$projectSelects = $request->get('projectSelects');
+		$projectArr = array();
+		if ($projectSelects) {
+			$projectArr = array_map(function ($obj) {
+				return $obj['id'];
+			}, $projectSelects);
+		}
+		// End POST data
+
+		// Get processes
+		$start_time_full = $start_time . ' 00:00:00';
+		$end_time_full = $end_time . ' 23:59:59';
+		$processesUploaded = DB::table('processes as proc')
+			->select(
+				DB::raw("MIN(u.name) as user_name"),
+				'p.name as project',
+				DB::raw("MIN(proc.date) as date, t.slug as job_type, SUM(proc.page) as page, SUM(proc.file) as file")
+			)
+			->leftJoin('schedules as s', 's.id', '=', 'proc.schedule_id')
+			->leftJoin('users as u', 'u.id', '=', 'proc.user_id')
+			->join('issues as i', 'i.id', '=', 'proc.issue_id')
+			->join('projects as p', 'p.id', '=', 'i.project_id')
+			->leftJoin('departments as d', 'd.id', '=', 'p.dept_id')
+			->leftJoin('types as t', 't.id', '=', 'p.type_id')
+			->where(function ($query) {
+				$query->where('proc.status', 'Start Working')
+					->orWhere('proc.status', 'Finished Work');
+			})
+			->where(function ($query) use ($teamFilter) {
+				$query->where('p.team', '=', $teamFilter)
+					->orWhere('p.team', 'LIKE', $teamFilter . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $teamFilter . ',%')
+					->orWhere('p.team', 'LIKE', '%,' . $teamFilter);
+			})
+			->when($userArr, function ($query, $userArr) {
+				return $query->whereIn('proc.user_id', $userArr);
+			})
+			->when($deptArr, function ($query, $deptArr) {
+				return $query->whereIn('p.dept_id', $deptArr);
+			})
+			->when($typeArr, function ($query, $typeArr) {
+				return $query->whereIn('p.type_id', $typeArr);
+			})
+			->when($projectArr, function ($query, $projectArr) {
+				return $query->whereIn('p.id', $projectArr);
+			})
+			->when($issueFilter, function ($query, $issueFilter) {
+				return $query->where('i.name', 'like', '%' . $issueFilter . '%');
+			})
+			->where(function ($query) {
+				$query->where('t.line_room', '!=', NULL)
+					->orWhere('t.email', '!=', NULL);
+			})
+			->orderBy('proc.id', 'desc')
+			->groupBy('proc.issue_id', 's.memo')
+			->havingRaw("SUM(proc.page) > 0 AND MIN(proc.date) >= '{$start_time_full}' AND MIN(proc.date) <= '{$end_time_full}'")
+			->get();
+
+		// Get total page
+		$processesUploaded = collect($processesUploaded)->map(function ($x) {
+			$x->page = $x->page ? $x->page * 1 : '--';
+			$x->file = $x->file ? $x->file * 1 : '--';
+			$x->date = str_replace( '-', '/', explode( ' ', $x->date)[0] );
+
+			return (array) $x;
+		})->toArray();
+
+		$numberRows = count($processesUploaded) + 5;
+
+		$results = Excel::create('Report_finished_record' . "--" . $start_time . "--" . $end_time, function ($excel) use ($processesUploaded, $start_time, $end_time, $numberRows) {
+			$excel->setTitle('Report Job Time');
+			$excel->setCreator('Kilala Job Time')
+				->setCompany('Kilala');
+			$excel->sheet('Report Detail', function ($sheet) use ($processesUploaded, $start_time, $end_time, $numberRows) {
+				$sheet->setCellValue('A1', "Job Time Report from " . $start_time . " to " . $end_time);
+				$sheet->setCellValue('A2', "Date: " . Carbon::now());
+				$sheet->setCellValue('A3', 'Finished Record');
+
+				$columnName = 'F';
+				$columnNameBefore = 'E';
+
+				// Merge column
+				$sheet->mergeCells('A1:' . $columnName . '1');
+				$sheet->mergeCells('A2:' . $columnName . '2');
+				$sheet->mergeCells('A3:' . $columnName . '3');
+
+				// Style column
+				$sheet->cell('A1:' . $columnNameBefore . '3', function ($cells) {
+					// Set font
+					$cells->setFont([
+						'size'       => '14',
+						'bold'       =>  true
+					]);
+					$cells->setAlignment('center');
+					$cells->setValignment('middle');
+				});
+
+				$sheet->cell('A5:' . $columnName . '5', function ($cells) {
+					// Set font
+					$cells->setFont([
+						'bold'       =>  true
+					]);
+					$cells->setAlignment('center');
+					$cells->setValignment('middle');
+					$cells->setBackground('#ffd05b');
+				});
+
+				$sheet->cell('E6:F' . $numberRows, function ($cells) {
+					$cells->setAlignment('right');
+				});
+
+				$sheet->cell('D' . ($numberRows + 1) . ':' . $columnName . ($numberRows + 1), function ($cells) {
+					$cells->setAlignment('right');
+					// Set font
+					$cells->setFont([
+						'bold'       =>  true
+					]);
+				});
+
+				for ($i = 5; $i <= $numberRows; $i++) {
+					$sheet->cell('A' . $i . ':' . $columnName . $i, function ($cells) {
+						$cells->setBorder('thin', 'thin', 'thin', 'thin');
+					});
+				}
+
+				$sheet->setAllBorders('A5:' . $columnName . $numberRows, 'thin');
+
+				// Fill array to sheet
+				$sheet->fromArray($processesUploaded, null, 'A5', true);
+
+				$sheet->setCellValue('D' . ($numberRows + 1), 'Total');
+				$sheet->setCellValue('E' . ($numberRows + 1), '=SUM(E6:E' . $numberRows . ')');
+				$sheet->setCellValue('F' . ($numberRows + 1), '=SUM(F6:F' . $numberRows . ')');
+
+				//set title table
+				// $sheet->setCellValue('A5', "DEPARTMENT");
+				$sheet->setCellValue('A5', "USER");
+				$sheet->setCellValue('B5', "PROJECT");
+				// $sheet->setCellValue('D5', "ISSUE");
+				// $sheet->setCellValue('E5', "INFO");
+				$sheet->setCellValue('C5', "日付");
+				$sheet->setCellValue('D5', "種類");
+				$sheet->setCellValue('E5', "ページ数");
+				$sheet->setCellValue('F5', "OutlinePDF");
+
+				// Format column
+				$sheet->setColumnFormat(array(
+					'E6:F' . $numberRows => '0'
 				));
 			});
 		})->store('xlsx');
