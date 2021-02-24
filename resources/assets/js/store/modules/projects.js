@@ -238,7 +238,6 @@ export default {
 			let uri = '/data/projects';
 			axios.post(uri, data)
 				.then(res => {
-					console.log(data);
 					commit('SET_SELECTED_ITEM', { type_id: 0 })
 					commit('SET_VALIDATE', { error: '', success: res.data.message })
 				})

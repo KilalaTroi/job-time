@@ -243,7 +243,7 @@
           ></textarea>
       </div>
     </div>
-    <error-item :errors="validationErrors"></error-item>
+    <error-item :errors="validationErrors" class="mt-3"></error-item>
     <success-item :success="validationSuccess"></success-item>
     <hr />
     <div class="form-group text-right">
