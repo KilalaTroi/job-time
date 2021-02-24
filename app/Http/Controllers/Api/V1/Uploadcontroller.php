@@ -397,8 +397,7 @@ class Uploadcontroller extends Controller
 				'p.name as project',
 				'i.name as issue',
 				's.memo as phase',
-				'u.name as user_name',
-				DB::raw("SUM(proc.page) as page, SUM(proc.file) as file, MIN(proc.date) as date")
+				DB::raw("MIN(proc.date) as date, u.name as user_name, SUM(proc.page) as page, SUM(proc.file) as file")
 			)
 			->leftJoin('schedules as s', 's.id', '=', 'proc.schedule_id')
 			->leftJoin('users as u', 'u.id', '=', 'proc.user_id')
@@ -466,7 +465,7 @@ class Uploadcontroller extends Controller
 		// })->toArray();
 
 		// Get total page
-		$processesUploaded = collect($processesUploaded)->map(function ($x) use ($processePage) {
+		$processesUploaded = collect($processesUploaded)->map(function ($x) {
 			// $pages = 0;
 			// $files = 0;
 			// $x->phase = $x->phase ? $x->phase : false;
@@ -567,6 +566,11 @@ class Uploadcontroller extends Controller
 				$sheet->setCellValue('G5', "REPORTER");
 				$sheet->setCellValue('H5', "PAGES WORK");
 				$sheet->setCellValue('I5', "FILES WORK");
+
+				// Format column
+				$sheet->setColumnFormat(array(
+					'H6:I' . $numberRows => '0'
+				));
 			});
 		})->store('xlsx');
 

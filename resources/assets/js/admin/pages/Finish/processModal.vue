@@ -383,19 +383,20 @@ export default {
           .post(uri, newProcess)
           .then((res) => {
             this.success = res.data.message;
+
+            this.sendMessageLineWork(this.newMessage).then((res) => {
+              this.isLoading = false;
+              this.newMessage = "";
+              this.$emit("reset-validation");
+            });
           })
           .catch((err) => {
+            this.isLoading = false;
             console.log(err);
             if (err.response.status == 422) {
               this.errors = err.response.data;
             }
           });
-
-        await this.sendMessageLineWork(this.newMessage).then((res) => {
-          this.isLoading = false;
-          this.newMessage = "";
-          this.$emit("reset-validation");
-        });
       }
     },
     resetValidate() {

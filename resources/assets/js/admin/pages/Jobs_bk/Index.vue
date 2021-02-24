@@ -381,7 +381,6 @@ export default {
                     .delete(uri)
                     .then(res => {
                         this.fetchItems();
-                        console.log(res.data);
                     })
                     .catch(err => console.log(err));
             }

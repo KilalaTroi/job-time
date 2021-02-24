@@ -189,5 +189,7 @@ export default {
     txtData: 'Data',
     txtInkiet: 'Inkjet',
     txtFinishRQ: 'Finish RQ',
-    txtNotFinished: 'Not Finished'
+    txtNotFinished: 'Not Finished',
+    txtSchedule: 'Schedule date',
+    txtStartWorking: 'Start Working'
 }
