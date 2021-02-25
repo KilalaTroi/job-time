@@ -249,7 +249,7 @@ class ReportsController extends Controller
 
 				// Fill total time to sheet
 				$sheet->setCellValue($endLetter . ($numberRows + 1), 'Total');
-				$sheet->setCellValue($totalLetter . ($numberRows + 1), '=SUM(' . $totalLetter . '6:' . $totalLetter . $numberRows . ')');
+				$sheet->setCellValue($totalLetter . ($numberRows + 1), '=SUBTOTAL(9,' . $totalLetter . '6:' . $totalLetter . $numberRows . ')');
 
 				//set title table
 				if (count($userArr) != 1) {
