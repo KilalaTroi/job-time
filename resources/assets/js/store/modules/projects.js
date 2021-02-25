@@ -261,8 +261,8 @@ export default {
 				});
 		},
 
-		resetSelectedItem({ commit }) {
-			commit('SET_SELECTED_ITEM', { type_id: 0 })
+		resetSelectedItem({ commit, rootState }) {
+			commit('SET_SELECTED_ITEM', { type_id: 0, team: [rootState.currentTeam] })
 		},
 
 		resetValidate({ state, dispatch, commit }) {

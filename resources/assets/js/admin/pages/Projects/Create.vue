@@ -305,6 +305,9 @@ export default {
       endDisabled: true,
     };
   },
+  mounted() {
+    this.selectedItem.team = [this.currentTeam];
+  },
   methods: {
     ...mapActions({
       addProject: "projects/addProject",

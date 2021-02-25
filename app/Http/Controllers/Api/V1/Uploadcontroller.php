@@ -740,8 +740,8 @@ class Uploadcontroller extends Controller
 				$sheet->fromArray($processesUploaded, null, 'A5', true);
 
 				$sheet->setCellValue('D' . ($numberRows + 1), 'Total');
-				$sheet->setCellValue('E' . ($numberRows + 1), '=SUM(E6:E' . $numberRows . ')');
-				$sheet->setCellValue('F' . ($numberRows + 1), '=SUM(F6:F' . $numberRows . ')');
+				$sheet->setCellValue('E' . ($numberRows + 1), '=SUBTOTAL(9,E6:E' . $numberRows . ')');
+				$sheet->setCellValue('F' . ($numberRows + 1), '=SUBTOTAL(9,F6:F' . $numberRows . ')');
 
 				//set title table
 				// $sheet->setCellValue('A5', "DEPARTMENT");
