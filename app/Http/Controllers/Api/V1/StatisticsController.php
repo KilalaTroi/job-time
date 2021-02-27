@@ -24,8 +24,13 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
-			$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+			if ( Carbon::now()->day > 21 ) {
+				$startMonthCar = $startMonthCar->day(21)->format('Y/m/d');
+				$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y/m/d');
+			} else {
+				$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
+				$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+			}
 		} else {
 			$startMonthCar = $startMonthCar->format('Y/m/d');
 			$endMonthCar = $endMonthCar->format('Y/m/d');
@@ -64,8 +69,13 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
-			$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+			if ( Carbon::now()->day > 21 ) {
+				$startMonthCar = $startMonthCar->day(21)->format('Y/m/d');
+				$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y/m/d');
+			} else {
+				$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
+				$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+			}
 		} else {
 			$startMonthCar = $startMonthCar->format('Y/m/d');
 			$endMonthCar = $endMonthCar->format('Y/m/d');
@@ -130,8 +140,13 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
-			$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+			if ( Carbon::now()->day > 21 ) {
+				$startMonthCar = $startMonthCar->day(21)->format('Y/m/d');
+				$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y/m/d');
+			} else {
+				$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y/m/d');
+				$endMonthCar = $endMonthCar->day(20)->format('Y/m/d');
+			}
 		} else {
 			$startMonthCar = $startMonthCar->format('Y/m/d');
 			$endMonthCar = $endMonthCar->format('Y/m/d');
@@ -332,8 +347,15 @@ class StatisticsController extends Controller
 		$daysOfMonth = array();
 		$monthsText = array();
 		$monthYearText = array();
-		$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
-		$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
+
+		if ( 2 == $teamID && Carbon::now()->day > 21 ) {
+			$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth)->addMonth(1);
+			$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth)->addMonth(1);
+		} else {
+			$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
+			$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
+		}
+		
 		$totalMonths = $startMonth->diffInMonths($endMonth) + 1;
 
 		if ($export) {
@@ -959,9 +981,16 @@ class StatisticsController extends Controller
 
 		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
-		$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y-m-d');
+
+		if ( Carbon::now()->day > 21 ) {
+			$startMonthCar = $startMonthCar->day(21)->format('Y-m-d');
+			$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y-m-d');
+		} else {
+			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y-m-d');
+			$endMonthCar = $endMonthCar->day(20)->format('Y-m-d');
+		}
+		
 		$startMonthCarFull = $startMonthCar . ' 00:00:00';
-		$endMonthCar = $endMonthCar->day(20)->format('Y-m-d');
 		$endMonthCarFull = $endMonthCar . ' 23:59:59';
 
 		$dataFinsh = DB::table('processes as proc')

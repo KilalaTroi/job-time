@@ -673,6 +673,23 @@ class Uploadcontroller extends Controller
 			$x->file = $x->file ? $x->file * 1 : '--';
 			$x->date = str_replace( '-', '/', explode( ' ', $x->date)[0] );
 
+			switch ($x->job_type) {
+				case "yuidea_imp_spot":
+					$x->job_type = "IMP_SPOT";
+					break;
+				case "yuidea_imp_periodic":
+					$x->job_type = "IMP";
+					break;
+				default:
+					if (str_contains($x->project, 'TAP')) {
+						$x->job_type = "PWC";
+					} elseif (str_contains($x->project, 'ECPDF')) {
+						$x->job_type = "ECP";
+					} elseif (str_contains($x->project, 'PDF')) {
+						$x->job_type = "INAP";
+					};
+			};
+
 			return (array) $x;
 		})->toArray();
 
