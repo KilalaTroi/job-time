@@ -703,7 +703,7 @@ class StatisticsController extends Controller
 
 			// Nguyen off 5 months
 			$offMonth = 0;
-			if ( $teamID == 1 && in_array( $key, ['202008', '202009', '202010', '202011', '202012'] ) ) {
+			if ( $teamID == 1 && in_array( $key, ['202008', '202009', '202010', '202011', '202012'] ) && !$user_id) {
 				$offMonth = 1;
 			}
 
