@@ -13,4 +13,5 @@ Page Work: {{$page}} <br>
 @if ( $file && $status == 'Finished Work' )
 File Work: {{$file}} <br>
 @endif
-Note: {{$content}} 
+<br>
+Note:  <br>{{$content}} 

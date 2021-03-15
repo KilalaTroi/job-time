@@ -835,7 +835,7 @@ class Uploadcontroller extends Controller
 			// $contentArr = explode('---- ', $request->get('content'));
 
 			Mail::send('emails.finish', [
-				'content' => $request->get('content'),
+				'content' => nl2br($request->get('content')),
 				'user' => $request->get('user'),
 				'type' => $request->get('type'),
 				'p_name' => $request->get('p_name'),
