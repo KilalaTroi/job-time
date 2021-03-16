@@ -14,4 +14,4 @@ Page Work: {{$page}} <br>
 File Work: {{$file}} <br>
 @endif
 <br>
-Note:  <br>{{$content}} 
+Note:  <br>{!! $content !!} 
