@@ -103,7 +103,7 @@ export default {
   },
   async created() {
     const _this = this;
-    _this.getAll();
+    await _this.getAll();
     _this.getItem(_this.filters.date);
     _this.hideModal();
   },

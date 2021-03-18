@@ -501,10 +501,10 @@ export default {
               const lastProcess = arrProcess[arrProcess.length - 1];
               return Object.assign({}, item, {
                 status: arrProcess.length ? lastProcess.status : "",
-                page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.page * 1; }, 0) : "",
-                file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.file * 1; }, 0) : "",
+                // page: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.page * 1; }, 0) : "",
+                // file: arrProcess.length ? arrProcess.reduce((total, item) => { return total + item.file * 1; }, 0) : "",
                 user_name: arrProcess.length ? lastProcess.user_name : "",
-                date: arrProcess.length ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm") : "",
+                // date: arrProcess.length ? this.dateFormat(lastProcess.date, "MMM DD, YYYY HH:mm") : "",
               });
             });
           } else {
@@ -561,8 +561,10 @@ export default {
     },
   },
   async created() {
-    this.team = this.currentTeam ? this.currentTeam.id : "";
-		await this.fetchData();
+    this.team = 2;
+    if(this.currentTeam.id == 2) await this.fetchData();
+    // this.team = this.currentTeam ? this.currentTeam.id : "";
+		// await this.fetchData();
 	},
   watch: {
     users: [
@@ -614,7 +616,7 @@ export default {
       {
         handler: function (value) {
           if ( value != this.currentTeam.id ){
-            this.setCurrentTeam(value);
+            // this.setCurrentTeam(value);
             this.fetchData();
           }
         },

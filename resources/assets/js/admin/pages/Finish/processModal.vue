@@ -32,10 +32,10 @@
               <label class="">{{ $ml.with("VueJS").get("txtStatus") }}</label>
               <select-2 v-model="currentProcess.status" class="select2">
                 <option value="">--</option>
-                <option value="Start Working">Start Working</option>
-                <option value="Finished Work">Finished Work</option>
-                <option value="Start Uploading">Start Uploading</option>
-                <option value="Finished Upload">Finished Upload</option>
+                <option :disabled="arrCurrentProcess.length !== 0" value="Start Working">Start Working</option>
+                <option :disabled="arrCurrentProcess.length !== 1" value="Finished Work">Finished Work</option>
+                <option :disabled="arrCurrentProcess.length !== 2" value="Start Uploading">Start Uploading</option>
+                <option :disabled="arrCurrentProcess.length !== 3" value="Finished Upload">Finished Upload</option>
               </select-2>
             </div>
           </div>
@@ -69,6 +69,51 @@
             </div>
           </div>
         </div>
+        <hr />
+
+        <div class="row">
+          
+          <div class="col">
+            <div class="form-group">
+              <label class="">{{
+                $ml.with("VueJS").get("txtData")
+              }}</label>
+              <input
+                type="text"
+                v-model="currentProcess.data"
+                class="form-control"
+                :disabled="currentProcess.status != 'Start Working'"
+              />
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label class="">{{
+                $ml.with("VueJS").get("txtInkiet")
+              }}</label>
+              <input
+                type="text"
+                v-model="currentProcess.inkjet"
+                class="form-control"
+                :disabled="currentProcess.status != 'Start Working'"
+              />
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label class="">{{
+                $ml.with("VueJS").get("txtFinishRQ")
+              }}</label>
+              <input
+                type="text"
+                v-model="currentProcess.finish_rq"
+                class="form-control"
+                :disabled="currentProcess.status != 'Start Working'"
+              />
+            </div>
+          </div>
+        </div>
+
         <hr />
 
         <div v-if="!sendSuccess" class="form-group">
@@ -213,10 +258,14 @@ export default {
             roomId: this.currentProcess.room_id,
             content: content,
             user: this.loginUser,
+            type: this.currentProcess.t_name,
             p_name: this.currentProcess.project,
             i_name: this.currentProcess.i_name,
             page: this.currentProcess.page,
             file: this.currentProcess.file,
+            data: this.currentProcess.data,
+            inkjet: this.currentProcess.inkjet,
+            finish_rq: this.currentProcess.finish_rq,
             page_number: this.currentProcess.page_number,
             phase: this.currentProcess.phase,
             status: this.currentProcess.status,
@@ -242,24 +291,33 @@ export default {
         this.currentProcess.page = null;
         this.currentProcess.file = null;
       }
+
       if (this.currentProcess.page_number && !this.currentProcess.page && this.currentProcess.status === "Finished Work") {
         this.currentProcess.page = this.currentProcess.page_number;
       }
 
-      this.newMessage =
-        "[" +
-        (this.currentProcess.status
-          ? this.currentProcess.status
-          : "null!") +
-        "] \nReporter:  " +
-        this.loginUser.name +
-        " \nProject: " +
-        this.currentProcess.p_name +
-        " \nIssue: " +
-        (this.currentProcess.i_name ? this.currentProcess.i_name : "--") +
-        " \nPhase: " +
-        (this.currentProcess.phase ? this.currentProcess.phase : "--") +
-        " \n----------------------------  ";
+      if ( this.arrCurrentProcess.length > 0 ) {
+        this.currentProcess.data = this.arrCurrentProcess[0].data;
+        this.currentProcess.inkjet = this.arrCurrentProcess[0].inkjet;
+        this.currentProcess.finish_rq = this.arrCurrentProcess[0].finish_rq;
+      }
+
+      // this.newMessage =
+      //   "[" +
+      //   (this.currentProcess.status
+      //     ? this.currentProcess.status
+      //     : "null!") +
+      //   "] \nProject: " +
+      //   this.currentProcess.p_name +
+      //   "\nType:  " +
+      //   this.currentProcess.type +
+      //   " \nIssue: " +
+      //   (this.currentProcess.i_name ? this.currentProcess.i_name : "--") +
+      //   " \nPhase: " +
+      //   (this.currentProcess.phase ? this.currentProcess.phase : "--") +
+      //   "\nReporter:  " +
+      //   this.loginUser.name +
+      //   " \n----------------------------  ";
 
       if (this.arrCurrentProcess.length) {
         this.dataProcess = this.arrCurrentProcess.map((item, index) => {
@@ -286,14 +344,15 @@ export default {
       this.errors = [];
       this.success = "";
       const checkStatus = this.currentProcess.status === "Finished Work" ? true : false;
+      const checkStatusStart = this.currentProcess.status === "Start Working" ? true : false;
 
       if (!this.currentProcess.status) {
         this.errors = [["Please choosing the status."], ...this.errors];
       }
 
-      if (!this.newMessage) {
-        this.errors = [["Please typing the massage."], ...this.errors];
-      }
+      // if (!this.newMessage) {
+      //   this.errors = [["Please typing the massage."], ...this.errors];
+      // }
 
       if(!this.currentProcess.page || 0 == this.currentProcess.page){
         if(checkStatus) this.errors = [['Enter in "PAGES WORKS"'], ...this.errors];
@@ -306,11 +365,16 @@ export default {
           user_id: this.loginUser.id,
           issue_id: this.currentProcess.id,
           schedule_id: this.currentProcess.schedule_id,
+          type: this.currentProcess.t_name,
           memo: this.currentProcess.phase,
           date: this.dateFormat(new Date(), "YYYY-MM-DD HH:mm"),
           page: checkStatus ? this.currentProcess.page : null,
           file: checkStatus ? this.currentProcess.file : null,
+          data: checkStatusStart ? this.currentProcess.data : null,
+          inkjet: checkStatusStart ? this.currentProcess.inkjet : null,
+          finish_rq: checkStatusStart ? this.currentProcess.finish_rq : null,
           status: this.currentProcess.status ? this.currentProcess.status : "null",
+          message: this.newMessage,
         };
 
         const uri = "/data/processes";
@@ -319,19 +383,20 @@ export default {
           .post(uri, newProcess)
           .then((res) => {
             this.success = res.data.message;
+
+            this.sendMessageLineWork(this.newMessage).then((res) => {
+              this.isLoading = false;
+              this.newMessage = "";
+              this.$emit("reset-validation");
+            });
           })
           .catch((err) => {
+            this.isLoading = false;
             console.log(err);
             if (err.response.status == 422) {
               this.errors = err.response.data;
             }
           });
-
-        await this.sendMessageLineWork(this.newMessage).then((res) => {
-          this.isLoading = false;
-          this.newMessage = "";
-          this.currentProcess.status = null;
-        });
       }
     },
     resetValidate() {
@@ -339,7 +404,6 @@ export default {
       this.errors = "";
       this.success = "";
       this.newMessage = "";
-      this.currentProcess.status = this.currentProcess.status ? this.currentProcess.status : '';
       this.$emit("reset-validation");
     },
     onCancel() {

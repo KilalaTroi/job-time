@@ -142,6 +142,8 @@ export default {
     txtRCFullDay: 'Full',
     txtRCAM: 'AM',
     txtRCPM: 'PM',
+    txtRCOff: 'Off',
+    txtRCHoliday: 'Holiday',
     txtReportFilter: 'Filter',
     txtReportType: 'Report type',
     txtReportCreate: 'Create New Report',
@@ -184,4 +186,10 @@ export default {
     txtPrint: 'Print',
     txtQuantity: 'Quantity',
     txtImage: 'Image',
+    txtData: 'Data',
+    txtInkiet: 'Inkjet',
+    txtFinishRQ: 'Finish RQ',
+    txtNotFinished: 'Not Finished',
+    txtSchedule: 'Schedule date',
+    txtStartWorking: 'Start Working'
 }

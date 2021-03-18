@@ -21,7 +21,7 @@
         </div>
          <button type="button" @click="multiplePrints ? printEvents(selectedItem)  : printEvent(currentEvent)" class="btn btn-primary ml-3">{{ $ml.with("VueJS").get("txtPrint") }}
         </button>
-        <button type="button" @click="deleteEvent(currentEvent)" class="btn btn-danger ml-3">{{ $ml.with("VueJS").get("txtDelete") }}</button>
+        <button v-if="(currentEvent.extendedProps && 'approved' == currentEvent.extendedProps.status) || (loginUser.role && 1 == loginUser.role.id)" type="button" @click="deleteEvent(currentEvent)" class="btn btn-danger ml-3">{{ $ml.with("VueJS").get("txtDelete") }}</button>
       </div>
     </div>
   </modal>
@@ -37,6 +37,9 @@ export default {
     Modal,
   },
   computed: {
+    ...mapGetters({
+      loginUser: "loginUser",
+    }),
     ...mapGetters('offdays',{
       currentEvent: "currentEvent",
       selectedItem: "selectedItem",

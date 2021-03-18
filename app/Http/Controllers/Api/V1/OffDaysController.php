@@ -71,12 +71,33 @@ class OffDaysController extends Controller
 				return $query;
 			})
 			->whereIn('off_days.status', array('approved', 'printed'))
+			->whereNotIn('off_days.type', array('holiday', 'offday'))
 			->where('off_days.date', '>=',  $startDate)
 			->where('off_days.date', '<',  $endDate)
 			->get()->toArray();
 
+		if (NULL === $offDays || empty($offDays)) $offDays = array();
+
+		$holiDays = DB::table('off_days')
+			->select(
+				'off_days.id as id',
+				'users.name as name',
+				'users.id as user_id',
+				'off_days.type as type',
+				'off_days.status as status',
+				'off_days.date as date'
+			)
+			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
+			->whereIn('off_days.type', array('holiday', 'offday'))
+			->where('off_days.date', '>=',  $startDate)
+			->where('off_days.date', '<',  $endDate)
+			->get()->toArray();
+
+		if (NULL === $holiDays || empty($holiDays)) $holiDays = array();
+
+
 		return response()->json([
-			'offDays' => $offDays,
+			'offDays' => array_merge($offDays, $holiDays),
 			'codition' => $codition
 		]);
 	}
@@ -90,6 +111,7 @@ class OffDaysController extends Controller
 	{
 		$offDay = OffDay::findOrFail($request->input('id'));
 		$results = array(
+			'user_id' => $offDay['user_id'],
 			'total' => 0,
 			'ids' => ''
 		);
@@ -97,8 +119,8 @@ class OffDaysController extends Controller
 			$offDay = $offDay->toArray();
 			$dataStartWeekDay = $dataEndWeekDay = array();
 
-			if ( $offDay['type'] != 'afternoon' ) $dataStartWeekDay = $this->getOffDayStartWeek($offDay['date']);
-			if ( $offDay['type'] != 'morning' ) $dataEndWeekDay = $this->getOffDayEndWeek($offDay['date']);
+			if ($offDay['type'] != 'afternoon') $dataStartWeekDay = $this->getOffDayStartWeek($offDay['date'], $offDay['user_id']);
+			if ($offDay['type'] != 'morning') $dataEndWeekDay = $this->getOffDayEndWeek($offDay['date'], $offDay['user_id']);
 
 			$dataDate = array_merge($dataStartWeekDay, $dataEndWeekDay);
 
@@ -139,39 +161,46 @@ class OffDaysController extends Controller
 	 */
 	public function store(Request $request)
 	{
-		$ids = array(); // ids ngày nghĩ bị trùng
+		$data = array(
+			'message' => 'Successfully.',
+			'oldEvent' => array(),
+			'event' => array()
+		);
 
-		// lấy ngày nghĩ bị trùng
-		$oldOffDay = DB::table('off_days')
-			->select(
-				'id'
-			)
-			->where('user_id', '=', $request->get('user_id'))
+		$holiDays = DB::table('off_days')
+			->select('id', 'status')
+			->whereIn('off_days.type', array('holiday', 'offday'))
 			->where('date', '=',  $request->get('date'))
-			->get()->toArray();
+			->count();
 
-		if ($oldOffDay) {
-			foreach ($oldOffDay as $value) {
-				$ids[] = $value->id; // ids ngày nghĩ bị trùng
+		if ($holiDays == 0 || 'holiday' == $request->get('type') || 'offday' == $request->get('type')) {
+			$oldOffDay = DB::table('off_days')
+				->select('id', 'status')
+				->where('user_id', '=', $request->get('user_id'))
+				->where('date', '=',  $request->get('date'))
+				->first();
+			if ($oldOffDay) {
+				if ('approved' == $oldOffDay->status) {
+					OffDay::where('id', $oldOffDay->id)->delete();
+					$data['oldEvent'] = array($oldOffDay->id);
+					$offDay = OffDay::create($request->all());
+				}
+			} else	$offDay = OffDay::create($request->all());
+			if (isset($offDay) && !empty($offDay)) {
+				$data['event'] = array(
+					'id' => $offDay->id,
+					'type' => $request->get('type'),
+					'start' => $request->get('start'),
+					'end' => $request->get('end'),
+					'borderColor' => $request->get('borderColor'),
+					'backgroundColor' => $request->get('backgroundColor'),
+					'title' => $request->get('title')
+				);
 			}
-			OffDay::destroy($ids);
 		}
 
-		$offDay = OffDay::create($request->all());
 
-		return response()->json(array(
-			'event' => array(
-				'id' => $offDay->id,
-				'type' => $request->get('type'),
-				'start' => $request->get('start'),
-				'end' => $request->get('end'),
-				'borderColor' => $request->get('borderColor'),
-				'backgroundColor' => $request->get('backgroundColor'),
-				'title' => $request->get('title')
-			),
-			'oldEvent' => $ids, // ids ngày nghĩ bị trùng
-			'message' => 'Successfully.'
-		), 200);
+		return response()->json($data, 200);
 	}
 
 	/**
@@ -190,7 +219,7 @@ class OffDaysController extends Controller
 		), 200);
 	}
 
-	private function getOffDayStartWeek($date)
+	private function getOffDayStartWeek($date, $user_id)
 	{
 		$dateCab = Carbon::createFromFormat('Y-m-d', $date);
 		$startDateWeek = Carbon::createFromFormat('Y-m-d', $date)->startOfWeek()->format('Y-m-d');
@@ -202,11 +231,11 @@ class OffDaysController extends Controller
 		for ($i = 0; $i <= $intDate - $intDateWeek; $i++) {
 			$dataDate = $dateCab->copy()->subDay($i)->format('Y-m-d');
 			$offDay = OffDay::select('id', 'type', 'date')
-				->where('user_id', $this->user['id'])
+				->where('user_id', $user_id)
 				->where('date', $dataDate)
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
-			$offDay = $offDay->toArray();			
+			$offDay = $offDay->toArray();
 			if (isset($data) && !empty($data)) {
 				if ('all_day' == $data[$i - 1]['type'] && $offDay['type'] == 'morning') break;
 				else if ('afternoon' == $data[$i - 1]['type'] && $offDay['type'] == 'all_day') break;
@@ -215,12 +244,12 @@ class OffDaysController extends Controller
 			}
 			$data[] = $offDay;
 		}
-		
+
 		krsort($data);
 		return $data;
 	}
 
-	private function getOffDayEndWeek($date)
+	private function getOffDayEndWeek($date, $user_id)
 	{
 		$dateCab = Carbon::createFromFormat('Y-m-d', $date);
 		$endDateWeek = Carbon::createFromFormat('Y-m-d', $date)->endOfWeek()->subDay(1)->format('Y-m-d');
@@ -231,7 +260,7 @@ class OffDaysController extends Controller
 		for ($i = 0; $i <= $intDateWeek - $intDate; $i++) {
 			$dataDate = $dateCab->copy()->addDay($i)->format('Y-m-d');;
 			$offDay = OffDay::select('id', 'type', 'date')
-				->where('user_id', $this->user['id'])
+				->where('user_id', $user_id)
 				->where('date', $dataDate)
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;

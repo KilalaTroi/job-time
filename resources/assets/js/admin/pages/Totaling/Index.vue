@@ -176,8 +176,6 @@ import Card from "../../components/Cards/Card";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import Multiselect from "vue-multiselect";
 import Datepicker from "vuejs-datepicker";
-import { vi, ja, en } from "vuejs-datepicker/dist/locale";
-import moment from "moment";
 import ButtonViewTableOption from "../../components/Buttons/ViewTableOption";
 import ViewTableOption from "../../components/ModalViewTableOption";
 import { mapGetters, mapActions } from "vuex";

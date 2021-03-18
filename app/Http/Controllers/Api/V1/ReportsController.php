@@ -20,6 +20,9 @@ use Google\Cloud\Translate\TranslateClient;
 
 class ReportsController extends Controller
 {
+
+	private $reportTypes = array('Trouble' => 'tb', 'Notice' => 'nt', 'Meeting' => 'mt');
+
 	/**
 	 * Store a newly created resource in storage.
 	 *
@@ -34,7 +37,7 @@ class ReportsController extends Controller
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
 
 		// Nếu có data project mới check issue
-		if ( $data['projects'] ) {
+		if ($data['projects']) {
 			$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
 			$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
 
@@ -48,6 +51,10 @@ class ReportsController extends Controller
 		}
 
 		$report = Report::create($data);
+		if (isset($report->id) && !empty($report->id)) {
+			$report_id = $this->reportTypes[$report->type] . '_' . str_pad($report->id, 4, '0', STR_PAD_LEFT);
+			$report->update(['report_id' => $report_id]);
+		}
 
 		return response()->json(array(
 			'id' => $report->id,
@@ -66,11 +73,11 @@ class ReportsController extends Controller
 		$report = Report::findOrFail($id);
 		$data = $request->all();
 		$data['seen'] = $this->user['id'];
-
+		$data['report_id'] = str_replace(array_values($this->reportTypes), $this->reportTypes[$data['type']], $report['report_id']);
 		$data['projects'] = isset($data['projects']) && !empty($data['projects']) ? $data['projects'] : null;
 
 		// Nếu có data project mới check issue
-		if ( $data['projects'] ) {
+		if ($data['projects']) {
 			$data['issue'] = isset($data['issue']) &&  !empty($data['issue']) && '--' != $data['issue'] ? $data['issue'] : null;
 			$data['issueYear'] = isset($data['issueYear']) && !empty($data['issueYear']) && '--' != $data['issueYear'] ? $data['issueYear'] : null;
 
@@ -242,7 +249,7 @@ class ReportsController extends Controller
 
 				// Fill total time to sheet
 				$sheet->setCellValue($endLetter . ($numberRows + 1), 'Total');
-				$sheet->setCellValue($totalLetter . ($numberRows + 1), '=SUM(' . $totalLetter . '6:' . $totalLetter . $numberRows . ')');
+				$sheet->setCellValue($totalLetter . ($numberRows + 1), '=SUBTOTAL(9,' . $totalLetter . '6:' . $totalLetter . $numberRows . ')');
 
 				//set title table
 				if (count($userArr) != 1) {
@@ -710,9 +717,9 @@ class ReportsController extends Controller
 				->paginate(20);
 		}
 
-		$projects = $filters['department'] ? $this->getProject( $filters['department']['id'], $filters['team']) : array();
-		$issues = $filters['project'] ? $this->getIssue( $filters['project']['id'], $filters['issueYear'] ? $filters['issueYear']['id'] : null ) : array();
-		$issuesYear = $filters['project'] ? $this->getIssueYear( $filters['project']['id'], $filters['issue'] ? $filters['issue']['id'] : null ) : array();
+		$projects = $filters['department'] ? $this->getProject($filters['department']['id'], $filters['team']) : array();
+		$issues = $filters['project'] ? $this->getIssue($filters['project']['id'], $filters['issueYear'] ? $filters['issueYear']['id'] : null) : array();
+		$issuesYear = $filters['project'] ? $this->getIssueYear($filters['project']['id'], $filters['issue'] ? $filters['issue']['id'] : null) : array();
 
 		return response()->json([
 			'reports' => isset($dataReports) && !empty($dataReports) ? $dataReports : '',

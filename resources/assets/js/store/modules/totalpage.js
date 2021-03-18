@@ -36,7 +36,7 @@ export default {
 
   actions: {
     getAll({ state, commit }) {
-      const uri = '/data/totalpage/';
+      const uri = '/data/totalpage';
       axios.get(uri).then(response => {
         response.data.types.forEach(function (element) {
           if (!response.data[element.id]) {

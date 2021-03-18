@@ -21,6 +21,26 @@ export default {
 				text: "Full-day (08:00 - 17:00)",
 				color: "#F55555",
 			},
+			{
+				id: "offday",
+				name: "Off",
+				text: "Off",
+				color: "#eaeaea",
+				permission: {
+					role: 'admin',
+					user_id: '',
+				}
+			},
+			{
+				id: "holiday",
+				name: "Holiday",
+				text: "Holiday",
+				color: "#ffd6fb",
+				permission: {
+					role: 'admin',
+					user_id: '',
+				}
+			},
 		],
 		allOffDays: [],
 		offDays: [],
@@ -60,15 +80,14 @@ export default {
 		},
 		recapTime() {
 			return (type, translateFunc) => {
-				if (type == "all_day") {
-					return "[" + translateFunc.get("txtRCFullDay") + "] ";
+				const textType = {
+					all_day: "[" + translateFunc.get("txtRCFullDay") + "] ",
+					morning: "[" + translateFunc.get("txtRCAM") + "] ",
+					afternoon: "[" + translateFunc.get("txtRCPM") + "] ",
+					offday: translateFunc.get("txtRCOff"),
+					holiday: translateFunc.get("txtRCHoliday"),
 				}
-				if (type == "morning") {
-					return "[" + translateFunc.get("txtRCAM") + "] ";
-				}
-				if (type == "afternoon") {
-					return "[" + translateFunc.get("txtRCPM") + "] ";
-				}
+				return textType[type];
 			}
 		},
 	},
@@ -115,7 +134,7 @@ export default {
 		},
 
 		ADD_OFF_DAY: (state, data) => {
-			if (data.oldOffDays) {
+			if (data.oldOffDays.length > 0) {
 				state.offDays = state.offDays.filter((elem) => {
 					if (data.oldOffDays.indexOf(elem.id) === -1) {
 						return elem
@@ -135,9 +154,10 @@ export default {
 					if (res.data.offDays.length) {
 						res.data.offDays = res.data.offDays.map((item, index) => {
 							const type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
+							const name = (-1 == ('holiday, offday').indexOf(item.type)) ? getters['recapName'](item.name) : '';
 							return Object.assign({}, item, {
-								title: getters['recapTime'](item.type, rootState.translateTexts) + getters['recapName'](item.name),
-								className: 'printed' == item.status ? 'printed' : '',
+								title: getters['recapTime'](item.type, rootState.translateTexts) + name,
+								className: ('printed' == item.status ? 'printed' : '') + ('holiday' == item.type ? 'holiday' : '') + ('offday' == item.type ? 'offday' : ''),
 								borderColor: type.color,
 								backgroundColor: type.color,
 								start: rootGetters['dateFormat'](item.date),
@@ -206,9 +226,9 @@ export default {
 			}).catch(err => console.log(err));
 		},
 
-		clickEvent({ commit, rootGetters, state, dispatch }, item) {
+		clickEvent({ commit, rootGetters, state, dispatch, rootState }, item) {
 			const user_id = rootGetters['getObjectByID'](state.allOffDays, item.event.id * 1)['user_id'];
-			if (user_id == state.filters.user_id) {
+			if ((user_id == state.filters.user_id || 1 == rootState.loginUser.role.id) && -1 == ('holiday, offday').indexOf(item.event.extendedProps.type)) {
 				if ('morning' != item.event._def.extendedProps.type) dispatch('getAllOffDayWeek', item.event.id);
 				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 })
 				commit('UPDATE_CURRENT_EVENT', item.event);
@@ -242,18 +262,19 @@ export default {
 					commit('ADD_OFF_DAY', data)
 					if (rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
 					info.event.remove();
-					dispatch('getAllOffDays')
+					dispatch('getAllOffDays');
 				})
 				.catch(err => {
 					console.log(err);
 				});
 		},
 
-		printEvent({ }, event) {
+		printEvent({ dispatch }, event) {
 			const uri = "/pdf/absence?id=" + event.id;
 			axios.get(uri)
 				.then(res => {
 					window.open(res.data.file_name, "_blank");
+					dispatch('getAllOffDays')
 				})
 				.catch(err => {
 					console.log(err);
@@ -261,12 +282,13 @@ export default {
 				});
 		},
 
-		printEvents({ }, selectItem) {
-			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date + '&ids=' + selectItem.ids;
+		printEvents({ dispatch }, selectItem) {
+			const uri = "/pdf/absence?total=" + selectItem.total + "&morning=" + selectItem.morning + "&afternoon=" + selectItem.afternoon + "&allDay=" + selectItem.all_day + "&date=" + selectItem.date + '&ids=' + selectItem.ids + '&user_id=' + selectItem.user_id;
 			axios.get(uri)
 				.then(res => {
 					if (res.data.status == 1) window.open(res.data.file_name, "_blank");
 					else alert('Error Print');
+					dispatch('getAllOffDays');
 				})
 				.catch(err => {
 					console.log(err);

@@ -142,6 +142,8 @@ export default {
     txtRCFullDay: 'Full',
     txtRCAM: 'AM',
     txtRCPM: 'PM',
+    txtRCOff: 'Off',
+    txtRCHoliday: 'Holiday',
     txtReportFilter: 'フィルタ',
     txtReportType: '種類',
     txtReportCreate: '新規レポートの作成',
@@ -184,4 +186,10 @@ export default {
     txtPrint: 'Print',
     txtQuantity: '量',
     txtImage: 'ページ数',
+    txtData: 'Data',
+    txtInkiet: 'Inkjet',
+    txtFinishRQ: 'Finish RQ',
+    txtNotFinished: 'Not Finished',
+    txtSchedule: 'Schedule date',
+    txtStartWorking: 'Start Working'
 }

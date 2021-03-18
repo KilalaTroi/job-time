@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Team;
+use App\Process;
 use App\Department;
+use App\Schedule;
 use App\Imports\ProjectsImport;
 use App\Type;
 use Carbon\Carbon;
@@ -13,6 +15,7 @@ use App\Issue;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Excel;
+use Mail;
 use Illuminate\Validation\Validator;
 
 class ProjectsController extends Controller
@@ -120,6 +123,7 @@ class ProjectsController extends Controller
      */
     public function store(Request $request)
     {
+        $user_id = $request->session()->get('Auth')[0]['id'];
         $request->merge(['name' => $request->get('project_name')]);
 
         $this->validate($request, [
@@ -162,6 +166,75 @@ class ProjectsController extends Controller
                 'end_date' => $end_date,
                 'status' => 'publish',
             ]);
+        }
+
+        if ( $request->get('schedule_date') != null && $request->get('schedule_date') ) {
+            $schedule_date = explode('T', $request->get('schedule_date'));
+            $schedule_date = $schedule_date[0];
+            $schedule_start_time = $request->get('schedule_start_time');
+            $schedule_end_time = $request->get('schedule_end_time');
+
+            $schedule = Schedule::create([
+                'issue_id' => $issue->id,
+                'team_id' => $request->get('team'),
+                'start_time' => $schedule_start_time && $schedule_start_time['HH'] != '00' ? $schedule_start_time['HH'].':'.$schedule_start_time['mm'] : '07:00',
+                'end_time' => $schedule_end_time ? $schedule_end_time['HH'].':'.$schedule_end_time['mm'] : null,
+                'date' => $schedule_date,
+            ]);
+
+            if ( $request->get('start_working') != null && $request->get('start_working') ) {
+                $finish_email = DB::table('types as t')
+                ->where( 'id', $request->get('type_id') )
+                ->where(function ($query) {
+                    $query->where('t.line_room', '!=', NULL)
+                        ->orWhere('t.email', '!=', NULL);
+                })->get()->toArray();
+
+                if ( isset($finish_email[0]) && $finish_email[0]->email ) {
+                    $process = Process::create([
+                        'user_id' => $user_id,
+                        'issue_id' => $issue->id,
+                        'schedule_id' => $schedule->id,
+                        'finish_rq' => $request->get('work_rq'),
+                        'inkjet' => $request->get('work_inkjet'),
+                        'data' => $request->get('work_data'),
+                        'date' => date("Y-m-d H:i:s"),
+                        'message' => $request->get('work_message'),
+                        'status' => 'Start Working',
+                    ]);
+    
+                    // send email
+
+                    $from = array(
+                        'email' => $request->session()->get('Auth')[0]['email'],
+                        'name' => $request->session()->get('Auth')[0]['name']
+                    );
+        
+                    $emails[] = $finish_email[0]->email;
+        
+                    Mail::send('emails.finish', [
+                        'content' => $request->get('work_message'),
+                        'user' => $request->session()->get('Auth')[0],
+                        'type' => $request->get('type'),
+                        'p_name' => $request->get('name'),
+                        'i_name' => $request->get('issue_name'),
+                        'page' => $request->get('page'),
+                        'file' => null,
+                        'phase' => null,
+                        'data' => $request->get('work_data'),
+                        'inkjet' => $request->get('work_inkjet'),
+                        'finish_rq' => $request->get('work_rq'),
+                        'status' => 'Start Working'
+                    ], function ($message) use ($emails, $from, $request) {
+                        $message->from($from['email'], $from['name']);
+                        $message->sender('code_smtp@cetusvn.com', 'Kilala Mail System');
+                        $subject = 'JOBTIME : Updated invitation [Start Working_' . ucfirst($request->session()->get('Auth')[0]['username']) . '] ' . $request->get('name');
+                        if ($request->get('page')) $subject .= '_' . $request->get('page') . 'p';
+                        $message->to($emails)->subject($subject);
+                    });
+                }
+                
+            }
         }
 
         return response()->json(array(

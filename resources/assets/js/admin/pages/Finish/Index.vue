@@ -385,6 +385,7 @@ export default {
           text: this.$ml.with("VueJS").get("txtShowBySchedule"),
         },
         { id: "all", text: this.$ml.with("VueJS").get("txtShowAll") },
+        { id: "notFinished", text: this.$ml.with("VueJS").get("txtNotFinished") },
       ];
       this.optionsFilter = [...arr];
     },
@@ -396,7 +397,7 @@ export default {
       return moment(date).format("YYYY/MM/DD");
     },
     resetValidate() {
-      this.currentProcess = {};
+      this.currentProcess = { status: null };
       this.fetchData(this.page, false);
     },
     getLanguage(data) {
@@ -404,17 +405,19 @@ export default {
     },
   },
   async created() {
-    this.selectTeam = this.currentTeam.id;
-    await this.fetchData();
+    // this.selectTeam = this.currentTeam.id;
+    this.selectTeam = 2;
+    // if(this.currentTeam.id == 2) await this.fetchData();
   },
   watch: {
     selectTeam: [
       {
         handler: function (value) {
-          if (value != this.currentTeam.id) {
-            this.setCurrentTeam(value);
-            this.fetchData();
-          }
+          this.fetchData();
+          // if (value != this.currentTeam.id) {
+          //   // this.setCurrentTeam(value);
+          //   this.fetchData();
+          // }
         },
       },
     ],
