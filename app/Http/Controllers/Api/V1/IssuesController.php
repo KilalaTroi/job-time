@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Project;
 use App\Issue;
+use App\Job;
+use App\Schedule;
+use App\Process;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -227,12 +230,16 @@ class IssuesController extends Controller
 		$issue = Issue::findOrFail($id);
 		$projectIssue = Issue::where('project_id', $issue->project_id)->count();
 
-		if ($projectIssue > 1) {
-			$issue->delete();
-		} else {
+		if ($projectIssue == 1) {
 			$project = Project::findOrFail($issue->project_id);
 			$project->delete();
 		}
+
+		Job::where('issue_id', $id)->delete();
+		Process::where('issue_id', $id)->delete();
+		Schedule::where('issue_id', $id)->delete();
+
+		$issue->delete();
 
 		return response()->json(array(
 			'message' => 'Successfully.'
