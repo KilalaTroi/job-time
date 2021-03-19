@@ -53,6 +53,8 @@ export default {
 		async getAll({ rootState, rootGetters, commit, dispatch }, page = 1) {
 			const uri = '/data/types?page=' + page
 
+			if ( ! rootState.departments.options.length ) await dispatch( 'departments/getOptions', true, {root:true} );
+
 			await axios.get(uri).then(response => {
 				if (response.data.data.length) {
 					response.data.data = response.data.data.map((item, index) => {
