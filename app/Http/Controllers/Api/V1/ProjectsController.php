@@ -213,7 +213,7 @@ class ProjectsController extends Controller
                     $emails[] = $finish_email[0]->email;
         
                     Mail::send('emails.finish', [
-                        'content' => $request->get('work_message'),
+                        'content' => nl2br($request->get('work_message')),
                         'user' => $request->session()->get('Auth')[0],
                         'type' => $request->get('type'),
                         'p_name' => $request->get('name'),

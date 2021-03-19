@@ -62,18 +62,13 @@ export default {
     ButtonCreate,
   },
   computed: {
-    ...mapGetters("types", {
-      columns: "columns",
-      typeData: "data",
-      deptOptions: "options"
+    ...mapGetters({
+      columns: "types/columns",
+      typeData: "types/data"
     }),
   },
 
   methods: {
-    ...mapActions("departments", {
-      getOtionsDept: "getOptions",
-    }),
-
     ...mapActions("types", {
       setColumns: "setColumns",
       getAll: "getAll",
@@ -83,8 +78,9 @@ export default {
   async created(){
     const _this = this;
     _this.setColumns();
-    if ( !_this.deptOptions.length ) await _this.getOtionsDept(true);
+    
     await _this.getAll();
+    
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
     });
