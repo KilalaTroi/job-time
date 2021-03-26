@@ -10,9 +10,10 @@
     <meta name="user-id" content="{{ Auth::user()->id }}">
     <meta name="user-created-at" content="{{ Auth::user()->created_at }}">
     <meta name="user-language" content="{{ Auth::user()->language ? Auth::user()->language : 'en' }}">
-    <meta name="teams" content="{{ json_encode($teamOptions) }}">
+    <meta name="teams" content="{{ json_encode($teamDigitalOptions) }}">
+    <meta name="media-teams" content="{{ json_encode($teamMediaOptions) }}">
     <meta name="team-default" content="{{ Auth::user()->team }}">
-    
+
     <title>{{ config('app.name', 'Job Time') }}</title>
 
     @include('./components/favicon')

@@ -17,14 +17,22 @@ class Controller extends BaseController
 			// fetch session and use it in entire class with constructor
 			$user = $request->session()->get('Auth');
 			$this->user = $user[0];
-			if ( isset($_GET['team']) && $_GET['team_id'] ) $this->teamIDs = $_GET['team_id'];
-			else $this->teamIDs = explode(',',$user[0]['team'])[0];
+			if (isset($_GET['team']) && $_GET['team_id']) $this->teamIDs = $_GET['team_id'];
+			else $this->teamIDs = explode(',', $user[0]['team'])[0];
 			return $next($request);
 		});
 	}
-	public function validateMultileCol($arr){
+	public function validateMultileCol($arr)
+	{
 		$str = '';
-		foreach($arr as $k => $v)	$str .= isset($v) && !empty($v) ? ','. $k .','.$v : ','. $k .',NULL';
-		return ltrim($str,',');
+		foreach ($arr as $k => $v)	$str .= isset($v) && !empty($v) ? ',' . $k . ',' . $v : ',' . $k . ',NULL';
+		return ltrim($str, ',');
 	}
+
+	public function dbConnetAccess(){
+		$dbName = env("DB_CONNECTION_ACCESS");
+		if (!file_exists($dbName)) die("Could not find access database file.");
+		return new \PDO("odbc:DRIVER={Microsoft Access Driver (*.mdb)}; DBQ=".$dbName, "Admin");
+	}
+
 }

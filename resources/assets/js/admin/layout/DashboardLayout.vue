@@ -44,6 +44,18 @@
                 <i class="fa fa-toggle-off" aria-hidden="true"></i>
                 <p v-text="$ml.with('VueJS').get('sbOffDays')" />
             </sidebar-link>
+            <sidebar-link to="/checkinout">
+                <i class="fa fa-clock-o fa-side-menu"></i>
+                <p>Check In Out</p>
+
+                <template v-slot:submenu>
+                    <ul>
+                        <sidebar-link to="/timetable">
+                            <p>TimeTable</p>
+                        </sidebar-link>
+                    </ul>
+                </template>
+            </sidebar-link>
             <sidebar-link to="/types">
                 <!-- <i class="nc-icon nc-tag-content"></i> -->
                 <i class="fa fa-tags" aria-hidden="true"></i>
@@ -125,7 +137,7 @@
 
 .wrapper-planner, .wrapper-japanese_planner, .wrapper-employee {
     .menu {
-        &-user, &-teams, &-types, &-departments {
+        &-user, &-teams, &-types, &-departments,&-checkinout {
             display: none;
         }
 
@@ -149,7 +161,7 @@
 
 .wrapper-employee {
     .menu {
-        &-projects {
+        &-projects,&-checkinout {
             display: none;
         }
 
@@ -165,7 +177,7 @@
 
 .wrapper-japanese_planner {
     .menu {
-        &-jobs, &-off-days {
+        &-jobs, &-off-days,&-checkinout {
             display: none;
         }
     }

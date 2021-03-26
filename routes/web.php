@@ -85,6 +85,19 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('finish/update-status', 'UploadController@updateStatus');
     Route::post('finish/submit-message', 'UploadController@submitMessage');
 
+    Route::post('checkinout', 'CheckInOutController@index');
+    Route::get('checkinout/get-options', 'CheckInOutController@getOptions');
+    Route::get('checkinout/get-timetable', 'CheckInOutController@timeTable');
+    Route::post('checkinout/timetable', 'CheckInOutController@addTimeTable');
+    Route::patch('checkinout/timetable/{id}', 'CheckInOutController@updateTimeTable');
+    Route::delete('checkinout/timetable/{id}', 'CheckInOutController@deleteTimeTable');
+
+    Route::get('checkinout/get-schedules-timetable', 'CheckInOutController@schudelesTimeTable');
+    Route::post('checkinout/schedules-timetable', 'CheckInOutController@addSchudelesTimeTable');
+    Route::patch('checkinout/schedules-timetable/{id}', 'CheckInOutController@updateSchudelesTimeTable');
+    Route::delete('checkinout/schedules-timetable/{id}', 'CheckInOutController@deleteSchudelesTimeTable');
+
+
     Route::post('upload/report', 'UserUploadController@updateReport');
 
     Route::resource('comments', 'CommentsController', ['except' => ['create', 'edit']]);
