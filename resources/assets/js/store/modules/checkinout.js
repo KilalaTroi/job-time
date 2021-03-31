@@ -11,30 +11,31 @@ export default {
 			teams: [],
 			lates: [
 				{
-					id: 5,
-					text: '00:05'
+					id: 1,
+					text: 'Late'
 				},
 				{
 					id: 15,
-					text: '00:15'
+					text: 'Later 15 Minutes'
 				},
 				{
 					id: 30,
-					text: '00:30'
+					text: 'Later 30 Minutes'
 				}
 			]
 		},
+		selectedItemReason: {},
 		validationErrors: '',
 		validationSuccess: '',
 		filters: {
 			start_date: new Date(moment().startOf('month').format("YYYY/MM/DD")),
 			end_date: new Date(moment().format("YYYY/MM/DD")),
-			user_id: [],
+			user_id: '',
 			team_id: '',
-			late: 5,
+			late: 15,
 		},
-		currentStart: '',
-		currentEnd: '',
+		currentStart: new Date(moment().startOf('month').format("YYYY/MM/DD")),
+		currentEnd: new Date(moment().startOf('end').format("YYYY/MM/DD")),
 	},
 
 	getters: {
@@ -43,20 +44,11 @@ export default {
 		cdata: state => state.cdata,
 		filters: state => state.filters,
 		options: state => state.options,
+		selectedItemReason: state => state.selectedItemReason,
 		currentStart: state => state.currentStart,
 		currentEnd: state => state.currentEnd,
 		validationErrors: state => state.validationErrors,
 		validationSuccess: state => state.validationSuccess,
-		recapName() {
-			return (str) => {
-				let words = str.split(" ");
-				let firstName = words[words.length - 1],
-					middleName = words[words.length - 2]
-						? words[words.length - 2] + " "
-						: "";
-				return middleName + firstName;
-			}
-		},
 	},
 
 	mutations: {
@@ -69,8 +61,14 @@ export default {
 		},
 
 		SET_OPTIONS: (state, options) => {
-			state.options.users = options.users
+			if (options.users) state.options.users = [{ id: "", text: "ALL" }].concat(options.users)
+			if (options.lates) state.options.lates = options.lates;
 		},
+
+		SET_FILTERS: (state, filters) => {
+			state.filters = filters
+		},
+
 
 		SET_CURRENT_START: (state, data) => {
 			state.currentStart = data
@@ -80,8 +78,8 @@ export default {
 			state.currentEnd = data
 		},
 
-		SET_SELECTED_ITEM: (state, selectedItem) => {
-			state.selectedItem = Object.assign({}, selectedItem)
+		SET_SELECTED_ITEM_REASON: (state, selectedItemReason) => {
+			state.selectedItemReason = Object.assign({}, selectedItemReason)
 		},
 
 		SET_VALIDATE: (state, data) => {
@@ -95,7 +93,7 @@ export default {
 	},
 
 	actions: {
-		getAll({ state, commit, rootGetters }, flag = 0) {
+		getAll({ state, commit, rootGetters, dispatch }, flag = 0) {
 			const uri = '/data/checkinout';
 			const _flag = flag;
 			const dataSend = {
@@ -112,16 +110,7 @@ export default {
 				if (_flag == 0) {
 					commit('SET_DATA', response.data)
 					setTimeout(function () {
-						for (const elm of $('#checkinout tbody tr')) {
-							const late = $(elm).find('.cl-late');
-							const early = $(elm).find('.cl-early');
-							if (late.text() == '00:00') late.text('--');
-							if (early.text() == '00:00') early.text('--');
-
-							if (late.text() != '--') $(elm).removeClass('bg-early').removeClass('bg-all').addClass('bg-late');
-							if (early.text() != '--') $(elm).removeClass('bg-late').removeClass('bg-all').addClass('bg-early');
-							if (late.text() != '--' && early.text() != '--') $(elm).removeClass('bg-early').removeClass('bg-late').addClass('bg-all');
-						}
+						dispatch('setColorLateEarly');
 					}, 300)
 				} else if (_flag == 1) {
 					commit('SET_CDATA', response.data)
@@ -129,37 +118,101 @@ export default {
 			})
 		},
 
-		getOptions({ state, commit }) {
+		getOptions({ state, commit, rootGetters }, flag) {
 			const uri = '/data/checkinout/get-options?team_id=' + state.filters.team_id;
 			axios.get(uri).then(response => {
 				commit('SET_OPTIONS', response.data)
 			})
 		},
 
-		getItem({ state, commit, rootGetters }, id) {
-			const item = rootGetters['getObjectByID'](state.data.data, id)
-			commit('SET_SELECTED_ITEM', item)
+		getItemReason({ state, commit, rootGetters }, obj) {
+			const result = state.data.data.filter(item => item.userid === obj.id && item.date === obj.date)
+			const item = result.length ? result[0] : {};
+			commit('SET_SELECTED_ITEM_REASON', item)
+		},
+
+		updateReason({ commit }, item) {
+			commit('SET_VALIDATE', { error: '', success: '' })
+			const data = Object.assign({}, item)
+			const uri = '/data/checkinout/reason';
+			axios.post(uri, data)
+				.then(res => {
+					commit('SET_VALIDATE', { error: '', success: res.data.message })
+				})
+				.catch(err => {
+					if (err.response.status === 422) commit('SET_VALIDATE', { error: err.response.data, success: '' })
+				});
 		},
 
 
-		handleMonthChangeAll({ commit, dispatch }, arg) {
-			commit('SET_CURRENT_START', arg.view.currentStart)
-			commit('SET_CURRENT_END', arg.view.currentEnd)
-			dispatch('getAll', 1)
+		handleMonthChangeAll({ state, commit, dispatch, rootGetters }, arg) {
+			const currentStart = rootGetters['dateFormat'](state.currentStart, 'YYYYMMDD');
+			const currentEnd = rootGetters['dateFormat'](state.currentEnd, 'YYYYMMDD');
+			const aCurrentStart = rootGetters['dateFormat'](arg.view.currentStart, 'YYYYMMDD');
+			const aCurrentEnd = rootGetters['dateFormat'](arg.view.currentEnd, 'YYYYMMDD');
+			if (currentStart !== aCurrentStart && currentEnd !== aCurrentEnd) {
+				commit('SET_CURRENT_START', arg.view.currentStart)
+				commit('SET_CURRENT_END', arg.view.currentEnd)
+				dispatch('getAll', 1);
+			}
 		},
 
+		setColorLateEarly() {
+			$('#checkinout tbody tr').removeClass('bg-early').removeClass('bg-all').removeClass('bg-late').find('.cl-reason').removeAttr('title');
+			for (const elm of $('#checkinout tbody tr')) {
+				if ('--' != $(elm).find('.cl-reason').text()) $(elm).find('.cl-reason').attr('title', $(elm).find('.cl-reason').text());
+				const late = $(elm).find('.cl-late');
+				const early = $(elm).find('.cl-early');
+				if (late.text() == '00:00') late.text('--');
+				if (early.text() == '00:00') early.text('--');
+				if (late.text() != '--') $(elm).removeClass('bg-early').removeClass('bg-all').addClass('bg-late');
+				if (early.text() != '--') $(elm).removeClass('bg-late').removeClass('bg-all').addClass('bg-early');
+				if (late.text() != '--' && early.text() != '--') $(elm).removeClass('bg-early').removeClass('bg-late').addClass('bg-all');
+			}
+		},
+
+		resetFilter({ state, commit }, flag = 0) {
+			if (flag == 0 || flag == 1) {
+				const filters = {
+					start_date: new Date(moment().startOf('month').format("YYYY/MM/DD")),
+					end_date: new Date(moment().format("YYYY/MM/DD")),
+					user_id: '',
+					team_id: '',
+					late: 15,
+				};
+				commit('SET_FILTERS', filters);
+			}
+			if (flag == 0 || flag == 2) {
+				const currentStart = new Date(moment().startOf('month').format("YYYY/MM/DD"));
+				const currentEnd = new Date(moment().startOf('end').format("YYYY/MM/DD"));
+				commit('SET_CURRENT_START', currentStart);
+				commit('SET_CURRENT_END', currentEnd);
+			}
+		},
+
+		resetSelectedItem({ commit }) {
+			commit('SET_SELECTED_ITEM_REASON', {})
+		},
+
+		resetValidate({ commit, dispatch }) {
+			commit('SET_VALIDATE', { error: '', success: '' })
+			dispatch('getAll');
+			setTimeout(function () {
+				dispatch('setColorLateEarly');
+			}, 300)
+		},
 
 		setColumns({ commit, rootGetters }) {
 			const columns = [
-				{ id: "fullname", value: "Name", width: "200", class: "" },
-				{ id: "date", value: "Date", width: "150", class: "text-center" },
-				{ id: "checkin", value: "Check in", width: "110", class: "text-center" },
-				{ id: "checkout", value: "Check out", width: "110", class: "text-center" },
-				{ id: "late", value: "Late", width: "110", class: "text-center" },
-				{ id: "early", value: "Early", width: "110", class: "text-center" },
-				{ id: "workingtime", value: "Working time", width: "150", class: "text-center" },
-				{ id: "team", value: "Team", width: "110", class: "text-center" },
-				{ id: "", value: "", width: "", class: "text-center" },
+				{ id: "fullname", value: rootGetters['getTranslate']('txtName'), width: "160", class: "" },
+				{ id: "date", value: rootGetters['getTranslate']('txtDate'), width: "100", class: "text-center" },
+				{ id: "dayoweek", value: rootGetters['getTranslate']('txtDay'), width: "60", class: "text-center" },
+				{ id: "checkin", value: rootGetters['getTranslate']('txtCheckIn'), width: "100", class: "text-center" },
+				{ id: "checkout", value: rootGetters['getTranslate']('txtCheckOut'), width: "120", class: "text-center" },
+				{ id: "late", value: rootGetters['getTranslate']('txtLate'), width: "100", class: "text-center" },
+				{ id: "early", value: rootGetters['getTranslate']('txtEarly'), width: "100", class: "text-center" },
+				{ id: "workingtime", value: rootGetters['getTranslate']('txtWorkingTime'), width: "120", class: "text-center" },
+				{ id: "reason", value: rootGetters['getTranslate']('txtReason'), width: "", class: "" },
 			]
 
 			commit('SET_COLUMNS', columns)

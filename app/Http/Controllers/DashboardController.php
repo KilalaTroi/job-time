@@ -34,23 +34,24 @@ class DashboardController extends Controller
             'name as text'
         )->whereNotIn('id', [1, 2, 3])->get()->toArray();
 
+        $teamFullOptions = array_merge($teamDigitalOptions, $teamMediaOptions);
         if (!$request->user()->disable_date == null) {
             return view('errors.disable');
         }
 
         // redirect view by user
         if ($request->user()->authorizeRoles('admin')) {
-            return view('dashboard', ['teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions'=> $teamMediaOptions]);
+            return view('dashboard', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
         };
 
         if ($request->user()->authorizeRoles('planner')) {
-            return view('planner', ['teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions'=> $teamMediaOptions]);
+            return view('planner', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
         };
 
         if ($request->user()->authorizeRoles('japanese_planner')) {
-            return view('japanese_planner', ['teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions'=> $teamMediaOptions]);
+            return view('japanese_planner', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
         };
 
-        return view('employee', ['teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions'=> $teamMediaOptions]);
+        return view('employee', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
     }
 }

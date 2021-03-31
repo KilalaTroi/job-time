@@ -97,6 +97,9 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::patch('checkinout/schedules-timetable/{id}', 'CheckInOutController@updateSchudelesTimeTable');
     Route::delete('checkinout/schedules-timetable/{id}', 'CheckInOutController@deleteSchudelesTimeTable');
 
+    Route::post('checkinout/reason', 'CheckInOutController@updateReason');
+
+
 
     Route::post('upload/report', 'UserUploadController@updateReport');
 

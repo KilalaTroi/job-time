@@ -29,10 +29,10 @@ class Controller extends BaseController
 		return ltrim($str, ',');
 	}
 
-	public function dbConnetAccess(){
+	public function dbConnetAccess()
+	{
 		$dbName = env("DB_CONNECTION_ACCESS");
 		if (!file_exists($dbName)) die("Could not find access database file.");
-		return new \PDO("odbc:DRIVER={Microsoft Access Driver (*.mdb)}; DBQ=".$dbName, "Admin");
+		return new \PDO("odbc:DRIVER={Microsoft Access Driver (*.mdb)}; DBQ=" . $dbName, "Admin");
 	}
-
 }

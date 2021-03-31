@@ -94,7 +94,7 @@ export default {
       setBackground: "setBackground",
       getLanguage: "getLanguage",
       loginUser: "loginUser",
-      currentTeamOption: "currentTeamOption",
+      currentFullTeamOption: "currentFullTeamOption",
       currentTeam: "currentTeam",
       getLangCode: "getLangCode",
       dateFormat: "dateFormat"
@@ -181,7 +181,7 @@ export default {
 
   async created() {
     const _this = this;
-    _this.options.team = [{ id: "", text: "ALL" }].concat(_this.currentTeamOption);
+    _this.options.team = [{ id: "", text: "ALL" }].concat(_this.currentFullTeamOption);
     if(_this.loginUser.role && ('admin' == _this.loginUser.role.name || -1 !== [1, 49].indexOf(_this.loginUser.id))) _this.filters.team = ''
     else _this.filters.team = _this.currentTeam.id;
   },

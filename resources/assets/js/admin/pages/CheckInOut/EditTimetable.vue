@@ -1,6 +1,6 @@
 <template>
   <modal id="timeTableDetail" v-on:reset-validation="resetValidation">
-    <template slot="title">Edit Timetable</template>
+    <template slot="title">{{ $ml.with("VueJS").get("txtUpdateTimeTableEdit") }}</template>
     <form v-if="selectedItemt">
       <div class="form-group">
         <label class="">{{ $ml.with("VueJS").get("txtName") }}</label>
@@ -12,14 +12,15 @@
         />
       </div>
       <div class="form-group">
-        <label><strong>Monday</strong></label>
-        <div class="row">
+        <label><strong>{{ $ml.with("VueJS").get("txtMondayFriday") }}</strong></label>
+        <div class="row mb-3">
           <div class="col-sm-6">
             <vue-timepicker
-              v-model="selectedItemt.check_in.mon"
+              v-model="selectedItemt.monfri.check_in"
               hide-disabled-items
+              hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
+              :hour-range="[[5, 17]]"
               input-width="100%"
               close-on-complete
               required
@@ -27,8 +28,93 @@
           </div>
           <div class="col-sm-6">
             <vue-timepicker
-              v-model="selectedItemt.check_out.mon"
+              v-model="selectedItemt.monfri.check_out"
               hide-disabled-items
+              hide-clear-button
+              :minute-range="defaultMinuteRange"
+              :hour-range="[[5, 17]]"
+              input-width="100%"
+              close-on-complete
+              required
+            ></vue-timepicker>
+          </div>
+        </div>
+        <label><strong>{{ $ml.with("VueJS").get("txtEffectiveTimeStart") }}</strong></label>
+        <div class="row mb-3">
+          <div class="col-sm-6">
+            <vue-timepicker
+              v-model="selectedItemt.monfri.check_in_start"
+              hide-disabled-items
+              hide-clear-button
+              :minute-range="defaultMinuteRange"
+              :hour-range="[[4, 12]]"
+              input-width="100%"
+              close-on-complete
+              required
+            ></vue-timepicker>
+          </div>
+          <div class="col-sm-6">
+            <vue-timepicker
+              v-model="selectedItemt.monfri.check_in_end"
+              hide-disabled-items
+              hide-clear-button
+              :minute-range="defaultMinuteRange"
+              :hour-range="[[4, 12]]"
+              input-width="100%"
+              close-on-complete
+              required
+            ></vue-timepicker>
+          </div>
+        </div>
+        <label><strong>{{ $ml.with("VueJS").get("txtEffectiveTimeEnd") }}</strong></label>
+        <div class="row mb-3">
+          <div class="col-sm-6">
+            <vue-timepicker
+              v-model="selectedItemt.monfri.check_out_start"
+              hide-disabled-items
+              hide-clear-button
+              :minute-range="defaultMinuteRange"
+              :hour-range="[[13, 22]]"
+              input-width="100%"
+              close-on-complete
+              required
+            ></vue-timepicker>
+          </div>
+          <div class="col-sm-6">
+            <vue-timepicker
+              v-model="selectedItemt.monfri.check_out_end"
+              hide-disabled-items
+              hide-clear-button
+              :minute-range="defaultMinuteRange"
+              :hour-range="[[13, 22]]"
+              input-width="100%"
+              close-on-complete
+              required
+            ></vue-timepicker>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div class="form-group">
+        <label><strong>{{ $ml.with("VueJS").get("txtSaturdaySunday") }}</strong></label>
+        <div class="row mb-3">
+          <div class="col-sm-6">
+            <vue-timepicker
+              v-model="selectedItemt.satsun.check_in"
+              hide-disabled-items
+              hide-clear-button
+              :minute-range="defaultMinuteRange"
+              :hour-range="[[5, 17]]"
+              input-width="100%"
+              close-on-complete
+              required
+            ></vue-timepicker>
+          </div>
+          <div class="col-sm-6">
+            <vue-timepicker
+              v-model="selectedItemt.satsun.check_out"
+              hide-disabled-items
+              hide-clear-button
               :minute-range="defaultMinuteRange"
               :hour-range="[[8, 17]]"
               input-width="100%"
@@ -37,16 +123,15 @@
             ></vue-timepicker>
           </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label><strong>Tuesday</strong></label>
-        <div class="row">
+        <label><strong>{{ $ml.with("VueJS").get("txtEffectiveTimeStart") }}</strong></label>
+        <div class="row mb-3">
           <div class="col-sm-6">
             <vue-timepicker
-              v-model="selectedItemt.check_in.tue"
+              v-model="selectedItemt.satsun.check_in_start"
               hide-disabled-items
+              hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
+              :hour-range="[[4, 10]]"
               input-width="100%"
               close-on-complete
               required
@@ -54,53 +139,26 @@
           </div>
           <div class="col-sm-6">
             <vue-timepicker
-              v-model="selectedItemt.check_out.tue"
+              v-model="selectedItemt.satsun.check_in_end"
               hide-disabled-items
+              hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
-              input-width="100%"
-              close-on-complete
-              required
-            ></vue-timepicker>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label><strong>Wednesday</strong></label>
-        <div class="row">
-          <div class="col-sm-6">
-            <vue-timepicker
-              v-model="selectedItemt.check_in.wed"
-              hide-disabled-items
-              :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
-              input-width="100%"
-              close-on-complete
-              required
-            ></vue-timepicker>
-          </div>
-          <div class="col-sm-6">
-            <vue-timepicker
-              v-model="selectedItemt.check_out.wed"
-              hide-disabled-items
-              :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
+              :hour-range="[[4, 10]]"
               input-width="100%"
               close-on-complete
               required
             ></vue-timepicker>
           </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label><strong>Thursday</strong></label>
+        <label><strong>{{ $ml.with("VueJS").get("txtEffectiveTimeEnd") }}</strong></label>
         <div class="row">
           <div class="col-sm-6">
             <vue-timepicker
-              v-model="selectedItemt.check_in.thu"
+              v-model="selectedItemt.satsun.check_out_start"
               hide-disabled-items
+              hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
+              :hour-range="[[11, 22]]"
               input-width="100%"
               close-on-complete
               required
@@ -108,64 +166,11 @@
           </div>
           <div class="col-sm-6">
             <vue-timepicker
-              v-model="selectedItemt.check_out.thu"
+              v-model="selectedItemt.satsun.check_out_end"
               hide-disabled-items
+              hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
-              input-width="100%"
-              close-on-complete
-              required
-            ></vue-timepicker>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label><strong>Friday</strong></label>
-        <div class="row">
-          <div class="col-sm-6">
-            <vue-timepicker
-              v-model="selectedItemt.check_in.fri"
-              hide-disabled-items
-              :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
-              input-width="100%"
-              close-on-complete
-              required
-            ></vue-timepicker>
-          </div>
-          <div class="col-sm-6">
-            <vue-timepicker
-              v-model="selectedItemt.check_out.fri"
-              hide-disabled-items
-              :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
-              input-width="100%"
-              close-on-complete
-              required
-            ></vue-timepicker>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label><strong>Saturday</strong></label>
-        <div class="row">
-          <div class="col-sm-6">
-            <vue-timepicker
-              v-model="selectedItemt.check_in.sat"
-              hide-disabled-items
-              :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
-              input-width="100%"
-              close-on-complete
-              required
-            ></vue-timepicker>
-          </div>
-          <div class="col-sm-6">
-            <vue-timepicker
-              v-model="selectedItemt.check_out.sat"
-              hide-disabled-items
-              :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
+              :hour-range="[[11, 22]]"
               input-width="100%"
               close-on-complete
               required
@@ -176,7 +181,11 @@
       <error-item :errors="validationErrors"></error-item>
       <success-item :success="validationSuccess"></success-item>
       <div class="form-group text-right">
-        <button type="button" class="btn btn-primary" @click="updateTimetable(selectedItemt)" >
+        <button
+          type="button"
+          class="btn btn-primary"
+          @click="updateTimetable(selectedItemt)"
+        >
           {{ $ml.with("VueJS").get("txtUpdate") }}
         </button>
       </div>
@@ -219,13 +228,15 @@ export default {
   },
   methods: {
     ...mapActions("timetable", {
-    	resetValidate: "resetValidate",
-    	resetSelectedItem: "resetSelectedItem",
-    	updateTimetable: "updateTimetable"
+      resetValidate: "resetValidate",
+      resetSelectedItem: "resetSelectedItem",
+      updateTimetable: "updateTimetable",
+      getAll: "getAll",
+      getAllSchedules: "getAllSchedules",
     }),
     resetValidation() {
-    	this.resetValidate();
-    	this.resetSelectedItem();
+      this.resetValidate();
+      this.resetSelectedItem();
     },
   },
 };

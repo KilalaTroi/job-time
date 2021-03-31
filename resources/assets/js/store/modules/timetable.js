@@ -9,26 +9,28 @@ export default {
       stimetable: {}
     },
     selectedItem: {
-      time_table_id: 0
+      time_table_id: 0,
+      start_date: new Date(moment('2000-01-01', 'YYYY/MM/DD')),
+      end_date: new Date(moment('2099-12-31', 'YYYY/MM/DD')),
     },
     selectedItemt: {
       name: '',
-      check_in: {
-        mon: { 'HH': '08', 'mm': '00' },
-        tue: { 'HH': '08', 'mm': '00' },
-        wed: { 'HH': '08', 'mm': '00' },
-        thu: { 'HH': '08', 'mm': '00' },
-        fri: { 'HH': '08', 'mm': '00' },
-        sat: { 'HH': '08', 'mm': '00' },
+      monfri: {
+        check_in: { 'HH': '08', 'mm': '00' },
+        check_out: { 'HH': '17', 'mm': '00' },
+        check_in_start: { 'HH': '04', 'mm': '00' },
+        check_in_end: { 'HH': '10', 'mm': '00' },
+        check_out_start: { 'HH': '16', 'mm': '00' },
+        check_out_end: { 'HH': '22', 'mm': '00' }
       },
-      check_out: {
-        mon: { 'HH': '17', 'mm': '00' },
-        tue: { 'HH': '17', 'mm': '00' },
-        wed: { 'HH': '17', 'mm': '00' },
-        thu: { 'HH': '17', 'mm': '00' },
-        fri: { 'HH': '17', 'mm': '00' },
-        sat: { 'HH': '12', 'mm': '00' },
-      }
+      satsun: {
+        check_in: { 'HH': '08', 'mm': '00' },
+        check_out: { 'HH': '12', 'mm': '00' },
+        check_in_start: { 'HH': '04', 'mm': '00' },
+        check_in_end: { 'HH': '10', 'mm': '00' },
+        check_out_start: { 'HH': '11', 'mm': '00' },
+        check_out_end: { 'HH': '22', 'mm': '00' }
+      },
     },
     options: {
       users: [],
@@ -120,7 +122,6 @@ export default {
 
     getItem({ state, commit, rootGetters }, id) {
       const item = rootGetters['getObjectByID'](state.data.stimetable.data, id);
-      console.log(item);
       commit('SET_SELECTED_ITEM', item)
     },
 
@@ -210,24 +211,28 @@ export default {
     resetSelectedItem({ commit }) {
       commit('SET_SELECTED_ITEMT', {
         name: '',
-        check_in: {
-          mon: { 'HH': '08', 'mm': '00' },
-          tue: { 'HH': '08', 'mm': '00' },
-          wed: { 'HH': '08', 'mm': '00' },
-          thu: { 'HH': '08', 'mm': '00' },
-          fri: { 'HH': '08', 'mm': '00' },
-          sat: { 'HH': '08', 'mm': '00' },
+        monfri: {
+          check_in: { 'HH': '08', 'mm': '00' },
+          check_out: { 'HH': '17', 'mm': '00' },
+          check_in_start: { 'HH': '04', 'mm': '00' },
+          check_in_end: { 'HH': '10', 'mm': '00' },
+          check_out_start: { 'HH': '16', 'mm': '00' },
+          check_out_end: { 'HH': '22', 'mm': '00' }
         },
-        check_out: {
-          mon: { 'HH': '17', 'mm': '00' },
-          tue: { 'HH': '17', 'mm': '00' },
-          wed: { 'HH': '17', 'mm': '00' },
-          thu: { 'HH': '17', 'mm': '00' },
-          fri: { 'HH': '17', 'mm': '00' },
-          sat: { 'HH': '12', 'mm': '00' },
-        }
+        satsun: {
+          check_in: { 'HH': '08', 'mm': '00' },
+          check_out: { 'HH': '12', 'mm': '00' },
+          check_in_start: { 'HH': '04', 'mm': '00' },
+          check_in_end: { 'HH': '10', 'mm': '00' },
+          check_out_start: { 'HH': '11', 'mm': '00' },
+          check_out_end: { 'HH': '22', 'mm': '00' }
+        },
       })
-      commit('SET_SELECTED_ITEM', { time_table_id: 0 })
+      commit('SET_SELECTED_ITEM', {
+        time_table_id: 0,
+        start_date: new Date(moment('2000-01-01', 'YYYY/MM/DD')),
+        end_date: new Date(moment('2099-12-31', 'YYYY/MM/DD')),
+      })
     },
 
     resetValidate({ commit, dispatch }) {
@@ -239,14 +244,14 @@ export default {
     setColumns({ commit, rootGetters }) {
       const columns = {
         'timetable': [
-          { id: "name", value: "Name", width: "", class: "" },
+          { id: "name", value: rootGetters['getTranslate']('txtName'), width: "", class: "" },
         ],
         'stimetable': [
-          { id: "timetable", value: "Timetable", width: "", class: "" },
-          { id: "user", value: "User", width: "", class: "" },
-          { id: "team", value: "Team", width: "", class: "" },
-          { id: "start_date", value: "Start Date", width: "", class: "" },
-          { id: "end_date", value: "End Date", width: "", class: "" },
+          { id: "timetable", value: rootGetters['getTranslate']('txtTimetable'), width: "", class: "" },
+          { id: "user", value: rootGetters['getTranslate']('txtUser'), width: "", class: "" },
+          { id: "team", value: rootGetters['getTranslate']('txtTeam'), width: "", class: "" },
+          { id: "start_date", value: rootGetters['getTranslate']('txtStartDate'), width: "", class: "" },
+          { id: "end_date", value: rootGetters['getTranslate']('txtEndDate'), width: "", class: "" },
         ]
       }
 

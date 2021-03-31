@@ -18,6 +18,10 @@ class CreateTimeTableDays extends Migration
             $table->integer('time_table_id');
             $table->string('check_in',6);
             $table->string('check_out',6);
+            $table->string('check_in_start',6);
+            $table->string('check_in_end',6);
+            $table->string('check_out_start',6);
+            $table->string('check_out_end',6);
             $table->string('day',25);
             $table->timestamps();
         });

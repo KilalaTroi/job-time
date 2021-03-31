@@ -24,7 +24,7 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			if ( Carbon::now()->day > 21 ) {
+			if (Carbon::now()->day > 21) {
 				$startMonthCar = $startMonthCar->day(21)->format('Y/m/d');
 				$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y/m/d');
 			} else {
@@ -69,7 +69,7 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			if ( Carbon::now()->day > 21 ) {
+			if (Carbon::now()->day > 21) {
 				$startMonthCar = $startMonthCar->day(21)->format('Y/m/d');
 				$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y/m/d');
 			} else {
@@ -140,7 +140,7 @@ class StatisticsController extends Controller
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		if (2 == $teamID) {
-			if ( Carbon::now()->day > 21 ) {
+			if (Carbon::now()->day > 21) {
 				$startMonthCar = $startMonthCar->day(21)->format('Y/m/d');
 				$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y/m/d');
 			} else {
@@ -185,9 +185,9 @@ class StatisticsController extends Controller
 
 		foreach ($types as $index => $type) {
 			$childIndex = 0;
-			
+
 			foreach ($totals['hoursPerMonth'] as $key => $month) {
-				$hours = isset( $totals['hoursPerProject'][$type->id . '_' . $key] ) ? $totals['hoursPerProject'][$type->id . '_' . $key] : false;
+				$hours = isset($totals['hoursPerProject'][$type->id . '_' . $key]) ? $totals['hoursPerProject'][$type->id . '_' . $key] : false;
 				$percent = $hours && $month ? round($hours['total'] / $month * 100, 1) : 0;
 				$mainTable[$type->slug]['slug'] = $type->slug;
 				$mainTable[$type->slug]['slug_ja'] = $type->slug_ja;
@@ -348,14 +348,14 @@ class StatisticsController extends Controller
 		$monthsText = array();
 		$monthYearText = array();
 
-		if ( 2 == $teamID && Carbon::now()->day > 21 ) {
+		if (2 == $teamID && Carbon::now()->day > 21) {
 			$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth)->addMonth(1);
 			$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth)->addMonth(1);
 		} else {
 			$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
 			$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
 		}
-		
+
 		$totalMonths = $startMonth->diffInMonths($endMonth) + 1;
 
 		if ($export) {
@@ -471,7 +471,7 @@ class StatisticsController extends Controller
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
-			->get()->toArray();
+			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'ASC')->get()->toArray();
 
 		$users['old'] = DB::connection('mysql')->table('role_user')
 			->select('users.id')
@@ -703,7 +703,7 @@ class StatisticsController extends Controller
 
 			// Nguyen off 5 months
 			$offMonth = 0;
-			if ( $teamID == 1 && in_array( $key, ['202008', '202009', '202010', '202011', '202012'] ) && !$user_id) {
+			if ($teamID == 1 && in_array($key, ['202008', '202009', '202010', '202011', '202012']) && !$user_id) {
 				$offMonth = 1;
 			}
 
@@ -780,7 +780,7 @@ class StatisticsController extends Controller
 			}
 		}
 
-		if ( $export ) {
+		if ($export) {
 			$data['hoursPerProject'] = $dataHoursPerProject;
 		} else {
 			$data['hoursPerProject'] = array_values($dataHoursPerProject);
@@ -982,14 +982,14 @@ class StatisticsController extends Controller
 		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
 		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
 
-		if ( Carbon::now()->day > 21 ) {
+		if (Carbon::now()->day > 21) {
 			$startMonthCar = $startMonthCar->day(21)->format('Y-m-d');
 			$endMonthCar = $endMonthCar->copy()->addMonth(1)->day(20)->format('Y-m-d');
 		} else {
 			$startMonthCar = $startMonthCar->copy()->subMonth(1)->day(21)->format('Y-m-d');
 			$endMonthCar = $endMonthCar->day(20)->format('Y-m-d');
 		}
-		
+
 		$startMonthCarFull = $startMonthCar . ' 00:00:00';
 		$endMonthCarFull = $endMonthCar . ' 23:59:59';
 
@@ -1210,7 +1210,7 @@ class StatisticsController extends Controller
 			->whereNotIn('user.id', $this->usersIgnoreAdmin($team))
 			->where('team', $team)
 			->where('disable_date', NULL)
-			->get()->toArray();
+			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'DESC')->get()->toArray();
 	}
 
 	private function getProject($filters)

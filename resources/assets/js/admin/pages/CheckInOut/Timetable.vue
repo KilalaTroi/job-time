@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div id="timetable" class="content">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-4">
@@ -14,11 +14,11 @@
                 data-keyboard="false"
               >
                 <i class="fa fa-plus"></i>
-                <slot name="title">Create New</slot>
+                <slot name="title">{{ $ml.with('VueJS').get('txtCreate') }}</slot>
               </button>
             </div>
             <template slot="header">
-              <h4 class="card-title">Timetable List</h4>
+              <h4 class="card-title">{{ $ml.with('VueJS').get('txtTimetableList') }}</h4>
             </template>
             <tbl-default
               :dataItems="data.timetable"
@@ -68,10 +68,10 @@
         <div class="col-sm-8">
           <card class="strpied-tabled-with-hover">
             <template slot="header">
-              <h4 class="card-title">Schedules Timetable List</h4>
+              <h4 class="card-title">{{ $ml.with('VueJS').get('txtSchedulesTimetableList') }}</h4>
             </template>
             <button-create>
-              <template slot="title">Create New</template>
+              <template slot="title">{{ $ml.with('VueJS').get('txtCreate') }}</template>
             </button-create>
             <tbl-default
               :dataItems="data.stimetable"
@@ -109,7 +109,7 @@ export default {
     CreateTimetable,
     EditTimetable,
     CreateSchedulesTimetable,
-    EditSchedulesTimetable
+    EditSchedulesTimetable,
   },
 
   computed: {
@@ -148,16 +148,18 @@ export default {
 };
 </script>
 <style lang="scss">
-[data-target="#timeTableCreate"],
-[data-target="#itemCreate"] {
-  position: absolute;
-}
-[data-target="#timeTableCreate"] {
-  right: 0;
-  top: -50px;
-}
-[data-target="#itemCreate"] {
-  top: 8px;
-  right: 15px;
+#timetable {
+  [data-target="#timeTableCreate"],
+  [data-target="#itemCreate"] {
+    position: absolute;
+  }
+  [data-target="#timeTableCreate"] {
+    right: 0;
+    top: -50px;
+  }
+  [data-target="#itemCreate"] {
+    top: 8px;
+    right: 15px;
+  }
 }
 </style>

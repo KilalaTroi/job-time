@@ -53,6 +53,8 @@ import Finish from './admin/pages/Finish';
 import Uploaded from './admin/pages/Finish/Uploaded';
 import OffDays from './admin/pages/OffDays';
 import Jobs from './admin/pages/Jobs';
+import CheckInOut from './admin/pages/CheckInOut';
+import Timetable from './admin/pages/CheckInOut/Timetable';
 
 const routes = [{
         path: '/',
@@ -157,6 +159,16 @@ const routes = [{
                 path: 'jobs',
                 name: 'Jobs',
                 component: Jobs
+            },
+            {
+                path: 'checkinout',
+                name: 'CheckInOut',
+                component: CheckInOut
+            },
+            {
+                path: 'timetable',
+                name: 'Timetable',
+                component: Timetable
             },
             {
                 path: '*',

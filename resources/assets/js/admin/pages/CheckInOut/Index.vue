@@ -1,191 +1,242 @@
 <template>
-  <div class="content">
+  <div class="content inout">
     <div class="container-fluid">
-      <card>
+      <card class="mb-0">
         <template slot="header">
           <div class="d-flex justify-content-between">
-            <h4 class="card-title">
-              {{ $ml.with("VueJS").get("txtFilter") }}
-            </h4>
+            <h4 class="card-title">{{ $ml.with('VueJS').get('sbAttendance') }}</h4>
+            <div
+              class="form-group mb-0 d-flex justify-content-end align-items-end"
+              style="width: width: 800px"
+            >
+              <div v-show="2 === tab" style="width: 150px" class="mr-2">
+                <div class="">
+                  <div>
+                    <select-2
+                      :options="options.lates"
+                      v-model="filters.late"
+                      class="select2"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div v-show="1 === tab" class="mr-2 filter-time">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <datepicker
+                      name="startDate"
+                      input-class="form-control"
+                      placeholder="Select Date"
+                      v-model="filters.start_date"
+                      :format="customFormatter"
+                      :disabled-dates="disabledEndDates(filters.end_date)"
+                      :language="getLangCode(this.$ml)"
+                    ></datepicker>
+                  </div>
+                  <div class="col-sm-6">
+                    <datepicker
+                      name="endDate"
+                      input-class="form-control"
+                      placeholder="Select Date"
+                      v-model="filters.end_date"
+                      :format="customFormatter"
+                      :disabled-dates="disabledStartDates(filters.start_date)"
+                      :language="getLangCode(this.$ml)"
+                    ></datepicker>
+                  </div>
+                </div>
+              </div>
+              <div class="mr-2" style="width: 100px">
+                <div class="">
+                  <div>
+                    <select-2
+                      :options="options.teams"
+                      v-model="filters.team_id"
+                      class="select2"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div style="width: 200px">
+                <div class="">
+                  <div>
+                    <select-2
+                      :options="options.users"
+                      v-model="filters.user_id"
+                      class="select2"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="row justify-content-end" style="width: 800px"></div> -->
           </div>
         </template>
-
-        <div class="row">
-          <div class="col-sm-3">
-            <div class="form-group">
-              <label class="">{{ $ml.with("VueJS").get("txtTeam") }}</label>
-              <div>
-                <select-2
-                  :options="options.teams"
-                  v-model="filters.team_id"
-                  class="select2"
-                />
+        <div class="row mb-3">
+          <div class="col-sm-12">
+            <nav>
+              <div class="nav" id="nav-tab" role="tablist">
+                <a
+                  class="nav-item nav-link active"
+                  id="table-tab-2"
+                  data-toggle="tab"
+                  href="#table-tab-calendar"
+                  role="tab"
+                  aria-controls="table-tab-calendar"
+                  aria-selected="false"
+                  @click="changeTab(2)"
+                  >{{ $ml.with('VueJS').get('txtCalendar') }}</a
+                >
+                <a
+                  class="nav-item nav-link"
+                  id="table-tab-1"
+                  data-toggle="tab"
+                  href="#table-tab-table"
+                  role="tab"
+                  aria-controls="table-tab-table"
+                  aria-selected="true"
+                  @click="changeTab(1)"
+                  >{{ $ml.with('VueJS').get('txtTable') }}</a
+                >
+                <router-link class="" to="/timetable">{{ $ml.with('VueJS').get('txtTimetable') }}</router-link>
               </div>
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="form-group">
-              <label class>{{ $ml.with("VueJS").get("txtUsers") }}</label>
-              <div>
-                <multiselect
-                  :multiple="true"
-                  v-model="filters.user_id"
-                  :options="options.users"
-                  :clear-on-select="false"
-                  :preserve-search="true"
-                  :placeholder="$ml.with('VueJS').get('txtPickSome')"
-                  label="text"
-                  track-by="text"
-                ></multiselect>
-              </div>
-            </div>
-          </div>
-          <div v-show="1 === tab" class="col-sm-3">
-            <div class="form-group">
-              <label class>{{ $ml.with("VueJS").get("txtStartDate") }}</label>
-              <datepicker
-                name="startDate"
-                input-class="form-control"
-                placeholder="Select Date"
-                v-model="filters.start_date"
-                :format="customFormatter"
-                :disabled-dates="disabledEndDates(filters.end_date)"
-                :language="getLangCode(this.$ml)"
-              ></datepicker>
-            </div>
-          </div>
-
-          <div v-show="1 === tab" class="col-sm-3">
-            <div class="form-group">
-              <label class>{{ $ml.with("VueJS").get("txtEndDate") }}</label>
-              <datepicker
-                name="endDate"
-                input-class="form-control"
-                placeholder="Select Date"
-                v-model="filters.end_date"
-                :format="customFormatter"
-                :disabled-dates="disabledStartDates(filters.start_date)"
-                :language="getLangCode(this.$ml)"
-              ></datepicker>
-            </div>
-          </div>
-
-          <div v-show="2 === tab" class="col-sm-3">
-            <div class="form-group">
-              <label class="">Late time</label>
-              <div>
-                <select-2
-                  :options="options.lates"
-                  v-model="filters.late"
-                  class="select2"
-                />
-              </div>
-            </div>
+            </nav>
           </div>
         </div>
-      </card>
-
-      <card class="strpied-tabled-with-hover inout">
-        <nav>
-          <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <a
-              class="nav-item nav-link active"
-              id="table-tab-1"
-              data-toggle="tab"
-              href="#table-tab-table"
-              role="tab"
-              aria-controls="table-tab-table"
-              aria-selected="true"
-              @click="changeTab(1)"
-              >Table Check In Out List</a
-            >
-            <a
-              class="nav-item nav-link"
-              id="table-tab-2"
-              data-toggle="tab"
-              href="#table-tab-calendar"
-              role="tab"
-              aria-controls="table-tab-calendar"
-              aria-selected="false"
-              @click="changeTab(2)"
-              >Calendar Check In Out List</a
-            >
-          </div>
-        </nav>
-
-        <div class="tab-content" id="nav-tabContent">
-          <div
-            class="tab-pane fade show active"
-            id="table-tab-table"
-            role="tabpanel"
-            aria-labelledby="table-tab-table-tab"
-          >
-            <card class="strpied-tabled-with-hover">
-              <tbl-default
-                :dataItems="data"
-                :dataCols="columns"
-                dataPath="checkinout"
+        <div class="row">
+          <div class="col-sm-12 row--left">
+            <card>
+              <div
+                color="#00AEEF"
+                class="alert alert-success"
+                style="
+                  background-color: #f3a2a2;
+                  border-color: #f3a2a2;
+                  color: #333;
+                "
               >
-                <template v-if="data.data" v-slot:tr>
-                  <tr class="tr-foot">
-                    <td
-                      v-for="(column, index) in columns"
-                      :key="index"
-                      :class="column.class"
-                      :data-filter="column.id"
-                    >
-                      <span
-                        class="cl-late"
-                        v-if="'late' == column.id"
-                        v-html="data.total.late"
-                      ></span>
-                      <span
-                        class="cl-early"
-                        v-else-if="'early' == column.id"
-                        v-html="data.total.early"
-                      ></span>
-                      <span v-else>--</span>
-                    </td>
-                  </tr>
-                </template>
-              </tbl-default>
-              <div v-if="!data.data" class="text-center mt-3">
-                <img src="https://i.imgur.com/JfPpwOA.gif" />
+                <span><b>{{ $ml.with('VueJS').get('txtLate') }}</b></span>
+              </div>
+              <div
+                color="#00AEEF"
+                class="alert alert-success"
+                style="
+                  background-color: #93ccb7;
+                  border-color: #93ccb7;
+                  color: #333;
+                "
+              >
+                <span><b>{{ $ml.with('VueJS').get('txtEarly') }}</b></span>
+              </div>
+              <div
+                color="#00AEEF"
+                class="alert alert-success"
+                style="
+                  background-color: #d23c3c;
+                  border-color: #d23c3c;
+                  color: #333;
+                "
+              >
+                <span><b>{{ $ml.with('VueJS').get('txtTotalLate') }}</b></span>
+              </div>
+              <div
+                color="#00AEEF"
+                class="alert alert-success"
+                style="
+                  background-color: #29b166;
+                  border-color: #29b166;
+                  color: #333;
+                "
+              >
+                <span><b>{{ $ml.with('VueJS').get('txtTotalEarly') }}</b></span>
               </div>
             </card>
           </div>
-          <div
-            class="tab-pane fade"
-            id="table-tab-calendar"
-            role="tabpanel"
-            aria-labelledby="table-tab-table-tab"
-          >
-            <card class="strpied-tabled-with-hover">
-              <FullCalendar
-                class="checkinoutcalendar"
-                defaultView="dayGridMonth"
-                :plugins="calendarPlugins"
-                :header="calendarHeader"
-                :business-hours="businessHours"
-                :editable="false"
-                :droppable="false"
-                :all-day-slot="false"
-                :events="cdata.data"
-                height="auto"
-                :hidden-days="[0]"
-                :locale="getLanguage(this.$ml)"
-                :datesRender="handleMonthChangeAll"
-              />
-            </card>
+          <div class="col-sm-12 row--right">
+            <div class="tab-content" id="nav-tabContent">
+              <div
+                class="tab-pane fade show active"
+                id="table-tab-calendar"
+                role="tabpanel"
+                aria-labelledby="table-tab-table-tab"
+              >
+                <div class="strpied-tabled-with-hover">
+                  <FullCalendar
+                    class="checkinoutcalendar"
+                    defaultView="dayGridMonth"
+                    :plugins="calendarPlugins"
+                    :header="calendarHeader"
+                    :business-hours="businessHours"
+                    :editable="false"
+                    :droppable="false"
+                    :all-day-slot="false"
+                    :events="cdata.data"
+                    height="auto"
+                    :hidden-days="[0]"
+                    :locale="getLanguage(this.$ml)"
+                    :datesRender="handleMonthChangeAll"
+                  />
+                </div>
+              </div>
+              <div
+                class="tab-pane fade"
+                id="table-tab-table"
+                role="tabpanel"
+                aria-labelledby="table-tab-table-tab"
+              >
+                <div class="strpied-tabled-with-hover">
+                  <tbl-check-in-out
+                    :dataItems="data"
+                    :dataCols="columns"
+                    dataAction="reason"
+                    dataPath="checkinout"
+                  >
+                    <template v-if="data.data" v-slot:tr>
+                      <tr class="tr-foot">
+                        <td
+                          v-for="(column, index) in columns"
+                          :key="index"
+                          :class="column.class"
+                          :data-filter="column.id"
+                        >
+                          <span
+                            class="cl-checkout text-right d-block"
+                            v-if="'checkout' == column.id"
+                            >{{ $ml.with('VueJS').get('txtTotal') }}:</span
+                          >
+                          <span
+                            class="cl-late"
+                            :data-time="data.total.late"
+                            v-else-if="'late' == column.id"
+                            v-html="data.total.strlate"
+                          ></span>
+                          <span
+                            class="cl-early"
+                            :data-time="data.total.early"
+                            v-else-if="'early' == column.id"
+                            v-html="data.total.strearly"
+                          ></span>
+                          <span v-else></span>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbl-check-in-out>
+                  <div v-if="!data.data" class="text-center mt-3">
+                    <img src="https://i.imgur.com/JfPpwOA.gif" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </card>
     </div>
+    <update-reason />
   </div>
 </template>
 
 <script>
-import TblDefault from "../../components/Table";
+import TblCheckInOut from "../../components/TableCheckInOut";
 import Datepicker from "vuejs-datepicker";
 import Multiselect from "vue-multiselect";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
@@ -194,15 +245,18 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timeGrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+import UpdateReason from "./UpdateReason";
+
 import { mapGetters, mapActions } from "vuex";
 
 export default {
   components: {
-    TblDefault,
+    TblCheckInOut,
     Datepicker,
     Multiselect,
     Select2,
     FullCalendar,
+    UpdateReason,
   },
 
   computed: {
@@ -220,7 +274,7 @@ export default {
       customFormatter: "customFormatter",
       disabledStartDates: "disabledStartDates",
       disabledEndDates: "disabledEndDates",
-      currentTeamOption: "currentTeamOption",
+      currentFullTeamOption: "currentFullTeamOption",
       currentTeam: "currentTeam",
     }),
   },
@@ -234,8 +288,20 @@ export default {
         timeGridPlugin,
       ],
 
-      tab: 1,
-      team_id: "",
+      tab: 2,
+      filtersTable: {
+        start_date: "",
+        end_date: "",
+      },
+
+      filtersCalendar: {
+        late: "",
+      },
+
+      filtersAll: {
+        user_id: "",
+        team_id: "",
+      },
 
       calendarHeader: {
         left: "prev",
@@ -263,8 +329,10 @@ export default {
     ...mapActions("checkinout", {
       setColumns: "setColumns",
       getAll: "getAll",
+      getItemReason: "getItemReason",
       getOptions: "getOptions",
       handleMonthChangeAll: "handleMonthChangeAll",
+      resetFilter: "resetFilter",
     }),
     changeTab(elm) {
       this.tab = elm;
@@ -273,17 +341,12 @@ export default {
 
   async created() {
     const _this = this;
+    _this.resetFilter();
     _this.setColumns();
-    _this.options.teams = [{ id: "", text: "ALL" }]
-      .concat(_this.currentTeamOption)
-      .concat(
-        JSON.parse(
-          document
-            .querySelector("meta[name='media-teams']")
-            .getAttribute("content")
-        )
-      );
-    _this.filters.team_id = _this.team_id = _this.currentTeam.id;
+    _this.options.teams = [{ id: "", text: "ALL" }].concat(
+      _this.currentFullTeamOption
+    );
+    _this.filters.team_id = _this.filtersAll.team_id = _this.currentTeam.id;
     _this.getOptions();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
@@ -295,14 +358,33 @@ export default {
       {
         handler: function (value) {
           const _this = this;
-          if (value.team_id != _this.team_id) {
-            _this.team_id = value.team_id;
-            if (value.team_id) _this.filters.user_id = [];
+          if (value.team_id != _this.filtersAll.team_id) {
             _this.getOptions();
+            this.setCurrentTeam(value.team_id);
+            _this.filters.user_id = _this.filtersAll.user_id = "";
           }
-          _this.data.data = null;
-          _this.getAll();
-          _this.getAll(1);
+          if (
+            _this.filtersAll.team_id != value.team_id ||
+            _this.filtersAll.user_id != value.user_id
+          ) {
+            _this.filtersAll.team_id = value.team_id;
+            _this.filtersAll.user_id = value.user_id;
+            _this.getAll();
+            _this.getAll(1);
+          }
+          if (_this.filtersCalendar.late != value.late) {
+            _this.filtersCalendar.late = value.late;
+            _this.getAll(1);
+          }
+          if (
+            _this.filtersTable.start_date != value.start_date ||
+            _this.filtersTable.end_date != value.end_date
+          ) {
+            _this.data.data = null;
+            _this.filtersTable.start_date = value.start_date;
+            _this.filtersTable.end_date = value.end_date;
+            _this.getAll();
+          }
         },
         deep: true,
       },
@@ -317,9 +399,61 @@ export default {
 @import "~@fullcalendar/timegrid/main.css";
 @import "~@fullcalendar/list/main.css";
 .inout {
+  @media (min-width: 992px) {
+    .row {
+      &--left {
+        flex: 0 0 20%;
+        max-width: 20%;
+      }
+      &--right {
+        flex: 0 0 80%;
+        max-width: 80%;
+      }
+    }
+  }
+  #nav-tab {
+    a {
+      padding: {
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+      }
+      &:not(:last-child) {
+        margin-right: 10px;
+        padding-right: 10px;
+        &::after {
+          content: "";
+          height: 100%;
+          width: 1px;
+          background-color: #006b82;
+          display: block;
+          position: absolute;
+          top: 0;
+          right: 0;
+        }
+      }
+      &.active {
+        color: #006b82;
+      }
+    }
+  }
+  .filter-time .row > .col-sm-6 {
+    &:first-child {
+      &:after {
+        content: "-";
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: -2px;
+      }
+    }
+  }
   .table-responsive {
     overflow-y: auto;
-    max-height: 500px;
+    max-height: calc(100vh - 303px);
+    #checkinout {
+      margin-bottom: 0;
+    }
     thead td,
     thead th,
     tbody tr.tr-foot td,
@@ -330,13 +464,40 @@ export default {
     }
     thead td,
     thead th {
-      top: -1px;
+      top: 0;
     }
 
-    tbody tr.tr-foot td,
-    tbody tr.tr-foot th {
-      bottom: -1px;
-      background-color: #b1acac;
+    tbody tr.tr-foot {
+      &.bg-late,
+      &.bg-all {
+        td {
+          &[data-filter="late"],
+          &[data-filter="checkin"] {
+            background-color: #d23c3c;
+          }
+          &[data-filter="late"] {
+            border: 1px solid;
+          }
+        }
+      }
+      &.bg-early,
+      &.bg-all {
+        td {
+          &[data-filter="early"],
+          &[data-filter="checkout"] {
+            background-color: #29b166;
+            border: 1px;
+          }
+          &[data-filter="early"] {
+            border: 1px solid;
+          }
+        }
+      }
+      td,
+      th {
+        bottom: 0;
+        background-color: #b1acac;
+      }
     }
 
     tbody tr {
@@ -348,33 +509,30 @@ export default {
           }
         }
       }
-      &.bg-late {
-        td {
-          &[data-filter="late"],
-          &[data-filter="checkin"] {
-            background-color: #ff9e9e;
-          }
-        }
-      }
-      &.bg-early {
-        td {
-          &[data-filter="early"],
-          &[data-filter="checkout"] {
-            background-color: #7fffd4;
-          }
-        }
-      }
+      &.bg-late,
       &.bg-all {
         td {
           &[data-filter="late"],
           &[data-filter="checkin"] {
-            background-color: #ff9e9e;
+            background-color: #f3a2a2;
           }
-
+        }
+      }
+      &.bg-early,
+      &.bg-all {
+        td {
           &[data-filter="early"],
           &[data-filter="checkout"] {
-            background-color: #7fffd4;
+            background-color: #93ccb7;
           }
+        }
+      }
+      td {
+        &[data-filter="reason"] {
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          max-width: 320px;
         }
       }
     }
@@ -385,42 +543,18 @@ export default {
     tfoot > tr > th,
     thead > tr > td,
     thead > tr > th {
-      padding: 0px 8px;
+      padding: 2px 8px;
       font-size: 14px;
     }
   }
-  .fc-time-grid-event .fc-time,
-  .fc-time-grid-event .fc-title {
-    color: rgba(0, 0, 0, 0.8);
+  .fc-event{
+    cursor: default;
   }
-
-  .fc-time-grid .fc-slats td {
-    height: 2em;
-  }
-
-  .fc-unthemed td.fc-today {
-    background-color: transparent;
-  }
-
-  .fc .fc-view-container .fc-head .fc-today {
-    background-color: #ffd05b;
-  }
-
-  .fc-unthemed th,
-  .fc-unthemed td,
-  .fc-unthemed thead,
-  .fc-unthemed tbody,
-  .fc-unthemed .fc-divider,
-  .fc-unthemed .fc-row,
-  .fc-unthemed .fc-content,
-  .fc-unthemed .fc-popover,
-  .fc-unthemed .fc-list-view,
-  .fc-unthemed .fc-list-heading td {
-    border-color: #b3aeae;
-  }
-
-  .off-days .fc-day-grid-event .fc-time {
-    display: none;
+  .fc-dayGrid-view .fc-body .fc-row {
+    min-height: 9em;
+    .fc-title {
+      color: red;
+    }
   }
 }
 </style>

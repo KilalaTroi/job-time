@@ -1,9 +1,9 @@
 <template>
   <modal id="itemCreate" v-on:reset-validation="resetValidation">
-    <template slot="title">Create Schedules Timetable</template>
+    <template slot="title">{{ $ml.with("VueJS").get("txtCreateSchedules") }}</template>
     <form>
       <div class="form-group">
-        <label class="">Timetable</label>
+        <label class="">{{ $ml.with("VueJS").get("txtTimetable") }}</label>
         <div>
           <select-2
             :options="options.timetabels"
@@ -33,7 +33,7 @@
           <multiselect
             :multiple="true"
             v-model="selectedItem.teams"
-            :options="currentTeamOption"
+            :options="currentFullTeamOption"
             :clear-on-select="false"
             :preserve-search="true"
             :placeholder="$ml.with('VueJS').get('txtPickSome')"
@@ -109,7 +109,7 @@ export default {
     ...mapGetters({
       getLangCode: "getLangCode",
       customFormatter: "customFormatter",
-      currentTeamOption: "currentTeamOption",
+      currentFullTeamOption: "currentFullTeamOption",
     }),
   },
   props: ["options"],
