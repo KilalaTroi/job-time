@@ -88,10 +88,10 @@
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
-                            <a v-if="3 != team" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">Total pages</a>
-                            <a v-if="3 == team" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">Total projects</a>
-                            <a v-if="3 == team" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">Total jobs</a>
-                            <a v-if="2 == team" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">Table</a>
+                            <a v-if="3 != team" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">{{$ml.with('VueJS').get('txtTotalPages')}}</a>
+                            <a v-if="3 == team" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">{{$ml.with('VueJS').get('txtTotalProjects')}}</a>
+                            <a v-if="3 == team" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">{{$ml.with('VueJS').get('txtTotalJobs')}}</a>
+                            <a v-if="2 == team" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">{{$ml.with('VueJS').get('txtTable')}}</a>
                         </div>
                     </nav>
                      <div class="tab-content" id="nav-tabContent">

@@ -4,6 +4,9 @@ export default {
     state: {
         columns: [],
         items: [],
+        filters: {
+            'team' : {}
+        },
         roles: [],
         roleOptions: [],
         selectedUser: {},
@@ -15,6 +18,7 @@ export default {
         columns: state => state.columns,
         items: state => state.items,
         roles: state => state.roles,
+        filters: state => state.filters,
         roleOptions: state => state.roleOptions,
         selectedUser: state => state.selectedUser,
         validationErrors: state => state.validationErrors,
@@ -62,8 +66,8 @@ export default {
             commit('SET_COLUMNS', columns)
         },
 
-        getAllUser({ commit, rootState }) {
-            axios.get('/data/users?team_id=' + rootState.currentTeam.id).then(response => {
+        getAllUser({ commit, state }) {
+            axios.get('/data/users?team_id=' + state.filters.team.id).then(response => {
                 commit('GET_ALL_USER', response.data)
             })
         },
@@ -75,7 +79,7 @@ export default {
                 text: "Select role"
             }
             dataOptions.push(obj)
-            
+
             dataOptions = [...dataOptions, ...state.roles.map(item => {
                 return {
                     id: item.name,
@@ -107,8 +111,8 @@ export default {
         },
 
         getUserById({ state, commit, rootGetters, rootState }, id) {
-            const user = rootGetters['getObjectByID'](state.items, id)
-            user.team = rootGetters['getObjectByID'](rootState.currentTeamOption, +user.team)
+            const user = rootGetters['getObjectByID'](state.items, id);
+            user.team = rootGetters['getObjectByID'](rootState.currentFullTeamOption, +user.team)
             commit('SET_SELECTED_USER', user)
         },
 

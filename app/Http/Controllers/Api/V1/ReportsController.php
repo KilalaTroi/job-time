@@ -768,7 +768,7 @@ class ReportsController extends Controller
 			->when($team, function ($query, $teamID) {
 				return $query->where('user.team', $teamID);
 			})
-			->get()->toArray();
+			->orderBy('user.team','ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'ASC')->get()->toArray();
 	}
 
 	private function getIssue($projectId, $issueYear)

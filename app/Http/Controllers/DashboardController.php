@@ -24,28 +24,34 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        $teamOptions = DB::table("teams")->select(
+        $teamDigitalOptions = DB::table("teams")->select(
             'id',
             'name as text'
-        )->get()->toArray();
+        )->whereNotIn('id', [4, 5])->get()->toArray();
 
-        if ( !$request->user()->disable_date == null ) {
+        $teamMediaOptions = DB::table("teams")->select(
+            'id',
+            'name as text'
+        )->whereNotIn('id', [1, 2, 3])->get()->toArray();
+
+        $teamFullOptions = array_merge($teamDigitalOptions, $teamMediaOptions);
+        if (!$request->user()->disable_date == null) {
             return view('errors.disable');
         }
 
         // redirect view by user
-        if ( $request->user()->authorizeRoles('admin') ) { 
-            return view('dashboard', ['teamOptions' => $teamOptions]);
+        if ($request->user()->authorizeRoles('admin')) {
+            return view('dashboard', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
         };
 
-        if ( $request->user()->authorizeRoles('planner') ) { 
-            return view('planner', ['teamOptions' => $teamOptions]);
+        if ($request->user()->authorizeRoles('planner')) {
+            return view('planner', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
         };
 
-        if ( $request->user()->authorizeRoles('japanese_planner') ) { 
-            return view('japanese_planner', ['teamOptions' => $teamOptions]);
+        if ($request->user()->authorizeRoles('japanese_planner')) {
+            return view('japanese_planner', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
         };
 
-        return view('employee', ['teamOptions' => $teamOptions]);
+        return view('employee', ['teamFullOptions' => $teamFullOptions, 'teamDigitalOptions' => $teamDigitalOptions, 'teamMediaOptions' => $teamMediaOptions]);
     }
 }
