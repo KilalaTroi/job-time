@@ -225,7 +225,8 @@ class StatisticsController extends Controller
 		// Excel
 		$columnName = $this->columnLetter(count($mainTable[$otherName]));
 		$columnNameNext = $this->columnLetter(count($mainTable[$otherName]) + 1);
-		$startRow = $infoUser ? 5 : 4;
+		// $startRow = $infoUser ? 5 : 4;
+		$startRow = 4;
 		$numberRows = count($mainTable) + $startRow;
 		$curentTimestampe = Carbon::now()->timestamp;
 
