@@ -306,6 +306,7 @@ class CheckInOutController extends Controller
   {
     $data = $request->input();
     $reason = DB::table('checkinout_reason')->select('checkinout_user_id')->where('checkinout_user_id', $data['userid'])->where('date', $data['date']);
+    $data['server_token'] = env('LINE_WORKS_SERVER_TOKEN', '');
     $this->sendReason($data);
     dd('aaa');
     if ($reason->count()) {
@@ -341,16 +342,17 @@ class CheckInOutController extends Controller
     return response()->json($options);
   }
 
-  private function sendReason($data)
+  private function sendReason($data, $token_number = 1)
   {
     $client = new \GuzzleHttp\Client([
       'headers' => [
         'Access-Control-Allow-Origin' => '*',
         'Content-Type'     => 'application/json',
         'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
-        'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
+        'Authorization'    => 'Bearer ' . $data['server_token']
       ]
     ]);
+
     $response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
       'json' => [
         "botNo" => 763699,
@@ -361,9 +363,23 @@ class CheckInOutController extends Controller
         ),
       ]
     ]);
+
     $subnets = json_decode($response->getBody()->getContents(), true);
+
     if('200' != $subnets['errorCode']){
-      $this->sendReason($data);
+      if ( $token_number == 1 ) {
+        $data['server_token'] = env('LINE_WORKS_SERVER_TOKEN_TWO', '');
+        $this->sendReason($data, 2);
+      } 
+
+      if ( $token_number == 2 ) {
+        $data['server_token'] = env('LINE_WORKS_SERVER_TOKEN_THREE', '');
+        $this->sendReason($data, 3);
+      } 
+
+      if ( $token_number == 3 ) {
+        return $subnets;
+      }
     };
   }
 
