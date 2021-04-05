@@ -307,6 +307,7 @@ class CheckInOutController extends Controller
     $data = $request->input();
     $reason = DB::table('checkinout_reason')->select('checkinout_user_id')->where('checkinout_user_id', $data['userid'])->where('date', $data['date']);
     $this->sendReason($data);
+    dd('aaa');
     if ($reason->count()) {
       $reason->update([
         'description' => $data['reason'],
@@ -350,17 +351,20 @@ class CheckInOutController extends Controller
         'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
       ]
     ]);
-    $a = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
+    $response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
       'json' => [
         "botNo" => 763699,
-        "roomId" => 61838587,
+        "roomId" => "61838587",
         "content" => array(
           "type" => "text",
-          "text" => $data['fullname'] . ' (' . $data['date'] . ')'. PHP_EOL . $data['reason'],
+          "text" => $data['fullname'] . " (" . $data['date'] . ")\n" . $data['reason'],
         ),
       ]
     ]);
-    dd($a);
+    $subnets = json_decode($response->getBody()->getContents(), true);
+    if('200' != $subnets['errorCode']){
+      $this->sendReason($data);
+    };
   }
 
   private function getCheckInOutList($filters, $start_date, $end_date)
