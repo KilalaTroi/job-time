@@ -331,7 +331,7 @@ class Uploadcontroller extends Controller
 			->where(function ($query) use ($teamFilter) {
 				$query->where('team', $teamFilter);
 			})
-			->get()->toArray();
+			->orderBy('user.team','ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'ASC')->get()->toArray();
 
 		// Return Json
 		return response()->json([

@@ -18,6 +18,8 @@ import schedules from './modules/schedules'
 import totaling from './modules/totaling'
 import reports from './modules/reports'
 import totalpage from './modules/totalpage'
+import checkinout from './modules/checkinout'
+import timetable from './modules/timetable'
 
 Vue.use(Vuex)
 
@@ -38,7 +40,9 @@ export default new Vuex.Store({
     schedules,
     totaling,
     reports,
-    totalpage
+    totalpage,
+    checkinout,
+    timetable
   },
 })
 

@@ -43,6 +43,8 @@ import Totaling from './admin/pages/Totaling';
 import Reports from './admin/pages/Reports';
 import Finish from './admin/pages/Finish';
 import Uploaded from './admin/pages/Finish/Uploaded';
+import CheckInOut from './admin/pages/CheckInOut';
+import Timetable from './admin/pages/CheckInOut/Timetable';
 
 const routes = [{
         path: '/',
@@ -97,6 +99,16 @@ const routes = [{
                 path: 'uploaded',
                 name: 'Uploaded',
                 component: Uploaded
+            },
+            {
+                path: 'checkinout',
+                name: 'CheckInOut',
+                component: CheckInOut
+            },
+            {
+                path: 'timetable',
+                name: 'Timetable',
+                component: Timetable
             },
             {
                 path: '*',

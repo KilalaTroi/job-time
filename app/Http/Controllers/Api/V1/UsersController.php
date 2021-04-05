@@ -31,7 +31,7 @@ class UsersController extends Controller
             ->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
             ->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
             ->where('team', $_GET['team_id'])
-            ->get()->toArray();
+            ->orderBy('user.team','ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'ASC')->get()->toArray();
 
         return response()->json([
             'users' => $users,
@@ -85,8 +85,8 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
         return response()->json([
-        	'user' => $user,
-        	'role' => $user->roles()->first()
+            'user' => $user,
+            'role' => $user->roles()->first()
         ]);
     }
 
@@ -101,14 +101,14 @@ class UsersController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:100|unique:users,username,'.$id.'|alpha_dash',
-            'email' => 'required|string|email|max:100|unique:users,email,'.$id,
+            'username' => 'required|string|max:100|unique:users,username,' . $id . '|alpha_dash',
+            'email' => 'required|string|email|max:100|unique:users,email,' . $id,
             'team' => 'required',
         ]);
 
         $user = User::findOrFail($id);
 
-        if ( $request->get('password') ) {
+        if ($request->get('password')) {
             $this->validate($request, [
                 'password' => 'required|string|min:6|confirmed',
             ]);
@@ -117,7 +117,7 @@ class UsersController extends Controller
             ]);
         }
 
-        if ( $request->get('r_name') && $user->roles()->first()->name != $request->get('r_name') ) {
+        if ($request->get('r_name') && $user->roles()->first()->name != $request->get('r_name')) {
             $roleID = DB::table('roles')
                 ->select(
                     'id'

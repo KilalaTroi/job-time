@@ -7,6 +7,7 @@ export default {
 	currentLang: state => state.currentLang,
 	currentTeam: state => state.currentTeam,
 	currentTeamOption: state => state.currentTeamOption,
+	currentFullTeamOption: state => state.currentFullTeamOption,
 	reportNotify: state => state.reportNotify,
 
 	getTranslate(state) {
@@ -57,14 +58,14 @@ export default {
 		}
 
 		return (data) => {
-			if('ja' == data.current) return dataLang[data.current]
+			if ('ja' == data.current) return dataLang[data.current]
 		}
 	},
 
-	getLanguage(){
+	getLanguage() {
 		return (data) => {
 			const language = 'ja' == data.current ? 'ja' : 'en';
-      return language;
+			return language;
 		}
 	},
 
@@ -79,14 +80,14 @@ export default {
 
 	disabledStartDates() {
 		return (date = false) => {
-			if ( date ) return { to: new Date(date), from: new Date() };
+			if (date) return { to: new Date(date), from: new Date() };
 			return { from: new Date() };
 		}
 	},
 
 	disabledEndDates() {
 		return (date = false) => {
-			if ( date ) return { from: new Date(date) };
+			if (date) return { from: new Date(date) };
 			return { from: new Date() };
 		}
 	},
@@ -95,7 +96,7 @@ export default {
 		return (team) => {
 			if (typeof team === 'string' || team instanceof String) {
 				return team.split(',').map((item, index) => {
-					return '<span>' + getters['getObjectByID'](state.currentTeamOption, +item).text + '</span>'
+					return '<span>' + getters['getObjectByID'](state.currentFullTeamOption, +item).text + '</span>'
 				}).toString()
 			}
 		}

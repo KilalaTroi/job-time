@@ -1,14 +1,25 @@
 <template>
   <div class="content">
     <div class="container-fluid">
-      <div class="form-group">
-        <div class="row">
-          <div class="col-12 col-sm-auto">
-            <button-create>
-              <template slot="title">{{
-                $ml.with("VueJS").get("txtCreateDept")
-              }}</template>
-            </button-create>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="my-0 mb-1">
+            <b>{{ $ml.with("VueJS").get("sbSettings") }}</b>
+          </h4>
+          <div class="lsub-menu">
+            <router-link class="active" to="/departments">{{ $ml.with("VueJS").get("sbDepartments") }}</router-link>
+            <router-link class="" to="/teams">{{ $ml.with("VueJS").get("sbTeams") }}</router-link>
+          </div>
+        </div>
+        <div class="form-group mb-0">
+          <div class="row">
+            <div class="col-12 col-sm-auto">
+              <button-create>
+                <template slot="title">{{
+                  $ml.with("VueJS").get("txtCreateDept")
+                }}</template>
+              </button-create>
+            </div>
           </div>
         </div>
       </div>
@@ -24,7 +35,7 @@
           dataPath="departments"
         />
         <div v-if="!departmentData.data" class="text-center mt-3">
-          <img src="https://i.imgur.com/JfPpwOA.gif">
+          <img src="https://i.imgur.com/JfPpwOA.gif" />
         </div>
         <pagination
           :data="departmentData"
@@ -59,14 +70,14 @@ export default {
   },
 
   computed: {
-    ...mapGetters('departments', {
+    ...mapGetters("departments", {
       columns: "columns",
       departmentData: "data",
     }),
   },
 
   methods: {
-    ...mapActions('departments', {
+    ...mapActions("departments", {
       setColumns: "setColumns",
       getAll: "getAll",
     }),
