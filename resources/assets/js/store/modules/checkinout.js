@@ -147,12 +147,17 @@ export default {
 
 		handleMonthChangeAll({ state, commit, dispatch, rootGetters }, arg) {
 			const currentStart = rootGetters['dateFormat'](state.currentStart, 'YYYYMMDD');
-			const currentEnd = rootGetters['dateFormat'](state.currentEnd, 'YYYYMMDD');
 			const aCurrentStart = rootGetters['dateFormat'](arg.view.currentStart, 'YYYYMMDD');
-			const aCurrentEnd = rootGetters['dateFormat'](arg.view.currentEnd, 'YYYYMMDD');
-			if (currentStart !== aCurrentStart && currentEnd !== aCurrentEnd) {
-				commit('SET_CURRENT_START', arg.view.currentStart)
-				commit('SET_CURRENT_END', arg.view.currentEnd)
+
+			const month = rootGetters['dateFormat'](state.currentEnd, 'MM');
+			const aMonth = rootGetters['dateFormat'](arg.view.currentStart, 'MM');
+
+			let endDate = arg.view.currentEnd;
+			if(month == aMonth) endDate = state.currentEnd;
+
+			if (currentStart !== aCurrentStart) {
+				commit('SET_CURRENT_START', aCurrentStart)
+				commit('SET_CURRENT_END', endDate)
 				dispatch('getAll', 1);
 			}
 		},
@@ -183,10 +188,8 @@ export default {
 				commit('SET_FILTERS', filters);
 			}
 			if (flag == 0 || flag == 2) {
-				const currentStart = new Date(moment().startOf('month').format("YYYY/MM/DD"));
-				const currentEnd = new Date(moment().startOf('end').format("YYYY/MM/DD"));
-				commit('SET_CURRENT_START', currentStart);
-				commit('SET_CURRENT_END', currentEnd);
+				commit('SET_CURRENT_START', new Date(moment().startOf('month').format("YYYY/MM/DD")));
+				commit('SET_CURRENT_END', new Date(moment().add(1, 'months').startOf('month').format("YYYY/MM/DD")));
 			}
 		},
 

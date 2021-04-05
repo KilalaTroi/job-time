@@ -197,7 +197,7 @@ export default {
     txtSchedule: 'Schedule date',
     txtStartWorking: 'Start Working',
     txtCalendar: 'カレンダー',
-    txtTable: '統計表',
+    txtTable: '表',
     txtTimetable: 'タイムテーブル',
     txtLate: '遅刻',
     txtEarly: '早帰り',
@@ -217,10 +217,12 @@ export default {
     txtCreateTimetable: 'タイムテーブル作成',
     txtMondayFriday: '月～金',
     txtSaturdaySunday: '土～日',
-    txtEffectiveTimeStart: '効果終了時間',
-    txtEffectiveTimeEnd: '効果開始時間',
+    txtEffectiveTimeStart: '効果開始時間',
+    txtEffectiveTimeEnd: '効果終了時間',
     txtUpdateTimeTable: 'タイムテーブル更新',
     txtCreateSchedulesTimetable: 'スケジュール作成',
-    txtUpdateSchedulesTimetable: 'スケジュール更新'
-
+    txtUpdateSchedulesTimetable: 'スケジュール更新',
+    txtTotalPages: 'ページ合計',
+    txtTotalProjects: 'プロジェクト合計',
+    txtTotalJobs: 'ジョブ合計'
 }

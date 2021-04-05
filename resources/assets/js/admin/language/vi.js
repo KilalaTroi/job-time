@@ -220,5 +220,8 @@ export default {
     txtEffectiveTimeEnd: 'Effective Time End',
     txtUpdateTimeTable: 'Edit Timetable',
     txtCreateSchedulesTimetable: 'Create Schedules Timetable',
-    txtUpdateSchedulesTimetable: 'Edit Schedules Timetable'
+    txtUpdateSchedulesTimetable: 'Edit Schedules Timetable',
+    txtTotalPages: 'Total pages',
+    txtTotalProjects: 'Total projects',
+    txtTotalJobs: 'Total jobs'
 }

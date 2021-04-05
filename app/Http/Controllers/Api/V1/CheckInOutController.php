@@ -305,8 +305,8 @@ class CheckInOutController extends Controller
   public function updateReason(Request $request)
   {
     $data = $request->input();
-
-    $reason = DB::table('checkinout_reason')->where('checkinout_user_id', $data['userid'])->where('date', $data['date']);
+    $reason = DB::table('checkinout_reason')->select('checkinout_user_id')->where('checkinout_user_id', $data['userid'])->where('date', $data['date']);
+    $this->sendReason($data);
     if ($reason->count()) {
       $reason->update([
         'description' => $data['reason'],
@@ -338,6 +338,29 @@ class CheckInOutController extends Controller
     })->orderBy('team', 'ASC')->orderBy('orderby', 'DESC')->orderBy('id', 'ASC')->get()->toArray();
     $options['timetabels'] = DB::table('time_tables')->select('id', 'name as text')->get()->toArray();
     return response()->json($options);
+  }
+
+  private function sendReason($data)
+  {
+    $client = new \GuzzleHttp\Client([
+      'headers' => [
+        'Access-Control-Allow-Origin' => '*',
+        'Content-Type'     => 'application/json',
+        'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
+        'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
+      ]
+    ]);
+    $a = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
+      'json' => [
+        "botNo" => 763699,
+        "roomId" => 61838587,
+        "content" => array(
+          "type" => "text",
+          "text" => $data['fullname'] . ' (' . $data['date'] . ')'. PHP_EOL . $data['reason'],
+        ),
+      ]
+    ]);
+    dd($a);
   }
 
   private function getCheckInOutList($filters, $start_date, $end_date)

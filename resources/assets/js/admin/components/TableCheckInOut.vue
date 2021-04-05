@@ -28,7 +28,7 @@
             :data-filter="column.id"
           >
             <button
-              v-if="'reason' == column.id"
+              v-if="'reason' == column.id && -1 !== ('1,49,56,45,').indexOf(loginUser.id+',')"
               @click="
                 getItemReason({
                   id: item.userid,
@@ -66,6 +66,7 @@ export default {
   computed: {
     ...mapGetters({
       itemValue: "table/itemValue",
+      loginUser: "loginUser",
     }),
   },
 
