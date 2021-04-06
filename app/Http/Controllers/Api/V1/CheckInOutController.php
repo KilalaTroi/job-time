@@ -306,27 +306,30 @@ class CheckInOutController extends Controller
   {
     $data = $request->input();
     $reason = DB::table('checkinout_reason')->select('checkinout_user_id')->where('checkinout_user_id', $data['userid'])->where('date', $data['date']);
-    $data['server_token'] = env('LINE_WORKS_SERVER_TOKEN', '');
-    $this->sendReason($data);
-    dd('aaa');
-    if ($reason->count()) {
-      $reason->update([
-        'description' => $data['reason'],
-        'updated_at' => date('Y-m-d'),
-      ]);
+    if (isset($data['reason']) && !empty($data['reason'])) {
+      if ($reason->count() > 0) {
+        $reason->update([
+          'description' => $data['reason'],
+          'updated_at' => date('Y-m-d'),
+        ]);
+      } else {
+        DB::table('checkinout_reason')->insert(
+          [
+            array(
+              'checkinout_user_id' => $data['userid'],
+              'date' => $data['date'],
+              'description' => $data['reason'],
+              'created_at' => date('Y-m-d'),
+              'updated_at' => date('Y-m-d'),
+            )
+          ]
+        );
+      }
+      $this->sendReason($data);
     } else {
-      DB::table('checkinout_reason')->insert(
-        [
-          array(
-            'checkinout_user_id' => $data['userid'],
-            'date' => $data['date'],
-            'description' => $data['reason'],
-            'created_at' => date('Y-m-d'),
-            'updated_at' => date('Y-m-d'),
-          )
-        ]
-      );
+      if ($reason->count() > 0) $reason->delete();
     }
+
     return response()->json(array(
       'message' => 'Successfully.'
     ), 200);
@@ -344,12 +347,18 @@ class CheckInOutController extends Controller
 
   private function sendReason($data, $token_number = 1)
   {
+    $ipToken = array(
+      1 => env('LINE_WORKS_SERVER_TOKEN'),
+      2 => env('LINE_WORKS_SERVER_TOKEN_TWO'),
+      3 => env('LINE_WORKS_SERVER_TOKEN_THREE'),
+    );
+
     $client = new \GuzzleHttp\Client([
       'headers' => [
         'Access-Control-Allow-Origin' => '*',
         'Content-Type'     => 'application/json',
         'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
-        'Authorization'    => 'Bearer ' . $data['server_token']
+        'Authorization'    => 'Bearer ' . $ipToken[$token_number]
       ]
     ]);
 
@@ -366,21 +375,12 @@ class CheckInOutController extends Controller
 
     $subnets = json_decode($response->getBody()->getContents(), true);
 
-    if('200' != $subnets['errorCode']){
-      if ( $token_number == 1 ) {
-        $data['server_token'] = env('LINE_WORKS_SERVER_TOKEN_TWO', '');
-        $this->sendReason($data, 2);
-      } 
-
-      if ( $token_number == 2 ) {
-        $data['server_token'] = env('LINE_WORKS_SERVER_TOKEN_THREE', '');
-        $this->sendReason($data, 3);
-      } 
-
-      if ( $token_number == 3 ) {
-        return $subnets;
-      }
+    if (isset($subnets['errorCode']) && !empty($subnets['errorCode'])) {
+      if (3 == $token_number) return false;
+      else $this->sendReason($data, $token_number + 1);
+      return false;
     };
+    return true;
   }
 
   private function getCheckInOutList($filters, $start_date, $end_date)
