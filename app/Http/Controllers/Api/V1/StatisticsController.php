@@ -225,7 +225,8 @@ class StatisticsController extends Controller
 		// Excel
 		$columnName = $this->columnLetter(count($mainTable[$otherName]));
 		$columnNameNext = $this->columnLetter(count($mainTable[$otherName]) + 1);
-		$startRow = $infoUser ? 5 : 4;
+		// $startRow = $infoUser ? 5 : 4;
+		$startRow = 4;
 		$numberRows = count($mainTable) + $startRow;
 		$curentTimestampe = Carbon::now()->timestamp;
 
@@ -600,8 +601,19 @@ class StatisticsController extends Controller
 		$startDate = $currentDate->startOfMonth()->format('Y-m-d');
 		$endDate = $currentDate->endOfMonth()->format('Y-m-d');
 
+		// Ngày nghỉ chung
+		$generalOffDay = DB::connection('mysql')->table('off_days')
+			->where('type', '=', 'offday')
+			->where('date', '<=', $endDate)
+			->where('date', '>=',  $startDate)
+			->count();
+
+		if (!$user_id) {
+			$generalOffDay = $generalOffDay * count($this->usersNotIgnore($teamID));
+		}
+
 		// Full day off
-		$off_days['full'] = DB::connection('mysql')->table('off_days')
+		$off_days['full'] = $generalOffDay + DB::connection('mysql')->table('off_days')
 			->join('users', 'users.id', '=', 'off_days.user_id')
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
@@ -708,6 +720,9 @@ class StatisticsController extends Controller
 			}
 
 			$totalHoursPerMonth[$key] = ($usersOld - $offMonth) * (8 * $daysInMonth + 8) - ($off_days[$key]['full'] * 8 + $off_days[$key]['half'] * 4) + round($ckHoursDisableUser);
+			
+			// Loại bỏ giá trị âm
+			if ( $totalHoursPerMonth[$key] < 0 ) $totalHoursPerMonth[$key] = 0;
 		}
 
 		$data['hoursPerMonth'] = $totalHoursPerMonth;
