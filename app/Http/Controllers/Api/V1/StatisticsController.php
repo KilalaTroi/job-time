@@ -163,7 +163,7 @@ class StatisticsController extends Controller
 
 		// Return totals
 		$totals = $this->getTotals($data['days_of_month'], $users['old'], $users['newUsersPerMonth'], $users['disableUsersInMonth'], $users['hoursOfDisableUser'], $data['off_days'], $startMonthCar, $endMonthCar, $user_id, $teamID, true);
-
+		
 		// infoUser
 		$infoUser = false;
 		if ($user_id) {
@@ -558,7 +558,7 @@ class StatisticsController extends Controller
 			)
 			->join('issues', 'issues.id', '=', 'jobs.issue_id')
 			->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
-			->where('jobs.date', "<", str_replace('/', '-', $endMonth))
+			->where('jobs.date', "<=", str_replace('/', '-', $endMonth))
 			->whereIn('jobs.user_id', $users['disable'])
 			->whereNotIn('jobs.user_id', $this->usersIgnore($teamID))
 			->when($teamID, function ($query, $teamID) {
@@ -745,7 +745,7 @@ class StatisticsController extends Controller
 			->join('issues', 'issues.id', '=', 'jobs.issue_id')
 			->join('projects', 'projects.id', '=', 'issues.project_id')
 			->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
-			->where('jobs.date', "<", str_replace('/', '-', $endMonth))
+			->where('jobs.date', "<=", str_replace('/', '-', $endMonth))
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team_id', $teamID);
 			})
