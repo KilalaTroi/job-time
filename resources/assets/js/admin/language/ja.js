@@ -187,7 +187,7 @@ export default {
     txtYearOfIssue: '発行年',
     txtFilesWorked: 'ファイル数',
     txtFiles: 'ファイル数',
-    txtPrint: 'Print',
+    txtPrint: '印刷',
     txtQuantity: '量',
     txtImage: 'ページ数',
     txtData: 'Data',
