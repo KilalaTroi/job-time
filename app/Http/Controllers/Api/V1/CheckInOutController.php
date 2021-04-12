@@ -324,7 +324,7 @@ class CheckInOutController extends Controller
             )
           ]
         );
-        $this->sendReason($data);
+        $this->sendMessageLineWork(env('CHANNEL_ID_ABSENT_KILALA'), $data['fullname'] . "\n" . $data['reason']);
       }
     } else {
       if ($reason->count() > 0) $reason->delete();
@@ -343,44 +343,6 @@ class CheckInOutController extends Controller
     })->orderBy('team', 'DESC')->orderBy('orderby', 'DESC')->orderBy('id', 'DESC')->get()->toArray();
     $options['timetabels'] = DB::table('time_tables')->select('id', 'name as text')->get()->toArray();
     return response()->json($options);
-  }
-
-  private function sendReason($data, $token_number = 1)
-  {
-    $ipToken = array(
-      1 => env('LINE_WORKS_SERVER_TOKEN'),
-      2 => env('LINE_WORKS_SERVER_TOKEN_TWO'),
-      3 => env('LINE_WORKS_SERVER_TOKEN_THREE'),
-    );
-
-    $client = new \GuzzleHttp\Client([
-      'headers' => [
-        'Access-Control-Allow-Origin' => '*',
-        'Content-Type'     => 'application/json',
-        'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY'),
-        'Authorization'    => 'Bearer ' . $ipToken[$token_number]
-      ]
-    ]);
-
-    $response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
-      'json' => [
-        "botNo" => 763699,
-        "roomId" => env('CHANNEL_ID_ABSENT_KILALA'),
-        "content" => array(
-          "type" => "text",
-          "text" => $data['fullname'] . "\n" . $data['reason'],
-        ),
-      ]
-    ]);
-
-    $subnets = json_decode($response->getBody()->getContents(), true);
-
-    if (isset($subnets['errorCode']) && !empty($subnets['errorCode'])) {
-      if (3 == $token_number) return false;
-      else $this->sendReason($data, $token_number + 1);
-      return false;
-    };
-    return true;
   }
 
   private function getCheckInOutList($filters, $start_date, $end_date, $flag)

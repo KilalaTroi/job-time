@@ -35,4 +35,42 @@ class Controller extends BaseController
 		if (!file_exists($dbName)) die("Could not find access database file.");
 		return new \PDO("odbc:DRIVER={Microsoft Access Driver (*.mdb)}; DBQ=" . $dbName, "Admin");
 	}
+
+	public function sendMessageLineWork($room_id, $text, $token_number = 1)
+	{
+		$ipToken = array(
+			1 => env('LINE_WORKS_SERVER_TOKEN'),
+			2 => env('LINE_WORKS_SERVER_TOKEN_TWO'),
+			3 => env('LINE_WORKS_SERVER_TOKEN_THREE'),
+		);
+
+		$client = new \GuzzleHttp\Client([
+			'headers' => [
+				'Access-Control-Allow-Origin' => '*',
+				'Content-Type'     => 'application/json',
+				'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY'),
+				'Authorization'    => 'Bearer ' . $ipToken[$token_number]
+			]
+		]);
+
+		$response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
+			'json' => [
+				"botNo" => 763699,
+				"roomId" => $room_id,
+				"content" => array(
+					"type" => "text",
+					"text" => $text,
+				),
+			]
+		]);
+
+		$subnets = json_decode($response->getBody()->getContents(), true);
+
+		if (isset($subnets['errorCode']) && !empty($subnets['errorCode'])) {
+			if (3 == $token_number) return false;
+			else $this->sendMessageLineWork($room_id, $text, $token_number + 1);
+			return false;
+		};
+		return true;
+	}
 }
