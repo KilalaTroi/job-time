@@ -67,10 +67,8 @@ class Controller extends BaseController
 		$subnets = json_decode($response->getBody()->getContents(), true);
 
 		if (isset($subnets['errorCode']) && !empty($subnets['errorCode'])) {
-			if (3 == $token_number) return false;
-			else $this->sendMessageLineWork($room_id, $text, $token_number + 1);
-			return false;
+			if (3 > $token_number) $this->sendMessageLineWork($room_id, $text, $token_number + 1);
 		};
-		return true;
+		return $response->getBody();
 	}
 }
