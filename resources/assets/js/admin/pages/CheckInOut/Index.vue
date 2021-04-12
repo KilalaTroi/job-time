@@ -96,9 +96,9 @@
                   aria-controls="table-tab-table"
                   aria-selected="true"
                   @click="changeTab(1)"
-                  >{{ $ml.with('VueJS').get('txtTable') }}</a
+                  >{{ $ml.with('VueJS').get('txtCalculation') }}</a
                 >
-                <router-link class="" to="/timetable">{{ $ml.with('VueJS').get('txtTimetable') }}</router-link>
+                <router-link class="" to="/timetable">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</router-link>
               </div>
             </nav>
           </div>

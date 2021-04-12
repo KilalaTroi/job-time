@@ -215,7 +215,7 @@ export default {
 				{ id: "late", value: rootGetters['getTranslate']('txtLate'), width: "100", class: "text-center" },
 				{ id: "early", value: rootGetters['getTranslate']('txtEarly'), width: "100", class: "text-center" },
 				{ id: "workingtime", value: rootGetters['getTranslate']('txtWorkingTime'), width: "120", class: "text-center" },
-				{ id: "reason", value: rootGetters['getTranslate']('txtReason'), width: "", class: "" },
+				{ id: "reason", value: rootGetters['getTranslate']('txtAllowed'), width: "", class: "" },
 			]
 
 			commit('SET_COLUMNS', columns)
