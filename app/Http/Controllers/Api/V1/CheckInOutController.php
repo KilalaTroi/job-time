@@ -32,17 +32,16 @@ class CheckInOutController extends Controller
       'cend_date' => $request->input('cend_date'),
     );
 
-    if (0 === $flag) $data = $this->getCheckInOutList($filters, $filters['start_date'], $filters['end_date'], $flag);
+    if (0 === $flag) $data = $this->getCheckInOutList($filters, $filters['start_date'], $filters['end_date']);
     else if (1 === $flag) {
-      $data = $this->getCheckInOutList($filters, $filters['cstar_date'], $filters['cend_date'], $flag);
-      $data['cdata'] = array();
-      $latesec = $this->time2seconds('00:' . $request->input('late'));
+      $cdata = array();
+      $data = $this->getCheckInOutList($filters, $filters['cstar_date'], $filters['cend_date']);
+      $latesec = $this->time2seconds($request->input('late'));
       foreach ($data['data'] as $value) {
-        $key = $value['userid'] . $value['date'];
         if (isset($value['late']) && !empty($value['late'])) {
           $dlatesec = $this->time2seconds($value['late']);
           if ($dlatesec >= $latesec) {
-            $data['cdata'][$key] = array(
+            $cdata[] = array(
               'title' => $value['fullname'],
               'className' => 'cl_late',
               'borderColor' => 'transparent',
@@ -53,8 +52,8 @@ class CheckInOutController extends Controller
           }
         }
       }
-      $data['data'] = array_values($data['cdata']);
-      unset($data['cdata'], $data['total']);
+      $data['data'] = $cdata;
+      unset($data['total']);
     }
 
     return response()->json($data);
@@ -345,7 +344,7 @@ class CheckInOutController extends Controller
     return response()->json($options);
   }
 
-  private function getCheckInOutList($filters, $start_date, $end_date, $flag)
+  private function getCheckInOutList($filters, $start_date, $end_date)
   {
     $datas = $datasdb = array();
     $total = array(

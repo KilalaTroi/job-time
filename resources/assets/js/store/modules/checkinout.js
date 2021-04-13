@@ -11,15 +11,15 @@ export default {
 			teams: [],
 			lates: [
 				{
-					id: 1,
+					id: "00:01",
 					text: 'Late'
 				},
 				{
-					id: 15,
+					id: "00:15",
 					text: 'Later 15 Minutes'
 				},
 				{
-					id: 30,
+					id: "00:30",
 					text: 'Later 30 Minutes'
 				}
 			]
@@ -32,7 +32,7 @@ export default {
 			end_date: new Date(moment().format("YYYY/MM/DD")),
 			user_id: '',
 			team_id: '',
-			late: 15,
+			late: "00:15",
 		},
 		currentStart: new Date(moment().startOf('month').format("YYYY/MM/DD")),
 		currentEnd: new Date(moment().startOf('end').format("YYYY/MM/DD")),
@@ -183,7 +183,7 @@ export default {
 					end_date: new Date(moment().format("YYYY/MM/DD")),
 					user_id: '',
 					team_id: '',
-					late: 15,
+					late: "00:15",
 				};
 				commit('SET_FILTERS', filters);
 			}
