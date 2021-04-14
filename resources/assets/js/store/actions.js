@@ -21,7 +21,7 @@ export default {
 	setCurrentTeam({ state, commit, getters, dispatch }, data) {
 		if (data) {
 			const team = getters['getObjectByID'](state.currentTeamOption, +data);
-			if ((typeof(team.id) != "undefined")) {
+			if ("undefined" != (typeof(team.id))) {
 				localStorage.setItem('team', team.id)
 				commit('SET_CURRENT_TEAM', team)
 				dispatch('setReportNotify', team.id)

@@ -271,6 +271,7 @@ export default {
     ...mapGetters({
       getLanguage: "getLanguage",
       getLangCode: "getLangCode",
+      loginUser: "loginUser",
       customFormatter: "customFormatter",
       disabledStartDates: "disabledStartDates",
       disabledEndDates: "disabledEndDates",
@@ -337,6 +338,10 @@ export default {
     changeTab(elm) {
       this.tab = elm;
     },
+    setTeam(){
+      const _this = this;
+      if("undefined" == typeof(_this.filters.team_id) && _this.loginUser.team) _this.filters.team_id = _this.filtersAll.team_id = _this.loginUser.team.id
+    }
   },
 
   async created() {
@@ -347,6 +352,7 @@ export default {
       _this.currentFullTeamOption
     );
     _this.filters.team_id = _this.filtersAll.team_id = _this.currentTeam.id;
+    _this.setTeam();
     _this.getOptions();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
@@ -354,41 +360,52 @@ export default {
   },
 
   watch: {
+    loginUser:[
+      {
+      handler: function () {
+        const _this = this;
+        _this.setTeam();
+      },
+      deep: true,
+      }
+    ],
     filters: [
       {
         handler: function (value) {
           const _this = this;
-          if (value.team_id != _this.filtersAll.team_id) {
-            _this.getOptions();
-            this.setCurrentTeam(value.team_id);
-            _this.filters.user_id = _this.filtersAll.user_id = "";
-          }
-          if (
-            _this.filtersAll.team_id != value.team_id ||
-            _this.filtersAll.user_id != value.user_id
-          ) {
-            _this.filtersAll.team_id = value.team_id;
-            _this.filtersAll.user_id = value.user_id;
-            _this.getAll();
-            _this.getAll(1);
-          }
-          if (_this.filtersCalendar.late != value.late) {
-            _this.filtersCalendar.late = value.late;
-            _this.getAll(1);
-          }
-          if (
-            _this.filtersTable.start_date != value.start_date ||
-            _this.filtersTable.end_date != value.end_date
-          ) {
-            _this.data.data = null;
-            _this.filtersTable.start_date = value.start_date;
-            _this.filtersTable.end_date = value.end_date;
-            _this.getAll();
+          if("undefined" != typeof(value.team_id)){
+            if (value.team_id != _this.filtersAll.team_id) {
+              _this.getOptions();
+              this.setCurrentTeam(value.team_id);
+              _this.filters.user_id = _this.filtersAll.user_id = "";
+            }
+            if (
+              _this.filtersAll.team_id != value.team_id ||
+              _this.filtersAll.user_id != value.user_id
+            ) {
+              _this.filtersAll.team_id = value.team_id;
+              _this.filtersAll.user_id = value.user_id;
+              _this.getAll();
+              _this.getAll(1);
+            }
+            if (_this.filtersCalendar.late != value.late) {
+              _this.filtersCalendar.late = value.late;
+              _this.getAll(1);
+            }
+            if (
+              _this.filtersTable.start_date != value.start_date ||
+              _this.filtersTable.end_date != value.end_date
+            ) {
+              _this.data.data = null;
+              _this.filtersTable.start_date = value.start_date;
+              _this.filtersTable.end_date = value.end_date;
+              _this.getAll();
+            }
           }
         },
         deep: true,
       },
-    ],
+    ]
   },
 };
 </script>
