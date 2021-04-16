@@ -323,7 +323,7 @@ class CheckInOutController extends Controller
             )
           ]
         );
-        $this->sendMessageLineWork(env('CHANNEL_ID_ABSENT_KILALA'), $data['fullname'] . "\n" . $data['reason']);
+        $this->sendMessageLineWork(env('CHANNEL_ID_ABSENT_KILALA'), '@'.$data['fullname'] . "\n" . $data['reason']);
       }
     } else {
       if ($reason->count() > 0) $reason->delete();
@@ -339,7 +339,7 @@ class CheckInOutController extends Controller
     $team_id = NULL !== $request->input('team_id') && !empty($request->input('team_id')) ? $request->input('team_id') : '';
     $options['users'] = DB::table('users')->select('checkinout_user_id as id', 'name as text')->where('checkinout_user_id', '!=', '')->when($team_id, function ($query, $team_id) {
       return $query->where('team', '=', $team_id);
-    })->orderBy('team', 'DESC')->orderBy('orderby', 'DESC')->orderBy('id', 'DESC')->get()->toArray();
+    })->orderBy('team', 'ASC')->orderBy('orderby', 'DESC')->orderBy('id', 'DESC')->get()->toArray();
     $options['timetabels'] = DB::table('time_tables')->select('id', 'name as text')->get()->toArray();
     return response()->json($options);
   }
@@ -433,7 +433,7 @@ class CheckInOutController extends Controller
         return $query->whereIn('checkinout.checkinout_user_id', explode(',', $user_checkout_id));
       })
       ->whereBetween('date', array($filters['start_date'],  $filters['end_date']))
-      ->orderBy('users.team', 'DESC')->orderBy('users.orderby', 'DESC')->orderBy('checkinout.date', 'DESC')->orderBy('users.id', 'DESC');
+      ->orderBy('users.team', 'ASC')->orderBy('users.orderby', 'DESC')->orderBy('checkinout.date', 'DESC')->orderBy('users.id', 'DESC');
     if ($dbcheckInOut->count() > 0)  $datas = $this->getCheckInOutListFromMySQLDB($dbcheckInOut->get());
     if (isset($datas['data']) && !empty($datas['data'])) {
       $total = $datas['total'];
@@ -458,7 +458,6 @@ class CheckInOutController extends Controller
     $timetosecin = $this->time2seconds($checkin);
 
     $reason = DB::table('checkinout_reason')->select('description')->where('checkinout_user_id', $userid)->where('date', $date)->first();
-
 
     if ($checkintime < $timetosecin) {
       $flagi = $this->hanldeCheckLateEarlyTime($checkinstartend['start'], $checkinstartend['end'], $timetosecin);
