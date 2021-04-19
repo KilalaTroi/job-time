@@ -883,27 +883,28 @@ class Uploadcontroller extends Controller
 
 		// Send message Line Work
 		if ($request->get('roomId')) {
-			$client = new Client([
-				'headers' => [
-					'Access-Control-Allow-Origin' => '*',
-					'Content-Type'     => 'application/json',
-					'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
-					'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
-				]
-			]);
+			return $this->sendMessageLineWork($request->get('roomId'), $request->get('content'));
+			// $client = new Client([
+			// 	'headers' => [
+			// 		'Access-Control-Allow-Origin' => '*',
+			// 		'Content-Type'     => 'application/json',
+			// 		'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
+			// 		'Authorization'    => 'Bearer ' . env('LINE_WORKS_SERVER_TOKEN', '')
+			// 	]
+			// ]);
 
-			$response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
-				'json' => [
-					"botNo" => 763699,
-					"roomId" => $request->get('roomId'),
-					"content" => array(
-						"type" => "text",
-						"text" => $request->get('content')
-					),
-				]
-			]);
+			// $response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
+			// 	'json' => [
+			// 		"botNo" => 763699,
+			// 		"roomId" => $request->get('roomId'),
+			// 		"content" => array(
+			// 			"type" => "text",
+			// 			"text" => $request->get('content')
+			// 		),
+			// 	]
+			// ]);
 
-			return $response->getBody();
+			// return $response->getBody();
 		}
 
 		return response()->json(array(

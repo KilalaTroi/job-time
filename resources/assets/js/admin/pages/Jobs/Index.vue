@@ -29,17 +29,21 @@
                   class="form-group mb-0 d-flex justify-content-between"
                   style="min-width: 160px"
                 >
-                  <select-2
-                    :options="currentTeamOption"
-                    v-model="filters.team"
-                    class="select2"
-                  ></select-2>
+                  <div :style="{minWidth: '60px'}">
+                    <select-2
+                      :options="currentTeamOption"
+                      v-model="filters.team"
+                      class="select2"
+                    ></select-2>
+                  </div>
                   <div class="ml-3"></div>
-                  <select-2
-                    :options="options"
-                    v-model="filters.show"
-                    class="select2"
-                  ></select-2>
+                  <div>
+                    <select-2
+                      :options="options"
+                      v-model="filters.show"
+                      class="select2"
+                    ></select-2>
+                  </div>
                 </div>
               </div>
             </template>
