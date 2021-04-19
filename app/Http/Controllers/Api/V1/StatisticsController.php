@@ -49,10 +49,28 @@ class StatisticsController extends Controller
 		$data['users'] = $this->getUsers($startMonthCar, $endMonthCar, $teamID);
 
 		// info current month
-		$data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID);
+		$data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID, 0, str_replace('/', '-', $startMonthCar));
 
 		// Return totals
 		$data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['users']['disableUsersInMonth'], $data['users']['hoursOfDisableUser'], $data['off_days'], $startMonthCar, $endMonthCar, 0, $teamID);
+
+		// Thêm user disable trước 3 tháng vào để xem dữ liệu
+		$disableUsers = $this->getDisableUsersByTeam($teamID);
+		
+		if ( count($disableUsers) > 0 ) {
+			$disableUsersID = array_column($disableUsers, 'id');
+
+			array_map(function ($obj, $k) use (&$disableUsers) {
+				$obj->disable_date = null;
+				$disableUsers[$k] = $obj;
+			}, $disableUsers, array_keys($disableUsers));
+
+			$data['users']['all'] = array_filter($data['users']['all'], function($obj) use ($disableUsersID) {
+				return !in_array($obj->id, $disableUsersID);
+			});
+			
+			$data['users']['all'] = array_merge($data['users']['all'], $disableUsers);
+		}
 
 		return response()->json($data);
 	}
@@ -88,7 +106,7 @@ class StatisticsController extends Controller
 		$data['users'] = $this->getUsers($startMonthCar, $endMonthCar, $teamID, $user_id);
 
 		// info current month
-		$data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID, $user_id);
+		$data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID, $user_id, str_replace('/', '-', $startMonthCar));
 
 		// Return totals
 		$data['totals'] = $this->getTotals($data['days_of_month'], $data['users']['old'], $data['users']['newUsersPerMonth'], $data['users']['disableUsersInMonth'], $data['users']['hoursOfDisableUser'], $data['off_days'], $startMonthCar, $endMonthCar, $user_id, $teamID);
@@ -120,7 +138,7 @@ class StatisticsController extends Controller
 		}
 
 		return response()->json([
-			'users' => $this->getUsersByTeam($filters['team']),
+			'users' => array_merge($this->getUsersByTeam($filters['team']), $this->getDisableUsersByTeam($filters['team'])),
 			'totaling' => $this->getTotaling($filters),
 			'departments' => $this->getDepartments($filters['team']),
 			'types' => $this->getTypes($filters['team']),
@@ -472,6 +490,10 @@ class StatisticsController extends Controller
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
+			->where(function ($query) use ($startMonth) {
+				$query->where('disable_date', '=',  NULL)
+					->orWhere('disable_date', '>=', str_replace('/', '-', $startMonth));
+			})
 			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'ASC')->get()->toArray();
 
 		$users['old'] = DB::connection('mysql')->table('role_user')
@@ -574,7 +596,7 @@ class StatisticsController extends Controller
 		return $users;
 	}
 
-	function currentMonth($usersTotal, $teamID = 0, $user_id = 0)
+	function currentMonth($usersTotal, $teamID = 0, $user_id = 0, $filterStartMonth = false)
 	{
 		$currentDate = Carbon::now();
 
@@ -651,10 +673,13 @@ class StatisticsController extends Controller
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
-			->when($user_id, function ($query, $user_id) {
-				return $query->where('user_id', $user_id);
-			})
+			// ->when($user_id, function ($query, $user_id) {
+			// 	return $query->where('user_id', $user_id);
+			// })
 			->where('users.disable_date', "<>", NULL)
+			->when($filterStartMonth, function ($query, $filterStartMonth) {
+				return $query->where('users.disable_date', ">=", $filterStartMonth);
+			})
 			->count();
 
 		$data['totalUsers'] = $usersTotal - $disableUsersInMonth;
@@ -1225,6 +1250,25 @@ class StatisticsController extends Controller
 			->whereNotIn('user.id', $this->usersIgnoreAdmin($team))
 			->where('team', $team)
 			->where('disable_date', NULL)
+			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'DESC')->get()->toArray();
+	}
+
+	private function getDisableUsersByTeam($team) // Lấy disable user trước 3 tháng
+	{
+		
+		$disableDate = Carbon::now()->subMonth(3)->format('Y-m-d');
+		
+		return DB::table('role_user as ru')
+			->select(
+				'user.id as id',
+				'user.name as text'
+			)
+			->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+			->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+			->whereNotIn('user.id', $this->usersIgnoreAdmin($team))
+			->where('team', $team)
+			->where('disable_date', '!=', null)
+			->where('disable_date', '>=', $disableDate)
 			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'DESC')->get()->toArray();
 	}
 
