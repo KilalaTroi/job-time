@@ -1,6 +1,6 @@
 <template>
   <modal class="edit-schedules-timetable" id="itemDetail" v-on:reset-validation="resetValidation">
-    <template slot="title">{{ $ml.with("VueJS").get("txtUpdateSchedulesTimetable") }}</template>
+    <template slot="title">{{ $ml.with("VueJS").get("txtUpdateShiftsManagement") }}</template>
     <form v-if="selectedItem">
       <div class="form-group">
         <label class="">{{ $ml.with("VueJS").get("txtTimetable") }}</label>

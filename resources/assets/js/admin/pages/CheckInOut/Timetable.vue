@@ -18,7 +18,7 @@
               </button>
             </div>
             <template slot="header">
-              <h4 class="card-title">{{ $ml.with('VueJS').get('txtTimetableList') }}</h4>
+              <h4 class="card-title">{{ $ml.with('VueJS').get('txtTimetable') }}</h4>
             </template>
             <tbl-default
               :dataItems="data.timetable"
@@ -68,7 +68,7 @@
         <div class="col-sm-8">
           <card class="strpied-tabled-with-hover">
             <template slot="header">
-              <h4 class="card-title">{{ $ml.with('VueJS').get('txtSchedulesTimetableList') }}</h4>
+              <h4 class="card-title">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</h4>
             </template>
             <button-create>
               <template slot="title">{{ $ml.with('VueJS').get('txtCreate') }}</template>

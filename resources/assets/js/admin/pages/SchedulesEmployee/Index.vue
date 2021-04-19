@@ -42,7 +42,7 @@
               <label class="mb-0" :style="{ paddingRight: '10px', whiteSpace:'nowrap' }">{{
                 $ml.with("VueJS").get("txtTeam")
               }}</label>
-              <div class="w-100">
+              <div :style="{minWidth: '60px'}">
                 <select-2
                   :options="currentTeamOption"
                   v-model="filters.team"
@@ -166,7 +166,7 @@ export default {
         placement: 'top',
         trigger: 'hover',
         container: 'body',
-      }); 
+      });
 
       info.el.querySelector('.fc-content').addEventListener("mouseover", function(event) {
         setTimeout(function() {

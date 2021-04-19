@@ -34,15 +34,14 @@ class CheckInOutController extends Controller
 
     if (0 === $flag) $data = $this->getCheckInOutList($filters, $filters['start_date'], $filters['end_date']);
     else if (1 === $flag) {
+      $cdata = array();
       $data = $this->getCheckInOutList($filters, $filters['cstar_date'], $filters['cend_date']);
-      $data['cdata'] = array();
-      $latesec = $this->time2seconds('00:' . $request->input('late'));
+      $latesec = $this->time2seconds($request->input('late'));
       foreach ($data['data'] as $value) {
-        $key = $value['userid'] . $value['date'];
         if (isset($value['late']) && !empty($value['late'])) {
           $dlatesec = $this->time2seconds($value['late']);
           if ($dlatesec >= $latesec) {
-            $data['cdata'][$key] = array(
+            $cdata[] = array(
               'title' => $value['fullname'],
               'className' => 'cl_late',
               'borderColor' => 'transparent',
@@ -53,8 +52,8 @@ class CheckInOutController extends Controller
           }
         }
       }
-      $data['data'] = array_values($data['cdata']);
-      unset($data['cdata'], $data['total']);
+      $data['data'] = $cdata;
+      unset($data['total']);
     }
 
     return response()->json($data);
@@ -324,8 +323,8 @@ class CheckInOutController extends Controller
             )
           ]
         );
+        $this->sendMessageLineWork(env('CHANNEL_ID_ABSENT_KILALA'), '@'.$data['fullname'] . "\n" . $data['reason']);
       }
-      $this->sendReason($data);
     } else {
       if ($reason->count() > 0) $reason->delete();
     }
@@ -340,47 +339,9 @@ class CheckInOutController extends Controller
     $team_id = NULL !== $request->input('team_id') && !empty($request->input('team_id')) ? $request->input('team_id') : '';
     $options['users'] = DB::table('users')->select('checkinout_user_id as id', 'name as text')->where('checkinout_user_id', '!=', '')->when($team_id, function ($query, $team_id) {
       return $query->where('team', '=', $team_id);
-    })->orderBy('team', 'ASC')->orderBy('orderby', 'DESC')->orderBy('id', 'ASC')->get()->toArray();
+    })->orderBy('team', 'ASC')->orderBy('orderby', 'DESC')->orderBy('id', 'DESC')->get()->toArray();
     $options['timetabels'] = DB::table('time_tables')->select('id', 'name as text')->get()->toArray();
     return response()->json($options);
-  }
-
-  private function sendReason($data, $token_number = 1)
-  {
-    $ipToken = array(
-      1 => env('LINE_WORKS_SERVER_TOKEN'),
-      2 => env('LINE_WORKS_SERVER_TOKEN_TWO'),
-      3 => env('LINE_WORKS_SERVER_TOKEN_THREE'),
-    );
-
-    $client = new \GuzzleHttp\Client([
-      'headers' => [
-        'Access-Control-Allow-Origin' => '*',
-        'Content-Type'     => 'application/json',
-        'consumerKey'      => env('LINE_WORKS_CONSUMER_KEY', ''),
-        'Authorization'    => 'Bearer ' . $ipToken[$token_number]
-      ]
-    ]);
-
-    $response = $client->request('POST', 'https://apis.worksmobile.com/jp1YSSqsNgFBe/message/sendMessage/v2', [
-      'json' => [
-        "botNo" => 763699,
-        "roomId" => "61838587",
-        "content" => array(
-          "type" => "text",
-          "text" => $data['fullname'] . " (" . $data['date'] . ")\n" . $data['reason'],
-        ),
-      ]
-    ]);
-
-    $subnets = json_decode($response->getBody()->getContents(), true);
-
-    if (isset($subnets['errorCode']) && !empty($subnets['errorCode'])) {
-      if (3 == $token_number) return false;
-      else $this->sendReason($data, $token_number + 1);
-      return false;
-    };
-    return true;
   }
 
   private function getCheckInOutList($filters, $start_date, $end_date)
@@ -393,25 +354,20 @@ class CheckInOutController extends Controller
 
     $filters['start_date'] = $start_date;
     $filters['end_date'] = $end_date;
-
     $filters['users'] = $this->getUsers($filters);
 
     $checkInOut = DB::table('checkinout')
-      ->select('checkinout_user_id as user_id', 'check_in', 'check_out', 'date')
+      ->select(DB::raw('min(date) as start_date'), DB::raw('max(date) as end_date'))
       ->where('date', '!=', date('Y-m-d'))
       ->when($filters['users'], function ($query, $user_checkout_id) {
         return $query->whereIn('checkinout_user_id', explode(',', $user_checkout_id));
       })
       ->whereBetween('date', array($filters['start_date'],  $filters['end_date']))
-      ->orderBy('date', 'DESC');
+      ->first();
 
-    if ($checkInOut->count() > 0) {
-      $checkInOut = $checkInOut->get()->toArray();
-      $filters['end_date_start'] = $checkInOut[0]->date;
-      $filters['start_date_end'] = $checkInOut[count($checkInOut) - 1]->date;
-      $datasdb = $this->getCheckInOutListFromMySQLDB($checkInOut);
-      $total = $datasdb['total'];
-      $datasdb = $datasdb['data'];
+    if (isset($checkInOut) && !empty($checkInOut)) {
+      $filters['end_date_start'] = $checkInOut->start_date;
+      $filters['start_date_end'] = $checkInOut->end_date;
     }
 
     if (isset($filters['end_date_start']) && !empty($filters['end_date_start']) && isset($filters['start_date_end']) && !empty($filters['start_date_end'])) {
@@ -421,15 +377,14 @@ class CheckInOutController extends Controller
       if ($filters['end_date'] != $endateCar && strtotime($endateCar) < strtotime(date('Y-m-d'))) $listCheckInOutEnd = $this->getCheckInOutListFromAccessDB($filters, 2);
       $listCheckInOut = array_merge($listCheckInOutStart, $listCheckInOutEnd);
     } else  $listCheckInOut = $this->getCheckInOutListFromAccessDB($filters);
-
     foreach ($listCheckInOut as $row) {
       $date = $row->sdate;
       $time = $row->ctime;
+      $user = $this->getUserById($row->user_id);
       $key = $row->user_id . $date;
+
       if (!isset($datas[$key]) || empty($datas[$key])) {
         $datas[$key] = array('fullname' => '', 'team' => '', 'date' => $date, 'checkin' => $time, 'checkout' => $time);
-
-        $user = $this->getUserById($row->user_id);
         $timetable = $this->getTimetable($date, $user);
         if (isset($timetable) && !empty($timetable)) {
           $checkinstartend = array(
@@ -456,33 +411,9 @@ class CheckInOutController extends Controller
       }
     }
 
-    foreach ($datas as $i => $v) {
-
-      $datas[$i]['dayoweek'] = false !== in_array(date("D", strtotime($v['date'])), array('Sat', 'Sun')) ? date("D", strtotime($v['date'])) : '';
-      $datas[$i]['workingtime'] = $this->formatTime($v['checkintime']) . ' - ' .  $this->formatTime($v['checkouttime']);
-
-      $dataTime = $this->hanldeLateEarlyTime($v['userid'], $v['date'], $v['checkin'], $v['checkout'], $v['checkintime'], $v['checkouttime'], $v['checkinstartend'], $v['checkoutstartend']);
-
-      $datas[$i]['reason'] = $dataTime['reason'];
-
-      if (isset($dataTime['late']) && !empty($dataTime['late'])) {
-        if (empty($dataTime['reason'])) {
-          $datas[$i]['late'] = $this->formatTime($dataTime['late']);
-          $total['late'] = $total['late'] + $dataTime['late'];
-        }
-      } else if (0 === $dataTime['late']) $datas[$i]['checkin'] = '';
-
-      if (isset($dataTime['early']) && !empty($dataTime['early'])) {
-        if (empty($dataTime['reason'])) {
-          $datas[$i]['early'] = $this->formatTime($dataTime['early']);
-          $total['early'] = $total['early'] + $dataTime['early'];
-        }
-      } else if (0 === $dataTime['early']) $datas[$i]['checkout'] = '';
-
-      unset($datas[$i]['checkintime'], $datas[$i]['checkouttime'], $datas[$i]['checkinstartend'], $datas[$i]['checkoutstartend']);
-
-      $checkinout = DB::table('checkinout')->where('checkinout_user_id', $v['userid'])->where('date', $v['date'])->count();
-      if ($checkinout == 0) {
+    foreach ($datas as $v) {
+      $checkinout = DB::table('checkinout')->select('id')->where('checkinout_user_id', $v['userid'])->where('date', $v['date']);
+      if ($checkinout->count() == 0) {
         DB::table('checkinout')->insert([
           'checkinout_user_id' => $v['userid'],
           'check_in' => $v['checkin'],
@@ -493,28 +424,24 @@ class CheckInOutController extends Controller
         ]);
       }
     }
-    foreach (explode(',', $filters['users']) as $user) {
-      $date = date('Y-m-d');
-      $user = $this->getUserById($user);
-      $key = $user->id2 . $date;
-      $reason = DB::table('checkinout_reason')->select('description')->where('checkinout_user_id', $user->id2)->where('date', $date)->first();
-      $datasdb[$key] = array(
-        'fullname' => $user->name,
-        'team' => $user->team,
-        'date' => $date,
-        'userid' => $user->id2,
-        'workingtime' => '',
-        'dayoweek' => false !== in_array(date("D", strtotime($date)), array('Sat', 'Sun')) ? date("D", strtotime($date)) : '',
-        'reason' => isset($reason) && !empty($reason) ? $reason->description : '',
-        'checkin' => '',
-        'checkout' => ''
-      );
+
+    $dbcheckInOut = DB::table('checkinout')
+      ->select('checkinout.id as checkinout_id', 'checkinout.checkinout_user_id as user_id', 'checkinout.check_in as check_in', 'checkinout.check_out as check_out', 'checkinout.date as date')
+      ->leftJoin('users', 'checkinout.checkinout_user_id', 'users.checkinout_user_id')
+      ->where('date', '!=', date('Y-m-d'))
+      ->when($filters['users'], function ($query, $user_checkout_id) {
+        return $query->whereIn('checkinout.checkinout_user_id', explode(',', $user_checkout_id));
+      })
+      ->whereBetween('date', array($filters['start_date'],  $filters['end_date']))
+      ->orderBy('users.team', 'ASC')->orderBy('users.orderby', 'DESC')->orderBy('checkinout.date', 'DESC')->orderBy('users.id', 'DESC');
+    if ($dbcheckInOut->count() > 0)  $datas = $this->getCheckInOutListFromMySQLDB($dbcheckInOut->get());
+    if (isset($datas['data']) && !empty($datas['data'])) {
+      $total = $datas['total'];
+      $datasdb = $datas['data'];
     }
-    $datas = array_replace($datasdb, $datas);
-    krsort($datas);
 
     return array(
-      'data' => array_values($datas),
+      'data' => $datasdb,
       'total' => array(
         'late' => $total['late'],
         'early' => $total['early'],
@@ -531,7 +458,6 @@ class CheckInOutController extends Controller
     $timetosecin = $this->time2seconds($checkin);
 
     $reason = DB::table('checkinout_reason')->select('description')->where('checkinout_user_id', $userid)->where('date', $date)->first();
-
 
     if ($checkintime < $timetosecin) {
       $flagi = $this->hanldeCheckLateEarlyTime($checkinstartend['start'], $checkinstartend['end'], $timetosecin);
@@ -571,47 +497,66 @@ class CheckInOutController extends Controller
       'early' => 0
     );
     foreach ($datas as $v) {
-      $key = $v->user_id . $v->date;
       $user = $this->getUserById($v->user_id);
+      $key = $v->user_id . '_' . $v->date;
+      $keyNowDate = $v->user_id . '_' . date('Y-m-d');
       $timetable = $this->getTimetable($v->date, $user);
-      if ($timetable) {
-        $datasdb[$key] = array(
+      if (empty($datasdb[$keyNowDate])) {
+        $date = date('Y-m-d');
+        $reason = DB::table('checkinout_reason')->select('description')->where('checkinout_user_id', $user->id2)->where('date', $date)->first();
+        $datasdb[$keyNowDate] = array(
           'fullname' => $user->name,
           'team' => $user->team,
-          'date' => $v->date,
-          'userid' => $v->user_id,
-          'workingtime' => $this->formatTime($timetable->check_in) . ' - ' .  $this->formatTime($timetable->check_out),
-          'dayoweek' => false !== in_array(date("D", strtotime($v->date)), array('Sat', 'Sun')) ? date("D", strtotime($v->date)) : '',
-          'checkin' => $v->check_in,
-          'checkout' => $v->check_out
+          'date' => $date,
+          'userid' => $user->id2,
+          'workingtime' => '',
+          'dayoweek' => false !== in_array(date("D", strtotime($date)), array('Sat', 'Sun')) ? date("D", strtotime($date)) : '',
+          'reason' => isset($reason) && !empty($reason) ? $reason->description : '',
+          'checkin' => '',
+          'checkout' => ''
         );
-        $checkinstartend = array(
-          'start' => $timetable->check_in_start,
-          'end' => $timetable->check_in_end,
-        );
-        $checkoutstartend = array(
-          'start' => $timetable->check_out_start,
-          'end' => $timetable->check_out_end,
-        );
-        $dataTime = $this->hanldeLateEarlyTime($v->user_id, $v->date, $v->check_in, $v->check_out, $timetable->check_in, $timetable->check_out, $checkinstartend, $checkoutstartend);
-        $datasdb[$key]['reason'] = $dataTime['reason'];
-        if (isset($dataTime['late']) && !empty($dataTime['late'])) {
-          if (empty($dataTime['reason'])) {
-            $datasdb[$key]['late'] = $this->formatTime($dataTime['late']);
-            $total['late'] = $total['late'] + $dataTime['late'];
-          }
-        } else if (0 === $dataTime['late']) $datasdb[$key]['checkin'] = '';
+      }
+      if ($timetable) {
+        if (isset($datasdb[$key]) && !empty($datasdb[$key])) DB::table('checkinout')->where('id', $v->checkinout_id)->delete();
+        else {
+          $datasdb[$key] = array(
+            'fullname' => $user->name,
+            'team' => $user->team,
+            'date' => $v->date,
+            'userid' => $v->user_id,
+            'workingtime' => $this->formatTime($timetable->check_in) . ' - ' .  $this->formatTime($timetable->check_out),
+            'dayoweek' => false !== in_array(date("D", strtotime($v->date)), array('Sat', 'Sun')) ? date("D", strtotime($v->date)) : '',
+            'checkin' => $v->check_in,
+            'checkout' => $v->check_out
+          );
+          $checkinstartend = array(
+            'start' => $timetable->check_in_start,
+            'end' => $timetable->check_in_end,
+          );
+          $checkoutstartend = array(
+            'start' => $timetable->check_out_start,
+            'end' => $timetable->check_out_end,
+          );
+          $dataTime = $this->hanldeLateEarlyTime($v->user_id, $v->date, $v->check_in, $v->check_out, $timetable->check_in, $timetable->check_out, $checkinstartend, $checkoutstartend);
+          $datasdb[$key]['reason'] = $dataTime['reason'];
+          if (isset($dataTime['late']) && !empty($dataTime['late'])) {
+            if (empty($dataTime['reason'])) {
+              $datasdb[$key]['late'] = $this->formatTime($dataTime['late']);
+              $total['late'] = $total['late'] + $dataTime['late'];
+            }
+          } else if (0 === $dataTime['late']) $datasdb[$key]['checkin'] = '';
 
-        if (isset($dataTime['early']) && !empty($dataTime['early'])) {
-          if (empty($dataTime['reason'])) {
-            $datasdb[$key]['early'] = $this->formatTime($dataTime['early']);
-            $total['early'] = $total['early'] + $dataTime['early'];
-          }
-        } else if (0 === $dataTime['early']) $datasdb[$key]['checkout'] = '';
+          if (isset($dataTime['early']) && !empty($dataTime['early'])) {
+            if (empty($dataTime['reason'])) {
+              $datasdb[$key]['early'] = $this->formatTime($dataTime['early']);
+              $total['early'] = $total['early'] + $dataTime['early'];
+            }
+          } else if (0 === $dataTime['early']) $datasdb[$key]['checkout'] = '';
+        }
       }
     }
     return array(
-      'data' => $datasdb,
+      'data' => array_values($datasdb),
       'total' => $total
     );
   }
@@ -651,9 +596,7 @@ class CheckInOutController extends Controller
 
   private function getUserById($id)
   {
-    return DB::table('users')->select('fullname', 'users.name as name', 'teams.name as team', 'checkinout_user_id as id2', 'teams.id as team_id')
-      ->leftJoin('teams', 'users.team', 'teams.id')
-      ->where('checkinout_user_id', $id)->first();
+    return DB::table('users')->select('fullname', 'users.name as name', 'teams.name as team', 'checkinout_user_id as id2', 'teams.id as team_id', 'users.orderby as orderby')->leftJoin('teams', 'users.team', 'teams.id')->where('checkinout_user_id', $id)->first();
   }
 
   private function getUsers($filters)
