@@ -98,7 +98,7 @@
                   @click="changeTab(1)"
                   >{{ $ml.with('VueJS').get('txtCalculation') }}</a
                 >
-                <router-link class="" to="/timetable">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</router-link>
+                <router-link class="" v-if="-1 !== ('1,49,').indexOf(loginUser.id+',')" to="/timetable">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</router-link>
               </div>
             </nav>
           </div>

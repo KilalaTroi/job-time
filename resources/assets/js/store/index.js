@@ -20,6 +20,7 @@ import reports from './modules/reports'
 import totalpage from './modules/totalpage'
 import checkinout from './modules/checkinout'
 import timetable from './modules/timetable'
+import hrprofiles from './modules/hrprofiles'
 
 Vue.use(Vuex)
 
@@ -42,7 +43,8 @@ export default new Vuex.Store({
     reports,
     totalpage,
     checkinout,
-    timetable
+    timetable,
+    hrprofiles
   },
 })
 
