@@ -36,18 +36,18 @@
           dataPath="hrprofiles"
         />
 
-        <!-- <div v-if="!data.data" class="text-center mt-3">
+        <div v-if="!data.data" class="text-center mt-3">
           <img src="https://i.imgur.com/JfPpwOA.gif">
-        </div> -->
+        </div>
 
-        <!-- <pagination
+        <pagination
           :data="data"
           :show-disabled="true"
           :limit="2"
           align="right"
           size="small"
           @pagination-change-page="getAll"
-        /> -->
+        />
       </card>
       <create-profile />
       <edit-profile />

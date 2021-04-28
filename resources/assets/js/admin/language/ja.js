@@ -10,6 +10,7 @@ export default {
     sbJobTypes: 'ジョブタイプ',
     sbProjects: 'プロジェクト',
     sbSchedules: 'スケジュール',
+    sbTimeSlots: '時間枠',
     sbJobs: 'ジョブ',
     sbOffDays: '休みの日',
     sbReports: 'レポート',

@@ -10,6 +10,7 @@ export default {
     sbJobTypes: 'Job Types',
     sbProjects: 'Projects',
     sbSchedules: 'Schedules',
+    sbTimeSlots: 'Time Slots',
     sbJobs: 'Tasks',
     sbOffDays: 'Off days',
     sbReports: 'Notes',

@@ -47,9 +47,14 @@
         <i class="fa fa-toggle-off" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbOffDays')" />
       </sidebar-link>
+      <sidebar-link to="/timeslots">
+        <!-- <i class="nc-icon nc-paper-2"></i> -->
+        <i class="fa fa-calendar-o" aria-hidden="true"></i>
+        <p v-text="$ml.with('VueJS').get('sbTimeSlots')" />
+      </sidebar-link>
       <sidebar-link to="/checkinout">
         <i class="fa fa-clock-o fa-side-menu"></i>
-         <p v-text="$ml.with('VueJS').get('sbAttendance')" />
+        <p v-text="$ml.with('VueJS').get('sbAttendance')" />
       </sidebar-link>
       <sidebar-link to="/types">
         <!-- <i class="nc-icon nc-tag-content"></i> -->
@@ -177,7 +182,8 @@
   .menu {
     &-jobs,
     &-off-days,
-    &-checkinout {
+    &-checkinout,
+    &-timeslots {
       display: none;
     }
   }
