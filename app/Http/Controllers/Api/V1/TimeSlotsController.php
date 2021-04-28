@@ -114,10 +114,10 @@ class TimeSlotsController extends Controller
 		foreach ($dbprojects as $item) {
 			$team_ids = explode(',', $item->team_id);
 			foreach ($team_ids as $team_id) {
-				$item->issue_id =  $item->issue_id . '_' . $team_id;
-				$item->team_id = $team_id;
-				$item->fullname = $item->p_name . ' (' . $teams[$team_id] . ')';
 				$item_clone = clone $item;
+				$item_clone->issue_id =  $item->issue_id . '_' . $team_id;
+				$item_clone->team_id = $team_id;
+				$item_clone->fullname = $item_clone->p_name . ' (' . $teams[$team_id] . ')';
 				$projects[$team_id] = $item_clone;
 			}
 		}
