@@ -43,12 +43,10 @@ class TimeSlotsController extends Controller
 	public function store(Request $request)
 	{
 		$data = $request->all();
-		$teams = DB::table('teams')->whereNotIn('id', [4, 5])->get();
-		foreach ($teams as $team) {
-			$data['team_id'] = $team->id;
-			Schedule::create($data);
-		}
-
+		$id_team = explode('_', $data['issue_id']);
+		$data['issue_id'] = $id_team[0];
+		$data['team_id'] = $id_team[1];
+		Schedule::create($data);
 		return response()->json(array(
 			'message' => 'Successfully.'
 		), 200);
@@ -63,9 +61,8 @@ class TimeSlotsController extends Controller
 	 */
 	public function update($id, Request $request)
 	{
-		$item = Schedule::findOrFail($id);
-		$schedules = Schedule::where('issue_id', $item->issue_id)->where('start_time', $item->start_time)->where('end_time', $item->end_time)->where('date', $item->date)->where('end_date', $item->end_date)->get();
-		foreach ($schedules as $schedule) $schedule->update($request->all());
+		$schedule = Schedule::findOrFail($id);
+		$schedule->update($request->all());
 		return response()->json(array(
 			'message' => 'Successfully.'
 		), 200);
@@ -79,9 +76,8 @@ class TimeSlotsController extends Controller
 	 */
 	public function destroy($id)
 	{
-		$item = Schedule::findOrFail($id);
-		$schedules = Schedule::where('issue_id', $item->issue_id)->where('start_time', $item->start_time)->where('end_time', $item->end_time)->where('date', $item->date)->where('end_date', $item->end_date)->get();
-		foreach ($schedules as $schedule) $schedule->delete();
+		$schedule = Schedule::findOrFail($id);
+		$schedule->delete();
 		return response()->json(array(
 			'message' => 'Successfully.'
 		), 200);
@@ -90,7 +86,8 @@ class TimeSlotsController extends Controller
 	private function getProjects($filters)
 	{
 		if ('false' !== $filters['onlyEvent']) return array();
-		$projects = DB::table('projects as p')
+		$projects = array();
+		$dbprojects = DB::table('projects as p')
 			->select(
 				'p.id as id',
 				'i.id as issue_id',
@@ -99,23 +96,33 @@ class TimeSlotsController extends Controller
 				't.slug as type',
 				't.value as value',
 				'i.name as i_name',
+				'p.team as team_id',
 				'type_id',
 				'start_date',
 				'end_date'
 			)
 			->rightJoin('issues as i', 'p.id', '=', 'i.project_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
-			->where('p.id', '344')
+			->whereIn('p.id', array('344', '14'))
 			->orderBy('i.created_at', 'desc')
 			->orderBy('p.name', 'asc')
 			->orderBy('i.name', 'asc')
 			->get()->toArray();
 
-		foreach ($projects as $item) {
-			$item->fullname = $item->p_name;
-		}
 
-		return $projects;
+		$teams = DB::table('teams')->select('id', 'name')->get()->pluck('name', 'id')->toArray();
+		foreach ($dbprojects as $item) {
+			$team_ids = explode(',', $item->team_id);
+			foreach ($team_ids as $team_id) {
+				$item->issue_id =  $item->issue_id . '_' . $team_id;
+				$item->team_id = $team_id;
+				$item->fullname = $item->p_name . ' (' . $teams[$team_id] . ')';
+				$item_clone = clone $item;
+				$projects[$team_id] = $item_clone;
+			}
+		}
+		krsort($projects);
+		return (object)$projects;
 	}
 
 	private function getIssues($filters)
@@ -167,6 +174,7 @@ class TimeSlotsController extends Controller
 				'i.start_date as start_date',
 				'i.end_date as end_date',
 				'p.name as p_name',
+				's.team_id as team',
 				'p.id as p_id',
 				't.slug as type',
 				't.value as value',
@@ -182,8 +190,7 @@ class TimeSlotsController extends Controller
 			->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
 			->rightJoin('schedules as s', 'i.id', '=', 's.issue_id')
 			->leftJoin('types as t', 't.id', '=', 'p.type_id')
-			->where('p.id', "344")
-			->where('s.team_id', '=', $filters['team'])
+			->whereIn('p.id', array('344', '14'))
 			->where(function ($query) use ($filters) {
 				$query->where(function ($query) use ($filters) {
 					$query->where('s.date', '>=',  $filters['startDate'])
@@ -200,8 +207,10 @@ class TimeSlotsController extends Controller
 			})
 			->get()->toArray();
 
+
+		$teams = DB::table('teams')->select('id', 'name')->get()->pluck('name', 'id')->toArray();
 		foreach ($schedules as $item) {
-			$item->name = $item->p_name;
+			$item->name = $item->p_name . ' (' . $teams[$item->team] . ')';
 			$item->title_not_memo = $item->p_name;
 			if (isset($item->i_name) && !empty($item->i_name))	$item->title_not_memo .= ' ' . $item->i_name;
 

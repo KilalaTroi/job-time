@@ -10,7 +10,7 @@
           {{ selectedItem.end_time }}
         </h5>
       </div>
-      <hr />
+      <!-- <hr />
       <div class="form-group">
         <label>{{ $ml.with("VueJS").get("txtPhase") }} </label>
         <input
@@ -19,18 +19,18 @@
           v-model="selectedItem.memo"
           class="form-control project-memo"
         />
-      </div>
+      </div> -->
       <error-item :errors="validationErrors"></error-item>
       <success-item :success="validationSuccess"></success-item>
       <hr />
       <div class="form-group text-right">
-        <button
+        <!-- <button
           @click="updateItem(selectedItem)"
           type="button"
           class="btn btn-primary"
         >
           {{ $ml.with("VueJS").get("txtSave") }}
-        </button>
+        </button> -->
         <button
           type="button"
           class="btn btn-danger ml-3"

@@ -208,7 +208,6 @@ export default {
           all_date: event.allDay,
           start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
           end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
-          team_id: state.filters.team
         },
         event: event,
       }
