@@ -10,36 +10,32 @@ export default {
   props: ["options", "value", "allowClear", "placeholder"],
   data() {
     return {
-      dallowClear: true,
-      dplaceholder: ""
+      params: {},
     };
   },
   mounted: function () {
-    var vm = this;
-    if (!this.allowClear) this.dallowClear = false;
-    if (!this.placeholder) this.dplaceholder = '';
-    $(this.$el)
-      // init select2
-      .select2({ data: this.options, allowClear: this.dallowClear, placeholder: this.dplaceholder })
-      .val(this.value)
-      .trigger("change")
-      // emit event on change.
-      .on("change", function () {
-        vm.$emit("input", this.value);
-      });
+    const _this = this;
+    _this.params.data = this.options;
+    if (_this.allowClear) {
+      _this.params.allowClear = _this.allowClear;
+      _this.params.placeholder = "";
+      if (_this.placeholder) _this.params.placeholder = _this.placeholder;
+    }
+
+    $(_this.$el).select2(_this.params).val(_this.value).trigger("change").on("change", function () {
+        _this.$emit("input", _this.value);
+    });
   },
   watch: {
     value: function (newValue, oldValue) {
-      if (!(newValue == oldValue) && (newValue || newValue >= 0))
-        $(this.$el).val(newValue).trigger("change");
+      if (!(newValue == oldValue) && (newValue || newValue >= 0)) $(this.$el).val(newValue).trigger("change");
     },
     options: function (options) {
+      const _this = this;
+      _this.params.data = options;
       // update options
-      $(this.$el)
-        .empty()
-        .select2({ data: options, allowClear: this.dallowClear, placeholder: this.dplaceholder });
-      if (!$(".select2.no-disable-first-value").length)
-        $('.select2 option[value="0"]').prop("disabled", true);
+      $(this.$el).empty().select2(this.params);
+      if (!$(".select2.no-disable-first-value").length) $('.select2 option[value="0"]').prop("disabled", true);
     },
   },
   destroyed: function () {

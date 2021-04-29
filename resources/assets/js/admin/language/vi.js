@@ -219,6 +219,7 @@ export default {
     txtSchedulesTimetableList : 'Schedules Timetable List',
     txtShiftsManagement : 'Shifts Management',
     txtCreateTimetable: 'Create Timetable',
+    txtUpadateTimetable: 'Edit Timetable',
     txtMondayFriday: 'Monday - Friday',
     txtSaturdaySunday: 'Saturday - Sunday',
     txtEffectiveTimeStart: 'Effective Time Start',

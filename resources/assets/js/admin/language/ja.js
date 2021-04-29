@@ -219,6 +219,7 @@ export default {
     txtSchedulesTimetableList : 'スケジュール表',
     txtShiftsManagement : 'シフト管理',
     txtCreateTimetable: 'タイムテーブル作成',
+    txtUpadateTimetable: 'タイムテーブル更新',
     txtMondayFriday: '月～金',
     txtSaturdaySunday: '土～日',
     txtEffectiveTimeStart: '効果開始時間',
