@@ -23,7 +23,6 @@ class JobsController extends Controller
     );
 
     $totaling = $this->getTotaling($filters, $this->user['id']);
-
     $totalTime = 0;
     foreach ($totaling as $v) $totalTime = $totalTime + $v->time;
 
@@ -167,7 +166,6 @@ class JobsController extends Controller
                 ->where('s.end_date', '>=',  $filters['date']);
             });
           })
-          ->where('i.status', '=', 'publish')
           ->where(function ($query) use ($filters) {
             $query->where('p.team', '=', $filters['team'])
               ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')

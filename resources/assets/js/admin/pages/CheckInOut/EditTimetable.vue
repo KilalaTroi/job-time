@@ -1,6 +1,6 @@
 <template>
   <modal id="timeTableDetail" v-on:reset-validation="resetValidation">
-    <template slot="title">{{ $ml.with("VueJS").get("txtUpdateTimeTableEdit") }}</template>
+    <template slot="title">{{ $ml.with("VueJS").get("txtUpadateTimetable") }}</template>
     <form v-if="selectedItemt">
       <div class="form-group">
         <label class="">{{ $ml.with("VueJS").get("txtName") }}</label>

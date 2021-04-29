@@ -19,7 +19,7 @@
           <slot name="th"></slot>
         </tr>
       </thead>
-      <tbody>
+      <tbody v-if="dataItems.data && dataItems.data.length > 0">
         <tr v-for="(item, index) in dataItems.data" :key="index">
           <td
             v-for="(column, index) in dataCols"
@@ -42,6 +42,12 @@
           </td>
         </tr>
         <slot name="tr"></slot>
+      </tbody>
+      <tbody v-else>
+        <tr :style="{ textAlign: 'center' }" v-if="dataItems.data">
+          <td v-if="dataAction && dataPath" :colspan="dataCols.length + 1" class="text-center">No Data</td>
+          <td v-else :colspan="dataCols.length">No Data</td>
+        </tr>
       </tbody>
     </table>
   </div>

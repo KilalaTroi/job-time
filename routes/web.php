@@ -52,6 +52,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('issues/delete-all', 'IssuesController@deleteAll');
     Route::post('issues/archive-all', 'IssuesController@archiveAll');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
+    Route::resource('timeslots', 'TimeSlotsController', ['except' => ['create', 'edit']]);
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
     Route::get('all-off-days', 'OffDaysController@allOffDays');
     Route::get('all-off-day-week', 'OffDaysController@allOffDayWeek');
@@ -99,6 +100,13 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
 
     Route::post('checkinout/reason', 'CheckInOutController@updateReason');
 
+    Route::resource('hr', 'HrController', ['except' => ['create', 'edit']]);
+
+    Route::post('hr/get-profiles', 'HrController@profiles');
+    Route::post('hr/profile', 'HrController@addProfile');
+    Route::post('hr/profile/{id}', 'HrController@updateProfile');
+    Route::delete('hr/profile/{id}', 'HrController@deleteProfile');
+
 
 
     Route::post('upload/report', 'UserUploadController@updateReport');
@@ -125,6 +133,21 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     {
         $path = storage_path() . '/app/public/pdf/' . $filename;
 
+        if(!File::exists($path)) abort(404);
+
+        $file = File::get($path);
+        $type = File::mimeType($path);
+
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+
+        return $response;
+    });
+
+    Route::get('images/profiles/{filename}', function ($filename)
+    {
+
+        $path = storage_path() . '/app/public/images/profiles/' . $filename;
         if(!File::exists($path)) abort(404);
 
         $file = File::get($path);
