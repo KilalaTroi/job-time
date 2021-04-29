@@ -452,7 +452,7 @@ export default {
     const _this = this;
     _this.filters.user_id = this.getReporter(_this.selectedItem.reporter);
     if(_this.selectedItem.attend_person) _this.selectedItem.attendPerson = this.getReporter(_this.selectedItem.attend_person);
-    _this.updateSeen();
+    if (_this.selectedItem.isSeen) _this.updateSeen();
   },
 
   mounted() {
