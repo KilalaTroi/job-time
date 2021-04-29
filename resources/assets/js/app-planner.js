@@ -36,6 +36,7 @@ import NotFound from './admin/pages/NotFoundPage'
 // Admin pages
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
+import TimeSlots from './admin/pages/TimeSlots';
 import Jobs from './admin/pages/Jobs';
 import Profile from './admin/pages/Profile';
 import OffDays from './admin/pages/OffDays';
@@ -65,6 +66,11 @@ const routes = [{
                 path: 'schedules',
                 name: 'Schedules',
                 component: Schedules
+            },
+            {
+                path: 'timeslots',
+                name: 'Timeslots',
+                component: TimeSlots
             },
             {
                 path: 'jobs',

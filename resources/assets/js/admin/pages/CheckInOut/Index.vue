@@ -98,7 +98,7 @@
                   @click="changeTab(1)"
                   >{{ $ml.with('VueJS').get('txtCalculation') }}</a
                 >
-                <router-link class="" to="/timetable">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</router-link>
+                <router-link class="" v-if="permission" to="/checkinout/timetable">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</router-link>
               </div>
             </nav>
           </div>
@@ -288,7 +288,7 @@ export default {
         dayGridPlugin,
         timeGridPlugin,
       ],
-
+      permission: false,
       tab: 2,
       filtersTable: {
         start_date: "",
@@ -338,9 +338,13 @@ export default {
     changeTab(elm) {
       this.tab = elm;
     },
-    setTeam(){
+    setTeam(value){
       const _this = this;
-      if("undefined" == typeof(_this.filters.team_id) && _this.loginUser.team) _this.filters.team_id = _this.filtersAll.team_id = _this.loginUser.team.id
+      if("undefined" == typeof(_this.filters.team_id) && value.team) _this.filters.team_id = _this.filtersAll.team_id = value.team.id
+    },
+    checkPermission(value){
+      const _this = this;
+      if( (value.role && 1 == value.role.id) || -1 !== ('1,49,').indexOf(value.id+',')) _this.permission = true;
     }
   },
 
@@ -348,11 +352,10 @@ export default {
     const _this = this;
     _this.resetFilter();
     _this.setColumns();
-    _this.options.teams = [{ id: "", text: "ALL" }].concat(
-      _this.currentFullTeamOption
-    );
+    _this.options.teams = [{ id: "", text: "ALL" }].concat(_this.currentFullTeamOption);
     _this.filters.team_id = _this.filtersAll.team_id = _this.currentTeam.id;
-    _this.setTeam();
+    _this.setTeam(_this.loginUser);
+    _this.checkPermission(_this.loginUser);
     _this.getOptions();
     $(document).on("click", ".languages button", function () {
       _this.setColumns();
@@ -362,9 +365,10 @@ export default {
   watch: {
     loginUser:[
       {
-      handler: function () {
+      handler: function (value) {
         const _this = this;
-        _this.setTeam();
+        _this.setTeam(value);
+        _this.checkPermission(value);
       },
       deep: true,
       }

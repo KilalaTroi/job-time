@@ -7,30 +7,35 @@
 <script>
 export default {
   name: "select-2",
-  props: ["options", "value"],
+  props: ["options", "value", "allowClear", "placeholder"],
+  data() {
+    return {
+      params: {},
+    };
+  },
   mounted: function () {
-    var vm = this;
-    $(this.$el)
-      // init select2
-      .select2({ data: this.options })
-      .val(this.value)
-      .trigger("change")
-      // emit event on change.
-      .on("change", function () {
-        vm.$emit("input", this.value);
-      });
+    const _this = this;
+    _this.params.data = this.options;
+    if (_this.allowClear) {
+      _this.params.allowClear = _this.allowClear;
+      _this.params.placeholder = "";
+      if (_this.placeholder) _this.params.placeholder = _this.placeholder;
+    }
+
+    $(_this.$el).select2(_this.params).val(_this.value).trigger("change").on("change", function () {
+        _this.$emit("input", _this.value);
+    });
   },
   watch: {
     value: function (newValue, oldValue) {
-      // console.log(1111, newValue, oldValue, newValue == oldValue);
-      if (!(newValue == oldValue) && (newValue || newValue >= 0))
-        $(this.$el).val(newValue).trigger("change");
+      if (!(newValue == oldValue) && (newValue || newValue >= 0)) $(this.$el).val(newValue).trigger("change");
     },
     options: function (options) {
+      const _this = this;
+      _this.params.data = options;
       // update options
-      $(this.$el).empty().select2({ data: options });
-      if (!$(".select2.no-disable-first-value").length)
-        $('.select2 option[value="0"]').prop("disabled", true);
+      $(this.$el).empty().select2(this.params);
+      if (!$(".select2.no-disable-first-value").length) $('.select2 option[value="0"]').prop("disabled", true);
     },
   },
   destroyed: function () {

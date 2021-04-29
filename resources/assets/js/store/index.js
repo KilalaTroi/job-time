@@ -15,11 +15,13 @@ import projects from './modules/projects'
 import jobs from './modules/jobs'
 import offdays from './modules/offdays'
 import schedules from './modules/schedules'
+import timeslots from './modules/timeslots'
 import totaling from './modules/totaling'
 import reports from './modules/reports'
 import totalpage from './modules/totalpage'
 import checkinout from './modules/checkinout'
 import timetable from './modules/timetable'
+import hrprofiles from './modules/hrprofiles'
 
 Vue.use(Vuex)
 
@@ -38,11 +40,13 @@ export default new Vuex.Store({
     jobs,
     offdays,
     schedules,
+    timeslots,
     totaling,
     reports,
     totalpage,
     checkinout,
-    timetable
+    timetable,
+    hrprofiles
   },
 })
 

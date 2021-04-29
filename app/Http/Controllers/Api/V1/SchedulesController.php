@@ -136,6 +136,7 @@ class SchedulesController extends Controller
 				->orWhere('team', 'LIKE', '%,' . $filters['team'] . ',%')
 				->orWhere('team', 'LIKE', '%,' . $filters['team']);
 		})
+		->whereNotIn('p.id',array('344','14'))
 		->orderBy('i.created_at', 'desc')
 		->orderBy('p.name', 'asc')
 		->orderBy('i.name', 'asc')
@@ -228,6 +229,7 @@ class SchedulesController extends Controller
 						->where('s.end_date', '>=',  $filters['endDate']);
 				});
 		})
+		->whereNotIn('p.id',array('344','14'))
 		->get()->toArray();
 
 		foreach($schedules as $item){

@@ -45,6 +45,7 @@ import Departments from './admin/pages/Departments';
 import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
+import TimeSlots from './admin/pages/TimeSlots';
 import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
 import Ckeditor from './admin/pages/Ckeditor';
@@ -55,6 +56,7 @@ import OffDays from './admin/pages/OffDays';
 import Jobs from './admin/pages/Jobs';
 import CheckInOut from './admin/pages/CheckInOut';
 import Timetable from './admin/pages/CheckInOut/Timetable';
+import HrProfiles from './admin/pages/Hr/Profiles';
 
 const routes = [{
         path: '/',
@@ -121,6 +123,11 @@ const routes = [{
                 component: Schedules
             },
             {
+                path: 'timeslots',
+                name: 'Timeslots',
+                component: TimeSlots
+            },
+            {
                 path: 'profile',
                 name: 'Profile',
                 component: Profile
@@ -169,6 +176,11 @@ const routes = [{
                 path: 'timetable',
                 name: 'Timetable',
                 component: Timetable
+            },
+            {
+                path: 'hrprofiles',
+                name: 'HrProfiles',
+                component: HrProfiles
             },
             {
                 path: '*',
