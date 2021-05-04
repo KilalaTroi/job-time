@@ -42,35 +42,6 @@
         <i class="fa fa-line-chart" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbStatistics')" />
       </sidebar-link>
-      <sidebar-link to="/off-days">
-        <!-- <i class="nc-icon nc-spaceship"></i> -->
-        <i class="fa fa-toggle-off" aria-hidden="true"></i>
-        <p v-text="$ml.with('VueJS').get('sbOffDays')" />
-      </sidebar-link>
-      <sidebar-link to="/timeslots">
-        <!-- <i class="nc-icon nc-paper-2"></i> -->
-        <i class="fa fa-calendar-o" aria-hidden="true"></i>
-        <p v-text="$ml.with('VueJS').get('sbTimeSlots')" />
-      </sidebar-link>
-      <sidebar-link to="/checkinout">
-        <i class="fa fa-clock-o fa-side-menu"></i>
-        <p v-text="$ml.with('VueJS').get('sbAttendance')" />
-      </sidebar-link>
-      <sidebar-link to="/types">
-        <!-- <i class="nc-icon nc-tag-content"></i> -->
-        <i class="fa fa-tags" aria-hidden="true"></i>
-        <p v-text="$ml.with('VueJS').get('sbJobTypes')" />
-      </sidebar-link>
-      <sidebar-link to="/user">
-        <!-- <i class="nc-icon nc-badge"></i> -->
-        <i class="fa fa-users" aria-hidden="true"></i>
-        <p v-text="$ml.with('VueJS').get('sbUsers')" />
-      </sidebar-link>
-      <sidebar-link to="/departments">
-        <!-- <i class="nc-icon nc-bank"></i> -->
-        <i style="font-size: 22px" class="fa fa-cog" aria-hidden="true"></i>
-        <p v-text="$ml.with('VueJS').get('sbSettings')" />
-      </sidebar-link>
       <sidebar-link to="/reports">
         <!-- <i class="nc-icon nc-single-copy-04"></i> -->
         <i class="fa fa-thumb-tack" aria-hidden="true"></i>
@@ -78,6 +49,30 @@
         <span class="report-notify" v-if="reportNotify">{{
           reportNotify
         }}</span>
+      </sidebar-link>
+      <sidebar-link to="/user">
+        <!-- <i class="nc-icon nc-badge"></i> -->
+        <i class="fa fa-users" aria-hidden="true"></i>
+        <p v-text="$ml.with('VueJS').get('sbUsers')" />
+      </sidebar-link>
+      <sidebar-link to="/off-days">
+        <!-- <i class="nc-icon nc-spaceship"></i> -->
+        <i class="fa fa-toggle-off" aria-hidden="true"></i>
+        <p v-text="$ml.with('VueJS').get('sbOffDays')" />
+      </sidebar-link>
+      <sidebar-link to="/checkinout">
+        <i class="fa fa-clock-o fa-side-menu"></i>
+        <p v-text="$ml.with('VueJS').get('sbAttendance')" />
+      </sidebar-link>
+      <sidebar-link to="/bookings">
+        <!-- <i class="nc-icon nc-paper-2"></i> -->
+        <i class="fa fa-calendar-o" aria-hidden="true"></i>
+        <p v-text="$ml.with('VueJS').get('sbMeetingRoom')" />
+      </sidebar-link>
+      <sidebar-link to="/departments">
+        <!-- <i class="nc-icon nc-bank"></i> -->
+        <i style="font-size: 22px" class="fa fa-cog" aria-hidden="true"></i>
+        <p v-text="$ml.with('VueJS').get('sbSettings')" />
       </sidebar-link>
       <sidebar-link to="/profile" class="d-block d-lg-none">
         <i class="nc-icon nc-circle-09"></i>
@@ -183,7 +178,7 @@
     &-jobs,
     &-off-days,
     &-checkinout,
-    &-timeslots {
+    &-mettingroom {
       display: none;
     }
   }

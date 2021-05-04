@@ -10,7 +10,7 @@ export default {
     sbJobTypes: 'ジョブタイプ',
     sbProjects: 'プロジェクト',
     sbSchedules: 'スケジュール',
-    sbTimeSlots: '時間枠',
+    sbMeetingRoom: '会議室',
     sbJobs: 'ジョブ',
     sbOffDays: '休みの日',
     sbReports: 'レポート',
@@ -232,5 +232,6 @@ export default {
     txtCalculation: '計算',
     txtTotalPages: 'ページ合計',
     txtTotalProjects: 'プロジェクト合計',
-    txtTotalJobs: 'ジョブ合計'
+    txtTotalJobs: 'ジョブ合計',
+    txtUseTheMeetingRoom: '会議室を使用する'
 }

@@ -9,6 +9,7 @@
           <div class="lsub-menu">
             <router-link class="active" to="/departments">{{ $ml.with("VueJS").get("sbDepartments") }}</router-link>
             <router-link class="" to="/teams">{{ $ml.with("VueJS").get("sbTeams") }}</router-link>
+            <router-link class="" to="/types">{{ $ml.with("VueJS").get("sbJobTypes") }}</router-link>
           </div>
         </div>
         <div class="form-group mb-0">

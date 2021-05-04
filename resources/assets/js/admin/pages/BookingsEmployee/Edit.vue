@@ -12,40 +12,14 @@
       </div>
       <hr />
       <div class="form-group">
-        <label>{{ $ml.with("VueJS").get("txtPhase") }}</label>
+        <label>{{ $ml.with("VueJS").get("txtPhase") }} </label>
         <input
           type="text"
+          name="memo"
+          readonly
           v-model="selectedItem.memo"
           class="form-control project-memo"
         />
-      </div>
-      <div v-if="14 == selectedItem.p_id || 344 == selectedItem.p_id" class="form-group d-flex align-items-center">
-        <input
-          type="checkbox"
-          v-model="selectedItem.booking"
-          class="form-control mr-2"
-          :style="{width: '25px'}"
-        />
-        <label class="mb-0">{{ $ml.with("VueJS").get("txtUseTheMeetingRoom") }}</label>
-      </div>
-      <error-item :errors="validationErrors"></error-item>
-      <success-item :success="validationSuccess"></success-item>
-      <hr />
-      <div class="form-group text-right">
-        <button
-          @click="updateItem(selectedItem)"
-          type="button"
-          class="btn btn-primary"
-        >
-          {{ $ml.with("VueJS").get("txtSave") }}
-        </button>
-        <button
-          type="button"
-          class="btn btn-danger ml-3"
-          @click="deleteItem($ml.with('VueJS').get('msgConfirmDelete'))"
-        >
-         {{$ml.with('VueJS').get('txtDelete')}}
-        </button>
       </div>
     </div>
   </modal>
@@ -66,7 +40,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters("schedules", {
+    ...mapGetters("bookings", {
       selectedItem: "selectedItem",
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
@@ -74,11 +48,9 @@ export default {
   },
 
   methods: {
-    ...mapActions("schedules", {
+    ...mapActions("bookings", {
       resetValidate: "resetValidate",
       resetSelectedItem: "resetSelectedItem",
-      updateItem: "updateItem",
-      deleteItem: "deleteItem",
     }),
 
     resetValidation() {

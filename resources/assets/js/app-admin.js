@@ -45,7 +45,7 @@ import Departments from './admin/pages/Departments';
 import Types from './admin/pages/Types';
 import Projects from './admin/pages/Projects';
 import Schedules from './admin/pages/Schedules';
-import TimeSlots from './admin/pages/TimeSlots';
+import Bookings from './admin/pages/Bookings';
 import Profile from './admin/pages/Profile';
 import Totaling from './admin/pages/Totaling';
 import Ckeditor from './admin/pages/Ckeditor';
@@ -123,9 +123,9 @@ const routes = [{
                 component: Schedules
             },
             {
-                path: 'timeslots',
-                name: 'Timeslots',
-                component: TimeSlots
+                path: 'bookings',
+                name: 'Bookings',
+                component: Bookings
             },
             {
                 path: 'profile',
@@ -173,12 +173,12 @@ const routes = [{
                 component: CheckInOut
             },
             {
-                path: 'timetable',
+                path: 'checkinout/timetable',
                 name: 'Timetable',
                 component: Timetable
             },
             {
-                path: 'hrprofiles',
+                path: 'hr/profiles',
                 name: 'HrProfiles',
                 component: HrProfiles
             },

@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content mtr">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-3 col-xl-2">
@@ -8,7 +8,6 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
-                  :class="{ 'no-schedule' : scheduleData.issuesNoSC.includes(item.issue_id) }"
                   v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
@@ -67,7 +66,6 @@
         </div>
       </div>
     </div>
-
     <edit-item />
   </div>
 </template>
@@ -124,7 +122,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters("timeslots", {
+    ...mapGetters("bookings", {
       scheduleData: "data",
       filters: "filters",
       fullCalendar: "fullCalendar",
@@ -140,7 +138,7 @@ export default {
   },
 
   methods: {
-    ...mapActions("timeslots", {
+    ...mapActions("bookings", {
       handleMonthChange: "handleMonthChange",
       resetValidate: "resetValidate",
       searchItem: "searchItem",
@@ -218,5 +216,7 @@ export default {
 </script>
 
 <style lang="scss" scope>
-@import "custom.scss";
+.mtr{
+  @import "custom.scss";
+}
 </style>
