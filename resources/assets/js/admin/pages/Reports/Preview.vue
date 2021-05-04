@@ -128,7 +128,7 @@
       </div>
       <div class="col-sm-2" v-if="'Meeting' != filters.type && 'Notice' != filters.type">
         <div class="form-group">
-          <label><strong>{{ $ml.with("VueJS").get("txtIssue") }}</strong></label>
+          <label><strong>{{ $ml.with("VueJS").get("txtYearOfIssue") }}</strong></label>
           <input
             :value="filters.issue_year.text"
             type="text"
