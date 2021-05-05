@@ -78,7 +78,10 @@ class SchedulesController extends Controller
 	{
 		$data = $request->all();
 		$schedule = Schedule::findOrFail($id);
-		if(true == $request->input('booking') && (empty($schedule->memo) || empty($data['memo']))) $data['memo'] = 'Meeting, Training (' . $this->user['name'] . ')';
+		if(true == $request->input('booking')){
+			// if(empty($schedule->memo)) $data['memo'] = 'Meeting, Training (' . $this->user['name'] . ')';
+			if(empty($data['memo'])) $data['memo'] = 'Meeting, Training (' . $this->user['name'] . ')';
+		}
 		$schedule->update($data);
 		$booking = SharedBooking::where('schedule_id', $id)->count();
 		if ($booking > 0 && false == $request->input('booking')) {
