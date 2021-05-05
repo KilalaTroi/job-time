@@ -27,23 +27,18 @@
         </template>
       </sidebar-link>
       <sidebar-link to="/jobs">
-        <!-- <i class="nc-icon nc-watch-time"></i> -->
-        <!-- <i class="fa fa-tasks" aria-hidden="true"></i> -->
         <i class="fa fa-list-ul" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbJobs')" />
       </sidebar-link>
       <sidebar-link to="/totaling">
-        <!-- <i class="nc-icon nc-chart-bar-32"></i> -->
         <i class="fa fa-file-text-o" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbTotaling')" />
       </sidebar-link>
       <sidebar-link to="/overview">
-        <!-- <i class="nc-icon nc-chart-pie-36"></i> -->
         <i class="fa fa-line-chart" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbStatistics')" />
       </sidebar-link>
       <sidebar-link to="/reports">
-        <!-- <i class="nc-icon nc-single-copy-04"></i> -->
         <i class="fa fa-thumb-tack" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbReports')" />
         <span class="report-notify" v-if="reportNotify">{{
@@ -51,12 +46,10 @@
         }}</span>
       </sidebar-link>
       <sidebar-link to="/user">
-        <!-- <i class="nc-icon nc-badge"></i> -->
         <i class="fa fa-users" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbUsers')" />
       </sidebar-link>
       <sidebar-link to="/off-days">
-        <!-- <i class="nc-icon nc-spaceship"></i> -->
         <i class="fa fa-toggle-off" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbOffDays')" />
       </sidebar-link>
@@ -65,14 +58,16 @@
         <p v-text="$ml.with('VueJS').get('sbAttendance')" />
       </sidebar-link>
       <sidebar-link to="/bookings">
-        <!-- <i class="nc-icon nc-paper-2"></i> -->
         <i class="fa fa-calendar-o" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbMeetingRoom')" />
       </sidebar-link>
-      <sidebar-link to="/departments">
-        <!-- <i class="nc-icon nc-bank"></i> -->
+      <sidebar-link to="/settings/departments">
         <i style="font-size: 22px" class="fa fa-cog" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbSettings')" />
+      </sidebar-link>
+       <sidebar-link to="/hr/profiles">
+        <i style="font-size: 22px; position: relative; top: 3px;" class="fa fa-address-card" aria-hidden="true"></i>
+        <p>Hr</p>
       </sidebar-link>
       <sidebar-link to="/profile" class="d-block d-lg-none">
         <i class="nc-icon nc-circle-09"></i>
@@ -132,10 +127,10 @@
 .wrapper-employee {
   .menu {
     &-user,
-    &-teams,
-    &-types,
-    &-departments,
-    &-settings {
+    &-settings-teams,
+    &-settings-types,
+    &-settings-departments,
+    &-hr-profiles{
       display: none;
     }
 

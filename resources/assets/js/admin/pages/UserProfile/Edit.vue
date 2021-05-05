@@ -91,7 +91,21 @@
             </datepicker>
           </div>
         </div>
-        <div class="col-sm-6"></div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="">Profile</label>
+            <multiselect
+              :multiple="false"
+              v-model="selectedUser.profile"
+              :options="options.profiles"
+              :clear-on-select="false"
+              :searchable="false"
+              :placeholder="$ml.with('VueJS').get('txtSelectOne')"
+              label="text"
+              track-by="text"
+            ></multiselect>
+          </div>
+        </div>
         <div class="col-sm-6">
           <div class="form-group">
             <label class="">{{ $ml.with("VueJS").get("txtPassword") }}</label>
@@ -152,7 +166,7 @@ export default {
     Multiselect,
   },
 
-  props: ['options'],
+  props: ["options"],
 
   data() {
     return {
