@@ -15,7 +15,7 @@ import projects from './modules/projects'
 import jobs from './modules/jobs'
 import offdays from './modules/offdays'
 import schedules from './modules/schedules'
-import timeslots from './modules/timeslots'
+import bookings from './modules/bookings'
 import totaling from './modules/totaling'
 import reports from './modules/reports'
 import totalpage from './modules/totalpage'
@@ -40,7 +40,7 @@ export default new Vuex.Store({
     jobs,
     offdays,
     schedules,
-    timeslots,
+    bookings,
     totaling,
     reports,
     totalpage,
