@@ -19,7 +19,7 @@ class JobsController extends Controller
     $filters = array(
       'date' => $request->get('date'),
       'team' => $request->get('team_id'),
-      'show' => $request->get('show')
+      'show' => $request->get('show'),
     );
 
     $totaling = $this->getTotaling($filters, $this->user['id']);
@@ -28,6 +28,7 @@ class JobsController extends Controller
 
     return response()->json([
       'jobs' => $this->getJobs($filters, $this->user['id']),
+      'meeting' => $this->getMeeting($filters, $this->user['id']),
       'totaling' => array(
         'data' => $totaling,
         'total' => array('text' => $this->formatTime($totalTime), 'value' => $totalTime)
@@ -156,22 +157,23 @@ class JobsController extends Controller
         ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
         ->leftJoin('types as t', 't.id', '=', 'p.type_id')
         ->where('i.status', '=', 'publish')
+        ->whereNotIn('p.id', [14, 344])
         ->where(function ($query) use ($filters) {
           $query->where(function ($query) use ($filters) {
             $query->where(function ($query) use ($filters) {
-                $query->where('s.date', '=',  $filters['date']);
+              $query->where('s.date', '=',  $filters['date']);
             })
-            ->orWhere(function ($query) use ($filters) {
+              ->orWhere(function ($query) use ($filters) {
                 $query->where('s.date', '<=',  $filters['date'])
-                ->where('s.end_date', '>=',  $filters['date']);
-            });
+                  ->where('s.end_date', '>=',  $filters['date']);
+              });
           })
-          ->where(function ($query) use ($filters) {
-            $query->where('p.team', '=', $filters['team'])
-              ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
-              ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
-              ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
-          });
+            ->where(function ($query) use ($filters) {
+              $query->where('p.team', '=', $filters['team'])
+                ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
+                ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
+                ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
+            });
         })
         ->orWhere(function ($query) use ($defaultProjects, $filters) {
           $query->whereIn('p.id', $defaultProjects)
@@ -186,7 +188,7 @@ class JobsController extends Controller
         ->orderBy('i.created_at', 'desc')
         ->orderBy('p_name', 'desc')
         ->groupBy('i.id', 's.memo')
-        ->paginate(10);
+        ->paginate(9);
     } else {
       $jobs = DB::table('issues as i')
         ->select(
@@ -242,8 +244,73 @@ class JobsController extends Controller
       $totalTime = isset($totalTime) && !empty($totalTime) ? $totalTime->time : '';
 
       $item->time = $this->formatTime($totalTime);
+
       return $item;
     });
+
+    return $jobs;
+  }
+
+  private function getMeeting($filters, $userID)
+  {
+    $jobs = DB::table('issues as i')
+      ->select(
+        'i.id as id',
+        't.dept_id',
+        'p.name as p_name',
+        'p.id as p_id',
+        's.id as schedule_id',
+        's.memo as phase',
+        't.slug as type',
+        't.email as email',
+        't.line_room as room_id',
+        'i.name as issue',
+        'i.year as issue_year'
+      )
+      ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+      ->leftJoin('schedules as s', 'i.id', '=', 's.issue_id')
+      ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+      ->whereIn('p.id', [14, 344])
+      ->where('i.status', '=', 'publish')
+      ->where(function ($query){
+        $query->where('s.memo', '=', null)->orWhere('s.memo', '=','');
+      })
+      ->where(function ($query) use ($filters) {
+        $query->where('i.start_date', '<=',  $filters['date'])->orWhere('i.start_date', '=',  NULL);
+      })
+      ->where(function ($query) use ($filters) {
+        $query->where('i.end_date', '>=',  $filters['date'])->orWhere('i.end_date', '=',  NULL);
+      })
+      ->where(function ($query) use ($filters) {
+        $query->where('p.team', '=', $filters['team'])
+          ->orWhere('p.team', 'LIKE', $filters['team'] . ',%')
+          ->orWhere('p.team', 'LIKE', '%,' . $filters['team'] . ',%')
+          ->orWhere('p.team', 'LIKE', '%,' . $filters['team']);
+      })
+      ->orderBy('i.created_at', 'desc')
+      ->orderBy('p_name', 'desc')
+      ->orderBy('s.id', 'desc')
+      ->groupBy('i.id')->get();
+    foreach ($jobs as $item) {
+      $item->fullproject = $item->p_name;
+      if (isset($item->issue_year) && !empty($item->issue_year)) $item->fullproject .= ' ' . $item->issue_year;
+      $item->fullproject .= ' ' . $item->issue;
+      $item->department = DB::table('departments')->select('name')->where('id', $item->dept_id)->first()->name;
+      $item->project = false !== strpos($item->type, '_tr') ? $item->p_name . ' (TR)' :  $item->p_name;
+
+      $totalTime = DB::table('jobs as j')
+        ->select(DB::raw('SUM(TIME_TO_SEC(j.end_time) - TIME_TO_SEC(j.start_time)) as time'))
+        ->leftJoin('schedules as s', 's.id', '=', 'j.schedule_id')
+        ->where('j.user_id', '=', $userID)
+        ->where('j.issue_id', '=', $item->id)
+        ->where('j.date', '=', $filters['date'])
+        ->groupBy('j.issue_id', 's.id')
+        ->first();
+
+      $totalTime = isset($totalTime) && !empty($totalTime) ? $totalTime->time : '';
+
+      $item->time = $this->formatTime($totalTime);
+    }
     return $jobs;
   }
 
@@ -284,8 +351,8 @@ class JobsController extends Controller
       $item->start_time_string = $item->start_time;
       $item->end_time_string = $item->end_time;
 
-      $startTime = explode(':',$item->start_time);
-      $endTime = explode(':',$item->end_time);
+      $startTime = explode(':', $item->start_time);
+      $endTime = explode(':', $item->end_time);
 
       $item->start_time = array(
         'HH' => $startTime[0],
@@ -303,17 +370,18 @@ class JobsController extends Controller
     return $totaling;
   }
 
-  public function getIssuePages() {
+  public function getIssuePages()
+  {
     return DB::table('issues as i')
-    ->select(
-      'i.page',
-    )
-    ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
-    ->leftJoin('types as t', 't.id', '=', 'p.type_id')
-    ->where('t.line_room', '=', NULL)
-    ->where('t.email', '=', NULL)
-    ->where('i.id', $_GET['issue_id'])
-    ->get()->pluck('page')->toArray();
+      ->select(
+        'i.page',
+      )
+      ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+      ->leftJoin('types as t', 't.id', '=', 'p.type_id')
+      ->where('t.line_room', '=', NULL)
+      ->where('t.email', '=', NULL)
+      ->where('i.id', $_GET['issue_id'])
+      ->get()->pluck('page')->toArray();
   }
 
   private function formatTime($time)

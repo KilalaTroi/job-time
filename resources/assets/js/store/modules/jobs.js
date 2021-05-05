@@ -126,6 +126,7 @@ export default {
 			const uri = '/data/jobs?page=' + page + '&date=' + currentDate + '&team_id=' + state.filters.team + '&show=' + state.filters.show;
 
 			await axios.get(uri).then(response => {
+				if('showSchedule' == state.filters.show)	response.data.jobs.data = [...response.data.meeting, ...response.data.jobs.data]
 				commit('SET_DATA', response.data)
 			})
 		},

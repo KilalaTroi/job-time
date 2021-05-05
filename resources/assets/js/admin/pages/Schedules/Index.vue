@@ -235,7 +235,6 @@ export default {
         handler: function(value) {
           this.search = '';
           this.getAll();
-
           if ( value.team != this.currentTeam.id ) {
             $('.tooltip').remove();
             this.setCurrentTeam(value.team);

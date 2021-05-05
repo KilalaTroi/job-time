@@ -3,8 +3,46 @@
     <div class="container-fluid">
       <card class="mb-0">
         <template slot="header">
-          <div class="d-flex justify-content-between">
-            <h4 class="card-title">{{ $ml.with('VueJS').get('sbAttendance') }}</h4>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="card-title my-0 mb-1">
+                {{ $ml.with("VueJS").get("sbAttendance") }}
+              </h4>
+              <nav>
+                <div class="nav" id="nav-tab" role="tablist">
+                  <a
+                    class="nav-item nav-link active"
+                    id="table-tab-2"
+                    data-toggle="tab"
+                    href="#table-tab-calendar"
+                    role="tab"
+                    aria-controls="table-tab-calendar"
+                    aria-selected="false"
+                    @click="changeTab(2)"
+                    >{{ $ml.with("VueJS").get("txtCalendar") }}</a
+                  >
+                  <a
+                    class="nav-item nav-link"
+                    id="table-tab-1"
+                    data-toggle="tab"
+                    href="#table-tab-table"
+                    role="tab"
+                    aria-controls="table-tab-table"
+                    aria-selected="true"
+                    @click="changeTab(1)"
+                    >{{ $ml.with("VueJS").get("txtCalculation") }}</a
+                  >
+                  <router-link
+                    class=""
+                    v-if="permission"
+                    to="/checkinout/timetable"
+                    >{{
+                      $ml.with("VueJS").get("txtShiftsManagement")
+                    }}</router-link
+                  >
+                </div>
+              </nav>
+            </div>
             <div
               class="form-group mb-0 d-flex justify-content-end align-items-end"
               style="width: width: 800px"
@@ -72,37 +110,6 @@
             <!-- <div class="row justify-content-end" style="width: 800px"></div> -->
           </div>
         </template>
-        <div class="row mb-3">
-          <div class="col-sm-12">
-            <nav>
-              <div class="nav" id="nav-tab" role="tablist">
-                <a
-                  class="nav-item nav-link active"
-                  id="table-tab-2"
-                  data-toggle="tab"
-                  href="#table-tab-calendar"
-                  role="tab"
-                  aria-controls="table-tab-calendar"
-                  aria-selected="false"
-                  @click="changeTab(2)"
-                  >{{ $ml.with('VueJS').get('txtCalendar') }}</a
-                >
-                <a
-                  class="nav-item nav-link"
-                  id="table-tab-1"
-                  data-toggle="tab"
-                  href="#table-tab-table"
-                  role="tab"
-                  aria-controls="table-tab-table"
-                  aria-selected="true"
-                  @click="changeTab(1)"
-                  >{{ $ml.with('VueJS').get('txtCalculation') }}</a
-                >
-                <router-link class="" v-if="permission" to="/checkinout/timetable">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</router-link>
-              </div>
-            </nav>
-          </div>
-        </div>
         <div class="row">
           <div class="col-sm-12 row--left">
             <card>
@@ -115,7 +122,9 @@
                   color: #333;
                 "
               >
-                <span><b>{{ $ml.with('VueJS').get('txtLate') }}</b></span>
+                <span
+                  ><b>{{ $ml.with("VueJS").get("txtLate") }}</b></span
+                >
               </div>
               <div
                 color="#00AEEF"
@@ -126,7 +135,9 @@
                   color: #333;
                 "
               >
-                <span><b>{{ $ml.with('VueJS').get('txtEarly') }}</b></span>
+                <span
+                  ><b>{{ $ml.with("VueJS").get("txtEarly") }}</b></span
+                >
               </div>
               <div
                 color="#00AEEF"
@@ -137,7 +148,9 @@
                   color: #333;
                 "
               >
-                <span><b>{{ $ml.with('VueJS').get('txtTotalLate') }}</b></span>
+                <span
+                  ><b>{{ $ml.with("VueJS").get("txtTotalLate") }}</b></span
+                >
               </div>
               <div
                 color="#00AEEF"
@@ -148,7 +161,9 @@
                   color: #333;
                 "
               >
-                <span><b>{{ $ml.with('VueJS').get('txtTotalEarly') }}</b></span>
+                <span
+                  ><b>{{ $ml.with("VueJS").get("txtTotalEarly") }}</b></span
+                >
               </div>
             </card>
           </div>
@@ -202,7 +217,7 @@
                           <span
                             class="cl-checkout text-right d-block"
                             v-if="'checkout' == column.id"
-                            >{{ $ml.with('VueJS').get('txtTotal') }}:</span
+                            >{{ $ml.with("VueJS").get("txtTotal") }}:</span
                           >
                           <span
                             class="cl-late"
@@ -338,21 +353,28 @@ export default {
     changeTab(elm) {
       this.tab = elm;
     },
-    setTeam(value){
+    setTeam(value) {
       const _this = this;
-      if("undefined" == typeof(_this.filters.team_id) && value.team) _this.filters.team_id = _this.filtersAll.team_id = value.team.id
+      if ("undefined" == typeof _this.filters.team_id && value.team)
+        _this.filters.team_id = _this.filtersAll.team_id = value.team.id;
     },
-    checkPermission(value){
+    checkPermission(value) {
       const _this = this;
-      if( (value.role && 1 == value.role.id) || -1 !== ('1,49,').indexOf(value.id+',')) _this.permission = true;
-    }
+      if (
+        (value.role && 1 == value.role.id) ||
+        -1 !== "1,49,".indexOf(value.id + ",")
+      )
+        _this.permission = true;
+    },
   },
 
   async created() {
     const _this = this;
     _this.resetFilter();
     _this.setColumns();
-    _this.options.teams = [{ id: "", text: "ALL" }].concat(_this.currentFullTeamOption);
+    _this.options.teams = [{ id: "", text: "ALL" }].concat(
+      _this.currentFullTeamOption
+    );
     _this.filters.team_id = _this.filtersAll.team_id = _this.currentTeam.id;
     _this.setTeam(_this.loginUser);
     _this.checkPermission(_this.loginUser);
@@ -363,21 +385,21 @@ export default {
   },
 
   watch: {
-    loginUser:[
+    loginUser: [
       {
-      handler: function (value) {
-        const _this = this;
-        _this.setTeam(value);
-        _this.checkPermission(value);
+        handler: function (value) {
+          const _this = this;
+          _this.setTeam(value);
+          _this.checkPermission(value);
+        },
+        deep: true,
       },
-      deep: true,
-      }
     ],
     filters: [
       {
         handler: function (value) {
           const _this = this;
-          if("undefined" != typeof(value.team_id)){
+          if ("undefined" != typeof value.team_id) {
             if (value.team_id != _this.filtersAll.team_id) {
               _this.getOptions();
               this.setCurrentTeam(value.team_id);
@@ -409,7 +431,7 @@ export default {
         },
         deep: true,
       },
-    ]
+    ],
   },
 };
 </script>
@@ -568,7 +590,7 @@ export default {
       font-size: 14px;
     }
   }
-  .fc-event{
+  .fc-event {
     cursor: default;
   }
   .fc-dayGrid-view .fc-body .fc-row {

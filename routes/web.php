@@ -52,15 +52,18 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('issues/delete-all', 'IssuesController@deleteAll');
     Route::post('issues/archive-all', 'IssuesController@archiveAll');
     Route::resource('schedules', 'SchedulesController', ['except' => ['create', 'edit']]);
-    Route::resource('timeslots', 'TimeSlotsController', ['except' => ['create', 'edit']]);
+    Route::resource('bookings', 'BookingsController', ['except' => ['create', 'edit']]);
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
     Route::get('all-off-days', 'OffDaysController@allOffDays');
     Route::get('all-off-day-week', 'OffDaysController@allOffDayWeek');
 
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::get('issue-pages', 'JobsController@getIssuePages');
-    Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
+
+    Route::get('users/get-options', 'UsersController@getOptions');
     Route::get('users/archive/{id}/{status}', 'UsersController@archive');
+    Route::resource('users', 'UsersController', ['except' => ['create', 'edit']]);
+
     Route::resource('processes', 'ProcessesController', ['except' => ['create', 'edit']]);
 
     Route::get('statistic/time-allocation', 'StatisticsController@timeAllocation');
