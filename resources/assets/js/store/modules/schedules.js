@@ -218,7 +218,6 @@ export default {
     dropSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
-
       // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
       //   data.revert();
       //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
@@ -233,6 +232,7 @@ export default {
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
             all_date: event.allDay,
+            booking: data.event._def.extendedProps.booking,
           }
         }
         dispatch('functionFullCalendar', request)
@@ -246,7 +246,6 @@ export default {
     resizeSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
-
       // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
       //   data.revert();
       //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
@@ -260,6 +259,7 @@ export default {
             end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+            booking: data.event._def.extendedProps.booking,
           }
         }
         dispatch('functionFullCalendar', request)
@@ -288,10 +288,13 @@ export default {
     getItem({ commit, rootGetters }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       const titleArray = (data.event).title.split("<br>");
+
       const item = {
         id: data.event.id,
         title_not_memo: titleArray.length > 2 ? titleArray[1] : titleArray[0],
         memo: titleArray.length > 2 ? titleArray[2] : titleArray[1],
+        p_id: data.event._def.extendedProps.p_id,
+        booking: data.event._def.extendedProps.booking,
         start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
         end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
       }
@@ -304,6 +307,7 @@ export default {
       const uri = "/data/schedules/" + state.selectedItem.id;
       const newItem = {
         memo: item.memo,
+        booking: item.booking,
       };
       axios
         .patch(uri, newItem)

@@ -10,7 +10,7 @@ export default {
     sbJobTypes: 'Job Types',
     sbProjects: 'Projects',
     sbSchedules: 'Schedules',
-    sbTimeSlots: 'Time Slots',
+    sbMeetingRoom: 'Meeting Room',
     sbJobs: 'Tasks',
     sbOffDays: 'Off days',
     sbReports: 'Notes',
@@ -232,5 +232,6 @@ export default {
     txtCalculation: 'Calculation',
     txtTotalPages: 'Total pages',
     txtTotalProjects: 'Total projects',
-    txtTotalJobs: 'Total jobs'
+    txtTotalJobs: 'Total jobs',
+    txtUseTheMeetingRoom: 'Use the meeting room',
 }

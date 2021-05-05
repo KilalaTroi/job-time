@@ -32,16 +32,12 @@ export default {
       state.data = {
         projects: data.projects,
         schedules: data.schedules,
-        schedulesDetail: data.schedulesDetail,
         projectsFilter: data.projects,
-        issuesNoSC: data.issues
       }
     },
 
     SET_DATA_SCHEDULE: (state, data) => {
       state.data.schedules = data.schedules;
-      state.data.schedulesDetail = data.schedulesDetail;
-      state.data.issuesNoSC = data.issues;
     },
 
     SET_DATA_CALENDAR: (state, data) => {
@@ -77,7 +73,7 @@ export default {
     async getAll({ commit, state, rootGetters, rootState }, onlyEvent = false) {
       const currentStart = rootGetters['dateFormat'](state.filters.currentStart, 'YYYY-MM-DD')
       const currentEnd = rootGetters['dateFormat'](state.filters.currentEnd, 'YYYY-MM-DD')
-      const uri = '/data/timeslots?startDate=' + currentStart + '&endDate=' + currentEnd + '&team_id=' + state.filters.team + '&only_event=' + onlyEvent
+      const uri = '/data/bookings?startDate=' + currentStart + '&endDate=' + currentEnd + '&team_id=' + state.filters.team + '&only_event=' + onlyEvent
 
       await axios.get(uri).then(response => {
         $('.tooltip').remove();
@@ -91,7 +87,6 @@ export default {
             let description = '';
 
             // Get log time detail for schedule
-            if ( response.data.schedulesDetail.length && !item.all_date ) sDetail = rootGetters['getLogTime'](response.data.schedulesDetail, item.issue_id, item.date);
             const codition = sDetail.length && (state.filters.team == 2) && ! arrProjectsPV.includes(item.p_id)
             const textTime = sDetail.length && (state.filters.team == 2) && arrProjectsHT.includes(item.p_id) ? '<span>' + sDetail[0].start_time + ' - ' + sDetail[sDetail.length - 1].end_time + '</span><br>' : '';
             const startTime = codition ? sDetail[0].start_time : item.start_time;
@@ -112,7 +107,7 @@ export default {
 
               return Object.assign({}, _item, {
                 id: _item.id,
-                title: _item.title + textTime + _item.name + '<br>' + memo,
+                title: textTime + _item.name,
                 description: description,
                 className: textTime ? 'has-log-time' + classHideTime : '' + classHideTime,
                 start: rootGetters['dateFormat'](_item.date + " " + _value.start_time),
@@ -197,12 +192,9 @@ export default {
       const { event } = data;
       const request = {
         method: "post",
-        uri: "/data/timeslots",
+        uri: "/data/bookings",
         data: {
-          issue_id: event.id,
           title: event.title,
-          borderColor: event.borderColor,
-          backgroundColor: event.backgroundColor,
           date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
           end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
           all_date: event.allDay,
@@ -225,7 +217,7 @@ export default {
         const { event } = data;
         const request = {
           method: "patch",
-          uri: "/data/timeslots/" + event.id,
+          uri: "/data/bookings/" + event.id,
           data: {
             date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
             end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
@@ -253,7 +245,7 @@ export default {
         const { event } = data;
         const request = {
           method: "patch",
-          uri: "/data/timeslots/" + event.id,
+          uri: "/data/bookings/" + event.id,
           data: {
             date: rootGetters['dateFormat'](event.start, "YYYY-MM-DD"),
             end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
@@ -286,11 +278,10 @@ export default {
 
     getItem({ commit, rootGetters }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      const titleArray = (data.event).title.split("<br>");
       const item = {
         id: data.event.id,
-        title_not_memo: titleArray.length > 2 ? titleArray[1] : titleArray[0],
-        memo: titleArray.length > 2 ? titleArray[2] : titleArray[1],
+        title_not_memo: data.event.title,
+        memo: data.event._def.extendedProps.memo,
         start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
         end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
       }
@@ -300,7 +291,7 @@ export default {
 
     updateItem({ state, commit }, item) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      const uri = "/data/timeslots/" + state.selectedItem.id;
+      const uri = "/data/bookings/" + state.selectedItem.id;
       const newItem = {
         memo: item.memo,
       };
@@ -318,7 +309,7 @@ export default {
     deleteItem({ dispatch, state }, msgText) {
       $("#itemDetail").modal("hide");
       if (confirm(msgText)) {
-        const uri = "/data/timeslots/" + state.selectedItem.id
+        const uri = "/data/bookings/" + state.selectedItem.id
         axios.delete(uri)
           .then(res => {
             dispatch('getAll', true)

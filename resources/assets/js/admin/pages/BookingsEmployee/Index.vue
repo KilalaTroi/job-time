@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content mtr">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-3 col-xl-2">
@@ -8,7 +8,6 @@
               <div id="external-events-list">
                 <div
                   class="alert alert-success fc-event"
-                  :class="{ 'no-schedule' : scheduleData.issuesNoSC.includes(item.issue_id) }"
                   v-for="(item, index) in scheduleData.projectsFilter"
                   :data-issue="item.issue_id"
                   :key="index"
@@ -55,12 +54,13 @@
             :hidden-days="hiddenDays"
             @datesRender="handleMonthChange"
             @eventRender="tooltipFunc"
+            @eventClick="getItem"
             :locale="getLanguage(this.$ml)"
           />
         </div>
       </div>
     </div>
-
+    <edit-item />
   </div>
 </template>
 
@@ -72,6 +72,7 @@ import interactionPlugin, { Draggable } from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list"
 import Card from "../../components/Cards/Card"
 import Select2 from "../../components/SelectTwo/SelectTwo.vue"
+import EditItem from "./Edit"
 import { mapGetters, mapActions } from "vuex"
 
 export default {
@@ -79,6 +80,7 @@ export default {
     Select2,
     FullCalendar, // make the <FullCalendar> tag available
     Card,
+    EditItem
   },
   data() {
     return {
@@ -115,7 +117,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters("timeslots", {
+    ...mapGetters("bookings", {
       scheduleData: "data",
       filters: "filters",
       fullCalendar: "fullCalendar",
@@ -131,10 +133,11 @@ export default {
   },
 
   methods: {
-    ...mapActions("timeslots", {
+    ...mapActions("bookings", {
       handleMonthChange: "handleMonthChange",
       searchItem: "searchItem",
-      getAll: "getAll"
+      getAll: "getAll",
+      getItem: "getItem",
     }),
 
     ...mapActions({
@@ -183,5 +186,7 @@ export default {
 </script>
 
 <style lang="scss" scope>
-@import "../TimeSlots/custom.scss";
+.mtr{
+  @import "../Bookings/custom.scss";
+}
 </style>
