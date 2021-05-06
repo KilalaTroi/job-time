@@ -21,12 +21,15 @@ class UsersController extends Controller
 		$users = DB::table('role_user as ru')
 			->select(
 				'user.id as id',
+				'user.checkinout_user_id as checkinout_user_id',
 				'user.name as name',
 				'user.username as username',
 				'user.email as email',
 				'user.team as team',
 				'user.language as language',
 				'user.disable_date as disable_date',
+				'user.work_date as work_date',
+				'user.created_at as created_at',
 				'role.name as r_name'
 			)
 			->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
@@ -37,6 +40,7 @@ class UsersController extends Controller
 		foreach ($users as $user) {
 			$hrprofile = HrProfile::select('id', 'name')->where('user_id', $user->id)->first();
 			$user->profile = $user->fullname = '';
+			if (empty($user->work_date) || NULL === $user->work_date) $user->work_date = $user->created_at;
 			if (isset($hrprofile) && !empty($hrprofile)) {
 				$user->profile = array(
 					'id' => $hrprofile->id,
@@ -69,34 +73,41 @@ class UsersController extends Controller
 
 		$this->validate($request, [
 			'name' => 'required|string|max:255',
-			'username' => 'required|string|max:100|unique:users',
+			'username' => 'required|string|max:100|unique:users|alpha_dash',
 			'email' => 'required|string|email|max:100|unique:users',
 			'team' => 'required',
 			'r_name' => 'required|not_in:0',
 			'password' => 'required|string|min:6|confirmed',
 		]);
-
+		if(!empty($request->get('checkinout_user_id')) && NULL !== $request->get('checkinout_user_id')) {
+			$this->validate($request, [
+				'checkinout_user_id' => 'unique:users',
+			]);
+		}
 		$user = User::create([
 			'name' => $request->get('name'),
+			'checkinout_user_id' => $request->get('checkinout_user_id') * 1,
 			'username' => $request->get('username'),
 			'language' => $request->get('language'),
 			'email' => $request->get('email'),
 			'team' => $request->get('team')['id'],
+			'work_date' => !empty($request->get('work_date')) && NULL !== $request->get('work_date') ? $request->get('work_date') : date('Y-m-d'),
 			'password' => bcrypt($request->get('password')),
 		]);
 
 		$user->roles()->attach(Role::where('name', $request->get('r_name'))->first());
 
-		$hrprofile = HrProfile::findOrFail($request->get('profile'));
+		$hrprofile = HrProfile::find($request->get('profile'));
 
-		$hrprofile->update([
-			'user_id' => $user->id,
-			'team_id' => $user->team,
-		]);
-
-		User::findOrFail($user->id)->update([
-			'fullname' => $hrprofile->name,
-		]);
+		if (isset($hrprofile) && !empty($hrprofile)) {
+			$hrprofile->update([
+				'user_id' => $user->id,
+				'team_id' => $user->team,
+			]);
+			User::findOrFail($user->id)->update([
+				'fullname' => $hrprofile->name,
+			]);
+		}
 
 		return response()->json(array(
 			'id' => $user->id,
@@ -134,6 +145,12 @@ class UsersController extends Controller
 			'email' => 'required|string|email|max:100|unique:users,email,' . $id,
 			'team' => 'required',
 		]);
+
+		if(!empty($request->get('checkinout_user_id')) && NULL !== $request->get('checkinout_user_id')) {
+			$this->validate($request, [
+				'checkinout_user_id' => 'unique:users,checkinout_user_id,' . $id,
+			]);
+		}
 
 		$profile = 0;
 		if (!empty($request->input('profile')) && NULL !== $request->input('profile')) {
@@ -188,15 +205,17 @@ class UsersController extends Controller
 
 		$userUpdate = array(
 			'name' => $request->get('name'),
+			'checkinout_user_id' => $request->get('checkinout_user_id') * 1,
 			'username' => $request->get('username'),
 			'language' => $request->get('language'),
 			'email' => $request->get('email'),
 			'team' => $request->get('team')['id'],
 			'disable_date' => $request->get('disable_date'),
+			'work_date' => !empty($request->get('work_date')) && NULL !== $request->get('work_date') ? $request->get('work_date') : $user->created_at,
 		);
 
 		if (!empty($request->input('profile_old')) && NULL !== $request->input('profile_old')) $userUpdate['fullname'] = NULL;
-		if(isset($user_fullname) && !empty($user_fullname)) $userUpdate['fullname'] =  $user_fullname;
+		if (isset($user_fullname) && !empty($user_fullname)) $userUpdate['fullname'] =  $user_fullname;
 
 		$user->update($userUpdate);
 
