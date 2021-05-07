@@ -8,6 +8,7 @@ use App\SharedBooking;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class SchedulesController extends Controller
 {
@@ -77,22 +78,49 @@ class SchedulesController extends Controller
 	public function update($id, Request $request)
 	{
 		$data = $request->all();
-		$schedule = Schedule::findOrFail($id);
-		if(true == $request->input('booking')){
-			// if(empty($schedule->memo)) $data['memo'] = 'Meeting, Training (' . $this->user['name'] . ')';
-			if(empty($data['memo'])) $data['memo'] = 'Meeting, Training (' . $this->user['name'] . ')';
+		if (true == $request->input('booking')) {
+			if (empty($data['memo'])) $data['memo'] = 'Meeting, Training (' . $this->user['name'] . ')';
 		}
-		$schedule->update($data);
-		$booking = SharedBooking::where('schedule_id', $id)->count();
-		if ($booking > 0 && false == $request->input('booking')) {
-			SharedBooking::where('schedule_id', $id)->delete();
-		} else if (true == $request->input('booking')) {
-			$schedule = $schedule->toArray();
-			$schedule['schedule_id'] = $id;
-			if ($booking == 0) SharedBooking::create($schedule);
+
+		$cbWeekStart = Carbon::createFromFormat('Y-m-d', explode('T', $data['daten'])[0]);
+		$days = array($cbWeekStart->copy()->format('Y-m-d'));
+
+		if (isset($data['weekendcheck']) && !empty($data['weekendcheck'])) {
+			$cbWeekEnd = Carbon::createFromFormat('Y-m-d', explode('T', $data['weekend'])[0]);
+			while ($cbWeekStart->lte($cbWeekEnd)) {
+				$cbWeekStart = $cbWeekStart->addWeek();
+				if ($cbWeekStart > $cbWeekEnd) break;
+				$days[] = $cbWeekStart->copy()->format('Y-m-d');
+			}
+		}
+
+		foreach ($days as $index => $day) {
+			if(0 === $index){
+				$schedule = Schedule::findOrFail($id);
+				$schedule->update($data);
+			}
 			else {
-				unset($schedule['id'], $schedule['issue_id']);
-				SharedBooking::where('schedule_id', $id)->update($schedule);
+				$schedule['date'] = $schedule['end_date'] = $day;
+				$schedule = Schedule::create($schedule);
+			}
+
+			$schedule = $schedule->toArray();
+			$schedule_id = $schedule['id'];
+			$issue_id = $schedule['issue_id'];
+
+			unset($schedule['updated_at'], $schedule['created_at']);
+			$booking = SharedBooking::where('schedule_id', $schedule_id)->count();
+			if ($booking > 0 && false == $request->input('booking')) {
+				SharedBooking::where('schedule_id', $schedule_id)->delete();
+			} else if (true == $request->input('booking')) {
+				$schedule['schedule_id'] = $schedule_id;
+				if ($booking == 0) SharedBooking::create($schedule);
+				else {
+					unset($schedule['id'], $schedule['issue_id']);
+					SharedBooking::where('schedule_id', $schedule_id)->update($schedule);
+					$schedule['id']= $schedule_id;
+					$schedule['issue_id'] = $issue_id;
+				}
 			}
 		}
 

@@ -79,6 +79,29 @@
         </div>
         <div class="col-sm-6">
           <div class="form-group">
+            <label class="">CheckInOut user id</label>
+            <input
+              v-model="selectedUser.checkinout_user_id"
+              type="number"
+              class="form-control"
+            />
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="">Work date</label>
+            <datepicker
+                input-class="form-control"
+                placeholder="Select Date"
+                v-model="selectedUser.work_date"
+                :format="customFormatter"
+                :language="getLangCode(this.$ml)"
+              >
+            </datepicker>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
             <label class="">Disable date</label>
             <datepicker
               name="disable_date"
@@ -91,7 +114,21 @@
             </datepicker>
           </div>
         </div>
-        <div class="col-sm-6"></div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="">Profile</label>
+            <multiselect
+              :multiple="false"
+              v-model="selectedUser.profile"
+              :options="options.profiles"
+              :clear-on-select="false"
+              :searchable="false"
+              :placeholder="$ml.with('VueJS').get('txtSelectOne')"
+              label="text"
+              track-by="text"
+            ></multiselect>
+          </div>
+        </div>
         <div class="col-sm-6">
           <div class="form-group">
             <label class="">{{ $ml.with("VueJS").get("txtPassword") }}</label>
@@ -152,7 +189,7 @@ export default {
     Multiselect,
   },
 
-  props: ['options'],
+  props: ["options"],
 
   data() {
     return {

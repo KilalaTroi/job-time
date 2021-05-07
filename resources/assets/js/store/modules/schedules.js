@@ -288,13 +288,16 @@ export default {
     getItem({ commit, rootGetters }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       const titleArray = (data.event).title.split("<br>");
-
+      let datew = data.event.start.setDate(data.event.start.getDate()+1);
+      datew = new Date(datew)
       const item = {
         id: data.event.id,
         title_not_memo: titleArray.length > 2 ? titleArray[1] : titleArray[0],
         memo: titleArray.length > 2 ? titleArray[2] : titleArray[1],
         p_id: data.event._def.extendedProps.p_id,
         booking: data.event._def.extendedProps.booking,
+        datew: datew,
+        daten: data.event.start,
         start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
         end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
       }
@@ -308,6 +311,9 @@ export default {
       const newItem = {
         memo: item.memo,
         booking: item.booking,
+        weekendcheck: item.weekendcheck,
+        weekend: item.weekend,
+        daten: item.daten
       };
       axios
         .patch(uri, newItem)

@@ -7,9 +7,9 @@
             <b>{{ $ml.with("VueJS").get("sbSettings") }}</b>
           </h4>
           <div class="lsub-menu">
-            <router-link class="" to="/departments">{{ $ml.with("VueJS").get("sbDepartments") }}</router-link>
-            <router-link class="active" to="/teams">{{ $ml.with("VueJS").get("sbTeams") }}</router-link>
-            <router-link class="" to="/types">{{ $ml.with("VueJS").get("sbJobTypes") }}</router-link>
+            <router-link class="" to="/settings/departments">{{ $ml.with("VueJS").get("sbDepartments") }}</router-link>
+            <router-link class="active" to="/settings/teams">{{ $ml.with("VueJS").get("sbTeams") }}</router-link>
+            <router-link class="" to="/settings/types">{{ $ml.with("VueJS").get("sbJobTypes") }}</router-link>
           </div>
         </div>
         <div class="form-group mb-0">

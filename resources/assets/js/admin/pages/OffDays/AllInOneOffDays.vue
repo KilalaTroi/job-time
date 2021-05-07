@@ -158,6 +158,13 @@ export default {
       return { from: new Date() };
     },
 
+    setTeam(value) {
+      const _this = this;
+      if("undefined" == typeof _this.filters.team && value.team) _this.filters.team = value.team.id;
+      if(value.role && ('admin' == value.role.name || -1 !== [1, 49].indexOf(value.id))) _this.filters.team = ''
+      if(value.team && ('4' == value.team)) _this.filters.team = ''
+    },
+
     makeDraggable() {
       let draggableEl = document.getElementById("external-events-list");
 
@@ -182,16 +189,18 @@ export default {
   async created() {
     const _this = this;
     _this.options.team = [{ id: "", text: "ALL" }].concat(_this.currentFullTeamOption);
-    if(_this.loginUser.role && ('admin' == _this.loginUser.role.name || -1 !== [1, 49].indexOf(_this.loginUser.id))) _this.filters.team = ''
-    else _this.filters.team = _this.currentTeam.id;
+    _this.filters.team = _this.currentTeam.id;
+    _this.setTeam(_this.loginUser);
   },
 
   watch: {
     filters: [
       {
         handler: function (value) {
-          if (value.team != this.currentTeam.id) this.setCurrentTeam(value.team);
-          this.getAllOffDays();
+          if ("undefined" != typeof this.filters.team){
+            if (value.team != this.currentTeam.id) this.setCurrentTeam(value.team);
+            this.getAllOffDays();
+          }
         },
         deep: true,
       },
@@ -199,7 +208,7 @@ export default {
     loginUser: [
       {
         handler: function (value) {
-          if('admin' == value.role.name || -1 !== [1, 49].indexOf(value.id)) this.filters.team = '';
+          this.setTeam(value);
         },
         deep: true,
       },
