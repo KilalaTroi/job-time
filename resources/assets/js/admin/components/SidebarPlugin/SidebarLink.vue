@@ -2,7 +2,7 @@
   <component :is="tag"
              @click.native="hideSidebar"
              v-bind="$attrs"
-             :class="$attrs.to.replace('/','menu-')"
+             :class="$attrs.to.replace('/','menu-').replaceAll('/','-')"
              tag="li">
     <a class="nav-link" v-bind="$attrs">
       <slot>

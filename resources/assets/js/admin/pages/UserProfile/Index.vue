@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content users">
     <div class="container-fluid">
       <div class="form-group">
         <div class="row">
@@ -72,28 +72,31 @@ export default {
   },
 
   computed: {
+    ...mapGetters("users", {
+      users: "items",
+      options: "options",
+      roles: "roles",
+      filters: "filters",
+    }),
     ...mapGetters({
       currentFullTeamOption: "currentFullTeamOption",
       currentTeam: "currentTeam",
-      users: "users/items",
-      roles: "users/roles",
-      filters: "users/filters",
     }),
   },
 
   data() {
     return {
       team: {},
-      options: {
-        teams: [],
-      },
     };
   },
 
   methods: {
+    ...mapActions("users", {
+      getAllUser: "getAllUser",
+      getRoleOptions: "getRoleOptions",
+      getOptions: "getOptions",
+    }),
     ...mapActions({
-      getAllUser: "users/getAllUser",
-      getRoleOptions: "users/getRoleOptions",
       setCurrentTeam: "setCurrentTeam",
     }),
   },
@@ -102,6 +105,7 @@ export default {
     const _this = this;
     _this.options.teams = _this.currentFullTeamOption;
     _this.filters.team = _this.team = Object.assign({}, _this.currentTeam);
+    _this.getOptions();
     _this.getAllUser();
   },
 
@@ -120,7 +124,7 @@ export default {
         handler: function (value) {
           const _this = this;
           if (value.team.id != _this.team.id) {
-            _this.team = value.team
+            _this.team = value.team;
             this.setCurrentTeam(value.team.id);
             this.getAllUser();
           }

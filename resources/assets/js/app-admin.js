@@ -78,7 +78,7 @@ const routes = [{
                 component: UserProfile
             },
             {
-                path: 'teams',
+                path: 'settings/teams',
                 name: 'Teams',
                 component: Teams
             },
@@ -103,12 +103,12 @@ const routes = [{
                 component: Notifications
             },
             {
-                path: 'departments',
+                path: 'settings/departments',
                 name: 'Departments',
                 component: Departments
             },
             {
-                path: 'types',
+                path: 'settings/types',
                 name: 'Types',
                 component: Types
             },
