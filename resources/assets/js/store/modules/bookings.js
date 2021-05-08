@@ -210,10 +210,6 @@ export default {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
 
-      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-      //   data.revert();
-      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -224,6 +220,8 @@ export default {
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
             all_date: event.allDay,
+            memo: event.extendedProps.memo,
+            daten: event.start
           }
         }
         dispatch('functionFullCalendar', request)
@@ -237,11 +235,6 @@ export default {
     resizeSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
-
-      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-      //   data.revert();
-      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -251,6 +244,8 @@ export default {
             end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+            memo: event.extendedProps.memo,
+            daten: event.start
           }
         }
         dispatch('functionFullCalendar', request)
@@ -278,12 +273,18 @@ export default {
 
     getItem({ commit, rootGetters }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
+      const { event } = data;
+      let datew = event.start.setDate(data.event.start.getDate()+1);
+      datew = new Date(datew)
       const item = {
-        id: data.event.id,
-        title_not_memo: data.event.title,
-        memo: data.event._def.extendedProps.memo,
-        start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
-        end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
+        id: event.id,
+        title_not_memo: event.title,
+        memo: event.extendedProps.memo,
+        start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
+        end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
+        datew: datew,
+        daten: event.start,
+        schedule_id: event.extendedProps.schedule_id
       }
       $("#itemDetail").modal("show");
       commit('SET_SELECTED_ITEM', item)
@@ -294,6 +295,9 @@ export default {
       const uri = "/data/bookings/" + state.selectedItem.id;
       const newItem = {
         memo: item.memo,
+        weekendcheck: item.weekendcheck,
+        weekend: item.weekend,
+        daten: item.daten
       };
       axios
         .patch(uri, newItem)

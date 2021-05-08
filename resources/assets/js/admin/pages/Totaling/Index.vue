@@ -26,7 +26,7 @@
               <datepicker
                 name="startDate"
                 input-class="form-control"
-                placeholder="Select Date"
+                :placeholder="$ml.with('VueJS').get('txtSelectDate')"
                 v-model="filters.start_date"
                 :format="dateFormat(filters.start_date,'YYYY-MM-DD')"
                 :disabled-dates="disabledEndDates(filters.end_date)"
@@ -40,7 +40,7 @@
               <datepicker
                 name="endDate"
                 input-class="form-control"
-                placeholder="Select Date"
+                :placeholder="$ml.with('VueJS').get('txtSelectDate')"
                 v-model="filters.end_date"
                 :format="dateFormat(filters.end_date,'YYYY-MM-DD')"
                 :disabled-dates="disabledStartDates(filters.start_date)"

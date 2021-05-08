@@ -35,12 +35,12 @@
           class="form-control mr-2"
           :style="{width: '25px'}"
         />
-        <label class="mb-0 mr-3">Every Weekend</label>
+        <label class="mb-0 mr-3">{{ $ml.with("VueJS").get("txtEveryWeekTo") }}</label>
 
         <datepicker
           v-if="selectedItem.weekendcheck"
           input-class="form-control"
-          placeholder="Select Date"
+          :placeholder="$ml.with('VueJS').get('txtSelectDate')"
           v-model="selectedItem.weekend"
           :disabled-dates="disabledStartDates(selectedItem.datew)"
           :format="customFormatter"

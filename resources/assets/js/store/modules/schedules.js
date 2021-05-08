@@ -218,10 +218,6 @@ export default {
     dropSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
-      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-      //   data.revert();
-      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -232,7 +228,9 @@ export default {
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
             all_date: event.allDay,
-            booking: data.event._def.extendedProps.booking,
+            booking: event._def.extendedProps.booking,
+            memo: event.extendedProps.memo,
+            daten: event.start
           }
         }
         dispatch('functionFullCalendar', request)
@@ -246,10 +244,6 @@ export default {
     resizeSchedule({ commit, rootGetters, dispatch }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
       commit('SET_DATA_CALENDAR', {editable: false, droppable: false})
-      // if (!confirm(rootGetters['getTranslate']("msgConfirmChange"))) {
-      //   data.revert();
-      //   commit('SET_DATA_CALENDAR', {editable: true, droppable: true})
-      // } else {
         const { event } = data;
         const request = {
           method: "patch",
@@ -259,7 +253,9 @@ export default {
             end_date: rootGetters['dateFormat'](event.end, "YYYY-MM-DD"),
             start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
             end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
-            booking: data.event._def.extendedProps.booking,
+            booking: event.extendedProps.booking,
+            memo: event.extendedProps.memo,
+            daten: event.start
           }
         }
         dispatch('functionFullCalendar', request)
@@ -287,19 +283,20 @@ export default {
 
     getItem({ commit, rootGetters }, data) {
       commit('SET_VALIDATE', { error: '', success: '' })
-      const titleArray = (data.event).title.split("<br>");
-      let datew = data.event.start.setDate(data.event.start.getDate()+1);
+      const { event } = data;
+      const titleArray = (event).title.split("<br>");
+      let datew = event.start.setDate(event.start.getDate()+1);
       datew = new Date(datew)
       const item = {
-        id: data.event.id,
+        id: event.id,
         title_not_memo: titleArray.length > 2 ? titleArray[1] : titleArray[0],
         memo: titleArray.length > 2 ? titleArray[2] : titleArray[1],
-        p_id: data.event._def.extendedProps.p_id,
-        booking: data.event._def.extendedProps.booking,
+        p_id: event.extendedProps.p_id,
+        booking: event.extendedProps.booking,
         datew: datew,
-        daten: data.event.start,
-        start_time: rootGetters['dateFormat'](data.event.start, 'HH:mm'),
-        end_time: rootGetters['dateFormat'](data.event.end, 'HH:mm'),
+        daten: event.start,
+        start_time: rootGetters['dateFormat'](event.start, 'HH:mm'),
+        end_time: rootGetters['dateFormat'](event.end, 'HH:mm'),
       }
       $("#itemDetail").modal("show");
       commit('SET_SELECTED_ITEM', item)

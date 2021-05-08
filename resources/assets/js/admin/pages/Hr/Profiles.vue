@@ -4,7 +4,7 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h4 class="my-0 mb-1">
-            <b>Hr</b>
+            <b>Human Resources Management</b>
           </h4>
           <div class="lsub-menu">
             <router-link class="active" to="/hrprofiles">Profiles</router-link>
