@@ -63,10 +63,10 @@
                 <div class="card-body">
                     <div class="d-flex mb-3 justify-content-between">
                         <div class="d-flex align-items-center flex-wrap">
-                            <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
+                            <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'day'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
                             </datepicker>
                             <span class="mx-2">-</span>
-                            <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
+                            <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'day'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
                             </datepicker>
                         </div>
                         <div>
@@ -88,10 +88,10 @@
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
-                            <a v-if="3 != team" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">{{$ml.with('VueJS').get('txtTotalPages')}}</a>
-                            <a v-if="3 == team" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">{{$ml.with('VueJS').get('txtTotalProjects')}}</a>
-                            <a v-if="3 == team" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">{{$ml.with('VueJS').get('txtTotalJobs')}}</a>
-                            <a v-if="2 == team" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">{{$ml.with('VueJS').get('txtTable')}}</a>
+                            <a v-if="3 != team" @click="showTotalPages" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">{{$ml.with('VueJS').get('txtTotalPages')}}</a>
+                            <a v-if="3 == team" @click="showTotalProjects" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">{{$ml.with('VueJS').get('txtTotalProjects')}}</a>
+                            <a v-if="3 == team" @click="showTotalJobs" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">{{$ml.with('VueJS').get('txtTotalJobs')}}</a>
+                            <a v-if="2 == team" @click="showTotalPages" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">{{$ml.with('VueJS').get('txtTable')}}</a>
                         </div>
                     </nav>
                      <div class="tab-content" id="nav-tabContent">
@@ -116,7 +116,7 @@
                         </div>
                         <div v-if="3 != team" class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
                             <div class="row">
-                                <div class="col-md-12" v-if="pageChart.data">
+                                <div class="col-md-12" v-if="pageChart.data && pageData.totalpage.length">
                                     <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -129,7 +129,7 @@
                         </div>
                         <div v-if="3 == team" class="tab-pane fade" id="totalprojects" role="tabpanel" aria-labelledby="totalprojects-tab">
                             <div class="row">
-                                <div class="col-md-12" v-if="projectChart.data">
+                                <div class="col-md-12" v-if="projectChart.data && projectsData.length">
                                     <chart-card :chart-data="projectChart.data" :chart-options="projectChart.options" chart-type="Bar" :chart-id="projectChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -142,7 +142,7 @@
                         </div>
                         <div v-if="3 == team" class="tab-pane fade" id="totaljobs" role="tabpanel" aria-labelledby="totaljobs-tab">
                             <div class="row">
-                                <div class="col-md-12" v-if="jobChart.data">
+                                <div class="col-md-12" v-if="jobChart.data && jobsData.length">
                                     <chart-card :chart-data="jobChart.data" :chart-options="jobChart.options" chart-type="Bar" :chart-id="jobChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -154,7 +154,7 @@
                             </div>
                         </div>
                         <div v-if="2 == team" class="tab-pane fade" :class="checkUser() ? 'flag' : ''" id="table" role="tabpanel" aria-labelledby="table-tab">
-                            <div class="row mt-3">
+                            <div v-if="data.totalpage.length" class="row mt-3">
                                 <button v-if="checkUser()" type="button" class="btn btn-primary" data-toggle="modal" data-target="#totalpageAction" data-backdrop="static" data-keyboard="false">
                                     Update
                                     <slot name="title"></slot>
@@ -364,7 +364,7 @@
             });
 
             $(document).on('click', '.languages button', function() {
-                _this.fetch();
+                _this.getAllData();
             });
         },
         methods: {
@@ -372,76 +372,42 @@
      	 	    setCurrentTeam: "setCurrentTeam"
             }),
 
-            fetch() {
+            getAllData(isFilter = 0) {
 
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
-                const uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                const uri = '/data/statistic/time-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team + '&isFilter=' + isFilter;
 
                 axios.get(uri)
                     .then(res => {
-                        this.types = res.data.types;
-                        this.users = res.data.users.all;
-                        this.newUsersPerMonth = res.data.users.newUsersPerMonth;
+                        if ( ! isFilter ) {
+                            // Reset
+                            this.pageData = {
+                                'totalpage' : [],
+                                'table' : [],
+                            };
+                            this.jobsData = [];
+                            this.projectsData = [];
+
+                            // Assign data
+                            this.types = res.data.types;
+                            this.users = res.data.users.all;
+                            this.newUsersPerMonth = res.data.users.newUsersPerMonth;
+                            this.jobs = res.data.jobs;
+                        }
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
                         this.hoursPerProject = res.data.totals.hoursPerProject;
-                        this.jobs = res.data.jobs;
                         this.currentMonth = res.data.currentMonth;
                         this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-
-                        if(3 != this.team){
-                            const uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getPageData(uriPage);
-                        }
-
-                        if(3 == this.team){
-                            const uriJobs = '/data/statistic/get-job-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getJobData(uriJobs);
-
-                            const uriProject = '/data/statistic/get-project-report?startMonth=' + this.customFormatterStr(this.startMonth)
-                            this.getProjectData(uriProject);
-                        }
                     })
                     .catch(err => {
                         console.log(err);
                         alert("Could not load data");
                     });
 
-            },
-            getFilterData() {
-
-                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-
-                const uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                axios.get(uri)
-                    .then(res => {
-                        this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
-                        this.hoursPerProject = res.data.totals.hoursPerProject;
-                        this.currentMonth = res.data.currentMonth;
-                        this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
-                        this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
-                        this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.barChart.data.labels = res.data.monthsText;
-                        this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-                        if(3 == this.team){
-                            const uriJobs = '/data/statistic/get-job-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getJobData(uriJobs);
-
-                            const uriProject = '/data/statistic/get-project-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth)
-                            this.getProjectData(uriProject);
-                        }
-
-                        if(3 != this.team){
-                            const uriPage = '/data/statistic/get-page-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getPageData(uriPage)
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load data");
-                    });
             },
 
             getPageData(url){
@@ -457,6 +423,13 @@
                 });
             },
 
+            showTotalPages() {
+                if ( ! this.pageData.totalpage.length ) {
+                    const uriPage = '/data/statistic/get-page-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                    this.getPageData(uriPage);
+                }
+            },
+
             getJobData(url){
                 axios.get(url)
                 .then(res => {
@@ -467,6 +440,13 @@
                     console.log(err);
                     alert("Could not load data");
                 });
+            },
+
+            showTotalJobs() {
+                if ( ! this.jobsData.length ) {
+                    const uriJobs = '/data/statistic/get-job-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                    this.getJobData(uriJobs);
+                }
             },
 
             getProjectData(url){
@@ -481,19 +461,28 @@
                 });
             },
 
+            showTotalProjects() {
+                if ( ! this.projectsData.length ) {
+                    const uriProject = '/data/statistic/get-project-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth)
+                    this.getProjectData(uriProject);
+                }
+            },
+
             hasObjectValue(data, id, yearMonth) {
                 let obj = data.filter((elem) => { if (typeof(elem) !== 'undefined' && elem.id == id && elem.yearMonth == yearMonth) return elem; });
                 if (obj.length > 0) return obj[0];
                 return false;
             },
             customFormatterEnd(date) {
-                return moment(date).endOf('month').format('YYYY/MM/DD');
+                // return moment(date).endOf('month').format('YYYY/MM/DD');
+                return moment(date).format('YYYY/MM/DD');
             },
             customFormatterStr(date) {
-                return moment(date).startOf('month').format('YYYY/MM/DD');
+                // return moment(date).startOf('month').format('YYYY/MM/DD');
+                return moment(date).format('YYYY/MM/DD')
             },
             customFormatterM(date) {
-                return moment(date).format('YYYY/MM');
+                return moment(date).format('YYYY/MM/DD');
             },
             circleClass(cl) {
                 return cl + ' text-uppercase ml-3';
@@ -592,6 +581,7 @@
                 const types = this.types;
                 $('.ct-chart, .card-footer .legend').addClass('loading');
                 if ( types.length ) {
+                    console.log('abc');
                     setTimeout(function(){
                         types.forEach(function(item, index) {
                             $(chartID).closest('.card').find('.' + item.class).each(function(){
@@ -613,18 +603,24 @@
                 handler: 'getUserOptions'
             }],
             user_id: [{
-                handler: 'getFilterData'
+                handler: function() {
+                    this.getAllData(true);
+                }
             }],
             startMonth: [{
-                handler: 'getFilterData'
+                handler: function() {
+                    this.getAllData(true);
+                }
             }],
             endMonth: [{
-                handler: 'getFilterData'
+                handler: function() {
+                    this.getAllData(true);
+                }
             }],
             team: [{
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
-                        this.fetch();
+                        this.getAllData();
                         if ( value != this.currentTeam.id ) {
                             this.setCurrentTeam(value);
                             $('#nav-tab > a').not('#timeallocation-tab').removeClass('active').attr('aria-selected',false);
