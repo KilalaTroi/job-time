@@ -233,5 +233,6 @@ export default {
     txtTotalPages: 'ページ合計',
     txtTotalProjects: 'プロジェクト合計',
     txtTotalJobs: 'ジョブ合計',
-    txtUseTheMeetingRoom: '会議室を使用する'
+    txtUseTheMeetingRoom: '会議室を使用する',
+    txtEveryWeekTo: '毎週まで',
 }

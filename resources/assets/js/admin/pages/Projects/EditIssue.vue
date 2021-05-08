@@ -80,7 +80,7 @@
             <datepicker
               name="startDate"
               input-class="form-control"
-              placeholder="Select Date"
+              :placeholder="$ml.with('VueJS').get('txtSelectDate')"
               v-model="selectedItem.start_date"
               :format="customFormatter"
               :disabled-dates="disabledEndDates()"
@@ -95,7 +95,7 @@
             <datepicker
               name="endDate"
               input-class="form-control"
-              placeholder="Select Date"
+              :placeholder="$ml.with('VueJS').get('txtSelectDate')"
               v-model="selectedItem.end_date"
               :format="customFormatter"
               :disabled-dates="disabledStartDates()"

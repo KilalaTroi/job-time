@@ -234,4 +234,5 @@ export default {
     txtTotalProjects: 'Total projects',
     txtTotalJobs: 'Total jobs',
     txtUseTheMeetingRoom: 'Use the meeting room',
+    txtEveryWeekTo: 'Every week to',
 }

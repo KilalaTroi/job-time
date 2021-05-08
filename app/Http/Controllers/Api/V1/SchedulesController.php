@@ -89,7 +89,7 @@ class SchedulesController extends Controller
 			$cbWeekEnd = Carbon::createFromFormat('Y-m-d', explode('T', $data['weekend'])[0]);
 			while ($cbWeekStart->lte($cbWeekEnd)) {
 				$cbWeekStart = $cbWeekStart->addWeek();
-				if ($cbWeekStart > $cbWeekEnd) break;
+				if ($cbWeekStart->gt($cbWeekEnd)) break;
 				$days[] = $cbWeekStart->copy()->format('Y-m-d');
 			}
 		}

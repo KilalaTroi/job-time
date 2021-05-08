@@ -39,7 +39,7 @@
           </div>
           <FullCalendar
             defaultView="timeGridWeek"
-            scroll-time="7:00:00"
+            scroll-time="8:00:00"
             :plugins="calendarPlugins"
             :slotLabelFormat="{ 'hour12': false, 'hour': '2-digit', 'minute': '2-digit'}"
             :eventTimeFormat="{ 'hour12': false, 'hour': '2-digit', 'minute': '2-digit'}"
@@ -50,7 +50,7 @@
             :droppable="fullCalendar.droppable"
             :events="scheduleData.schedules"
             :event-overlap="true"
-            min-time="07:00:00"
+            min-time="08:00:00"
             max-time="19:00:00"
             height="auto"
             :all-day-slot="false"
