@@ -61,13 +61,13 @@
         <i class="fa fa-calendar-o" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbMeetingRoom')" />
       </sidebar-link>
+      <sidebar-link to="/hr/profiles">
+        <i style="font-size: 22px; position: relative; top: 3px;" class="fa fa-address-card" aria-hidden="true"></i>
+        <p>HRM</p>
+      </sidebar-link>
       <sidebar-link to="/settings/departments">
         <i style="font-size: 22px" class="fa fa-cog" aria-hidden="true"></i>
         <p v-text="$ml.with('VueJS').get('sbSettings')" />
-      </sidebar-link>
-       <sidebar-link to="/hr/profiles">
-        <i style="font-size: 22px; position: relative; top: 3px;" class="fa fa-address-card" aria-hidden="true"></i>
-        <p>Hr</p>
       </sidebar-link>
       <sidebar-link to="/profile" class="d-block d-lg-none">
         <i class="nc-icon nc-circle-09"></i>

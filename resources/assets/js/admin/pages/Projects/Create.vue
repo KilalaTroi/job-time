@@ -76,7 +76,7 @@
           <label class="">{{ $ml.with("VueJS").get("txtStartDate") }}</label>
           <datepicker
             input-class="form-control"
-            placeholder="Select Date"
+            :placeholder="$ml.with('VueJS').get('txtSelectDate')"
             v-model="selectedItem.start_date"
             :format="customFormatter"
             :disabled-dates="disabledEndDates()"
@@ -90,7 +90,7 @@
           <label class="">{{ $ml.with("VueJS").get("txtEndDate") }}</label>
           <datepicker
             input-class="form-control"
-            placeholder="Select Date"
+            :placeholder="$ml.with('VueJS').get('txtSelectDate')"
             v-model="selectedItem.end_date"
             :format="customFormatter"
             :disabled-dates="disabledStartDates()"
@@ -349,7 +349,7 @@ export default {
       if (this.selectedItem.end_date) {
         let obj = {
           from: new Date(this.selectedItem.end_date),
-          to: new Date(this.selectedItem.start_date),   
+          to: new Date(this.selectedItem.start_date),
         };
         return obj;
       }
@@ -369,7 +369,7 @@ export default {
 			// this.endHourRange = [[this.startHour, 19]];
 
 			// this.endDisabled = true;
-      
+
 			if (this.selectedItem.schedule_start_time["HH"] && this.selectedItem.schedule_start_time["mm"]) this.endDisabled = false;
 
 			// if (this.selectedItem.schedule_end_time && this.selectedItem.schedule_end_time["HH"] && this.selectedItem.schedule_end_time["mm"]) {

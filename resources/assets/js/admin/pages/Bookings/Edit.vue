@@ -20,6 +20,25 @@
           class="form-control project-memo"
         />
       </div>
+          <div v-if="!selectedItem.schedule_id" class="form-group d-flex align-items-center">
+        <input
+          type="checkbox"
+          v-model="selectedItem.weekendcheck"
+          class="form-control mr-2"
+          :style="{width: '25px'}"
+        />
+        <label class="mb-0 mr-3">{{ $ml.with("VueJS").get("txtEveryWeekTo") }}</label>
+
+        <datepicker
+          v-if="selectedItem.weekendcheck"
+          input-class="form-control"
+          :placeholder="$ml.with('VueJS').get('txtSelectDate')"
+          v-model="selectedItem.weekend"
+          :disabled-dates="disabledStartDates(selectedItem.datew)"
+          :format="customFormatter"
+          :language="getLangCode(this.$ml)"
+        ></datepicker>
+      </div>
       <error-item :errors="validationErrors"></error-item>
       <success-item :success="validationSuccess"></success-item>
       <hr />
@@ -48,6 +67,7 @@ import Modal from "../../components/Modals/Modal"
 import { mapGetters, mapActions } from "vuex"
 import ErrorItem from "../../components/Validations/Error"
 import SuccessItem from "../../components/Validations/Success"
+import Datepicker from "vuejs-datepicker";
 
 export default {
   name: "edit-item",
@@ -55,6 +75,7 @@ export default {
     ErrorItem,
     SuccessItem,
     Modal,
+    Datepicker
   },
 
   computed: {
@@ -62,6 +83,11 @@ export default {
       selectedItem: "selectedItem",
       validationErrors: "validationErrors",
       validationSuccess: "validationSuccess",
+    }),
+     ...mapGetters({
+      getLanguage: "getLanguage",
+      getLangCode: "getLangCode",
+      customFormatter: "customFormatter",
     }),
   },
 
@@ -72,6 +98,10 @@ export default {
       updateItem: "updateItem",
       deleteItem: "deleteItem",
     }),
+
+    disabledStartDates(start_date) {
+			if (start_date) return { to: start_date };
+	  },
 
     resetValidation() {
       this.resetValidate()

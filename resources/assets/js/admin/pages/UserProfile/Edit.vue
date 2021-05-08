@@ -92,7 +92,7 @@
             <label class="">Work date</label>
             <datepicker
                 input-class="form-control"
-                placeholder="Select Date"
+                :placeholder="$ml.with('VueJS').get('txtSelectDate')"
                 v-model="selectedUser.work_date"
                 :format="customFormatter"
                 :language="getLangCode(this.$ml)"
@@ -106,7 +106,7 @@
             <datepicker
               name="disable_date"
               input-class="form-control"
-              placeholder="Select Date"
+              :placeholder="$ml.with('VueJS').get('txtSelectDate')"
               v-model="selectedUser.disable_date"
               :format="customFormatter"
               :language="getLangCode(this.$ml)"

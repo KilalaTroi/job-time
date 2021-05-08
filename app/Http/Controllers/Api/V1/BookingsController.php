@@ -7,6 +7,7 @@ use App\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class BookingsController extends Controller
 {
@@ -57,10 +58,36 @@ class BookingsController extends Controller
 	 */
 	public function update($id, Request $request)
 	{
+		$data = $request->all();
+		if (empty($data['memo'])) $data['memo'] = 'Meeting, Training (' . $this->user['name'] . ')';
+
+
+		$cbWeekStart = Carbon::createFromFormat('Y-m-d', explode('T', $data['daten'])[0]);
+		$days = array($cbWeekStart->copy()->format('Y-m-d'));
+
+		if (isset($data['weekendcheck']) && !empty($data['weekendcheck'])) {
+			$cbWeekEnd = Carbon::createFromFormat('Y-m-d', explode('T', $data['weekend'])[0]);
+			while ($cbWeekStart->lte($cbWeekEnd)) {
+				$cbWeekStart = $cbWeekStart->addWeek();
+				if ($cbWeekStart->gt($cbWeekEnd)) break;
+				$days[] = $cbWeekStart->copy()->format('Y-m-d');
+			}
+		}
+
 		$booking = SharedBooking::findOrFail($id);
-		$schedule = Schedule::find($booking->schedule_id);
-		if(isset($schedule) && !empty($schedule)) $schedule->update($request->all());
-		$booking->update($request->all());
+		foreach ($days as $index => $day) {
+			if(0 === $index){
+				$booking->update($data);
+				$schedule = Schedule::find($booking->schedule_id);
+				if(isset($schedule) && !empty($schedule)) $schedule->update($data);
+			}else{
+				$booking = $booking->toArray();
+				$booking['date'] = $booking['end_date'] = $day;
+				unset($booking['updated_at'], $booking['created_at']);
+				$booking = SharedBooking::create($booking);
+			}
+		}
+
 		return response()->json(array(
 			'message' => 'Successfully.'
 		), 200);
@@ -104,6 +131,7 @@ class BookingsController extends Controller
 				's.end_time',
 				's.memo',
 				's.date',
+				's.schedule_id',
 			)
 			->where(function ($query) use ($filters) {
 				$query->where(function ($query) use ($filters) {

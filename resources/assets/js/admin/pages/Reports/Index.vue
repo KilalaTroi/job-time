@@ -31,7 +31,7 @@
               <datepicker
                 name="startDate"
                 input-class="form-control"
-                placeholder="Select Date"
+                :placeholder="$ml.with('VueJS').get('txtSelectDate')"
                 v-model="filters.start_date"
                 :format="customFormatter"
                 :disabled-dates="disabledEndDates(filters.end_date)"
@@ -46,7 +46,7 @@
               <datepicker
                 name="endDate"
                 input-class="form-control"
-                placeholder="Select Date"
+                :placeholder="$ml.with('VueJS').get('txtSelectDate')"
                 v-model="filters.end_date"
                 :format=" customFormatter"
                 :disabled-dates="disabledStartDates(filters.start_date)"
@@ -274,7 +274,7 @@ export default {
       _this.setColumns(_this.$ml.current);
     })
   },
-  
+
   watch: {
     filters: [
       {
@@ -287,11 +287,11 @@ export default {
             if (value.team != _this.currentTeam.id) {
               _this.filters.department = _this.filters.project = _this.filters.issue = _this.filters.issue_year = null;
               _this.setCurrentTeam(value.team);
-              
+
             } else {
               _this.action.reset = true;
               _this.resetFilters();
-            } 
+            }
           }
         },
         deep: true
