@@ -116,7 +116,7 @@
                         </div>
                         <div v-if="3 != team" class="tab-pane fade" id="totalpage" role="tabpanel" aria-labelledby="totalpage-tab">
                             <div class="row">
-                                <div class="col-md-12" v-if="pageChart.data && pageData.totalpage.length">
+                                <div class="col-md-12" v-if="pageChart.data">
                                     <chart-card :chart-data="pageChart.data" :chart-options="pageChart.options" chart-type="Bar" :chart-id="pageChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -129,7 +129,7 @@
                         </div>
                         <div v-if="3 == team" class="tab-pane fade" id="totalprojects" role="tabpanel" aria-labelledby="totalprojects-tab">
                             <div class="row">
-                                <div class="col-md-12" v-if="projectChart.data && projectsData.length">
+                                <div class="col-md-12" v-if="projectChart.data">
                                     <chart-card :chart-data="projectChart.data" :chart-options="projectChart.options" chart-type="Bar" :chart-id="projectChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -142,7 +142,7 @@
                         </div>
                         <div v-if="3 == team" class="tab-pane fade" id="totaljobs" role="tabpanel" aria-labelledby="totaljobs-tab">
                             <div class="row">
-                                <div class="col-md-12" v-if="jobChart.data && jobsData.length">
+                                <div class="col-md-12" v-if="jobChart.data">
                                     <chart-card :chart-data="jobChart.data" :chart-options="jobChart.options" chart-type="Bar" :chart-id="jobChart.id" v-on:chart-loaded="chartLoaded">
                                         <template slot="footer">
                                             <div class="legend loading">
@@ -154,7 +154,7 @@
                             </div>
                         </div>
                         <div v-if="2 == team" class="tab-pane fade" :class="checkUser() ? 'flag' : ''" id="table" role="tabpanel" aria-labelledby="table-tab">
-                            <div v-if="data.totalpage.length" class="row mt-3">
+                            <div class="row mt-3">
                                 <button v-if="checkUser()" type="button" class="btn btn-primary" data-toggle="modal" data-target="#totalpageAction" data-backdrop="static" data-keyboard="false">
                                     Update
                                     <slot name="title"></slot>
@@ -389,12 +389,14 @@
                             this.jobsData = [];
                             this.projectsData = [];
 
-                            // Assign data
+                            // Assign data one time
                             this.types = res.data.types;
                             this.users = res.data.users.all;
-                            this.newUsersPerMonth = res.data.users.newUsersPerMonth;
                             this.jobs = res.data.jobs;
                         }
+
+                         // Assign data
+                        this.newUsersPerMonth = res.data.users.newUsersPerMonth;  
                         this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
                         this.hoursPerProject = res.data.totals.hoursPerProject;
                         this.currentMonth = res.data.currentMonth;
@@ -443,7 +445,7 @@
             },
 
             showTotalJobs() {
-                if ( ! this.jobsData.length ) {
+                if ( ! this.jobsData.totaljob ) {
                     const uriJobs = '/data/statistic/get-job-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
                     this.getJobData(uriJobs);
                 }
@@ -462,7 +464,7 @@
             },
 
             showTotalProjects() {
-                if ( ! this.projectsData.length ) {
+                if ( ! this.projectsData.totalproject ) {
                     const uriProject = '/data/statistic/get-project-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth)
                     this.getProjectData(uriProject);
                 }
@@ -520,7 +522,7 @@
                     })
                     return row;
                 });
-                this.series = this.barChart.data.series = series;
+                this.series = this.barChart.data.series = [...series];
             },
 
             getCustomSeries(type, data, chart, dataKey, totalHoursPerMonth){
@@ -581,7 +583,6 @@
                 const types = this.types;
                 $('.ct-chart, .card-footer .legend').addClass('loading');
                 if ( types.length ) {
-                    console.log('abc');
                     setTimeout(function(){
                         types.forEach(function(item, index) {
                             $(chartID).closest('.card').find('.' + item.class).each(function(){
@@ -596,6 +597,26 @@
             checkUser(){
                 if(-1 != ('1,24,49').indexOf(this.loginUser.id)) return true;
                 return false;
+            },
+
+            dateChange(value, oldValue) {
+                if ( value != oldValue ) {
+                    const _this = this;
+                    _this.getAllData(1);
+
+                    // Reset
+                    _this.pageData = {
+                        'totalpage' : [],
+                        'table' : [],
+                    };
+                    _this.jobsData = [];
+                    _this.projectsData = [];
+
+                    if ( $('#nav-tab > a#table').hasClass('active') ) _this.showTotalPages();
+                    if ( $('#nav-tab > a#totalpage-tab').hasClass('active') ) _this.showTotalPages();
+                    if ( $('#nav-tab > a#totalproject-tab').hasClass('active') ) _this.showTotalProjects();
+                    if ( $('#nav-tab > a#totaljobs-tab').hasClass('active') ) _this.showTotalJobs();
+                }
             }
         },
         watch: {
@@ -604,18 +625,14 @@
             }],
             user_id: [{
                 handler: function() {
-                    this.getAllData(true);
+                    this.getAllData(1);
                 }
             }],
             startMonth: [{
-                handler: function() {
-                    this.getAllData(true);
-                }
+                handler: 'dateChange'
             }],
             endMonth: [{
-                handler: function() {
-                    this.getAllData(true);
-                }
+                handler: 'dateChange'
             }],
             team: [{
                 handler: function(value, oldValue) {

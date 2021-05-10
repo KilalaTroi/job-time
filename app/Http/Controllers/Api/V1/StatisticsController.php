@@ -745,7 +745,7 @@ class StatisticsController extends Controller
 				return $query->where('user_id', $user_id);
 			})
 			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
-			->where('type', '<>', 'all_day')
+			->whereIn('type', array('morning', 'afternoon'))
 			->where('date', '<=', $endDate)
 			->where('date', '>=',  $startDate)
 			->count();
@@ -796,23 +796,24 @@ class StatisticsController extends Controller
 			$daysInMonth = 0;
 			$hoursDisableUser = [];
 			$ckHoursDisableUser = 0;
-			$arrayStart = explode('-', $value['start']);
-			$monthYear = Carbon::createFromFormat('Y-m-d', $value['start']);
+			$arrayStartDate = explode('-', $value['start']);
+			$carbStartDate = Carbon::createFromFormat('Y-m-d', $value['start']);
+			$arrayEndDate = explode('-', $value['end']);
+			$carbEndDate = Carbon::createFromFormat('Y-m-d', $value['end']);
 
 			if ($teamID != 2) {
-				for ($d = 1; $d <= $monthYear->daysInMonth; $d++) {
-					$day = Carbon::createFromDate($arrayStart[0], $arrayStart[1] * 1, $d);
+				for ($d = $carbStartDate->day; $d <= $carbEndDate->day; $d++) {
+					$day = Carbon::createFromDate($arrayStartDate[0], $arrayStartDate[1] * 1, $d);
 					if ($day->isWeekday()) $daysInMonth++;
 				}
 			} else {
-				for ($d = 21; $d <= $monthYear->daysInMonth; $d++) {
-					$day = Carbon::createFromDate($arrayStart[0], $arrayStart[1] * 1, $d);
+				for ($d = 21; $d <= $carbStartDate->daysInMonth; $d++) {
+					$day = Carbon::createFromDate($arrayStartDate[0], $arrayStartDate[1] * 1, $d);
 					if ($day->isWeekday()) $daysInMonth++;
 				}
 
-				$arrayStartEnd = explode('-', $value['end']);
 				for ($d = 1; $d <= 20; $d++) {
-					$day = Carbon::createFromDate($arrayStartEnd[0], $arrayStartEnd[1] * 1, $d);
+					$day = Carbon::createFromDate($arrayEndDate[0], $arrayEndDate[1] * 1, $d);
 					if ($day->isWeekday()) $daysInMonth++;
 				}
 			}
