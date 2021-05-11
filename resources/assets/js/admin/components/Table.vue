@@ -1,6 +1,6 @@
 <template>
   <div class="table-responsive">
-    <table class="table table-hover table-striped" :id="dataPath">
+    <table class="table table-hover table-striped" :id="'table-'+dataPath">
       <thead>
         <tr>
           <th
@@ -44,9 +44,16 @@
         <slot name="tr"></slot>
       </tbody>
       <tbody v-else>
-        <tr :style="{ textAlign: 'center' }" v-if="dataItems.data">
-          <td v-if="dataAction && dataPath" :colspan="dataCols.length + 1" class="text-center">No Data</td>
-          <td v-else :colspan="dataCols.length">No Data</td>
+        <tr>
+          <td
+              v-for="(column, index) in dataCols"
+              :key="index"
+              :class="column.class"
+              :data-filter="column.id"
+            >
+              <span :class="'cl-'+column.id">--</span>
+          </td>
+          <td v-if="dataAction && dataPath" class="text-center"><span>--</span></td>
         </tr>
       </tbody>
     </table>

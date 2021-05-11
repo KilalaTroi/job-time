@@ -47,7 +47,7 @@ export default {
 			}
     },
     hanldeFliterColumns(colunms) {
-      const table = "#" + this.dataTable;
+      const table = "#table-" + this.dataTable;
       $(table).find("th[data-filter],td[data-filter]").addClass("d-none");
       colunms.map(function (value) { $(table).find("[data-filter='" + value + "']").removeClass("d-none"); });
 		},

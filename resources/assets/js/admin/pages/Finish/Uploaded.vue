@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content" id="finishuploaded">
     <div class="container-fluid">
       <div class="row">
         <div class="col">
@@ -627,39 +627,41 @@ export default {
 </script>
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
-.type-color {
-  width: 60px !important;
-  height: 20px;
-  margin-right: 5px;
-  display: inline-block;
-  vertical-align: middle;
-}
-.message-content {
-  > span {
-    display: block;
-    height: 38px;
-    position: relative;
-    overflow: hidden;
+#finishuploaded{
+  .type-color {
+    width: 60px !important;
+    height: 20px;
+    margin-right: 5px;
+    display: inline-block;
+    vertical-align: middle;
   }
-  button {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 110px;
-    .less {
-      display: none;
-    }
-  }
-  &.active {
+  .message-content {
     > span {
-      height: auto;
+      display: block;
+      height: 38px;
+      position: relative;
+      overflow: hidden;
     }
     button {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 110px;
       .less {
-        display: inline;
-      }
-      .more {
         display: none;
+      }
+    }
+    &.active {
+      > span {
+        height: auto;
+      }
+      button {
+        .less {
+          display: inline;
+        }
+        .more {
+          display: none;
+        }
       }
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="content hrprofile">
+  <div class="content" id="hrprofile">
     <div class="container-fluid">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -135,7 +135,7 @@ export default {
 </script>
 <style lang="scss">
 // @import "~vue-multiselect/dist/vue-multiselect.min.css";
-.hrprofile {
+#hrprofile {
   tbody {
     .cl-havatar:not(:empty) {
       display: inline-flex;

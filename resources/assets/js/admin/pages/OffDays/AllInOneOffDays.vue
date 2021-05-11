@@ -218,110 +218,112 @@ export default {
 </script>
 
 <style lang="scss">
-@import "~@fullcalendar/core/main.css";
-@import "~@fullcalendar/daygrid/main.css";
-@import "~@fullcalendar/timegrid/main.css";
-@import "~@fullcalendar/list/main.css";
+#offdays{
+  @import "~@fullcalendar/core/main.css";
+  @import "~@fullcalendar/daygrid/main.css";
+  @import "~@fullcalendar/timegrid/main.css";
+  @import "~@fullcalendar/list/main.css";
 
-.fc-time-grid .fc-event {
-  padding: 5px;
-}
+  .fc-time-grid .fc-event {
+    padding: 5px;
+  }
 
-@media (min-width: 992px) {
-  .row {
-    &--left {
-      flex: 0 0 20%;
-      max-width: 20%;
-    }
-    &--right {
-      flex: 0 0 80%;
-      max-width: 80%;
+  @media (min-width: 992px) {
+    .row {
+      &--left {
+        flex: 0 0 20%;
+        max-width: 20%;
+      }
+      &--right {
+        flex: 0 0 80%;
+        max-width: 80%;
+      }
     }
   }
-}
 
-.fc-event {
-  cursor: move;
-  color: rgba(0, 0, 0, 0.8);
-  min-height: 0;
-  &.printed{
-    position: relative;
-    padding-right: 25px;
-    &::after{
-      content: "\f046";
-      display: inline-block;
-      font: normal normal normal 14px/1 FontAwesome;
-      font-size: inherit;
-      text-rendering: auto;
-      -webkit-font-smoothing: antialiased;
-      position: absolute;
-      right: 5px;
-      top: 50%;
-      transform: translateY(-50%);
-      margin-top: 1px;
+  .fc-event {
+    cursor: move;
+    color: rgba(0, 0, 0, 0.8);
+    min-height: 0;
+    &.printed{
+      position: relative;
+      padding-right: 25px;
+      &::after{
+        content: "\f046";
+        display: inline-block;
+        font: normal normal normal 14px/1 FontAwesome;
+        font-size: inherit;
+        text-rendering: auto;
+        -webkit-font-smoothing: antialiased;
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-top: 1px;
+      }
+    }
+    &.holiday, &.offday{
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 53px;
+      font-weight: 600;
+      text-transform: uppercase;
+      &:after{
+        content: "";
+        position: absolute;
+        top: -31px;
+        z-index: -1;
+        left: -3px;
+        height: 120px;
+        width: calc(100% + 6px);
+      }
+    }
+    &.offday{
+      &:after{
+        background-color: #eaeaea;
+      }
+    }
+    &.holiday{
+      &:after{
+        background-color: #ffd6fb;
+      }
     }
   }
-  &.holiday, &.offday{
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 53px;
-    font-weight: 600;
-    text-transform: uppercase;
-    &:after{
-      content: "";
-      position: absolute;
-      top: -31px;
-      z-index: -1;
-      left: -3px;
-      height: 120px;
-      width: calc(100% + 6px);
-    }
+
+  .fc-time-grid-event .fc-time,
+  .fc-time-grid-event .fc-title {
+    color: rgba(0, 0, 0, 0.8);
   }
-  &.offday{
-    &:after{
-      background-color: #eaeaea;
-    }
+
+  .fc-time-grid .fc-slats td {
+    height: 2em;
   }
-  &.holiday{
-    &:after{
-      background-color: #ffd6fb;
-    }
+
+  .fc-unthemed td.fc-today {
+    background-color: transparent;
   }
-}
 
-.fc-time-grid-event .fc-time,
-.fc-time-grid-event .fc-title {
-  color: rgba(0, 0, 0, 0.8);
-}
+  .fc .fc-view-container .fc-head .fc-today {
+    background-color: #ffd05b;
+  }
 
-.fc-time-grid .fc-slats td {
-  height: 2em;
-}
+  .fc-unthemed th,
+  .fc-unthemed td,
+  .fc-unthemed thead,
+  .fc-unthemed tbody,
+  .fc-unthemed .fc-divider,
+  .fc-unthemed .fc-row,
+  .fc-unthemed .fc-content,
+  .fc-unthemed .fc-popover,
+  .fc-unthemed .fc-list-view,
+  .fc-unthemed .fc-list-heading td {
+    border-color: #b3aeae;
+  }
 
-.fc-unthemed td.fc-today {
-  background-color: transparent;
-}
-
-.fc .fc-view-container .fc-head .fc-today {
-  background-color: #ffd05b;
-}
-
-.fc-unthemed th,
-.fc-unthemed td,
-.fc-unthemed thead,
-.fc-unthemed tbody,
-.fc-unthemed .fc-divider,
-.fc-unthemed .fc-row,
-.fc-unthemed .fc-content,
-.fc-unthemed .fc-popover,
-.fc-unthemed .fc-list-view,
-.fc-unthemed .fc-list-heading td {
-  border-color: #b3aeae;
-}
-
-.off-days .fc-day-grid-event .fc-time {
-  display: none;
+  .off-days .fc-day-grid-event .fc-time {
+    display: none;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <table id="finsh_totaling" class="table">
+  <table id="table-finsh_totaling" class="table">
     <thead>
       <slot name="columns">
         <tr>
@@ -99,46 +99,48 @@ export default {
 };
 </script>
 <style lang="scss">
-.btn-process,
-.btn-flag {
-  font-size: 24px;
-  width: 24px;
-  color: #6c757d;
-  cursor: pointer;
+#table-finsh_totaling{
+  .btn-process,
+  .btn-flag {
+    font-size: 24px;
+    width: 24px;
+    color: #6c757d;
+    cursor: pointer;
 
-  &.active {
-    color: #dc3545;
+    &.active {
+      color: #dc3545;
+    }
   }
-}
-.btn-process {
-  &:hover {
-    color: #dc3545;
+  .btn-process {
+    &:hover {
+      color: #dc3545;
+    }
   }
-}
-.start-working,
-.finished-work,
-.start-uploading,
-.finished-upload {
-  padding: 5px 10px;
-  border: 1px solid #231f20;
-  font-size: 12px;
-  display: block;
-  text-align: center;
-}
-tfoot{
-  border: 1px solid transparent;
-    border-top: 1px solid #000;
-}
-.start-working {
-  background-color: #6dcff6;
-}
-.finished-work {
-  background-color: #a5ce9a;
-}
-.start-uploading {
-  background-color: #fff799;
-}
-.finished-upload {
-  background-color: #f49ac1;
+  .start-working,
+  .finished-work,
+  .start-uploading,
+  .finished-upload {
+    padding: 5px 10px;
+    border: 1px solid #231f20;
+    font-size: 12px;
+    display: block;
+    text-align: center;
+  }
+  tfoot{
+    border: 1px solid transparent;
+      border-top: 1px solid #000;
+  }
+  .start-working {
+    background-color: #6dcff6;
+  }
+  .finished-work {
+    background-color: #a5ce9a;
+  }
+  .start-uploading {
+    background-color: #fff799;
+  }
+  .finished-upload {
+    background-color: #f49ac1;
+  }
 }
 </style>

@@ -340,14 +340,16 @@ class ProjectsController extends Controller
         }
 
         if (count($dataList)) {
+            $listnote = [];
             $validator = \Illuminate\Support\Facades\Validator::make($dataList, $this->rules());
             if ($validator->fails()) {
-                throw new \Exception(
-                    $validator->errors()
-                );
+                $error = $validator->errors()->first();
+                $arrErrors = explode('.', $error);
+                $arrErrors2 = explode(' ', $arrErrors[0]);
+                $errorRowNumber = (int)$arrErrors2[count($arrErrors2) - 1]+4;
+                $errorText = 'Row ' . $errorRowNumber . ': ' . $arrErrors[1];
+                return response()->json(['errors' => [$errorRowNumber => [$errorText]]], 403);
             }
-            $format = 'Y-m-d';
-            $listnote = [];
 
             foreach ($dataList as $key => $value) {
                 $dept = Department::where('name', trim($value['department']))->first();

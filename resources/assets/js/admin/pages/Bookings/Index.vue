@@ -1,5 +1,5 @@
 <template>
-  <div class="content mtr">
+  <div class="content" id="bookingroom">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-3 col-xl-2">
@@ -216,7 +216,7 @@ export default {
 </script>
 
 <style lang="scss" scope>
-.mtr{
+#bookingroom{
   @import "custom.scss";
 }
 </style>

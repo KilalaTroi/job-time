@@ -12,6 +12,12 @@
     border: 0;
 }
 
+.fc-time-grid .fc-slats tr{
+    &[data-time="12:30:00"]{
+        display: none;
+    }
+}
+
 .fc-time-grid .fc-content {
     padding: 5px;
     margin: -5px;

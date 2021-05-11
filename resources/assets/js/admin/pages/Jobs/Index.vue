@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content" id="jobs">
     <div class="container-fluid">
       <div class="row">
         <div class="col col-sm-auto">
@@ -233,23 +233,25 @@ export default {
 };
 </script>
 <style lang="scss">
-.time-record tr:last-child button {
-  display: none;
-}
-.table-responsive {
-  // .note, .year-of-issue, .quantity {
-  //   display: none;
-  // }
+#jobs{
+  .time-record tr:last-child button {
+    display: none;
+  }
+  .table-responsive {
+    // .note, .year-of-issue, .quantity {
+    //   display: none;
+    // }
 
-  // &.web, &.path {
-  //   .note, .year-of-issue {
-  //     display: table-cell;
-  //   }
-  // }
+    // &.web, &.path {
+    //   .note, .year-of-issue {
+    //     display: table-cell;
+    //   }
+    // }
 
-  &:not(.path) {
-    .quantity {
-      display: none;
+    &:not(.path) {
+      .quantity {
+        display: none;
+      }
     }
   }
 }

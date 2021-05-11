@@ -163,8 +163,8 @@ export default {
 		},
 
 		setColorLateEarly() {
-			$('#checkinout tbody tr').removeClass('bg-early').removeClass('bg-all').removeClass('bg-late').find('.cl-reason').removeAttr('title');
-			for (const elm of $('#checkinout tbody tr')) {
+			$('#table-checkinout tbody tr').removeClass('bg-early').removeClass('bg-all').removeClass('bg-late').find('.cl-reason').removeAttr('title');
+			for (const elm of $('#table-checkinout tbody tr')) {
 				if ('--' != $(elm).find('.cl-reason').text()) $(elm).find('.cl-reason').attr('title', $(elm).find('.cl-reason').text());
 				const late = $(elm).find('.cl-late');
 				const early = $(elm).find('.cl-early');
