@@ -651,7 +651,7 @@
         }
     }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 $chart-tooltip-bg: rgba(40, 40, 40, 0.75) ;
 $chart-tooltip-color: #fff;
 #nav-tabContent{
@@ -728,5 +728,8 @@ $chart-tooltip-color: #fff;
 }
 .table-bordered th, .table-bordered td{
   border-bottom: 1px solid #f1eded !important;
+}
+.card-title {
+    font-size: 18px;
 }
 </style>
