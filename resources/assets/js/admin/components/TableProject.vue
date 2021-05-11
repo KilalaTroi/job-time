@@ -1,5 +1,5 @@
 <template>
-  <table id="project" class="table">
+  <table id="table-project" class="table">
     <thead>
       <slot name="columns">
         <tr>

@@ -1,6 +1,6 @@
 <template>
   <div class="table-responsive">
-    <table class="table table-hover table-striped" id="checkinout">
+    <table class="table table-hover table-striped" id="table-checkinout">
       <thead>
         <tr>
           <th

@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content" id="schedules">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-lg-3 col-xl-2">
@@ -215,5 +215,7 @@ export default {
 </script>
 
 <style lang="scss" scope>
-@import "../Schedules/custom.scss";
+#schedules{
+  @import "../Schedules/custom.scss";
+}
 </style>
