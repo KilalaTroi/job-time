@@ -1,5 +1,5 @@
 <template>
-  <div class="content projects">
+  <div class="content projects" id="projects">
     <div class="container-fluid">
       <card>
         <template slot="header">
@@ -312,15 +312,17 @@ export default {
 
 <style lang="scss">
 @import "~vue-multiselect/dist/vue-multiselect.min.css";
-.type-color {
-  width: 60px;
-  height: 20px;
-  display: inline-block;
-  vertical-align: middle;
-}
-.table-responsive.path-team {
-    .year-of-issue {
-        display: none;
-    }
+#projects{
+  .type-color {
+    width: 60px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .table-responsive.path-team {
+      .year-of-issue {
+          display: none;
+      }
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="content inout">
+  <div class="content" id="inout">
     <div class="container-fluid">
       <card class="mb-0">
         <template slot="header">
@@ -436,12 +436,12 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "~vue-multiselect/dist/vue-multiselect.min.css";
-@import "~@fullcalendar/core/main.css";
-@import "~@fullcalendar/daygrid/main.css";
-@import "~@fullcalendar/timegrid/main.css";
-@import "~@fullcalendar/list/main.css";
-.inout {
+#inout {
+  @import "~vue-multiselect/dist/vue-multiselect.min.css";
+  @import "~@fullcalendar/core/main.css";
+  @import "~@fullcalendar/daygrid/main.css";
+  @import "~@fullcalendar/timegrid/main.css";
+  @import "~@fullcalendar/list/main.css";
   @media (min-width: 992px) {
     .row {
       &--left {

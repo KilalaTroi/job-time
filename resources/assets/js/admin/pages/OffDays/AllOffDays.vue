@@ -113,52 +113,54 @@ export default {
 </script>
 
 <style lang="scss">
-@import "~@fullcalendar/core/main.css";
-@import "~@fullcalendar/daygrid/main.css";
-@import "~@fullcalendar/timegrid/main.css";
-@import "~@fullcalendar/list/main.css";
+#offdays{
+  @import "~@fullcalendar/core/main.css";
+  @import "~@fullcalendar/daygrid/main.css";
+  @import "~@fullcalendar/timegrid/main.css";
+  @import "~@fullcalendar/list/main.css";
 
-.fc-time-grid .fc-event {
-  padding: 5px;
-}
+  .fc-time-grid .fc-event {
+    padding: 5px;
+  }
 
-.fc-event {
-  cursor: move;
-  color: rgba(0, 0, 0, 0.8);
-  min-height: 0;
-}
+  .fc-event {
+    cursor: move;
+    color: rgba(0, 0, 0, 0.8);
+    min-height: 0;
+  }
 
-.fc-time-grid-event .fc-time,
-.fc-time-grid-event .fc-title {
-  color: rgba(0, 0, 0, 0.8);
-}
+  .fc-time-grid-event .fc-time,
+  .fc-time-grid-event .fc-title {
+    color: rgba(0, 0, 0, 0.8);
+  }
 
-.fc-time-grid .fc-slats td {
-  height: 2em;
-}
+  .fc-time-grid .fc-slats td {
+    height: 2em;
+  }
 
-.fc-unthemed td.fc-today {
-  background-color: transparent;
-}
+  .fc-unthemed td.fc-today {
+    background-color: transparent;
+  }
 
-.fc .fc-view-container .fc-head .fc-today {
-  background-color: #ffd05b;
-}
+  .fc .fc-view-container .fc-head .fc-today {
+    background-color: #ffd05b;
+  }
 
-.fc-unthemed th,
-.fc-unthemed td,
-.fc-unthemed thead,
-.fc-unthemed tbody,
-.fc-unthemed .fc-divider,
-.fc-unthemed .fc-row,
-.fc-unthemed .fc-content,
-.fc-unthemed .fc-popover,
-.fc-unthemed .fc-list-view,
-.fc-unthemed .fc-list-heading td {
-  border-color: #b3aeae;
-}
+  .fc-unthemed th,
+  .fc-unthemed td,
+  .fc-unthemed thead,
+  .fc-unthemed tbody,
+  .fc-unthemed .fc-divider,
+  .fc-unthemed .fc-row,
+  .fc-unthemed .fc-content,
+  .fc-unthemed .fc-popover,
+  .fc-unthemed .fc-list-view,
+  .fc-unthemed .fc-list-heading td {
+    border-color: #b3aeae;
+  }
 
-.off-days .fc-day-grid-event .fc-time {
-  display: none;
+  .off-days .fc-day-grid-event .fc-time {
+    display: none;
+  }
 }
 </style>

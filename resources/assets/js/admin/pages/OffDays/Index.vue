@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content" id="offdays">
     <div class="container-fluid">
       <!-- <off-days v-if="1 != userID" /> -->
       <div class="all-of-day">
@@ -54,16 +54,17 @@ export default {
 //     z-index: 1;
 //   }
 // }
-
-.card{
-  &:not(.all){
-    .fc-dayGrid-view .fc-body .fc-row{
-      height: 70px !important;
+#offdays {
+  .card {
+    &:not(.all) {
+      .fc-dayGrid-view .fc-body .fc-row {
+        height: 70px !important;
+      }
     }
-  }
-  &.all{
-    .fc-dayGrid-view .fc-body .fc-row{
-      height: 120px !important;
+    &.all {
+      .fc-dayGrid-view .fc-body .fc-row {
+        height: 120px !important;
+      }
     }
   }
 }
