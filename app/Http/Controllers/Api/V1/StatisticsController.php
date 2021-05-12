@@ -26,17 +26,23 @@ class StatisticsController extends Controller
 		$isFilter = isset($_GET['isFilter']) && $_GET['isFilter'] ? true : false;
 
 		// Create Carbon Date
-		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
-		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
+		$carbStartDate = Carbon::createFromFormat('Y/m/d', $startMonth);
+		$carbEndDate = Carbon::createFromFormat('Y/m/d', $endMonth);
 
-		// Get start date and end date by team
-		$this->getStartEndDatebyTeam($teamID, $startMonthCar, $endMonthCar);
+		// Create data months
+		$data = $this->createDataMonths($carbStartDate, $carbEndDate, $teamID);
 
 		// Return project type
 		if ( !$isFilter ) $data['types'] = $this->typeWithClass($teamID);
 
 		// Get users
-		$data['users'] = $this->getUsers($startMonthCar, $endMonthCar, $teamID, $user_id);
+		$data['users'] = $this->getUsers($data, $carbStartDate, $carbEndDate, $teamID, $user_id);
+
+		dd($data);
+
+		// Get start date and end date by team
+		// $this->getStartEndDatebyTeam($teamID, $startMonthCar, $endMonthCar);
+
 
 		// Return months, monthsText, startEndYear, off days
 		$data = array_merge($data, $this->handleMonthYear($startMonth, $endMonth, $teamID, $data['users'], $user_id));
@@ -382,6 +388,90 @@ class StatisticsController extends Controller
 	}
 	
 	/**
+	 * createArrayMonths
+	 *
+	 * @param  Carbon:date $carbStartDate
+	 * @param  Carbon:date $carbEndDate
+	 * @param  boolean $export
+	 * @return array
+	 */
+	private function createDataMonths($carbStartDate, $carbEndDate, $teamID, $export = false)
+	{
+		$data = array();
+		$daysOfMonth = array();
+		$monthsText = array();
+		$monthYearText = array();
+		$copyStartDate = $carbStartDate->copy();
+		$numberMonths = 0;
+
+		while ( $copyStartDate->lte($carbEndDate) ) {
+			if ( $teamID == 2 ) {
+				$startM = $copyStartDate->copy()->day(21);
+				$endM = $copyStartDate->copy()->addMonths(1)->day(20);
+			} else {
+				$startM = $copyStartDate->copy()->startOfMonth();
+				$endM = $copyStartDate->copy()->endOfMonth();
+			}
+
+			// create key by year month
+			$keyYearMonth = $copyStartDate->year . $copyStartDate->format('m');
+
+			// assign the fist date of start month.
+			if ( $copyStartDate->eq($carbStartDate) ) {
+				$startM = $carbStartDate->copy();
+			}
+
+			// Get date for Path Team
+			if ( $teamID == 2 ) {
+				if ( $startM->day < 21) {
+					$startM->subMonths(1)->day(21);
+					$endM->subMonths(1)->day(20);
+
+					// So sánh start month với start month filter.
+					if ( $startM->lt($carbStartDate) ) {
+						$startM = $carbStartDate->copy();
+					}
+
+					// Decrease
+					$copyStartDate->subMonths(1)->startOfMonth(); // tạo lại ngày mới với 0h00. Nếu mở report ở 0h00 sẽ lỗi. kkkkk
+					dump($copyStartDate);
+				}
+
+				// create key by year month
+				$keyYearMonth = $endM->year . $endM->format('m');
+			}
+			
+			// So sánh end month với end month filter.
+			if ( $endM->gt($carbEndDate) ) {
+				$endM = $carbEndDate->copy();
+			}
+
+			// Out
+			$monthsText[] = $copyStartDate->format('M');
+			$monthYearText[$keyYearMonth] = $copyStartDate->format('M');
+			$daysOfMonth[$keyYearMonth] = array(
+				'start' => $startM->format('Y-m-d'),
+				'end' => $endM->format('Y-m-d')
+			);
+
+			// Increase month
+			$copyStartDate->addMonths(1)->startOfMonth();
+			$numberMonths++;
+		}
+
+		// Only export 12 months
+		if ($export) {
+			if ($numberMonths > 12) dd('The total number of months to export <= 12 months. Please enter again. Thank you.');
+		}
+
+		$data['monthsText'] = $monthsText;
+		$data['monthYearText'] = $monthYearText;
+		$data['daysOfMonth'] = $daysOfMonth;
+
+		return $data;
+	}
+	
+	/**
 	 * handleMonthYear
 	 *
 	 * @param  date $startMonth
@@ -407,13 +497,16 @@ class StatisticsController extends Controller
 		$monthsText = array();
 		$monthYearText = array();
 
-		if ( 2 == $teamID && Carbon::now()->day > 21 ) {
-			$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth)->addMonth(1);
-			$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth)->addMonth(1);
-		} else {
-			$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
-			$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
-		}
+		// if ( 2 == $teamID && Carbon::now()->day > 21 ) {
+		// 	$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth)->addMonth(1);
+		// 	$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth)->addMonth(1);
+		// } else {
+		// 	$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
+		// 	$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
+		// }
+
+		$startMonth = Carbon::createFromFormat('Y/m/d', $startMonth);
+		$endMonth = Carbon::createFromFormat('Y/m/d', $endMonth);
 
 		$totalMonths = $startMonth->diffInMonths($endMonth) + 1;
 
@@ -450,13 +543,15 @@ class StatisticsController extends Controller
 					$endM = $endMonth->copy();
 				}
 			}
-
+			
+			$startM = $startM->format('Y-m-d');
+			$endM = $endM->format('Y-m-d');
 			$inYearMonth = $getM->year . $getM->format('m');
 			$monthsText[] = $getM->format('M');
 			$monthYearText[$inYearMonth] = $getM->format('M');
 			$daysOfMonth[$inYearMonth] = array(
-				'start' => $startM->format('Y-m-d'),
-				'end' => $endM->format('Y-m-d')
+				'start' => $startM,
+				'end' => $endM
 			);
 
 			if (isset($newUsersPerMonth[$inYearMonth])) {
@@ -517,7 +612,7 @@ class StatisticsController extends Controller
 
 		$data['monthsText'] = $monthsText;
 		$data['monthYearText'] = $monthYearText;
-		$data['days_of_month'] = $daysOfMonth;
+		$data['daysOfmonth'] = $daysOfMonth;
 
 		// dd($data);
 
@@ -557,14 +652,18 @@ class StatisticsController extends Controller
 	/**
 	 * getUsers
 	 *
-	 * @param  date|string $startMonth
-	 * @param  date|string $endMonth
+	 * @param  array $dataMonths
+	 * @param  Carbon:date $startMonth
+	 * @param  Carbon:date $endMonth
 	 * @param  int $teamID
 	 * @param  int $user_id
 	 * @return array
 	 */
-	private function getUsers($startMonth, $endMonth, $teamID = 0, $user_id = 0)
+	private function getUsers($dataMonths, $carbStartDate, $carbEndDate, $teamID = 0, $user_id = 0)
 	{
+		['daysOfMonth' => $daysOfMonth] = $dataMonths;
+		$startDate = $carbStartDate->format('Y-m-d');
+		$endDate = $carbEndDate->format('Y-m-d');
 		// All users without Amin users and still not deactive after start date.
 		$users['all'] = DB::connection('mysql')->table('role_user as ru')
 			->select(
@@ -578,9 +677,9 @@ class StatisticsController extends Controller
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
-			->where(function ($query) use ($startMonth) {
+			->where(function ($query) use ($startDate) {
 				$query->where('disable_date', '=',  NULL)
-					->orWhere('disable_date', '>=', str_replace('/', '-', $startMonth));
+					->orWhere('disable_date', '>=', $startDate);
 			})
 			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'ASC')->get()->toArray();
 		
@@ -595,12 +694,12 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('users.id', $user_id);
 			})
-			->where(function ($query) use ($startMonth) {
+			->where(function ($query) use ($startDate) {
 				$query->where('disable_date', '=',  NULL)
-					->orWhere('disable_date', '>=', str_replace('/', '-', $startMonth));
+					->orWhere('disable_date', '>=', $startDate);
 			})
 			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
-			->where('users.created_at', "<", str_replace('/', '-', $startMonth))
+			->where('users.created_at', "<", $startDate)
 			->count();
 
 		// Disable users between start date and end date.
@@ -611,8 +710,8 @@ class StatisticsController extends Controller
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
-			->where('disable_date', ">=", str_replace('/', '-', $startMonth))
-			->where('disable_date', "<=", str_replace('/', '-', $endMonth))
+			->where('disable_date', ">=", $startDate)
+			->where('disable_date', "<=", $endDate)
 			->whereNotIn('users.id', $this->usersIgnore($teamID))
 			->get()->pluck('id')->toArray();
 
@@ -631,8 +730,8 @@ class StatisticsController extends Controller
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
-			->where('users.created_at', ">=", str_replace('/', '-', $startMonth))
-			->where('users.created_at', "<=", str_replace('/', '-', $endMonth))
+			->where('users.created_at', ">=", $startDate)
+			->where('users.created_at', "<=", $endDate)
 			->orderBy('yearMonth', 'desc')
 			->groupBy('yearMonth')
 			->get()->pluck('number', 'yearMonth')->toArray();
@@ -652,8 +751,8 @@ class StatisticsController extends Controller
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
-			->where('users.disable_date', ">=", str_replace('/', '-', $startMonth))
-			->where('users.disable_date', "<=", str_replace('/', '-', $endMonth))
+			->where('users.disable_date', ">=", $startDate)
+			->where('users.disable_date', "<=", $endDate)
 			->orderBy('yearMonth', 'desc')
 			->groupBy('yearMonth')
 			->get()->pluck('number', 'yearMonth')->toArray() : [];
@@ -665,8 +764,8 @@ class StatisticsController extends Controller
 				DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
 			)
 			->join('issues', 'issues.id', '=', 'jobs.issue_id')
-			->where('jobs.date', ">=", str_replace('/', '-', $startMonth))
-			->where('jobs.date', "<=", str_replace('/', '-', $endMonth))
+			->where('jobs.date', ">=", $startDate)
+			->where('jobs.date', "<=", $endDate)
 			->whereIn('jobs.user_id', $users['disable'])
 			->whereNotIn('jobs.user_id', $this->usersIgnore($teamID))
 			->when($teamID, function ($query, $teamID) {
@@ -1345,7 +1444,7 @@ class StatisticsController extends Controller
 			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'DESC')->get()->toArray();
 	}
 
-	private function getDisableUsersByTeam($team) // Lấy disable user trước 3 tháng
+	private function getDisableUsersByTeam($team) // Lấy disable user dưới 3 tháng
 	{
 		
 		$disableDate = Carbon::now()->subMonth(3)->format('Y-m-d');
