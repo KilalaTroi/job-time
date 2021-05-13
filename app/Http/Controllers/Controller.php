@@ -71,4 +71,44 @@ class Controller extends BaseController
 		};
 		return $response->getBody();
 	}
+
+	/**
+	 * Function that groups an array of associative arrays by some key.
+	 * 
+	 * @param {String} $key Property to sort by.
+	 * @param {Array} $data Array that stores multiple associative arrays.
+	 */
+	public function group_by_array_key($key, $data) {
+		$result = array();
+
+		foreach ($data as $val) {
+			if(array_key_exists($key, $val)){
+				$result[$val[$key]][] = $val;
+			}else{
+				$result[""][] = $val;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Function that groups an array of associative arrays by some key.
+	 * 
+	 * @param {String} $key Property to sort by.
+	 * @param {Array} $data Array that stores multiple associative objects.
+	 */
+	public function group_by_object_key($property, $data) {
+		$result = array();
+
+		foreach($data as $val) {
+			if(property_exists($val, $property)){
+				$result[$val->$property][] = $val;
+			}else{
+				$result[""][] = $val;
+			}
+		}
+
+		return $result;
+	}
 }
