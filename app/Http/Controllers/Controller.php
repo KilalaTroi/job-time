@@ -78,7 +78,7 @@ class Controller extends BaseController
 	 * @param {String} $key Property to sort by.
 	 * @param {Array} $data Array that stores multiple associative arrays.
 	 */
-	public function group_by_array_key($key, $data) {
+	public function groupByArrayKey($key, $data) {
 		$result = array();
 
 		foreach ($data as $val) {
@@ -98,7 +98,7 @@ class Controller extends BaseController
 	 * @param {String} $key Property to sort by.
 	 * @param {Array} $data Array that stores multiple associative objects.
 	 */
-	public function group_by_object_key($property, $data) {
+	public function groupByObjectKey($property, $data) {
 		$result = array();
 
 		foreach($data as $val) {
@@ -110,5 +110,36 @@ class Controller extends BaseController
 		}
 
 		return $result;
+	}
+
+	public function sumArrayByObjectKey($array, $property) {
+		$total = array_reduce(
+			$array,
+			function($total, $item) use($property) {
+				$total += $item->{$property};
+				return $total;
+		}, 0);
+
+		return $total;
+	}
+
+	public function sumArray($array, $key = false) {
+		if ( $key ) {
+			$total = array_reduce(
+				$array,
+				function($total, $item) {
+					$total += $item;
+					return $total;
+			}, 0);
+		} else {
+			$total = array_reduce(
+				$array,
+				function($total, $item) use($key) {
+					$total += $item[$key];
+					return $total;
+			}, 0);
+		}
+
+		return $total;
 	}
 }
