@@ -48,7 +48,7 @@ class StatisticsController extends Controller
 		$data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID, $user_id, $carbStartDate->format('Y-m-d'));
 
 		// Return totals
-		$data['totals'] = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID);
+		$data['totals'] = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID, $isFilter);
 
 		// Get start date and end date by team
 		// $this->getStartEndDatebyTeam($teamID, $startMonthCar, $endMonthCar);
@@ -434,7 +434,6 @@ class StatisticsController extends Controller
 
 					// Decrease
 					$copyStartDate->subMonths(1)->startOfMonth(); // tạo lại ngày mới với 0h00. Nếu mở report ở 0h00 sẽ lỗi. kkkkk
-					dump($copyStartDate);
 				}
 
 				// create key by year month
@@ -734,7 +733,7 @@ class StatisticsController extends Controller
 				$query->where('disable_date', '=',  NULL)
 					->orWhere('disable_date', '>=', $startDate);
 			})
-			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
 			->where('users.created_at', "<", $startDate)
 			->count();
 
@@ -754,7 +753,7 @@ class StatisticsController extends Controller
 			})
 			->where('disable_date', ">=", $startDate)
 			->where('disable_date', "<=", $endDate)
-			->whereNotIn('users.id', $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
 			->get()->toArray();
 
 		$users['disableUsersMonths'] = $this->groupByObjectKey('yearMonth', $users['disableUsersMonths']);
@@ -776,7 +775,7 @@ class StatisticsController extends Controller
 			})
 			->where('created_at', ">=", $startDate . ' 00:00:00')
 			->where('created_at', "<=", $endDate . ' 23:59:59')
-			->whereNotIn('users.id', $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
 			->get()->toArray();
 
 		$users['newUsersMonths'] = $this->groupByObjectKey('yearMonth', $users['newUsersMonths']);
@@ -871,21 +870,21 @@ class StatisticsController extends Controller
 				return $query->where('user_id', $user_id);
 			})
 			->whereNotIn('jobs.user_id', $this->usersIgnoreAdmin($teamID))
-			->where('jobs.date', ">=", $currentDate->startOfMonth()->format('Y-m-d'))
+			->where('jobs.date', ">=", $currentDate->copy()->startOfMonth()->format('Y-m-d'))
 			->get();
 
 		$daysCurrentMonth = 0;
-		for ($d = 1; $d <= $currentDate->daysInMonth; $d++) {
+		for ($d = 1; $d <= $currentDate->day; $d++) {
 			$day = Carbon::createFromDate($currentDate->year, $currentDate->month, $d);
 			if ($day->isWeekday()) $daysCurrentMonth++;
 		}
 
-		$startDate = $currentDate->startOfMonth()->format('Y-m-d');
-		$endDate = $currentDate->endOfMonth()->format('Y-m-d');
+		$startDate = $currentDate->copy()->startOfMonth()->format('Y-m-d');
+		$endDate = $currentDate->format('Y-m-d');
 
 		// Ngày nghỉ chung
 		$generalOffDay = DB::connection('mysql')->table('off_days')
-			->where('type', '=', 'offday')
+			->whereIn('type', array('holiday', 'offday'))
 			->where('date', '<=', $endDate)
 			->where('date', '>=',  $startDate)
 			->count();
@@ -903,7 +902,7 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('user_id', $user_id);
 			})
-			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
 			->where('type', '=', 'all_day')
 			->where('date', '<=', $endDate)
 			->where('date', '>=',  $startDate)
@@ -918,7 +917,7 @@ class StatisticsController extends Controller
 			->when($user_id, function ($query, $user_id) {
 				return $query->where('user_id', $user_id);
 			})
-			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
 			->whereIn('type', array('morning', 'afternoon'))
 			->where('date', '<=', $endDate)
 			->where('date', '>=',  $startDate)
@@ -929,7 +928,7 @@ class StatisticsController extends Controller
 			->select('users.id')
 			->join('users', 'users.id', '=', 'role_user.user_id')
 			->join('roles', 'roles.id', '=', 'role_user.role_id')
-			->whereNotIn('users.id', $user_id ? $this->usersIgnoreAdmin($teamID) : $this->usersIgnore($teamID))
+			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team', $teamID);
 			})
@@ -966,7 +965,7 @@ class StatisticsController extends Controller
 	 * @param  mixed $export
 	 * @return void
 	 */
-	private function getTotals($data = array(), $carbStartDate, $carbEndDate, $user_id = 0, $teamID = 0, $export = false)
+	private function getTotals($data = array(), $carbStartDate, $carbEndDate, $user_id = 0, $teamID = 0, $isFilter = 0, $export = false)
 	{
 		$totalPerfectHours = array();
 		['users' => $users, 'daysOfMonths' => $daysOfMonths, 'offDays' => $offDays] = $data;
@@ -1055,20 +1054,24 @@ class StatisticsController extends Controller
 
 		// Return total hours in month of per project type
 		$dataNowMonthHoursPerProject = $totalHoursProjects = array();
-		$totalHoursProjects = $this->getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate);
+		//Lấy total time từ database
+		if ( !$isFilter ) $totalHoursProjects = $this->getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate);
 		$startMonth = $carbStartDate->format('Y-m-d');
 		$endMonth = $carbEndDate->format('Y-m-d');
 
-		if (isset($totalHoursProjects) && !empty($totalHoursProjects)) {
+		// Nếu có dữ liệu total time từ data thì đổi lại start date
+		if (isset($totalHoursProjects) && !empty($totalHoursProjects) && !$isFilter) {
 			$totalTime = array_values($totalHoursProjects);
 			$startMonth = substr($totalTime[0]['yearMonth'], 0, 4) . '-' . substr($totalTime[0]['yearMonth'], -2) . '-' . substr($startMonth, -2);
+			$carbNewStartMonth = Carbon::createFromFormat('Y-m-d', $startMonth);
+			$startMonth = $carbNewStartMonth->addMonths(1)->format('Y-m-d');
 		}
 
 		$hoursProjects = DB::table('jobs')
 			->select(
 				'projects.type_id as id',
 				'jobs.date as jdate',
-				DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
+				DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total')
 			)
 			->join('issues', 'issues.id', '=', 'jobs.issue_id')
 			->join('projects', 'projects.id', '=', 'issues.project_id')
@@ -1095,7 +1098,8 @@ class StatisticsController extends Controller
 			}
 			// create key
 			$str = $value->id . '_' . $yearMonth;
-			$total = round($value->total, 2);
+			// $total = round($value->total, 2);
+			$total = (float)$value->total/3600;
 			if (isset($dataNowMonthHoursPerProject[$str]) && !empty($dataNowMonthHoursPerProject[$str])) {
 				$totalHoursProjects[$str]['total'] += $total;
 				$dataNowMonthHoursPerProject[$str]['total'] += $total;
@@ -1108,19 +1112,22 @@ class StatisticsController extends Controller
 			}
 		}
 
-		foreach ($dataNowMonthHoursPerProject as $item) {
-			if ($item['yearMonth'] < date('Ym')) {
-				DB::table('total_times')->insert(
-					array(
-						'type_id' => $item['id'],
-						'team_id' => $teamID,
-						'user_id' => $user_id,
-						'time' => $item['total'],
-						'date' => $item['yearMonth'],
-						'created_at' => date('Y-m-d H:i:s'),
-						'updated_at' => date('Y-m-d H:i:s'),
-					)
-				);
+		// Insert new data total time to database
+		if ( !$isFilter ) {
+			foreach ($dataNowMonthHoursPerProject as $item) {
+				if ($item['yearMonth'] < date('Ym')) {
+					DB::table('total_times')->insert(
+						array(
+							'type_id' => $item['id'],
+							'team_id' => $teamID,
+							'user_id' => $user_id,
+							'time' => $item['total'],
+							'date' => $item['yearMonth'],
+							'created_at' => date('Y-m-d H:i:s'),
+							'updated_at' => date('Y-m-d H:i:s'),
+						)
+					);
+				}
 			}
 		}
 
@@ -1130,15 +1137,13 @@ class StatisticsController extends Controller
 			$totals['totalHoursProjects'] = array_values($totalHoursProjects);
 		}
 
-		// dd($totals['totalHoursProjects']);
-
 		return $totals;
 	}
 
 	private function getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate)
 	{
-		$startMonth = $carbStartDate->format('Y-m-d');
-		$endMonth = $carbEndDate->format('Y-m-d');
+		$startMonth = $carbStartDate->format('Ym');
+		$endMonth = $carbEndDate->format('Ym');
 		$dataHoursPerProject = array();
 		$totalTime = DB::table('total_times')->select('type_id', 'time', 'date')
 			->where('time', '>', 0)
@@ -1150,18 +1155,15 @@ class StatisticsController extends Controller
 			})
 			->when($teamID, function ($query, $teamID) {
 				return $query->where(function ($query) use ($teamID) {
-					$query->where('team_id', '=', $teamID)
-						->orWhere('team_id', 'LIKE', $teamID . ',%')
-						->orWhere('team_id', 'LIKE', '%,' . $teamID . ',%')
-						->orWhere('team_id', 'LIKE', '%,' . $teamID);
+					$query->where('team_id', '=', $teamID);
 				});
 			})->orderBy('date', 'DESC')->get()->toArray();
 
 		foreach ($totalTime as $v) {
 			$dataHoursPerProject[$v->type_id . '_' . $v->date] = array(
 				'id' => $v->type_id,
-				'total' => $v->time,
 				'yearMonth' => $v->date,
+				'total' => $v->time,
 			);
 		}
 

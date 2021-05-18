@@ -51,7 +51,7 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtNewUser')}}</p>
-                            <h4 class="card-title">+{{ totalObject(newUsersMonths) }}/{{ currentMonth.totalUsers }}</h4>
+                            <h4 class="card-title">+{{ totalNewUsers(newUsersMonths) }}/{{ currentMonth.totalUsers }}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
@@ -231,7 +231,7 @@
                 jobs: 0,
 
                 startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
-                endMonth: new Date(moment().subtract(0, 'months').endOf('month').format('YYYY/MM/DD')),
+                endMonth: new Date(moment().subtract(0, 'months').format('YYYY/MM/DD')),
                 currentMonth: {},
 
                 users: [],
@@ -344,6 +344,8 @@
                 },
 
                 team: "",
+                isFilter: 0,
+                isTeamChange: 0,
             }
         },
         mounted() {
@@ -366,21 +368,22 @@
             $(document).on('click', '.languages button', function() {
                 _this.getAllData();
             });
+
+            _this.getAllData();
         },
         methods: {
             ...mapActions({
      	 	    setCurrentTeam: "setCurrentTeam"
             }),
 
-            getAllData(isFilter = 0) {
-
+            getAllData() {
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
-                const uri = '/data/statistic/time-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team + '&isFilter=' + isFilter;
+                const uri = '/data/statistic/time-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team + '&isFilter=' + this.isFilter;
 
                 axios.get(uri)
                     .then(res => {
-                        if ( ! isFilter ) {
+                        if ( ! this.isFilter ) {
                             // Reset
                             this.pageData = {
                                 'totalpage' : [],
@@ -409,6 +412,10 @@
                         console.log(err);
                         alert("Could not load data");
                     });
+                
+                // Reset Filter
+                this.isFilter = 0;
+                this.isTeamChange = 0;
 
             },
 
@@ -492,11 +499,13 @@
             totalObject(obj) {
                 return Object.keys(obj).reduce((total, key) => { return total + obj[key] }, 0);
             },
+            totalNewUsers(obj) {
+                return Object.keys(obj).reduce((total, key) => { return total + obj[key].length }, 0);
+            },
             totalArrayObject(arr) {
-                console.log(arr);
                 return arr.reduce((total, item) => { 
-                    console.log(total)
-                    return total + (item.total*1).toFixed(2)*1 
+                    total += (item.total*1);
+                    return total;
                 }, 0).toFixed(2);
             },
             getCurrentMonth(data) {
@@ -606,7 +615,8 @@
             dateChange(value, oldValue) {
                 if ( value != oldValue ) {
                     const _this = this;
-                    _this.getAllData(1);
+                    _this.isFilter = 1;
+                    _this.getAllData();
 
                     // Reset
                     _this.pageData = {
@@ -629,7 +639,8 @@
             }],
             user_id: [{
                 handler: function() {
-                    this.getAllData(1);
+                    this.isFilter = this.isTeamChange ? 0 : 1;
+                    this.getAllData();
                 }
             }],
             startMonth: [{
@@ -641,9 +652,11 @@
             team: [{
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
-                        this.getAllData();
                         if ( value != this.currentTeam.id ) {
                             this.setCurrentTeam(value);
+                            this.isTeamChange = 1;
+                            this.user_id = 0;
+                            
                             $('#nav-tab > a').not('#timeallocation-tab').removeClass('active').attr('aria-selected',false);
                             $('#timeallocation-tab').addClass('active').attr('aria-selected',true);
                             $('#nav-tabContent > div').not('#timeallocation').removeClass('active').removeClass('show');

@@ -124,7 +124,7 @@ class Controller extends BaseController
 	}
 
 	public function sumArray($array, $key = false) {
-		if ( $key ) {
+		if ( !$key ) {
 			$total = array_reduce(
 				$array,
 				function($total, $item) {
