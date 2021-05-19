@@ -368,20 +368,18 @@
             $(document).on('click', '.languages button', function() {
                 _this.getAllData();
             });
-
-            _this.getAllData();
         },
         methods: {
             ...mapActions({
      	 	    setCurrentTeam: "setCurrentTeam"
             }),
 
-            getAllData() {
+            async getAllData() {
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
                 const uri = '/data/statistic/time-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team + '&isFilter=' + this.isFilter;
 
-                axios.get(uri)
+                await axios.get(uri)
                     .then(res => {
                         if ( ! this.isFilter ) {
                             // Reset
@@ -638,9 +636,17 @@
                 handler: 'getUserOptions'
             }],
             user_id: [{
-                handler: function() {
-                    this.isFilter = this.isTeamChange ? 0 : 1;
-                    this.getAllData();
+                handler: function(value, oldValue) {
+                    if ( value != oldValue ) {
+                        console.log('ttttttttttt');
+                        this.isFilter = this.isTeamChange ? 0 : 1;
+                        this.getAllData();
+                    } else {
+                        if ( this.isTeamChange ) {
+                            this.isFilter = 0;
+                            this.getAllData();
+                        }
+                    }
                 }
             }],
             startMonth: [{
@@ -652,11 +658,18 @@
             team: [{
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
+                        console.log('wwwwwwwwwwwwww');
+                        this.isTeamChange = 1;
+                        if ( !this.user_id ) {
+                            console.log('eeeeeeeeeeeeeee');
+                            this.getAllData();
+                        } else {
+                            console.log('rrrrrrrrrrrrr');
+                            this.user_id = 0;
+                        }
+
                         if ( value != this.currentTeam.id ) {
                             this.setCurrentTeam(value);
-                            this.isTeamChange = 1;
-                            this.user_id = 0;
-                            
                             $('#nav-tab > a').not('#timeallocation-tab').removeClass('active').attr('aria-selected',false);
                             $('#timeallocation-tab').addClass('active').attr('aria-selected',true);
                             $('#nav-tabContent > div').not('#timeallocation').removeClass('active').removeClass('show');
