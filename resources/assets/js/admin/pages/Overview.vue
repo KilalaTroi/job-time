@@ -638,7 +638,6 @@
             user_id: [{
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
-                        console.log('ttttttttttt');
                         this.isFilter = this.isTeamChange ? 0 : 1;
                         this.getAllData();
                     } else {
@@ -658,13 +657,10 @@
             team: [{
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
-                        console.log('wwwwwwwwwwwwww');
                         this.isTeamChange = 1;
                         if ( !this.user_id ) {
-                            console.log('eeeeeeeeeeeeeee');
                             this.getAllData();
                         } else {
-                            console.log('rrrrrrrrrrrrr');
                             this.user_id = 0;
                         }
 

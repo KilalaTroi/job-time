@@ -128,27 +128,27 @@ class StatisticsController extends Controller
 		$endMonth = $_GET['endMonth'];
 		$teamID = $_GET['team_id'];
 
-		$startMonthCar = Carbon::createFromFormat('Y/m/d', $startMonth);
-		$endMonthCar = Carbon::createFromFormat('Y/m/d', $endMonth);
+		$carbStartDate = Carbon::createFromFormat('Y/m/d', $startMonth);
+		$carbEndDate = Carbon::createFromFormat('Y/m/d', $endMonth);
 
-		// Get start date and end date by team
-		$this->getStartEndDatebyTeam($teamID, $startMonthCar, $endMonthCar);
+		// Create data months
+		$data = $this->createDataMonths($carbStartDate, $carbEndDate, $teamID, true);
 
 		// Return project type
-		$types = $this->typeWithClass($teamID);
+		$types = $data['types'] = $this->typeWithClass($teamID);
 
 		// Get users
-		$users = $this->getUsers($startMonthCar, $endMonthCar, $teamID, $user_id);
+		$users = $data['users'] = $this->getUsers($carbStartDate, $carbEndDate, $teamID, $user_id);
 
-		// Return months, monthsText, startEndYear, off days
-		$data = $this->calcOffDays($startMonth, $endMonth, $teamID, $users, $user_id, true);
+		// Get off days
+		$data['offDays'] = $this->calcOffDays($data['daysOfMonths'], $data['users'], $carbStartDate, $carbEndDate,$teamID, $user_id);
 
 		// Return totals
-		$totals = $this->getTotals($data, $startMonthCar, $endMonthCar, $user_id, $teamID, true);
+		$totals = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID, 1, true);
 		
 		// infoUser
 		$infoUser = false;
-		if ($user_id) {
+		if ( $user_id ) {
 			$infoUser = array_filter($users['all'], function ($obj) use ($user_id) {
 				if ($obj->id == $user_id) {
 					return true;
@@ -162,14 +162,14 @@ class StatisticsController extends Controller
 		$mainTable = array();
 		$other = array();
 		$maxRow = count($types) + 5;
-		$maxColumn = count($totals['hoursPerMonth']) + 2;
+		$maxColumn = count($totals['totalPerfectHours']) + 2;
 		$letterMaxColumn = $this->columnLetter($maxColumn);
 
 		foreach ($types as $index => $type) {
 			$childIndex = 0;
 
-			foreach ($totals['hoursPerMonth'] as $key => $month) {
-				$hours = isset($totals['hoursPerProject'][$type->id . '_' . $key]) ? $totals['hoursPerProject'][$type->id . '_' . $key] : false;
+			foreach ($totals['totalPerfectHours'] as $key => $month) {
+				$hours = isset($totals['totalHoursProjects'][$type->id . '_' . $key]) ? $totals['totalHoursProjects'][$type->id . '_' . $key] : false;
 				$percent = $hours && $month ? round($hours['total'] / $month * 100, 1) : 0;
 				$mainTable[$type->slug]['slug'] = $type->slug;
 				$mainTable[$type->slug]['slug_ja'] = $type->slug_ja;
@@ -1514,20 +1514,20 @@ class StatisticsController extends Controller
 	 * @param  date $endDate
 	 * @return date
 	 */
-	private function getStartEndDatebyTeam($teamID, &$startDate, &$endDate) {
-		if ( 2 == $teamID ) {
-			if (Carbon::now()->day > 21) {
-				$startDate = $startDate->day(21)->format('Y/m/d');
-				$endDate = $endDate->copy()->addMonth(1)->day(20)->format('Y/m/d');
-			} else {
-				$startDate = $startDate->copy()->subMonth(1)->day(21)->format('Y/m/d');
-				$endDate = $endDate->day(20)->format('Y/m/d');
-			}
-		} else {
-			$startDate = $startDate->format('Y/m/d');
-			$endDate = $endDate->format('Y/m/d');
-		}
-	}
+	// private function getStartEndDatebyTeam($teamID, &$startDate, &$endDate) {
+	// 	if ( 2 == $teamID ) {
+	// 		if (Carbon::now()->day > 21) {
+	// 			$startDate = $startDate->day(21)->format('Y/m/d');
+	// 			$endDate = $endDate->copy()->addMonth(1)->day(20)->format('Y/m/d');
+	// 		} else {
+	// 			$startDate = $startDate->copy()->subMonth(1)->day(21)->format('Y/m/d');
+	// 			$endDate = $endDate->day(20)->format('Y/m/d');
+	// 		}
+	// 	} else {
+	// 		$startDate = $startDate->format('Y/m/d');
+	// 		$endDate = $endDate->format('Y/m/d');
+	// 	}
+	// }
 
 	private function columnLetter($c)
 	{
