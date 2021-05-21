@@ -433,7 +433,7 @@ class CheckInOutController extends Controller
         return $query->whereIn('checkinout.checkinout_user_id', explode(',', $user_checkout_id));
       })
       ->whereBetween('date', array($filters['start_date'],  $filters['end_date']))
-      ->orderBy('users.team', 'ASC')->orderBy('users.orderby', 'DESC')->orderBy('checkinout.date', 'DESC')->orderBy('users.id', 'DESC');
+      ->orderBy('users.team', 'ASC')->orderBy('users.orderby', 'DESC')->orderBy('users.id', 'DESC')->orderBy('checkinout.date', 'DESC');
     if ($dbcheckInOut->count() > 0)  $datas = $this->getCheckInOutListFromMySQLDB($dbcheckInOut->get());
     if (isset($datas['data']) && !empty($datas['data'])) {
       $total = $datas['total'];
