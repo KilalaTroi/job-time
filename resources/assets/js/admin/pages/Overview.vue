@@ -9,7 +9,7 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtWorkedTime')}}</p>
-                            <h4 class="card-title">{{ totalArrayObject(hoursPerProject) | numeral('0,0') }}/{{ totalObject(totalHoursPerMonth) | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
+                            <h4 class="card-title">{{ totalArrayObject(totalHoursProjects) | numeral('0,0') }}/{{ totalObject(totalPerfectHours) | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
@@ -51,7 +51,7 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtNewUser')}}</p>
-                            <h4 class="card-title">+{{ totalObject(newUsersPerMonth) }}/{{ currentMonth.totalUsers }}</h4>
+                            <h4 class="card-title">+{{ totalNewUsers(newUsersMonths) }}/{{ currentMonth.totalUsers }}</h4>
                         </div>
                         <div slot="footer">
                             <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
@@ -63,10 +63,10 @@
                 <div class="card-body">
                     <div class="d-flex mb-3 justify-content-between">
                         <div class="d-flex align-items-center flex-wrap">
-                            <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
+                            <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'day'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
                             </datepicker>
                             <span class="mx-2">-</span>
-                            <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
+                            <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'day'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
                             </datepicker>
                         </div>
                         <div>
@@ -88,10 +88,10 @@
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="timeallocation-tab" data-toggle="tab" href="#timeallocation" role="tab" aria-controls="timeallocation" aria-selected="true">{{$ml.with('VueJS').get('txtTimeAllocation')}}</a>
-                            <a v-if="3 != team" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">{{$ml.with('VueJS').get('txtTotalPages')}}</a>
-                            <a v-if="3 == team" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">{{$ml.with('VueJS').get('txtTotalProjects')}}</a>
-                            <a v-if="3 == team" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">{{$ml.with('VueJS').get('txtTotalJobs')}}</a>
-                            <a v-if="2 == team" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">{{$ml.with('VueJS').get('txtTable')}}</a>
+                            <a v-if="3 != team" @click="showTotalPages" class="nav-item nav-link " id="totalpage-tab" data-toggle="tab" href="#totalpage" role="tab" aria-controls="totalpage" aria-selected="false">{{$ml.with('VueJS').get('txtTotalPages')}}</a>
+                            <a v-if="3 == team" @click="showTotalProjects" class="nav-item nav-link " id="totalproject-tab" data-toggle="tab" href="#totalprojects" role="tab" aria-controls="totalprojects" aria-selected="false">{{$ml.with('VueJS').get('txtTotalProjects')}}</a>
+                            <a v-if="3 == team" @click="showTotalJobs" class="nav-item nav-link " id="totaljobs-tab" data-toggle="tab" href="#totaljobs" role="tab" aria-controls="totaljobs" aria-selected="false">{{$ml.with('VueJS').get('txtTotalJobs')}}</a>
+                            <a v-if="2 == team" @click="showTotalPages" class="nav-item nav-link" id="table-tab" data-toggle="tab" href="#table" role="tab" aria-controls="table" aria-selected="false">{{$ml.with('VueJS').get('txtTable')}}</a>
                         </div>
                     </nav>
                      <div class="tab-content" id="nav-tabContent">
@@ -219,9 +219,9 @@
                 types: [],
                 monthsText: [],
                 series: [],
-                newUsersPerMonth: {},
-                totalHoursPerMonth: {},
-                hoursPerProject: [],
+                newUsersMonths: {},
+                totalPerfectHours: {},
+                totalHoursProjects: [],
                 pageData: {
                     'totalpage' : [],
                     'table' : [],
@@ -231,7 +231,7 @@
                 jobs: 0,
 
                 startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
-                endMonth: new Date(moment().subtract(0, 'months').endOf('month').format('YYYY/MM/DD')),
+                endMonth: new Date(moment().subtract(0, 'months').format('YYYY/MM/DD')),
                 currentMonth: {},
 
                 users: [],
@@ -344,6 +344,8 @@
                 },
 
                 team: "",
+                isFilter: 0,
+                isTeamChange: 0,
             }
         },
         mounted() {
@@ -364,7 +366,7 @@
             });
 
             $(document).on('click', '.languages button', function() {
-                _this.fetch();
+                _this.getAllData();
             });
         },
         methods: {
@@ -372,83 +374,54 @@
      	 	    setCurrentTeam: "setCurrentTeam"
             }),
 
-            fetch() {
-
+            async getAllData() {
                 this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
 
-                const uri = '/data/statistic/time-allocation?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                const uri = '/data/statistic/time-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team + '&isFilter=' + this.isFilter;
 
-                axios.get(uri)
+                await axios.get(uri)
                     .then(res => {
-                        this.types = res.data.types;
-                        this.users = res.data.users.all;
-                        this.newUsersPerMonth = res.data.users.newUsersPerMonth;
-                        this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
-                        this.hoursPerProject = res.data.totals.hoursPerProject;
-                        this.jobs = res.data.jobs;
+                        if ( ! this.isFilter ) {
+                            // Reset
+                            this.pageData = {
+                                'totalpage' : [],
+                                'table' : [],
+                            };
+                            this.jobsData = [];
+                            this.projectsData = [];
+
+                            // Assign data one time
+                            this.types = res.data.types;
+                            this.users = res.data.users.all;
+                            this.jobs = res.data.jobs;
+                        }
+
+                         // Assign data
+                        this.newUsersMonths = res.data.users.newUsersMonths;  
+                        this.totalPerfectHours = res.data.totals.totalPerfectHours;
+                        this.totalHoursProjects = res.data.totals.totalHoursProjects;
                         this.currentMonth = res.data.currentMonth;
                         this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
-                        this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-
-                        if(3 != this.team){
-                            const uriPage = '/data/statistic/get-page-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getPageData(uriPage);
-                        }
-
-                        if(3 == this.team){
-                            const uriJobs = '/data/statistic/get-job-report?startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getJobData(uriJobs);
-
-                            const uriProject = '/data/statistic/get-project-report?startMonth=' + this.customFormatterStr(this.startMonth)
-                            this.getProjectData(uriProject);
-                        }
+                        this.getSeries(this.types, this.totalPerfectHours, this.totalHoursProjects);
                     })
                     .catch(err => {
                         console.log(err);
                         alert("Could not load data");
                     });
+                
+                // Reset Filter
+                this.isFilter = 0;
+                this.isTeamChange = 0;
 
-            },
-            getFilterData() {
-
-                this.exportLink = '/data/statistic/export-report/xlsx?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-
-                const uri = '/data/statistic/filter-allocation?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                axios.get(uri)
-                    .then(res => {
-                        this.totalHoursPerMonth = res.data.totals.hoursPerMonth;
-                        this.hoursPerProject = res.data.totals.hoursPerProject;
-                        this.currentMonth = res.data.currentMonth;
-                        this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
-                        this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
-                        this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.barChart.data.labels = res.data.monthsText;
-                        this.getSeries(this.types, this.totalHoursPerMonth, this.hoursPerProject);
-                        if(3 == this.team){
-                            const uriJobs = '/data/statistic/get-job-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getJobData(uriJobs);
-
-                            const uriProject = '/data/statistic/get-project-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth)
-                            this.getProjectData(uriProject);
-                        }
-
-                        if(3 != this.team){
-                            const uriPage = '/data/statistic/get-page-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
-                            this.getPageData(uriPage)
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        alert("Could not load data");
-                    });
             },
 
             getPageData(url){
                 axios.get(url)
                 .then(res => {
                     this.pageData = res.data;
-                    this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page',this.totalHoursPerMonth)
+                    this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page',this.totalPerfectHours)
                     this.data.totalpage = this.pageData;
                 })
                 .catch(err => {
@@ -457,11 +430,18 @@
                 });
             },
 
+            showTotalPages() {
+                if ( ! this.pageData.totalpage.length ) {
+                    const uriPage = '/data/statistic/get-page-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                    this.getPageData(uriPage);
+                }
+            },
+
             getJobData(url){
                 axios.get(url)
                 .then(res => {
                     this.jobsData = res.data;
-                    this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue',this.totalHoursPerMonth);
+                    this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue',this.totalPerfectHours);
                 })
                 .catch(err => {
                     console.log(err);
@@ -469,16 +449,30 @@
                 });
             },
 
+            showTotalJobs() {
+                if ( ! this.jobsData.totaljob ) {
+                    const uriJobs = '/data/statistic/get-job-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth) + '&endMonth=' + this.customFormatterEnd(this.endMonth) + '&team_id=' + this.team;
+                    this.getJobData(uriJobs);
+                }
+            },
+
             getProjectData(url){
                 axios.get(url)
                 .then(res => {
                     this.projectsData = res.data;
-                    this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project',this.totalHoursPerMonth);
+                    this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project',this.totalPerfectHours);
                 })
                 .catch(err => {
                     console.log(err);
                     alert("Could not load data");
                 });
+            },
+
+            showTotalProjects() {
+                if ( ! this.projectsData.totalproject ) {
+                    const uriProject = '/data/statistic/get-project-report?user_id=' + this.user_id + '&startMonth=' + this.customFormatterStr(this.startMonth)
+                    this.getProjectData(uriProject);
+                }
             },
 
             hasObjectValue(data, id, yearMonth) {
@@ -487,13 +481,15 @@
                 return false;
             },
             customFormatterEnd(date) {
-                return moment(date).endOf('month').format('YYYY/MM/DD');
+                // return moment(date).endOf('month').format('YYYY/MM/DD');
+                return moment(date).format('YYYY/MM/DD');
             },
             customFormatterStr(date) {
-                return moment(date).startOf('month').format('YYYY/MM/DD');
+                // return moment(date).startOf('month').format('YYYY/MM/DD');
+                return moment(date).format('YYYY/MM/DD')
             },
             customFormatterM(date) {
-                return moment(date).format('YYYY/MM');
+                return moment(date).format('YYYY/MM/DD');
             },
             circleClass(cl) {
                 return cl + ' text-uppercase ml-3';
@@ -501,8 +497,14 @@
             totalObject(obj) {
                 return Object.keys(obj).reduce((total, key) => { return total + obj[key] }, 0);
             },
+            totalNewUsers(obj) {
+                return Object.keys(obj).reduce((total, key) => { return total + obj[key].length }, 0);
+            },
             totalArrayObject(arr) {
-                return arr.reduce((total, item) => { return total + (item.total*1).toFixed(2)*1 }, 0).toFixed(2);
+                return arr.reduce((total, item) => { 
+                    total += (item.total*1);
+                    return total;
+                }, 0).toFixed(2);
             },
             getCurrentMonth(data) {
                 if (typeof(data.hours) !== 'undefined') return {
@@ -511,13 +513,13 @@
                 };
                 return false;
             },
-            getSeries(projectTypes, totalHoursPerMonth, hoursPerProject) {
+            getSeries(projectTypes, totalPerfectHours, totalHoursProjects) {
                 let _this = this;
                 let series = projectTypes.map((item, index) => {
                     let _item = item;
-                    let row = Object.keys(totalHoursPerMonth).map((key, index) => {
-                        if ( _this.hasObjectValue(hoursPerProject, _item.id, key) ) {
-                            let percents = (_this.hasObjectValue(hoursPerProject, _item.id, key).total*1/totalHoursPerMonth[key]*100).toFixed(2);
+                    let row = Object.keys(totalPerfectHours).map((key, index) => {
+                        if ( _this.hasObjectValue(totalHoursProjects, _item.id, key) ) {
+                            let percents = (_this.hasObjectValue(totalHoursProjects, _item.id, key).total*1/totalPerfectHours[key]*100).toFixed(2);
                             return {
                                 value: percents,
                                 meta: _item.slug
@@ -531,14 +533,14 @@
                     })
                     return row;
                 });
-                this.series = this.barChart.data.series = series;
+                this.series = this.barChart.data.series = [...series];
             },
 
-            getCustomSeries(type, data, chart, dataKey, totalHoursPerMonth){
+            getCustomSeries(type, data, chart, dataKey, totalPerfectHours){
                 let _this = this;
                 let series = type.map((item, index) => {
                     let _item = item;
-                    let row = Object.keys(totalHoursPerMonth).map((key, index) => {
+                    let row = Object.keys(totalPerfectHours).map((key, index) => {
                         if ( _this.hasObjectValue(data, _item.id, key) ) {
                             return {
                                 value: _this.hasObjectValue(data, _item.id, key)[dataKey],
@@ -606,6 +608,27 @@
             checkUser(){
                 if(-1 != ('1,24,49').indexOf(this.loginUser.id)) return true;
                 return false;
+            },
+
+            dateChange(value, oldValue) {
+                if ( value != oldValue ) {
+                    const _this = this;
+                    _this.isFilter = 1;
+                    _this.getAllData();
+
+                    // Reset
+                    _this.pageData = {
+                        'totalpage' : [],
+                        'table' : [],
+                    };
+                    _this.jobsData = [];
+                    _this.projectsData = [];
+
+                    if ( $('#nav-tab > a#table').hasClass('active') ) _this.showTotalPages();
+                    if ( $('#nav-tab > a#totalpage-tab').hasClass('active') ) _this.showTotalPages();
+                    if ( $('#nav-tab > a#totalproject-tab').hasClass('active') ) _this.showTotalProjects();
+                    if ( $('#nav-tab > a#totaljobs-tab').hasClass('active') ) _this.showTotalJobs();
+                }
             }
         },
         watch: {
@@ -613,18 +636,34 @@
                 handler: 'getUserOptions'
             }],
             user_id: [{
-                handler: 'getFilterData'
+                handler: function(value, oldValue) {
+                    if ( value != oldValue ) {
+                        this.isFilter = this.isTeamChange ? 0 : 1;
+                        this.getAllData();
+                    } else {
+                        if ( this.isTeamChange ) {
+                            this.isFilter = 0;
+                            this.getAllData();
+                        }
+                    }
+                }
             }],
             startMonth: [{
-                handler: 'getFilterData'
+                handler: 'dateChange'
             }],
             endMonth: [{
-                handler: 'getFilterData'
+                handler: 'dateChange'
             }],
             team: [{
                 handler: function(value, oldValue) {
                     if ( value != oldValue ) {
-                        this.fetch();
+                        this.isTeamChange = 1;
+                        if ( !this.user_id ) {
+                            this.getAllData();
+                        } else {
+                            this.user_id = 0;
+                        }
+
                         if ( value != this.currentTeam.id ) {
                             this.setCurrentTeam(value);
                             $('#nav-tab > a').not('#timeallocation-tab').removeClass('active').attr('aria-selected',false);
@@ -715,5 +754,8 @@ $chart-tooltip-color: #fff;
 }
 .table-bordered th, .table-bordered td{
   border-bottom: 1px solid #f1eded !important;
+}
+.card-title {
+    font-size: 18px;
 }
 </style>

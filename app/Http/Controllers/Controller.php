@@ -71,4 +71,75 @@ class Controller extends BaseController
 		};
 		return $response->getBody();
 	}
+
+	/**
+	 * Function that groups an array of associative arrays by some key.
+	 * 
+	 * @param {String} $key Property to sort by.
+	 * @param {Array} $data Array that stores multiple associative arrays.
+	 */
+	public function groupByArrayKey($key, $data) {
+		$result = array();
+
+		foreach ($data as $val) {
+			if(array_key_exists($key, $val)){
+				$result[$val[$key]][] = $val;
+			}else{
+				$result[""][] = $val;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Function that groups an array of associative arrays by some key.
+	 * 
+	 * @param {String} $key Property to sort by.
+	 * @param {Array} $data Array that stores multiple associative objects.
+	 */
+	public function groupByObjectKey($property, $data) {
+		$result = array();
+
+		foreach($data as $val) {
+			if(property_exists($val, $property)){
+				$result[$val->$property][] = $val;
+			}else{
+				$result[""][] = $val;
+			}
+		}
+
+		return $result;
+	}
+
+	public function sumArrayByObjectKey($array, $property) {
+		$total = array_reduce(
+			$array,
+			function($total, $item) use($property) {
+				$total += $item->{$property};
+				return $total;
+		}, 0);
+
+		return $total;
+	}
+
+	public function sumArray($array, $key = false) {
+		if ( !$key ) {
+			$total = array_reduce(
+				$array,
+				function($total, $item) {
+					$total += $item;
+					return $total;
+			}, 0);
+		} else {
+			$total = array_reduce(
+				$array,
+				function($total, $item) use($key) {
+					$total += $item[$key];
+					return $total;
+			}, 0);
+		}
+
+		return $total;
+	}
 }
