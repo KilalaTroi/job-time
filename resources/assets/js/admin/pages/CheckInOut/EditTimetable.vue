@@ -20,7 +20,7 @@
               hide-disabled-items
               hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[5, 17]]"
+              :hour-range="[[5, 20]]"
               input-width="100%"
               close-on-complete
               required
@@ -32,7 +32,7 @@
               hide-disabled-items
               hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[5, 17]]"
+              :hour-range="[[5, 20]]"
               input-width="100%"
               close-on-complete
               required
@@ -104,7 +104,7 @@
               hide-disabled-items
               hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[5, 17]]"
+              :hour-range="[[5, 20]]"
               input-width="100%"
               close-on-complete
               required
@@ -116,7 +116,7 @@
               hide-disabled-items
               hide-clear-button
               :minute-range="defaultMinuteRange"
-              :hour-range="[[8, 17]]"
+              :hour-range="[[8, 20]]"
               input-width="100%"
               close-on-complete
               required
