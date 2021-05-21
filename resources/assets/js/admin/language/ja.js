@@ -125,7 +125,7 @@ export default {
     txtLogOut: 'ログアウト',
     msgConfirmDelete: 'このレコードを削除してもよろしいですか？',
     msgConfirmArchive: '選択したプロジェクトをアーカイブしますか？',
-    msgConfirmUnlockArchive: '選択したプロジェクトのアーカイブを削除しますか？',
+    msgConfirmUnlockArchive: '選択したプロジェクトのアーカイブを解除しますか？',
     msgConfirmChange: 'この変化に確かですか？',
     txtPickSome: 'いくつかを選択',
     txtProcess: '進行',
