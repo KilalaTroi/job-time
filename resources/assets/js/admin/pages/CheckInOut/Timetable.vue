@@ -1,6 +1,28 @@
 <template>
   <div id="timetable" class="content">
     <div class="container-fluid">
+      <card class="mb-0">
+        <template slot="header">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="card-title my-0 mb-1">
+                {{ $ml.with("VueJS").get("sbAttendance") }}
+              </h4>
+              <nav>
+                <div class="nav" id="nav-tab" role="tablist">
+                  <router-link to="/checkinout#table-tab-calendar">{{
+                    $ml.with("VueJS").get("txtCalendar")
+                  }}</router-link>
+                  <router-link class="active" to="/checkinout/timetable">{{
+                    $ml.with("VueJS").get("txtShiftsManagement")
+                  }}</router-link>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </template>
+      </card>
+
       <div class="row">
         <div class="col-sm-4">
           <card class="strpied-tabled-with-hover">
@@ -14,11 +36,15 @@
                 data-keyboard="false"
               >
                 <i class="fa fa-plus"></i>
-                <slot name="title">{{ $ml.with('VueJS').get('txtCreate') }}</slot>
+                <slot name="title">{{
+                  $ml.with("VueJS").get("txtCreate")
+                }}</slot>
               </button>
             </div>
             <template slot="header">
-              <h4 class="card-title">{{ $ml.with('VueJS').get('txtTimetable') }}</h4>
+              <h4 class="card-title">
+                {{ $ml.with("VueJS").get("txtTimetable") }}
+              </h4>
             </template>
             <tbl-default
               :dataItems="data.timetable"
@@ -68,10 +94,14 @@
         <div class="col-sm-8">
           <card class="strpied-tabled-with-hover">
             <template slot="header">
-              <h4 class="card-title">{{ $ml.with('VueJS').get('txtShiftsManagement') }}</h4>
+              <h4 class="card-title">
+                {{ $ml.with("VueJS").get("txtShiftsManagement") }}
+              </h4>
             </template>
             <button-create>
-              <template slot="title">{{ $ml.with('VueJS').get('txtCreate') }}</template>
+              <template slot="title">{{
+                $ml.with("VueJS").get("txtCreate")
+              }}</template>
             </button-create>
             <tbl-default
               :dataItems="data.stimetable"
@@ -149,6 +179,33 @@ export default {
 </script>
 <style lang="scss">
 #timetable {
+  #nav-tab {
+    a {
+      position: relative;
+      padding: {
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+      }
+      &:not(:last-child) {
+        margin-right: 10px;
+        padding-right: 10px;
+        &::after {
+          content: "";
+          height: 100%;
+          width: 1px;
+          background-color: #006b82;
+          display: block;
+          position: absolute;
+          top: 0;
+          right: 0;
+        }
+      }
+      &.active {
+        color: #006b82;
+      }
+    }
+  }
   [data-target="#timeTableCreate"],
   [data-target="#itemCreate"] {
     position: absolute;

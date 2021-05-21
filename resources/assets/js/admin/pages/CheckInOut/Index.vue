@@ -456,6 +456,7 @@ export default {
   }
   #nav-tab {
     a {
+      position: relative;
       padding: {
         top: 0 !important;
         left: 0 !important;
