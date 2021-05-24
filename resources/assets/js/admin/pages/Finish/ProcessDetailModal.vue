@@ -2,7 +2,7 @@
   <div>
     <modal
       id="processDetailModal"
-      :sizeClasses="modalLg"
+      :sizeClasses="'modal-xl'"
       v-on:reset-validation="resetValidate"
     >
       <template slot="title">{{
@@ -65,36 +65,41 @@ export default {
         {
           id: "date",
           value: this.$ml.with("VueJS").get("txtDateTime"),
-          width: "",
+          width: "140",
           class: "",
         },
         {
           id: "user_name",
           value: this.$ml.with("VueJS").get("txtReporter"),
-          width: "",
+          width: "140",
           class: "",
         },
         {
           id: "page",
           value: this.$ml.with("VueJS").get("txtPages"),
-          width: "",
+          width: "80",
           class: "",
         },
         {
           id: "file",
           value: this.$ml.with("VueJS").get("txtFiles"),
-          width: "",
+          width: "80",
           class: "",
         },
         {
           id: "status",
           value: this.$ml.with("VueJS").get("txtStatus"),
-          width: "135",
+          width: "140",
+          class: "",
+        },
+        {
+          id: "message",
+          value: this.$ml.with("VueJS").get("txtMessage"),
+          width: "",
           class: "",
         },
       ],
       dataProcess: [],
-      modalLg: "modal-lg",
     };
   },
   mounted() {
@@ -105,31 +110,37 @@ export default {
         {
           id: "date",
           value: _this.$ml.with("VueJS").get("txtDateTime"),
-          width: "",
+          width: "140",
           class: "",
         },
         {
           id: "user_name",
           value: _this.$ml.with("VueJS").get("txtReporter"),
-          width: "",
+          width: "140",
           class: "",
         },
         {
           id: "page",
           value: _this.$ml.with("VueJS").get("txtPages"),
-          width: "",
+          width: "80",
           class: "",
         },
         {
           id: "file",
           value: _this.$ml.with("VueJS").get("txtFiles"),
-          width: "",
+          width: "80",
           class: "",
         },
         {
           id: "status",
           value: _this.$ml.with("VueJS").get("txtStatus"),
-          width: "135",
+          width: "140",
+          class: "",
+        },
+        {
+          id: "message",
+          value: _this.$ml.with("VueJS").get("txtMessage"),
+          width: "",
           class: "",
         },
       ];

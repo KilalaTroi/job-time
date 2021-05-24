@@ -78,7 +78,7 @@
                                     </div>
                                 </div>
                                 <div style="width: 200px;">
-                                    <select2 :options="userOptions" v-model="user_id" class="select2 form-control no-disable-first-value">
+                                    <select2 :options="userOptions" v-model="user_id" class="select2 select-user form-control no-disable-first-value">
                                         <option disabled value="0">All</option>
                                     </select2>
                                 </div>
@@ -366,7 +366,9 @@
             });
 
             $(document).on('click', '.languages button', function() {
-                _this.getAllData();
+                _this.getAllData().then(function(){
+                    if ( _this.user_id ) $('.select-user').val(_this.user_id).change();
+                });
             });
         },
         methods: {
