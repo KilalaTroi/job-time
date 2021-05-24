@@ -1380,7 +1380,9 @@ class StatisticsController extends Controller
 				->where('page', '>', 0)
 				->when($teamID, function ($query) use ($startMonth, $endMonth) {
 					return $query->where(function ($query) use ($startMonth, $endMonth) {
-						$query->where('total_pages.date', ">=", substr($startMonth, 0, 6))->where('total_pages.date', "<=", substr($endMonth, 0, 6));
+						$_startMonth = str_replace(array('/', '-'), '', $startMonth);
+						$_endMonth = str_replace(array('/', '-'), '', $endMonth);
+						$query->where('total_pages.date', ">=", substr($_startMonth, 0, 6))->where('total_pages.date', "<=", substr($_endMonth, 0, 6));
 					});
 				})
 				->when($teamID, function ($query, $teamID) {
