@@ -115,6 +115,7 @@ class Uploadcontroller extends Controller
 					'p.date',
 					'u.name as user_name',
 					'p.data as data',
+					'p.message as message',
 					'p.inkjet as inkjet',
 					'p.finish_rq as finish_rq',
 					'p.status as status'

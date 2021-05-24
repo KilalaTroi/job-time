@@ -160,10 +160,15 @@ class ReportsController extends Controller
 		$projectSelects = $request->get('projectSelects');
 		$projectArr = array();
 		if ($projectSelects) {
-			$projectArr = array_map(function ($obj) use (&$filenameExcel) {
-				$filenameExcel[] = str_slug($obj['text'], '-');
-				return $obj['id'];
-			}, $projectSelects);
+			if ( is_array($projectArr) && count($projectArr) ) {
+				$projectArr = array_map(function ($obj) use (&$filenameExcel) {
+					$filenameExcel[] = str_slug($obj['text'], '-');
+					return $obj['id'];
+				}, $projectSelects);
+			} else {
+				$projectArr = $projectSelects;
+				$filenameExcel[] = $projectSelects;
+			}
 		}
 		// End POST data
 
@@ -396,7 +401,11 @@ class ReportsController extends Controller
 				return $query->whereIn('p.type_id', $typeArr);
 			})
 			->when($projectArr, function ($query, $projectArr) {
-				return $query->whereIn('p.id', $projectArr);
+				if ( is_array($projectArr) ) {
+					return $query->whereIn('p.id', $projectArr);
+				} 
+				
+				return $query->where('p.name', 'like', '%' . $projectArr . '%');
 			})
 			->when($userArr, function ($query, $userArr) {
 				return $query->whereIn('j.user_id', $userArr);
