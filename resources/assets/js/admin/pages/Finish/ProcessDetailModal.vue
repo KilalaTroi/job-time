@@ -186,4 +186,9 @@ export default {
     }
   }
 }
+
+#processDetailModal .cl-message {
+  display: block;
+  white-space: pre-line;
+}
 </style>
