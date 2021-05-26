@@ -127,6 +127,7 @@ class ReportsController extends Controller
 		$end_time = $request->get('end_date');
 		$issueFilter = $request->get('issueFilter');
 		$teamFilter = $request->get('team');
+		$perfectMatch = $request->get('perfect_match');
 		if ($issueFilter) $filenameExcel[] = str_slug($issueFilter, '-');
 
 		$user_id = $request->get('user_id');
@@ -172,7 +173,7 @@ class ReportsController extends Controller
 		}
 		// End POST data
 
-		$dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter);
+		$dataTimeUser = $this->getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter, $perfectMatch);
 
 		if (empty($userArr)) {
 			$filenameExcel[] = "all-users";
@@ -377,7 +378,7 @@ class ReportsController extends Controller
 		return url('data/exports/' . $results->filename) . '.' . $results->ext;
 	}
 
-	public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter)
+	public function getDataTimeUser($userArr, $start_time, $end_time, $deptArr, $typeArr, $projectArr, $issueFilter, $teamFilter, $perfectMatch)
 	{
 		$dataDetail = '';
 		$dataTotal = '';
@@ -400,11 +401,14 @@ class ReportsController extends Controller
 			->when($typeArr, function ($query, $typeArr) {
 				return $query->whereIn('p.type_id', $typeArr);
 			})
-			->when($projectArr, function ($query, $projectArr) {
+			->when($projectArr, function ($query, $projectArr) use ($perfectMatch) {
 				if ( is_array($projectArr) ) {
 					return $query->whereIn('p.id', $projectArr);
 				} 
-				
+
+				if ( $perfectMatch )
+					return $query->where('p.name', $projectArr);
+
 				return $query->where('p.name', 'like', '%' . $projectArr . '%');
 			})
 			->when($userArr, function ($query, $userArr) {

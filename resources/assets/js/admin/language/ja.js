@@ -235,4 +235,5 @@ export default {
     txtTotalJobs: 'ジョブ合計',
     txtUseTheMeetingRoom: '会議室を使用する',
     txtEveryWeekTo: '毎週まで',
+    txtPerfectMatch: '完全一致',
 }

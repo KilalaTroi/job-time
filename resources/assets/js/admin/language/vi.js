@@ -235,4 +235,5 @@ export default {
     txtTotalJobs: 'Total jobs',
     txtUseTheMeetingRoom: 'Use the meeting room',
     txtEveryWeekTo: 'Every week to',
+    txtPerfectMatch: 'Perfect match',
 }

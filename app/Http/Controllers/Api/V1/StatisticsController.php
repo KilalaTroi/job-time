@@ -88,6 +88,7 @@ class StatisticsController extends Controller
 			'issue' =>  $request->input('issue'),
 			'team' =>  $request->input('team'),
 			'projects' => $request->input('projects'),
+			'perfect_match' => $request->input('perfect_match'),
 			'departments' => array(),
 			'types' => array(),
 		);
@@ -1617,7 +1618,9 @@ class StatisticsController extends Controller
 			->when($filters['types'], function ($query, $types) {
 				return $query->whereIn('p.type_id', $types);
 			})
-			->when($filters['projects'], function ($query, $projects) {
+			->when($filters['projects'], function ($query, $projects) use ($filters) {
+				if ( $filters['perfect_match'] )
+					return $query->where('p.name', $projects);
 				return $query->where('p.name', 'like', '%' . $projects . '%');
 			})
 			->when($filters['issue'], function ($query, $issue) {
