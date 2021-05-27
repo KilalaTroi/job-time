@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use COM;
 use Excel;
 use Illuminate\Http\Request;
+use SebastianBergmann\Environment\Console;
 
 class StatisticsController extends Controller
 {	
@@ -48,7 +49,7 @@ class StatisticsController extends Controller
 		$data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID, $user_id, $carbStartDate->format('Y-m-d'));
 
 		// Return totals
-		$data['totals'] = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID, $isFilter);
+		$data['totals'] = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID);
 
 		// Thêm user disable trước 3 tháng vào để xem dữ liệu
 		if ( !$isFilter ) {
@@ -142,7 +143,7 @@ class StatisticsController extends Controller
 		$data['offDays'] = $this->calcOffDays($data['daysOfMonths'], $data['users'], $carbStartDate, $carbEndDate,$teamID, $user_id);
 
 		// Return totals
-		$totals = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID, 1, true);
+		$totals = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID, true);
 		
 		// infoUser
 		$infoUser = false;
@@ -405,7 +406,7 @@ class StatisticsController extends Controller
 				$endM = $copyStartDate->copy()->addMonths(1)->day(20);
 
 				// If start date greate than filter end date => break
-				if($startM->gt($carbEndDate)) break;
+				if ( $startM->gt($carbEndDate) ) break;
 			} else {
 				$startM = $copyStartDate->copy()->startOfMonth();
 				$endM = $copyStartDate->copy()->endOfMonth();
@@ -415,9 +416,9 @@ class StatisticsController extends Controller
 			$keyYearMonth = $copyStartDate->year . $copyStartDate->format('m');
 
 			// assign the fist date of start month.
-			if ( $copyStartDate->eq($carbStartDate) ) {
-				$startM = $carbStartDate->copy();
-			}
+			// if ( $copyStartDate->eq($carbStartDate) ) {
+			// 	$startM = $carbStartDate->copy();
+			// }
 
 			// Get date for Path Team
 			if ( $teamID == 2 ) {
@@ -426,9 +427,9 @@ class StatisticsController extends Controller
 					$endM->subMonths(1)->day(20);
 
 					// So sánh start month với start month filter.
-					if ( $startM->lt($carbStartDate) ) {
-						$startM = $carbStartDate->copy();
-					}
+					// if ( $startM->lt($carbStartDate) ) {
+					// 	$startM = $carbStartDate->copy();
+					// }
 
 					// Decrease
 					$copyStartDate->subMonths(1)->startOfMonth(); // tạo lại ngày mới với 0h00. Nếu mở report ở 0h00 sẽ lỗi. kkkkk
@@ -447,9 +448,9 @@ class StatisticsController extends Controller
 			}
 			
 			// So sánh end month với end month filter.
-			if ( $endM->gt($carbEndDate) ) {
-				$endM = $carbEndDate->copy();
-			}
+			// if ( $endM->gt($carbEndDate) ) {
+			// 	$endM = $carbEndDate->copy();
+			// }
 
 			// daysOfMonth
 			$daysOfMonth[$keyYearMonth] = array(
@@ -955,7 +956,7 @@ class StatisticsController extends Controller
 	 * @param  mixed $export
 	 * @return void
 	 */
-	private function getTotals($data = array(), $carbStartDate, $carbEndDate, $user_id = 0, $teamID = 0, $isFilter = 0, $export = false)
+	private function getTotals($data = array(), $carbStartDate, $carbEndDate, $user_id = 0, $teamID = 0, $export = false)
 	{
 		$totalPerfectHours = array();
 		['users' => $users, 'daysOfMonths' => $daysOfMonths, 'offDays' => $offDays] = $data;
@@ -1043,16 +1044,23 @@ class StatisticsController extends Controller
 		// Return total hours in month of per project type
 		$dataNowMonthHoursPerProject = $totalHoursProjects = array();
 		//Lấy total time từ database
-		if ( !$isFilter ) $totalHoursProjects = $this->getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate);
+		// if ( !$isFilter ) 
+		$totalHoursProjects = $this->getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate);
 		$startMonth = $carbStartDate->format('Y-m-d');
 		$endMonth = $carbEndDate->format('Y-m-d');
 
 		// Nếu có dữ liệu total time từ data thì đổi lại start date
-		if (isset($totalHoursProjects) && !empty($totalHoursProjects) && !$isFilter) {
+		// if (isset($totalHoursProjects) && !empty($totalHoursProjects) && !$isFilter) {
+		if (isset($totalHoursProjects) && !empty($totalHoursProjects)) {
 			$totalTime = array_values($totalHoursProjects);
 			$startMonth = substr($totalTime[0]['yearMonth'], 0, 4) . '-' . substr($totalTime[0]['yearMonth'], -2) . '-' . substr($startMonth, -2);
 			$carbNewStartMonth = Carbon::createFromFormat('Y-m-d', $startMonth);
-			$startMonth = $carbNewStartMonth->addMonths(1)->format('Y-m-d');
+			if ($teamID != 2) {
+				$startMonth = $carbNewStartMonth->addMonths(1)->format('Y-m-d');
+			} else {
+				$startMonth = $carbNewStartMonth->day(21)->format('Y-m-d');
+				// if ( !$isFilter && Carbon::now()->day > 20 ) $endMonth = $carbEndDate->addMonths(1)->day(20)->format('Y-m-d');
+			}
 		}
 
 		$hoursProjects = DB::table('jobs')
@@ -1101,7 +1109,8 @@ class StatisticsController extends Controller
 		}
 
 		// Insert new data total time to database
-		if ( !$isFilter ) {
+		// if ( !$isFilter ) {
+		if ( count($dataNowMonthHoursPerProject) ) {
 			foreach ($dataNowMonthHoursPerProject as $item) {
 				if ($item['yearMonth'] < date('Ym')) {
 					DB::table('total_times')->insert(
@@ -1136,9 +1145,14 @@ class StatisticsController extends Controller
 		$totalTime = DB::table('total_times')->select('type_id', 'time', 'date')
 			->where('time', '>', 0)
 			->where('user_id', $user_id)
-			->when($teamID, function ($query) use ($startMonth, $endMonth) {
-				return $query->where(function ($query) use ($startMonth, $endMonth) {
-					$query->where('total_times.date', ">=", substr($startMonth, 0, 6))->where('total_times.date', "<=", substr($endMonth, 0, 6));
+			->when($teamID, function ($query) use ($startMonth, $endMonth, $teamID) {
+				return $query->where(function ($query) use ($startMonth, $endMonth, $teamID) {
+					if ( $teamID != 2 ) {
+						$query->where('total_times.date', ">=", substr($startMonth, 0, 6))->where('total_times.date', "<=", substr($endMonth, 0, 6));
+					} else {
+						$query->where('total_times.date', ">", substr($startMonth, 0, 6))->where('total_times.date', "<=", substr($endMonth, 0, 6));
+					}
+					
 				});
 			})
 			->when($teamID, function ($query, $teamID) {
@@ -1282,7 +1296,7 @@ class StatisticsController extends Controller
 		$carbStartDate = Carbon::createFromFormat('Y/m/d', $startMonth);
 		$carbEndDate = Carbon::createFromFormat('Y/m/d', $endMonth);
 
-		if (Carbon::now()->day > 21) {
+		if (Carbon::now()->day > 20) {
 			$startMonth = $carbStartDate->copy()->day(21)->format('Y-m-d');
 			$endMonth = $carbEndDate->copy()->addMonth(1)->day(20)->format('Y-m-d');
 		} else {
