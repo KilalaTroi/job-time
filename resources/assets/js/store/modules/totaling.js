@@ -13,6 +13,7 @@ export default {
       issue: "",
       types: [],
       team: "",
+      perfectMatch: false,
     },
     data: {},
     options: {
@@ -62,6 +63,7 @@ export default {
         projects: state.filters.projects,
         issue: state.filters.issue,
         team: state.filters.team,
+        perfect_match: state.filters.perfectMatch,
       }
       axios.post(uri, dataSend).then(response => {
         commit('SET_DATA', response.data.totaling)
@@ -80,6 +82,7 @@ export default {
         projectSelects: state.filters.projects,
         issueFilter: state.filters.issue,
         team: state.filters.team,
+        perfect_match: state.filters.perfectMatch,
       }
       axios
         .post(uri, dataSend)

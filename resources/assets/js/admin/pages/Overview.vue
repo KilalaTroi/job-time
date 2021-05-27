@@ -63,10 +63,10 @@
                 <div class="card-body">
                     <div class="d-flex mb-3 justify-content-between">
                         <div class="d-flex align-items-center flex-wrap">
-                            <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterM" :minimumView="'day'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
+                            <datepicker name="startMonth" input-class="form-control" v-model="startMonth" :format="customFormatterStr" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledEndMonth()" :language="getLanguage(this.$ml)">
                             </datepicker>
                             <span class="mx-2">-</span>
-                            <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterM" :minimumView="'day'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
+                            <datepicker name="endMonth" input-class="form-control" v-model="endMonth" :format="customFormatterEnd" :minimumView="'month'" :maximumView="'year'" :initialView="'month'" :disabled-dates="disabledStartMonth()" :language="getLanguage(this.$ml)">
                             </datepicker>
                         </div>
                         <div>
@@ -196,6 +196,8 @@
     import TotalUpdate from './TotalPage/Update'
     import { mapGetters, mapActions } from "vuex"
 
+    const teamDefault = JSON.parse(document.querySelector("meta[name='team-default']").getAttribute('content'))
+
     export default {
         components: {
             LTable,
@@ -204,14 +206,6 @@
             StatsCard,
             Select2,
             TotalUpdate
-        },
-        computed: {
-            ...mapGetters({
-                currentTeamOption: 'currentTeamOption',
-                currentTeam: 'currentTeam',
-                currentLang: 'currentLang',
-                loginUser: 'loginUser',
-            }),
         },
         data() {
             return {
@@ -230,8 +224,12 @@
                 projectsData: [],
                 jobs: 0,
 
-                startMonth: new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
-                endMonth: new Date(moment().subtract(0, 'months').format('YYYY/MM/DD')),
+                startMonth: teamDefault == 2 && moment().date() > 20 ? 
+                                new Date(moment().subtract(10, 'months').set('date', 21).format('YYYY/MM/DD')) :
+                                new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
+                endMonth: teamDefault == 2 && moment().date() > 20 ? 
+                                new Date(moment().add(1, 'months').endOf('month').format('YYYY/MM/DD')) :
+                                new Date(moment().subtract(0, 'months').endOf('month').format('YYYY/MM/DD')),
                 currentMonth: {},
 
                 users: [],
@@ -347,6 +345,25 @@
                 isFilter: 0,
                 isTeamChange: 0,
             }
+        },
+        computed: {
+            ...mapGetters({
+                currentTeamOption: 'currentTeamOption',
+                currentTeam: 'currentTeam',
+                currentLang: 'currentLang',
+                loginUser: 'loginUser',
+            }),
+            // startMonth: {
+            //     get: function () {
+            //         let teamDefault = this.team ? this.team : JSON.parse(document.querySelector("meta[name='team-default']").getAttribute('content'))
+            //         return teamDefault == 2 ? 
+            //         new Date(moment().subtract(11, 'months').set('date', 21).format('YYYY/MM/DD')) :
+            //         new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD'));
+            //     },
+            //     set: function (newValue) {
+            //         return newValue;
+            //     }
+            // }
         },
         mounted() {
             let _this = this;
@@ -483,12 +500,19 @@
                 return false;
             },
             customFormatterEnd(date) {
-                // return moment(date).endOf('month').format('YYYY/MM/DD');
-                return moment(date).format('YYYY/MM/DD');
+                if ( this.team && this.team == 2 ) {
+                    return moment(date).set('date', 20).format('YYYY/MM/DD');
+                }
+                return moment(date).endOf('month').format('YYYY/MM/DD');
             },
             customFormatterStr(date) {
-                // return moment(date).startOf('month').format('YYYY/MM/DD');
-                return moment(date).format('YYYY/MM/DD')
+                if ( this.team && this.team == 2 ) {
+                    console.log(this.startMonth, this.endMonth)
+                    if ( this.startMonth >= this.endMonth )
+                        return moment(date).subtract(1, 'months').set('date', 21).format('YYYY/MM/DD');
+                    return moment(date).set('date', 21).format('YYYY/MM/DD');
+                }
+                return moment(date).startOf('month').format('YYYY/MM/DD');
             },
             customFormatterM(date) {
                 return moment(date).format('YYYY/MM/DD');
@@ -571,7 +595,6 @@
             disabledStartMonth() {
                 let obj = {
                     to: this.startMonth,
-                    from: new Date(),
                 };
                 return obj;
             },

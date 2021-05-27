@@ -67,7 +67,12 @@
           </div>
           <div class="col-sm-3">
             <div class="form-group">
-              <label class>{{ $ml.with("VueJS").get("txtProjects") }}</label>
+              <label class="d-flex justify-content-between">
+                <span>{{ $ml.with("VueJS").get("txtProjects") }} </span>
+                <base-checkbox
+                v-model="filters.perfectMatch"
+                >{{ $ml.with("VueJS").get("txtPerfectMatch") }}</base-checkbox>
+                </label>
               <div>
                  <input type="text" v-model="filters.projects"  class="form-control">
               </div>
