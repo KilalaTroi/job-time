@@ -100,6 +100,17 @@
 
     <p style="margin-block: 60px" class="d-flex">My name is:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="{{ $styleName }}" class="d-inline-block overflow-x-hidden font-family-dif">{{ $contentName  }}</span>
     </p>
+
+    @php
+    $styleDepartment= "width: 630px; padding-top: 10px;";
+    $contentDepartment = "................................................................................................................................................................................................................................";
+    if(isset($data['team']) && !empty($data['team'])) {
+      $styleDepartment= "font-size:22px";
+      $contentDepartment = $data['team'];
+    }
+  @endphp
+    <p style="margin-block: 60px" class="d-flex">Department:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span style="{{ $styleDepartment }}" class="d-inline-block overflow-x-hidden font-family-dif">{{ $contentDepartment  }}</span>
+    </p>
     <p>Today, I would like to write this application to ask for your approval for my absence from the company on:</p>
     <ul>
       @php
