@@ -212,6 +212,7 @@
                 exportLink: '',
                 types: [],
                 monthsText: [],
+                monthYearText: {},
                 series: [],
                 newUsersMonths: {},
                 totalPerfectHours: {},
@@ -423,6 +424,7 @@
                         this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
                         this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
+                        this.monthYearText = res.data.monthYearText;
                         this.getSeries(this.types, this.totalPerfectHours, this.totalHoursProjects);
                     })
                     .catch(err => {
@@ -440,7 +442,7 @@
                 axios.get(url)
                 .then(res => {
                     this.pageData = res.data;
-                    this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page',this.totalPerfectHours)
+                    this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page')
                     this.data.totalpage = this.pageData;
                 })
                 .catch(err => {
@@ -460,7 +462,7 @@
                 axios.get(url)
                 .then(res => {
                     this.jobsData = res.data;
-                    this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue',this.totalPerfectHours);
+                    this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue');
                 })
                 .catch(err => {
                     console.log(err);
@@ -479,7 +481,7 @@
                 axios.get(url)
                 .then(res => {
                     this.projectsData = res.data;
-                    this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project',this.totalPerfectHours);
+                    this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project');
                 })
                 .catch(err => {
                     console.log(err);
@@ -543,7 +545,7 @@
                 let _this = this;
                 let series = projectTypes.map((item, index) => {
                     let _item = item;
-                    let row = Object.keys(totalPerfectHours).map((key, index) => {
+                    let row = Object.keys(_this.monthYearText).map((key, index) => {
                         if ( _this.hasObjectValue(totalHoursProjects, _item.id, key) ) {
                             let percents = (_this.hasObjectValue(totalHoursProjects, _item.id, key).total*1/totalPerfectHours[key]*100).toFixed(2);
                             return {
@@ -562,11 +564,11 @@
                 this.series = this.barChart.data.series = [...series];
             },
 
-            getCustomSeries(type, data, chart, dataKey, totalPerfectHours){
+            getCustomSeries(type, data, chart, dataKey){
                 let _this = this;
                 let series = type.map((item, index) => {
                     let _item = item;
-                    let row = Object.keys(totalPerfectHours).map((key, index) => {
+                    let row = Object.keys(_this.monthYearText).map((key, index) => {
                         if ( _this.hasObjectValue(data, _item.id, key) ) {
                             return {
                                 value: _this.hasObjectValue(data, _item.id, key)[dataKey],

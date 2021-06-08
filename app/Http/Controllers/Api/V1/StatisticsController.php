@@ -36,6 +36,9 @@ class StatisticsController extends Controller
 		// Return project type
 		if ( !$isFilter ) $data['types'] = $this->typeWithClass($teamID);
 
+		// Get cache data
+		$data['totals'] = $this->getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate);
+
 		// Get users
 		$data['users'] = $this->getUsers($carbStartDate, $carbEndDate, $teamID, $user_id);
 
@@ -596,6 +599,15 @@ class StatisticsController extends Controller
 		$generalOffDays = $this->groupByObjectKey('yearMonth', $generalOffDays);
 
 		// Calc offdays per month
+		// $allowedMonth  = $teamID == 2 ? $carbStartDate->copy()->addMonths(1)->format('Ym') : $carbStartDate->copy()->format('Ym');
+		// $daysOfMonths = array_filter(
+		// 	$daysOfMonths,
+		// 	function ($key) use ($allowedMonth) {
+		// 		return $key >= $allowedMonth;
+		// 	},
+		// 	ARRAY_FILTER_USE_KEY
+		// );
+		
 		foreach($daysOfMonths as $key => $value) {
 			// General OffDays per month
 			$generalOffDay = isset($generalOffDays[$key]) ? count($generalOffDays[$key]) : 0;
@@ -769,7 +781,9 @@ class StatisticsController extends Controller
 					->orWhere('disable_date', '>=', $startDate);
 			})
 			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
-			->where('users.created_at', "<", $startDate)
+			->when(!$user_id, function ($query) use ($startDate) {
+				return $query->where('users.created_at', "<", $startDate);
+			})
 			->count();
 
 		// Disable users between start date and end date.
@@ -958,13 +972,25 @@ class StatisticsController extends Controller
 	 */
 	private function getTotals($data = array(), $carbStartDate, $carbEndDate, $user_id = 0, $teamID = 0, $export = false)
 	{
-		$totalPerfectHours = array();
+		$totalNewHoursProjects = $totalNewPerfectHours = array();
+		$totalPerfectHours = isset($data['totals']['totalPerfectHours']) ? $data['totals']['totalPerfectHours'] : array();
+		$totalHoursProjects = isset($data['totals']['totalHoursProjects']) ? $data['totals']['totalHoursProjects'] : array();
+
 		['users' => $users, 'daysOfMonths' => $daysOfMonths, 'offDays' => $offDays] = $data;
 		[
 			'old' => $startNumberUsers, 
 			'newUsersMonths' => $newUsersMonths, 
 			'disableUsersMonths' => $disableUsersMonths,
 		] = $users;
+
+		// $allowedMonth  = $teamID == 2 ? $carbStartDate->copy()->addMonths(1)->format('Ym') : $carbStartDate->copy()->format('Ym');
+		// $daysOfMonths = array_filter(
+		// 	$daysOfMonths,
+		// 	function ($key) use ($allowedMonth) {
+		// 		return $key >= $allowedMonth;
+		// 	},
+		// 	ARRAY_FILTER_USE_KEY
+		// );
 
 		foreach ($daysOfMonths as $key => $value) {
 			$newUsersNumber = 0;
@@ -1026,13 +1052,20 @@ class StatisticsController extends Controller
 			if ( $daysInMonth <= 5 ) $staturdayHours = 0;
 
 			// Total work hours per month
-			$totalPerfectHours[$key] = ($startNumberUsers - $offMonth - $disableUsersNumber) * (8 * $daysInMonth + $staturdayHours) - ($offDays[$key]['full'] * 8 + $offDays[$key]['half'] * 4);
+			$totalNewPerfectHours[$key] = $totalPerfectHours[$key] = ($startNumberUsers - $offMonth - $disableUsersNumber) * (8 * $daysInMonth + $staturdayHours) - ($offDays[$key]['full'] * 8 + $offDays[$key]['half'] * 4);
 
-			if ( $newUsersNumber ) $totalPerfectHours[$key] += $newUsersPerfectHours;
-			if ( $disableUsersNumber ) $totalPerfectHours[$key] += $disableUsersPerfectHours;
+			if ( $newUsersNumber ) {
+				$totalPerfectHours[$key] += $newUsersPerfectHours;
+				$totalNewPerfectHours[$key] += $newUsersPerfectHours;
+			}
+
+			if ( $disableUsersNumber ) {
+				$totalPerfectHours[$key] += $disableUsersPerfectHours;
+				$totalNewPerfectHours[$key] += $disableUsersPerfectHours;
+			}
 			
 			// Loại bỏ giá trị âm
-			if ( $totalPerfectHours[$key] < 0 ) $totalPerfectHours[$key] = 0;
+			if ( $totalPerfectHours[$key] < 0 ) $totalNewPerfectHours[$key] = $totalPerfectHours[$key] = 0;
 
 			// Next month start number users
 			$startNumberUsers = $startNumberUsers + $newUsersNumber - $disableUsersNumber;
@@ -1041,27 +1074,9 @@ class StatisticsController extends Controller
 		// Total work hours months
 		$totals['totalPerfectHours'] = $totalPerfectHours;
 
-		// Return total hours in month of per project type
-		$dataNowMonthHoursPerProject = $totalHoursProjects = array();
-		//Lấy total time từ database
-		// if ( !$isFilter ) 
-		$totalHoursProjects = $this->getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate);
+		// get date string 
 		$startMonth = $carbStartDate->format('Y-m-d');
 		$endMonth = $carbEndDate->format('Y-m-d');
-
-		// Nếu có dữ liệu total time từ data thì đổi lại start date
-		// if (isset($totalHoursProjects) && !empty($totalHoursProjects) && !$isFilter) {
-		if (isset($totalHoursProjects) && !empty($totalHoursProjects)) {
-			$totalTime = array_values($totalHoursProjects);
-			$startMonth = substr($totalTime[0]['yearMonth'], 0, 4) . '-' . substr($totalTime[0]['yearMonth'], -2) . '-' . substr($startMonth, -2);
-			$carbNewStartMonth = Carbon::createFromFormat('Y-m-d', $startMonth);
-			if ($teamID != 2) {
-				$startMonth = $carbNewStartMonth->addMonths(1)->format('Y-m-d');
-			} else {
-				$startMonth = $carbNewStartMonth->day(21)->format('Y-m-d');
-				// if ( !$isFilter && Carbon::now()->day > 20 ) $endMonth = $carbEndDate->addMonths(1)->day(20)->format('Y-m-d');
-			}
-		}
 
 		$hoursProjects = DB::table('jobs')
 			->select(
@@ -1083,35 +1098,36 @@ class StatisticsController extends Controller
 			->orderBy('id', 'asc')
 			->groupBy('id', 'jdate')
 			->get()->toArray();
-
-		foreach ($hoursProjects as $key => $value) {
-			$dateCarbon = Carbon::createFromFormat('Y-m-d', $value->jdate);
-			$day = $dateCarbon->day;
-			$yearMonth = $dateCarbon->format('Ym');
-			// Từ ngày 21 đến ngày <=31 chuyển qua tháng mới
-			if (21 <= $day && 31 >= $day && 2 == $teamID) {
-				$yearMonth = $dateCarbon->copy()->startOfMonth()->addMonth()->format('Ym');
-			}
-			// create key
-			$str = $value->id . '_' . $yearMonth;
-			// $total = round($value->total, 2);
-			$total = (float)$value->total/3600;
-			if (isset($dataNowMonthHoursPerProject[$str]) && !empty($dataNowMonthHoursPerProject[$str])) {
-				$totalHoursProjects[$str]['total'] += $total;
-				$dataNowMonthHoursPerProject[$str]['total'] += $total;
-			} else {
-				$totalHoursProjects[$str] = $dataNowMonthHoursPerProject[$str] = array(
-					'id' => $value->id,
-					'yearMonth' => $yearMonth,
-					'total' => $total
-				);
+		
+		if ( count($hoursProjects) ) {
+			foreach ($hoursProjects as $key => $value) {
+				$dateCarbon = Carbon::createFromFormat('Y-m-d', $value->jdate);
+				$day = $dateCarbon->day;
+				$yearMonth = $dateCarbon->format('Ym');
+				// Từ ngày 21 đến ngày <=31 chuyển qua tháng mới
+				if (21 <= $day && 31 >= $day && 2 == $teamID) {
+					$yearMonth = $dateCarbon->copy()->startOfMonth()->addMonth()->format('Ym');
+				}
+				// create key
+				$str = $value->id . '_' . $yearMonth;
+				// $total = round($value->total, 2);
+				$total = (float)$value->total/3600;
+				if (isset($totalNewHoursProjects[$str]) && !empty($totalNewHoursProjects[$str])) {
+					$totalHoursProjects[$str]['total'] += $total;
+					$totalNewHoursProjects[$str]['total'] += $total;
+				} else {
+					$totalHoursProjects[$str] = $totalNewHoursProjects[$str] = array(
+						'id' => $value->id,
+						'yearMonth' => $yearMonth,
+						'total' => $total
+					);
+				}
 			}
 		}
-
+		
 		// Insert new data total time to database
-		// if ( !$isFilter ) {
-		if ( count($dataNowMonthHoursPerProject) ) {
-			foreach ($dataNowMonthHoursPerProject as $item) {
+		if ( count($totalNewHoursProjects) ) {
+			foreach ($totalNewHoursProjects as $item) {
 				if ($item['yearMonth'] < date('Ym')) {
 					DB::table('total_times')->insert(
 						array(
@@ -1128,6 +1144,19 @@ class StatisticsController extends Controller
 			}
 		}
 
+		// Insert new data perfect time to database
+		if ( count($totalNewPerfectHours) ) {
+			foreach ($totalNewPerfectHours as $key => $value) {
+				if ($key < date('Ym')) {
+					DB::table('total_times')
+						->where('date', $key)
+						->where('user_id', $user_id)
+						->where('team_id', $teamID)
+						->update(['perfect_time' => $value]);
+				}
+			}
+		}
+
 		if ($export) {
 			$totals['totalHoursProjects'] = $totalHoursProjects;
 		} else {
@@ -1137,12 +1166,12 @@ class StatisticsController extends Controller
 		return $totals;
 	}
 
-	private function getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate)
+	private function getTotalTimes($teamID, $user_id, &$carbStartDate, &$carbEndDate)
 	{
 		$startMonth = $carbStartDate->format('Ym');
 		$endMonth = $carbEndDate->format('Ym');
-		$dataHoursPerProject = array();
-		$totalTime = DB::table('total_times')->select('type_id', 'time', 'date')
+		$totalHoursProjects = array();
+		$totalTime = DB::table('total_times')->select('type_id', 'time', 'perfect_time', 'date')
 			->where('time', '>', 0)
 			->where('user_id', $user_id)
 			->when($teamID, function ($query) use ($startMonth, $endMonth, $teamID) {
@@ -1159,17 +1188,34 @@ class StatisticsController extends Controller
 				return $query->where(function ($query) use ($teamID) {
 					$query->where('team_id', '=', $teamID);
 				});
-			})->orderBy('date', 'DESC')->get()->toArray();
+			})->orderBy('date', 'DESC')->get();
 
-		foreach ($totalTime as $v) {
-			$dataHoursPerProject[$v->type_id . '_' . $v->date] = array(
+		foreach ($totalTime->toArray() as $v) {
+			$totalHoursProjects[$v->type_id . '_' . $v->date] = array(
 				'id' => $v->type_id,
 				'yearMonth' => $v->date,
 				'total' => $v->time,
 			);
 		}
 
-		return $dataHoursPerProject;
+		$totalPerfectHours = $totalTime->pluck('perfect_time', 'date')->toArray();
+
+		// Nếu có dữ liệu total time từ data thì đổi lại start date
+		if (isset($totalHoursProjects) && !empty($totalHoursProjects)) {
+			$totalTime = array_values($totalHoursProjects);
+			$startMonth = substr($totalTime[0]['yearMonth'], 0, 4) . '-' . substr($totalTime[0]['yearMonth'], -2) . '-' . substr($startMonth, -2);
+			$carbNewStartMonth = Carbon::createFromFormat('Y-m-d', $startMonth);
+			if ($teamID != 2) {
+				$carbStartDate = $carbNewStartMonth->addMonths(1)->startOfMonth();
+			} else {
+				$carbStartDate = $carbNewStartMonth->day(21);
+			}
+		}
+
+		return [
+			'totalHoursProjects' => $totalHoursProjects,
+			'totalPerfectHours' => $totalPerfectHours
+		];
 	}
 
 	private function getProjectReportAll($teamID, $userID)
