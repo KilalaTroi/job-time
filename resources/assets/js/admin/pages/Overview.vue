@@ -509,7 +509,6 @@
             },
             customFormatterStr(date) {
                 if ( this.team && this.team == 2 ) {
-                    console.log(this.startMonth, this.endMonth)
                     if ( this.startMonth >= this.endMonth )
                         return moment(date).subtract(1, 'months').set('date', 21).format('YYYY/MM/DD');
                     return moment(date).set('date', 21).format('YYYY/MM/DD');

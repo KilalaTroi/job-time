@@ -139,6 +139,9 @@ class StatisticsController extends Controller
 		// Return project type
 		$types = $data['types'] = $this->typeWithClass($teamID);
 
+		// Get cache data
+		$data['totals'] = $this->getTotalTimes($teamID, $user_id, $carbStartDate, $carbEndDate);
+
 		// Get users
 		$users = $data['users'] = $this->getUsers($carbStartDate, $carbEndDate, $teamID, $user_id);
 
@@ -599,14 +602,15 @@ class StatisticsController extends Controller
 		$generalOffDays = $this->groupByObjectKey('yearMonth', $generalOffDays);
 
 		// Calc offdays per month
-		// $allowedMonth  = $teamID == 2 ? $carbStartDate->copy()->addMonths(1)->format('Ym') : $carbStartDate->copy()->format('Ym');
-		// $daysOfMonths = array_filter(
-		// 	$daysOfMonths,
-		// 	function ($key) use ($allowedMonth) {
-		// 		return $key >= $allowedMonth;
-		// 	},
-		// 	ARRAY_FILTER_USE_KEY
-		// );
+		$off_days = array();
+		$allowedMonth  = $teamID == 2 ? $carbStartDate->copy()->addMonths(1)->format('Ym') : $carbStartDate->copy()->format('Ym');
+		$daysOfMonths = array_filter(
+			$daysOfMonths,
+			function ($key) use ($allowedMonth) {
+				return $key >= $allowedMonth;
+			},
+			ARRAY_FILTER_USE_KEY
+		);
 		
 		foreach($daysOfMonths as $key => $value) {
 			// General OffDays per month
@@ -781,9 +785,7 @@ class StatisticsController extends Controller
 					->orWhere('disable_date', '>=', $startDate);
 			})
 			->whereNotIn('users.id', $user_id ? [] : $this->usersIgnore($teamID))
-			->when(!$user_id, function ($query) use ($startDate) {
-				return $query->where('users.created_at', "<", $startDate);
-			})
+			->where('users.created_at', "<", $startDate)
 			->count();
 
 		// Disable users between start date and end date.
@@ -982,15 +984,16 @@ class StatisticsController extends Controller
 			'newUsersMonths' => $newUsersMonths, 
 			'disableUsersMonths' => $disableUsersMonths,
 		] = $users;
-
-		// $allowedMonth  = $teamID == 2 ? $carbStartDate->copy()->addMonths(1)->format('Ym') : $carbStartDate->copy()->format('Ym');
-		// $daysOfMonths = array_filter(
-		// 	$daysOfMonths,
-		// 	function ($key) use ($allowedMonth) {
-		// 		return $key >= $allowedMonth;
-		// 	},
-		// 	ARRAY_FILTER_USE_KEY
-		// );
+		
+		// Perfect Hours for new month
+		$allowedMonth  = $teamID == 2 ? $carbStartDate->copy()->addMonths(1)->format('Ym') : $carbStartDate->copy()->format('Ym');
+		$daysOfMonths = array_filter(
+			$daysOfMonths,
+			function ($key) use ($allowedMonth) {
+				return $key >= $allowedMonth;
+			},
+			ARRAY_FILTER_USE_KEY
+		);
 
 		foreach ($daysOfMonths as $key => $value) {
 			$newUsersNumber = 0;
