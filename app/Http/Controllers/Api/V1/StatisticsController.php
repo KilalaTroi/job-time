@@ -150,6 +150,18 @@ class StatisticsController extends Controller
 
 		// Return totals
 		$totals = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID, true);
+
+		// Fill null month.
+		if ( count($totals['totalPerfectHours']) < count($data['daysOfMonths']) ) {
+			foreach ( $data['daysOfMonths'] as $key => $value ) {
+				if ( !isset($totals['totalPerfectHours'][$key]) ) {
+					$totals['totalPerfectHours'][$key] = 0;
+				}
+			}
+		}
+
+		// Sort
+		ksort($totals['totalPerfectHours']);
 		
 		// infoUser
 		$infoUser = false;
@@ -196,8 +208,8 @@ class StatisticsController extends Controller
 			return $value;
 		}, $other);
 
-		$otherName = $teamID == 2 ? 'free_time' : 'other';
-		$otherJAText = $teamID == 2 ? 'Free time' : 'その他';
+		$otherName = $teamID == 2 || $teamID == 3 ? 'free_time' : 'other';
+		$otherJAText = $teamID == 2 || $teamID == 3 ? 'Free time' : 'その他';
 		$otherSlug['slug'] = $otherName;
 		$otherSlug['slug_ja'] = $otherJAText;
 		$other = array_merge($otherSlug, $other);
