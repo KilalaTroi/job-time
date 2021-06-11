@@ -225,12 +225,13 @@
                 projectsData: [],
                 jobs: 0,
 
-                startMonth: teamDefault == 2 && moment().date() > 20 ? 
-                                new Date(moment().subtract(10, 'months').set('date', 21).format('YYYY/MM/DD')) :
-                                new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
+                // Start and end dates init (Type Date)
+                startMonth: teamDefault == 2 && moment().date() <= 20 ? 
+                            new Date(moment().subtract(12, 'months').format('YYYY/MM/DD')) :
+                            new Date(moment().subtract(11, 'months').format('YYYY/MM/DD')),
                 endMonth: teamDefault == 2 && moment().date() > 20 ? 
-                                new Date(moment().add(1, 'months').endOf('month').format('YYYY/MM/DD')) :
-                                new Date(moment().subtract(0, 'months').endOf('month').format('YYYY/MM/DD')),
+                            new Date(moment().add(1, 'months').format('YYYY/MM/DD')) :
+                            new Date(moment().format('YYYY/MM/DD')),
                 currentMonth: {},
 
                 users: [],
@@ -354,17 +355,6 @@
                 currentLang: 'currentLang',
                 loginUser: 'loginUser',
             }),
-            // startMonth: {
-            //     get: function () {
-            //         let teamDefault = this.team ? this.team : JSON.parse(document.querySelector("meta[name='team-default']").getAttribute('content'))
-            //         return teamDefault == 2 ? 
-            //         new Date(moment().subtract(11, 'months').set('date', 21).format('YYYY/MM/DD')) :
-            //         new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD'));
-            //     },
-            //     set: function (newValue) {
-            //         return newValue;
-            //     }
-            // }
         },
         mounted() {
             let _this = this;
