@@ -483,55 +483,74 @@ class StatisticsController extends Controller
 	 */
 	private function userWorkHours($userGeneralOffDays, &$item, $dateRange, $startDate, $endDate, $teamID) {
 		
-		$item->offDaysFull = $userGeneralOffDays + DB::connection('mysql')->table('off_days')
+		$off_days_number = DB::connection('mysql')->table('off_days')
+		->select(
+			DB::raw('IF( type != "all_day", 0.5, 1 ) as number'),
+		)
 		->leftJoin('users', 'users.id', '=', 'off_days.user_id')
-		->where('type', '=', 'all_day')
+		->whereIn('type', array('all_day', 'morning', 'afternoon'))
 		->where('date', '>=', $dateRange['start'])
 		->where('date', '<=', $dateRange['end'])
 		->where('user_id', $item->id)
-		->count();
+		->get()->pluck('number')->toArray();
 
-		$item->offDaysHalf = DB::connection('mysql')->table('off_days')
+		$special_days_number = DB::connection('mysql')->table('off_days')
+		->select(
+			DB::raw('IF( WEEKDAY(date) = 5, 0.5, 1 ) as number'),
+		)
 		->leftJoin('users', 'users.id', '=', 'off_days.user_id')
-		->whereIn('type', array('morning', 'afternoon'))
+		->whereIn('type', array('special_day'))
 		->where('date', '>=', $dateRange['start'])
 		->where('date', '<=', $dateRange['end'])
 		->where('user_id', $item->id)
-		->count();
+		->get()->pluck('number')->toArray();
+		
+		$item->offDays = array_sum($off_days_number) + array_sum($special_days_number) + $userGeneralOffDays;
 
 		$workDays = 0;
 		
 		if ($teamID != 2) {
 			for ($d = $startDate->day; $d <= $endDate->day; $d++) {
 				$day = Carbon::createFromDate($startDate->year, $startDate->month, $d);
-				if ($day->isWeekday()) $workDays++;
+				if ( $day->isWeekday() ) {
+					$workDays++;
+				} elseif ( $day->isSaturday() ) {
+					$workDays += 0.5;
+				}
 			}
 		} else {
 			$carbEndOfMonth = $startDate->copy()->endOfMonth();
 			if ( $carbEndOfMonth->lt($endDate) ) {
 				for ($d = $startDate->day; $d <= $startDate->daysInMonth; $d++) {
 					$day = Carbon::createFromDate($startDate->year, $startDate->month, $d);
-					if ($day->isWeekday()) $workDays++;
+					if ( $day->isWeekday() ) {
+						$workDays++;
+					} elseif ( $day->isSaturday() ) {
+						$workDays += 0.5;
+					}
 				}
 
 				for ($d = 1; $d <= $endDate->day; $d++) {
 					$day = Carbon::createFromDate($endDate->year, $endDate->month, $d);
-					if ($day->isWeekday()) $workDays++;
+					if ( $day->isWeekday() ) {
+						$workDays++;
+					} elseif ( $day->isSaturday() ) {
+						$workDays += 0.5;
+					}
 				}
 			} else {
 				for ($d = $startDate->day; $d <= $endDate->day; $d++) {
 					$day = Carbon::createFromDate($startDate->year, $startDate->month, $d);
-					if ($day->isWeekday()) $workDays++;
+					if ( $day->isWeekday() ) {
+						$workDays++;
+					} elseif ( $day->isSaturday() ) {
+						$workDays += 0.5;
+					}
 				}
 			}
-			
 		}
 
-		$staturdayHours = 8;
-		if ( $workDays <= 15 ) $staturdayHours = 4;
-		if ( $workDays <= 5 ) $staturdayHours = 0;
-
-		$item->perfectHours = ( $workDays - $item->offDaysFull ) * 8 - ( $item->offDaysHalf * 4 ) + $staturdayHours;
+		$item->perfectHours = ( $workDays - $item->offDays ) * 8;
 	}
 	
 	/**
@@ -645,13 +664,16 @@ class StatisticsController extends Controller
 
 			// $generalOffDay
 			if ( !$user_id ) {
-				$generalOffDay = $generalOffDay * $startNumberUsers;
+				$generalOffDay = $generalOffDay * ($startNumberUsers - $disableUsersMonth);
 			}
 
-			// Full day off
-			$off_days[$key]['full'] = $generalOffDay + DB::connection('mysql')->table('off_days')
+			// Special days
+			$special_days_number = DB::connection('mysql')->table('off_days')
+			->select(
+				DB::raw('IF( WEEKDAY(date) = 5, 0.5, 1 ) as number'),
+			)
 			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
-			->where('type', '=', 'all_day')
+			->whereIn('type', array('special_day'))
 			->where('date', '>=', $value['start'])
 			->where('date', '<=', $value['end'])
 			->when($teamID, function ($query, $teamID) {
@@ -666,15 +688,17 @@ class StatisticsController extends Controller
 			})
 			->when($newUsersMonth, function ($query) use ($newUsersMonths, $key) {
 				return $query->whereNotIn('users.id', array_column($newUsersMonths[$key], 'id'));
-			})
-			->count();
+			})->get()->pluck('number')->toArray();
 
-			// Half day off
-			$off_days[$key]['half'] = DB::connection('mysql')->table('off_days')
+			// Off days
+			$off_days_number = DB::connection('mysql')->table('off_days')
+			->select(
+				DB::raw('IF( type != "all_day", 0.5, 1 ) as number'),
+			)
 			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
-			->whereIn('type', array('morning', 'afternoon'))
+			->whereIn('type', array('all_day', 'morning', 'afternoon'))
 			->where('date', '>=', $value['start'])
-			->where('date', '<=',  $value['end'])
+			->where('date', '<=', $value['end'])
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('users.team', $teamID);
 			})
@@ -687,8 +711,9 @@ class StatisticsController extends Controller
 			})
 			->when($newUsersMonth, function ($query) use ($newUsersMonths, $key) {
 				return $query->whereNotIn('users.id', array_column($newUsersMonths[$key], 'id'));
-			})
-			->count();
+			})->get()->pluck('number')->toArray();
+
+			$off_days[$key] = array_sum($off_days_number) + array_sum($special_days_number) + $generalOffDay;
 
 			// start users next month
 			$startNumberUsers = $startNumberUsers + $newUsersMonth - $disableUsersMonth;
@@ -1008,24 +1033,40 @@ class StatisticsController extends Controller
 			if ($teamID != 2) {
 				for ($d = $carbStartDateM->day; $d <= $carbEndDateM->day; $d++) {
 					$day = Carbon::createFromDate($carbStartDateM->year, $carbStartDateM->month, $d);
-					if ($day->isWeekday()) $daysInMonth++;
+					if ( $day->isWeekday() ) {
+						$daysInMonth++;
+					} elseif ( $day->isSaturday() ) {
+						$daysInMonth += 0.5;
+					}
 				}
 			} else {
 				$carbEndOfMonth = $carbStartDateM->copy()->endOfMonth();
 				if ( $carbEndOfMonth->lt($carbEndDateM) ) {
 					for ($d = $carbStartDateM->day; $d <= $carbStartDateM->daysInMonth; $d++) {
 						$day = Carbon::createFromDate($carbStartDateM->year, $carbStartDateM->month, $d);
-						if ($day->isWeekday()) $daysInMonth++;
+						if ( $day->isWeekday() ) {
+							$daysInMonth++;
+						} elseif ( $day->isSaturday() ) {
+							$daysInMonth += 0.5;
+						}
 					}
 	
 					for ($d = 1; $d <= $carbEndDateM->day; $d++) {
 						$day = Carbon::createFromDate($carbEndDateM->year, $carbEndDateM->month, $d);
-						if ($day->isWeekday()) $daysInMonth++;
+						if ( $day->isWeekday() ) {
+							$daysInMonth++;
+						} elseif ( $day->isSaturday() ) {
+							$daysInMonth += 0.5;
+						}
 					}
 				} else {
 					for ($d = $carbStartDateM->day; $d <= $carbEndDateM->day; $d++) {
 						$day = Carbon::createFromDate($carbStartDateM->year, $carbStartDateM->month, $d);
-						if ($day->isWeekday()) $daysInMonth++;
+						if ( $day->isWeekday() ) {
+							$daysInMonth++;
+						} elseif ( $day->isSaturday() ) {
+							$daysInMonth += 0.5;
+						}
 					}
 				}
 				
@@ -1037,13 +1078,8 @@ class StatisticsController extends Controller
 				$offMonth = 1;
 			}
 
-			// Saturday Hours
-			$staturdayHours = 8;
-			if ( $daysInMonth <= 15 ) $staturdayHours = 4;
-			if ( $daysInMonth <= 5 ) $staturdayHours = 0;
-
 			// Total work hours per month
-			$totalNewPerfectHours[$key] = $totalPerfectHours[$key] = ($startNumberUsers - $offMonth - $disableUsersNumber) * (8 * $daysInMonth + $staturdayHours) - ($offDays[$key]['full'] * 8 + $offDays[$key]['half'] * 4);
+			$totalNewPerfectHours[$key] = $totalPerfectHours[$key] = ($startNumberUsers - $offMonth - $disableUsersNumber) * (8 * $daysInMonth) - ($offDays[$key]['full'] * 8 + $offDays[$key]['half'] * 4);
 
 			if ( $newUsersNumber ) {
 				$totalPerfectHours[$key] += $newUsersPerfectHours;

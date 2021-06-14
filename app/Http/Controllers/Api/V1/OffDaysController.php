@@ -49,6 +49,7 @@ class OffDaysController extends Controller
 		$startDate = $_GET['startDate'];
 		$endDate = $_GET['endDate'];
 		$teamID = $_GET['team_id'];
+		$userID = $_GET['user_id'];
 		$user = $request->session()->get('Auth');
 
 		// Check filter team for user
@@ -69,6 +70,9 @@ class OffDaysController extends Controller
 				return $query->where('users.team', $teamID);
 			}, function ($query) {
 				return $query;
+			})
+			->when($userID, function ($query) use ($userID) {
+				return $query->where('off_days.user_id', $userID);
 			})
 			->whereIn('off_days.status', array('approved', 'printed'))
 			->whereNotIn('off_days.type', array('holiday', 'offday'))
@@ -98,7 +102,8 @@ class OffDaysController extends Controller
 
 		return response()->json([
 			'offDays' => array_merge($offDays, $holiDays),
-			'codition' => $codition
+			'codition' => $codition,
+			'users' => $this->getUsersByTeam($teamID)
 		]);
 	}
 
@@ -274,5 +279,19 @@ class OffDaysController extends Controller
 			$data[] = $offDay;
 		}
 		return $data;
+	}
+
+	private function getUsersByTeam($team)
+	{
+		return DB::table('role_user as ru')
+			->select(
+				'user.id as id',
+				'user.name as text'
+			)
+			->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+			->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+			->where('team', $team)
+			->where('disable_date', NULL)
+			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'DESC')->get()->toArray();
 	}
 }

@@ -15,13 +15,13 @@
       </div>
       <hr />
       <div class="form-group text-right">
-        <div class="d-inline-flex align-items-center" v-if="multiplePrints && currentEvent.extendedProps &&  'morning' != currentEvent.extendedProps.type">
+        <div class="d-inline-flex align-items-center" v-if="multiplePrints && currentEvent.extendedProps &&  'morning' != currentEvent.extendedProps.type && 'special_day' != currentEvent.extendedProps.type">
           <input class="mr-2" v-model="multiplePrints" id="multiple_days" type="checkbox">
           <label class="mb-0" :style="{ position: 'relative', top: '1px' }" for="multiple_days">Multiple Days</label>
         </div>
-         <button type="button" @click="multiplePrints ? printEvents(selectedItem)  : printEvent(currentEvent)" class="btn btn-primary ml-3">{{ $ml.with("VueJS").get("txtPrint") }}
+         <button v-if="(currentEvent.extendedProps && 'special_day' != currentEvent.extendedProps.type)" type="button" @click="multiplePrints ? printEvents(selectedItem)  : printEvent(currentEvent)" class="btn btn-primary ml-3">{{ $ml.with("VueJS").get("txtPrint") }}
         </button>
-        <button v-if="(currentEvent.extendedProps && 'approved' == currentEvent.extendedProps.status) || (loginUser.role && 1 == loginUser.role.id)" type="button" @click="deleteEvent(currentEvent)" class="btn btn-danger ml-3">{{ $ml.with("VueJS").get("txtDelete") }}</button>
+        <button v-if="(currentEvent.extendedProps && 'approved' == currentEvent.extendedProps.status) || (loginUser.role && 1 == loginUser.role.id) || 1 != [45].indexOf(loginUser.id)" type="button" @click="deleteEvent(currentEvent)" class="btn btn-danger ml-3">{{ $ml.with("VueJS").get("txtDelete") }}</button>
       </div>
     </div>
   </modal>

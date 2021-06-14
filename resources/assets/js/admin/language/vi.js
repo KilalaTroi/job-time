@@ -147,6 +147,7 @@ export default {
     txtRCPM: 'PM',
     txtRCOff: 'Off',
     txtRCHoliday: 'Holiday',
+    txtRCSpecial: 'Special',
     txtReportFilter: 'Filter',
     txtReportType: 'Report type',
     txtReportCreate: 'Create New Report',

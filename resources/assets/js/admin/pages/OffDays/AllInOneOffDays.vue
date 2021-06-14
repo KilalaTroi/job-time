@@ -9,11 +9,26 @@
           class="form-group mb-0 d-flex justify-content-between"
           style="min-width: 100px"
         >
-          <select-2
-            :options="options.team"
-            v-model="filters.team"
-            class="select2"
-          />
+          <div v-if="filters.team != '0' && !(loginUser.role && -1 == [45].indexOf(loginUser.id) && -1 == ['admin'].indexOf(loginUser.role.name))" 
+          style="min-width: 240px" class="mr-3">
+            <multiselect
+              :multiple="false"
+              v-model="filters.user_id"
+              :options="users"
+              :clear-on-select="false"
+              :preserve-search="true"
+              :placeholder="$ml.with('VueJS').get('txtSelectOne')"
+              label="text"
+              track-by="text"
+            ></multiselect>
+          </div>
+          <div style="min-width: 100px">
+            <select-2
+              :options="options.team"
+              v-model="filters.team"
+              class="select2"
+            />
+          </div>
         </div>
       </div>
     </template>
@@ -76,6 +91,7 @@ import listPlugin from "@fullcalendar/list";
 import Datepicker from "vuejs-datepicker";
 import Card from "../../components/Cards/Card";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
+import Multiselect from "vue-multiselect";
 import EditEvent from "./Edit";
 import { mapGetters, mapActions } from "vuex";
 
@@ -85,6 +101,7 @@ export default {
     FullCalendar, // make the <FullCalendar> tag available
     Card,
     Select2,
+    Multiselect,
     EditEvent,
     Datepicker
   },
@@ -105,6 +122,7 @@ export default {
       offDayTypes: "offDayTypes",
       currentEvent: "currentEvent",
       filters: "filters",
+      users: "users",
     }),
   },
 
@@ -188,7 +206,7 @@ export default {
 
   async created() {
     const _this = this;
-    _this.options.team = [{ id: "", text: "ALL" }].concat(_this.currentFullTeamOption);
+    _this.options.team = [{ id: 0, text: "ALL" }].concat(_this.currentFullTeamOption);
     _this.filters.team = _this.currentTeam.id;
     _this.setTeam(_this.loginUser);
   },
@@ -197,8 +215,12 @@ export default {
     filters: [
       {
         handler: function (value) {
-          if ("undefined" != typeof this.filters.team){
-            if (value.team != this.currentTeam.id) this.setCurrentTeam(value.team);
+          if ("undefined" != typeof this.filters.team) {
+            if (value.team != this.currentTeam.id) {
+              this.filters.user_id = '';
+              this.setCurrentTeam(value.team);
+              this.getAllOffDays();
+            } 
             this.getAllOffDays();
           }
         },
@@ -218,6 +240,7 @@ export default {
 </script>
 
 <style lang="scss">
+@import "~vue-multiselect/dist/vue-multiselect.min.css";
 #offdays{
   @import "~@fullcalendar/core/main.css";
   @import "~@fullcalendar/daygrid/main.css";

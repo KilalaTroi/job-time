@@ -28,7 +28,7 @@ export default {
 				color: "#eaeaea",
 				permission: {
 					role: 'admin',
-					user_id: '',
+					user_id: [45],
 				}
 			},
 			{
@@ -38,18 +38,29 @@ export default {
 				color: "#ffd6fb",
 				permission: {
 					role: 'admin',
-					user_id: '',
+					user_id: [45],
+				}
+			},
+			{
+				id: "special_day",
+				name: "Special offday",
+				text: "Special offday",
+				color: "#a1e82c",
+				permission: {
+					role: 'admin',
+					user_id: [45],
 				}
 			},
 		],
 		allOffDays: [],
+		users: [],
 		offDays: [],
 		currentEvent: {},
 		currentStart: '',
 		currentEnd: '',
 		filters: {
 			team: '',
-			user_id: document.querySelector("meta[name='user-id']").getAttribute('content')
+			user_id: ''
 		},
 		selectedItem: {
 			afternoon: '',
@@ -62,6 +73,7 @@ export default {
 	getters: {
 		offDayTypes: state => state.offDayTypes,
 		allOffDays: state => state.allOffDays,
+		users: state => state.users,
 		filters: state => state.filters,
 		offDays: state => state.offDays,
 		selectedItem: state => state.selectedItem,
@@ -72,7 +84,7 @@ export default {
 			return (str) => {
 				let words = str.split(" ");
 				let firstName = words[words.length - 1],
-					middleName = words[words.length - 2]
+					middleName = typeof(words[words.length - 2]) != "undefined"
 						? words[words.length - 2] + " "
 						: "";
 				return middleName + firstName;
@@ -86,6 +98,7 @@ export default {
 					afternoon: "[" + translateFunc.get("txtRCPM") + "] ",
 					offday: translateFunc.get("txtRCOff"),
 					holiday: translateFunc.get("txtRCHoliday"),
+					special_day: "[" + translateFunc.get("txtRCSpecial") + "] ",
 				}
 				return textType[type];
 			}
@@ -95,6 +108,10 @@ export default {
 	mutations: {
 		SET_ALL_OFF_DAYS: (state, data) => {
 			state.allOffDays = data
+		},
+
+		SET_USERS: (state, data) => {
+			state.users = data
 		},
 
 		SET_OFF_DAYS: (state, data) => {
@@ -147,7 +164,10 @@ export default {
 
 	actions: {
 		async getAllOffDays({ commit, state, rootGetters, getters, rootState }) {
-			const uri = '/data/all-off-days?team_id=' + state.filters.team + '&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
+			console.log(state.filters.user_id);
+			const user_id = state.filters.user_id && typeof(state.filters.user_id.id) != 'undefined' ? 
+							state.filters.user_id.id : 0;
+			const uri = '/data/all-off-days?team_id=' + state.filters.team + '&user_id='+ user_id +'&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
 
 			await axios.get(uri)
 				.then(res => {
@@ -166,6 +186,7 @@ export default {
 						});
 					}
 					commit('SET_ALL_OFF_DAYS', res.data.offDays)
+					commit('SET_USERS', res.data.users)
 				})
 				.catch(err => {
 					console.log(err);
@@ -175,8 +196,9 @@ export default {
 
 		getOffDays({ commit, state, rootState, rootGetters, dispatch }) {
 			// const uri = '/data/offdays?user_id=' + rootState.loginUser.id + '&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
-
-			const uri = '/data/all-off-days?team_id=' + state.filters.team + '&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
+			const user_id = state.filters.user_id && typeof(state.filters.user_id.id) != 'undefined' ? 
+							state.filters.user_id.id : 0;
+			const uri = '/data/all-off-days?team_id=' + state.filters.team + '&user_id='+ user_id +'&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
 
 			axios.get(uri)
 				.then(res => {
@@ -228,8 +250,9 @@ export default {
 
 		clickEvent({ commit, rootGetters, state, dispatch, rootState }, item) {
 			const user_id = rootGetters['getObjectByID'](state.allOffDays, item.event.id * 1)['user_id'];
-			if ((user_id == state.filters.user_id || 1 == rootState.loginUser.role.id) && -1 == ('holiday, offday').indexOf(item.event.extendedProps.type)) {
-				if ('morning' != item.event._def.extendedProps.type) dispatch('getAllOffDayWeek', item.event.id);
+			if ((user_id == state.filters.user_id || 1 == rootState.loginUser.role.id || -1 != [45].indexOf(rootState.loginUser.id)) && -1 == ('holiday, offday').indexOf(item.event.extendedProps.type)) {
+				if ('morning' != item.event._def.extendedProps.type && 'special_day' != item.event._def.extendedProps.type) 
+					dispatch('getAllOffDayWeek', item.event.id);
 				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 })
 				commit('UPDATE_CURRENT_EVENT', item.event);
 				$('#editEvent').modal('show');
@@ -239,7 +262,9 @@ export default {
 		addEvent({ dispatch, commit, state, rootState, rootGetters }, info) {
 			const { event } = info;
 			const { id, start, end, borderColor, backgroundColor, title } = event;
-			const uri = '/data/offdays?user_id=' + rootState.loginUser.id;
+			const user_id = state.filters.user_id ? 
+							state.filters.user_id.id : rootState.loginUser.id;
+			const uri = '/data/offdays?user_id=' + user_id;
 			const uriWithTeam = rootState.queryTeam ? uri + '&' + rootState.queryTeam : uri
 
 			const newItem = {
