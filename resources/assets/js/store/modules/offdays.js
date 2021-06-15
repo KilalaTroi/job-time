@@ -22,16 +22,6 @@ export default {
 				color: "#F55555",
 			},
 			{
-				id: "offday",
-				name: "Off",
-				text: "Off",
-				color: "#eaeaea",
-				permission: {
-					role: 'admin',
-					user_id: [45],
-				}
-			},
-			{
 				id: "holiday",
 				name: "Holiday",
 				text: "Holiday",
@@ -42,10 +32,20 @@ export default {
 				}
 			},
 			{
+				id: "offday",
+				name: "Off day",
+				text: "Off day",
+				color: "#eaeaea",
+				permission: {
+					role: 'admin', 
+					user_id: [45],
+				}
+			},
+			{
 				id: "special_day",
-				name: "Special offday",
-				text: "Special offday",
-				color: "#a1e82c",
+				name: "Special day",
+				text: "Special day",
+				color: "#eaeaea",
 				permission: {
 					role: 'admin',
 					user_id: [45],
@@ -59,7 +59,7 @@ export default {
 		currentStart: '',
 		currentEnd: '',
 		filters: {
-			team: '',
+			team: 0,
 			user_id: ''
 		},
 		selectedItem: {
@@ -135,14 +135,8 @@ export default {
 		},
 
 		UPDATE_CURRENT_EVENT: (state, data) => {
-			state.currentEvent = data
+			state.currentEvent = data 
 		},
-
-		// DELETE_EVENT: (state, id) => {
-		// 	state.offDays = state.offDays.filter((elem) => {
-		// 		if (elem.id != id) return elem
-		// 	});
-		// },
 
 		DELETE_EVENT: (state, id) => {
 			state.allOffDays = state.allOffDays.filter((elem) => {
@@ -163,13 +157,12 @@ export default {
 	},
 
 	actions: {
-		async getAllOffDays({ commit, state, rootGetters, getters, rootState }) {
-			console.log(state.filters.user_id);
+		getAllOffDays({ commit, state, rootGetters, getters, rootState }) {
 			const user_id = state.filters.user_id && typeof(state.filters.user_id.id) != 'undefined' ? 
 							state.filters.user_id.id : 0;
 			const uri = '/data/all-off-days?team_id=' + state.filters.team + '&user_id='+ user_id +'&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
 
-			await axios.get(uri)
+			axios.get(uri)
 				.then(res => {
 					if (res.data.offDays.length) {
 						res.data.offDays = res.data.offDays.map((item, index) => {
@@ -194,33 +187,6 @@ export default {
 				});
 		},
 
-		getOffDays({ commit, state, rootState, rootGetters, dispatch }) {
-			// const uri = '/data/offdays?user_id=' + rootState.loginUser.id + '&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
-			const user_id = state.filters.user_id && typeof(state.filters.user_id.id) != 'undefined' ? 
-							state.filters.user_id.id : 0;
-			const uri = '/data/all-off-days?team_id=' + state.filters.team + '&user_id='+ user_id +'&startDate=' + rootGetters['dateFormat'](state.currentStart, 'YYYY-MM-DD') + '&endDate=' + rootGetters['dateFormat'](state.currentEnd, 'YYYY-MM-DD');
-
-			axios.get(uri)
-				.then(res => {
-					if (res.data.offDays.length) {
-						res.data.offDays = res.data.offDays.map((item, index) => {
-							return Object.assign({}, item, {
-								title: rootGetters['getObjectByID'](state.offDayTypes, item.type).name,
-								borderColor: rootGetters['getObjectByID'](state.offDayTypes, item.type).color,
-								backgroundColor: rootGetters['getObjectByID'](state.offDayTypes, item.type).color,
-								start: rootGetters['dateFormat'](item.date),
-								end: rootGetters['dateFormat'](item.date)
-							})
-						})
-					}
-					commit('SET_OFF_DAYS', res.data.offDays)
-				})
-				.catch(err => {
-					console.log(err);
-					alert("Could not load Off days");
-				});
-		},
-
 		getAllOffDayWeek({ commit }, id) {
 			const uri = '/data/all-off-day-week?id=' + id;
 
@@ -232,10 +198,6 @@ export default {
 					console.log(err);
 					alert("Could not load Off days");
 				});
-		},
-
-		setTeam({ commit }, data) {
-			commit('SET_TEAM', data)
 		},
 
 		deleteEvent({ commit, rootState }, event) {
@@ -250,10 +212,11 @@ export default {
 
 		clickEvent({ commit, rootGetters, state, dispatch, rootState }, item) {
 			const user_id = rootGetters['getObjectByID'](state.allOffDays, item.event.id * 1)['user_id'];
-			if ((user_id == state.filters.user_id || 1 == rootState.loginUser.role.id || -1 != [45].indexOf(rootState.loginUser.id)) && -1 == ('holiday, offday').indexOf(item.event.extendedProps.type)) {
+			if ( (user_id == rootState.loginUser.id || 1 == rootState.loginUser.role.id || -1 != [45].indexOf(rootState.loginUser.id) ) && -1 == ['holiday', 'offday'].indexOf(item.event.extendedProps.type)) {
 				if ('morning' != item.event._def.extendedProps.type && 'special_day' != item.event._def.extendedProps.type) 
 					dispatch('getAllOffDayWeek', item.event.id);
-				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 })
+				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 });
+
 				commit('UPDATE_CURRENT_EVENT', item.event);
 				$('#editEvent').modal('show');
 			}
@@ -265,7 +228,6 @@ export default {
 			const user_id = state.filters.user_id ? 
 							state.filters.user_id.id : rootState.loginUser.id;
 			const uri = '/data/offdays?user_id=' + user_id;
-			const uriWithTeam = rootState.queryTeam ? uri + '&' + rootState.queryTeam : uri
 
 			const newItem = {
 				user_id: this.userID,
@@ -278,14 +240,17 @@ export default {
 				title: title
 			};
 
-			axios.post(uriWithTeam, newItem)
+			axios.post(uri, newItem)
 				.then(res => {
 					const data = {
 						oldOffDays: res.data.oldEvent,
 						newOffDay: res.data.event
 					}
 					commit('ADD_OFF_DAY', data)
-					if (rootState.loginUser.team.id != state.filters.team) state.filters.team = rootState.loginUser.team.id
+					if (
+						rootState.loginUser.team.id != state.filters.team && 
+						rootState.loginUser.id == user_id
+					) state.filters.team = rootState.loginUser.team.id;
 					info.event.remove();
 					dispatch('getAllOffDays');
 				})
@@ -319,12 +284,6 @@ export default {
 					console.log(err);
 					alert("Could not load data");
 				});
-		},
-
-		handleMonthChange({ commit, dispatch }, arg) {
-			commit('SET_CURRENT_START', arg.view.currentStart)
-			commit('SET_CURRENT_END', arg.view.currentEnd)
-			dispatch('getOffDays')
 		},
 
 		handleMonthChangeAll({ commit, dispatch }, arg) {

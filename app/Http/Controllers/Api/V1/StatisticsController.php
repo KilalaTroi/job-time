@@ -1079,7 +1079,7 @@ class StatisticsController extends Controller
 			}
 
 			// Total work hours per month
-			$totalNewPerfectHours[$key] = $totalPerfectHours[$key] = ($startNumberUsers - $offMonth - $disableUsersNumber) * (8 * $daysInMonth) - ($offDays[$key]['full'] * 8 + $offDays[$key]['half'] * 4);
+			$totalNewPerfectHours[$key] = $totalPerfectHours[$key] = ($startNumberUsers - $offMonth - $disableUsersNumber) * (8 * $daysInMonth) - ($offDays[$key] * 8);
 
 			if ( $newUsersNumber ) {
 				$totalPerfectHours[$key] += $newUsersPerfectHours;

@@ -238,6 +238,7 @@ class OffDaysController extends Controller
 			$offDay = OffDay::select('id', 'type', 'date')
 				->where('user_id', $user_id)
 				->where('date', $dataDate)
+				->whereIn('type', array('all_day', 'morning', 'afternoon'))
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
 			$offDay = $offDay->toArray();
@@ -267,6 +268,7 @@ class OffDaysController extends Controller
 			$offDay = OffDay::select('id', 'type', 'date')
 				->where('user_id', $user_id)
 				->where('date', $dataDate)
+				->whereIn('type', array('all_day', 'morning', 'afternoon'))
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
 			$offDay = $offDay->toArray();
