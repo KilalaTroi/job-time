@@ -237,4 +237,6 @@ export default {
     txtUseTheMeetingRoom: '会議室を使用する',
     txtEveryWeekTo: '毎週まで',
     txtPerfectMatch: '完全一致',
+    txtTotalTime: '合計時間',
+    txtThisMonth: '今月',
 }

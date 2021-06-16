@@ -168,8 +168,9 @@ export default {
 						res.data.offDays = res.data.offDays.map((item, index) => {
 							const type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
 							const name = (-1 == ('holiday, offday').indexOf(item.type)) ? getters['recapName'](item.name) : '';
+							const reason = item.reason ? ' ' + item.reason + ' ' : '';
 							return Object.assign({}, item, {
-								title: getters['recapTime'](item.type, rootState.translateTexts) + name,
+								title: getters['recapTime'](item.type, rootState.translateTexts) + reason + name,
 								className: ('printed' == item.status ? 'printed' : '') + ('holiday' == item.type ? 'holiday' : '') + ('offday' == item.type ? 'offday' : ''),
 								borderColor: type.color,
 								backgroundColor: type.color,
@@ -216,7 +217,8 @@ export default {
 				if ('morning' != item.event._def.extendedProps.type && 'special_day' != item.event._def.extendedProps.type) 
 					dispatch('getAllOffDayWeek', item.event.id);
 				else commit('SET_SELECTED_ITEM', { afternoon: '', all_day: '', morning: '', total: 0 });
-
+				
+				item.event.reason = item.event._def.extendedProps.reason;
 				commit('UPDATE_CURRENT_EVENT', item.event);
 				$('#editEvent').modal('show');
 			}
@@ -257,6 +259,10 @@ export default {
 				.catch(err => {
 					console.log(err);
 				});
+		},
+
+		updateSpecialDays({ commit }, data) {
+			console.log(data);
 		},
 
 		printEvent({ dispatch }, event) {

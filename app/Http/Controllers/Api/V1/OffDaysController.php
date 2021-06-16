@@ -63,7 +63,8 @@ class OffDaysController extends Controller
 				'users.id as user_id',
 				'off_days.type as type',
 				'off_days.status as status',
-				'off_days.date as date'
+				'off_days.date as date',
+				'off_days.reason as reason'
 			)
 			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
 			->when($codition, function ($query) use ($teamID) {
@@ -89,7 +90,8 @@ class OffDaysController extends Controller
 				'users.id as user_id',
 				'off_days.type as type',
 				'off_days.status as status',
-				'off_days.date as date'
+				'off_days.date as date',
+				'off_days.reason as reason'
 			)
 			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
 			->whereIn('off_days.type', array('holiday', 'offday'))
@@ -105,6 +107,10 @@ class OffDaysController extends Controller
 			'codition' => $codition,
 			'users' => $this->getUsersByTeam($teamID)
 		]);
+	}
+
+	public function updateSpecialDays(Request $request) {
+		return response()->json($request);
 	}
 
 	/**

@@ -54,14 +54,14 @@ class StatisticsController extends Controller
 		// Get off days
 		$data['offDays'] = $this->calcOffDays($data['daysOfMonths'], $data['users'], $carbStartDate, $carbEndDate,$teamID, $user_id);
 
+		// Return totals
+		$data['totals'] = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID);
+
 		// Number current jobs
 		if ( !$isFilter ) $data['jobs'] = $this->currentJobs($teamID);
 
 		// info current month
-		$data['currentMonth'] = $this->currentMonth(count($data['users']['all']), $teamID, $user_id, $carbStartDate->format('Y-m-d'));
-
-		// Return totals
-		$data['totals'] = $this->getTotals($data, $carbStartDate, $carbEndDate, $user_id, $teamID);
+		$data['currentMonth'] = $this->currentMonth($teamID, $user_id);
 
 		// Thêm user disable trước 3 tháng vào để xem dữ liệu
 		if ( !$isFilter ) {
@@ -875,103 +875,162 @@ class StatisticsController extends Controller
 	 * @param  mixed $filterStartMonth
 	 * @return void
 	 */
-	private function currentMonth($usersTotal, $teamID = 0, $user_id = 0, $filterStartMonth = false)
+	private function currentMonth($teamID = 0, $user_id = 0)
 	{
 		$currentDate = Carbon::now();
+		$keyYearMonth = $currentDate->copy()->format('Ym');
 
-		$hoursCurrentMonth = DB::table('jobs')
+		if ( $teamID == 2 ) {
+			$currentStartDate = $currentDate->copy()->day(21);
+			if ( $currentDate->day < 21 ) {
+				$currentStartDate->subMonths(1);
+			} else {
+				$keyYearMonth = $currentDate->copy()->addMonths(1)->format('Ym');
+			}
+		} else {
+			$currentStartDate = $currentDate->copy()->startOfMonth();
+		}
+
+		// daysOfMonth
+		$daysOfMonth[$keyYearMonth] = array(
+			'start' => $currentStartDate->format('Y-m-d'),
+			'end' => $currentDate->format('Y-m-d')
+		);
+
+		$current['daysOfMonth'] = array(
+			'start' => $currentStartDate->format('Y/m/d'),
+			'end' => $currentDate->format('Y/m/d')
+		);
+
+		// Get users
+		$current['users'] = $this->getUsers($currentStartDate, $currentDate, $teamID, $user_id);
+
+		// Get off days
+		$offDays = $current['offDays'] = $this->calcOffDays($daysOfMonth, $current['users'], $currentStartDate, $currentDate, $teamID, $user_id);
+
+		// Calc Total time
+		[
+			'old' => $startNumberUsers, 
+			'newUsersMonths' => $newUsersMonths, 
+			'disableUsersMonths' => $disableUsersMonths,
+		] = $current['users'];
+
+		foreach ($daysOfMonth as $key => $value) {
+			$newUsersNumber = 0;
+			$newUsersPerfectHours = 0;
+			$disableUsersNumber = 0;
+			$disableUsersPerfectHours = 0;
+			$daysInMonth = 0;
+			$carbStartDateM = Carbon::createFromFormat('Y-m-d', $value['start']);
+			$carbEndDateM = Carbon::createFromFormat('Y-m-d', $value['end']);
+
+			// New users
+			if ( isset($newUsersMonths[$key]) ) {
+				$newUsersNumber = count($newUsersMonths[$key]);
+				$newUsersPerfectHours = $this->sumArrayByObjectKey($newUsersMonths[$key], 'perfectHours');
+			}
+
+			// Disable users
+			if ( isset($disableUsersMonths[$key]) ) {
+				$disableUsersNumber = count($disableUsersMonths[$key]);
+				$disableUsersPerfectHours = $this->sumArrayByObjectKey($disableUsersMonths[$key], 'perfectHours');
+			}
+
+			if ($teamID != 2) {
+				for ($d = $carbStartDateM->day; $d <= $carbEndDateM->day; $d++) {
+					$day = Carbon::createFromDate($carbStartDateM->year, $carbStartDateM->month, $d);
+					if ( $day->isWeekday() ) {
+						$daysInMonth++;
+					} elseif ( $day->isSaturday() ) {
+						$daysInMonth += 0.5;
+					}
+				}
+			} else {
+				$carbEndOfMonth = $carbStartDateM->copy()->endOfMonth();
+				if ( $carbEndOfMonth->lt($carbEndDateM) ) {
+					for ($d = $carbStartDateM->day; $d <= $carbStartDateM->daysInMonth; $d++) {
+						$day = Carbon::createFromDate($carbStartDateM->year, $carbStartDateM->month, $d);
+						if ( $day->isWeekday() ) {
+							$daysInMonth++;
+						} elseif ( $day->isSaturday() ) {
+							$daysInMonth += 0.5;
+						}
+					}
+	
+					for ($d = 1; $d <= $carbEndDateM->day; $d++) {
+						$day = Carbon::createFromDate($carbEndDateM->year, $carbEndDateM->month, $d);
+						if ( $day->isWeekday() ) {
+							$daysInMonth++;
+						} elseif ( $day->isSaturday() ) {
+							$daysInMonth += 0.5;
+						}
+					}
+				} else {
+					for ($d = $carbStartDateM->day; $d <= $carbEndDateM->day; $d++) {
+						$day = Carbon::createFromDate($carbStartDateM->year, $carbStartDateM->month, $d);
+						if ( $day->isWeekday() ) {
+							$daysInMonth++;
+						} elseif ( $day->isSaturday() ) {
+							$daysInMonth += 0.5;
+						}
+					}
+				}
+				
+			}
+
+			// Total work hours per month
+			$totalNewPerfectHours[$key] = $totalPerfectHours[$key] = ($startNumberUsers - $disableUsersNumber) * (8 * $daysInMonth) - ($offDays[$key] * 8);
+
+			if ( $newUsersNumber ) {
+				$totalPerfectHours[$key] += $newUsersPerfectHours;
+				$totalNewPerfectHours[$key] += $newUsersPerfectHours;
+			}
+
+			if ( $disableUsersNumber ) {
+				$totalPerfectHours[$key] += $disableUsersPerfectHours;
+				$totalNewPerfectHours[$key] += $disableUsersPerfectHours;
+			}
+			
+			// Loại bỏ giá trị âm
+			if ( $totalPerfectHours[$key] < 0 ) $totalNewPerfectHours[$key] = $totalPerfectHours[$key] = 0;
+
+			// Next month start number users
+			$startNumberUsers = $startNumberUsers + $newUsersNumber - $disableUsersNumber;
+		}
+
+		// Total work hours months
+		$totals['totalPerfectHours'] = $totalPerfectHours;
+
+		// get date string 
+		$startMonth = $currentStartDate->format('Y-m-d');
+		$endMonth = $currentDate->format('Y-m-d');
+
+		$hoursProjects = DB::table('jobs')
 			->select(
-				DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time))/3600 as total')
+				'projects.type_id as id',
+				'jobs.date as jdate',
+				DB::raw('SUM(TIME_TO_SEC(end_time) - TIME_TO_SEC(start_time)) as total')
 			)
+			->join('issues', 'issues.id', '=', 'jobs.issue_id')
+			->join('projects', 'projects.id', '=', 'issues.project_id')
+			->where('jobs.date', ">=", $startMonth)
+			->where('jobs.date', "<=", $endMonth)
 			->when($teamID, function ($query, $teamID) {
 				return $query->where('team_id', $teamID);
 			})
 			->when($user_id, function ($query, $user_id) {
-				return $query->where('user_id', $user_id);
+				return $query->where('jobs.user_id', $user_id);
 			})
-			->whereNotIn('jobs.user_id', $this->notLogTimeUsers)
-			->where('jobs.date', ">=", $currentDate->copy()->startOfMonth()->format('Y-m-d'))
-			->get();
+			->whereNotIn('jobs.user_id', $user_id ? [] : $this->notUserInTimeTotals)
+			->orderBy('id', 'asc')
+			->groupBy('id', 'jdate')
+			->get()->pluck('total')->toArray();
 
-		$daysCurrentMonth = 0;
-		for ($d = 1; $d <= $currentDate->day; $d++) {
-			$day = Carbon::createFromDate($currentDate->year, $currentDate->month, $d);
-			if ($day->isWeekday()) $daysCurrentMonth++;
-		}
+		$totals['totalHours'] = array_sum($hoursProjects) / 3600;
 
-		$startDate = $currentDate->copy()->startOfMonth()->format('Y-m-d');
-		$endDate = $currentDate->format('Y-m-d');
+		$current['totals'] = $totals;
 
-		// Ngày nghỉ chung
-		$generalOffDay = DB::connection('mysql')->table('off_days')
-			->whereIn('type', array('holiday', 'offday'))
-			->where('date', '<=', $endDate)
-			->where('date', '>=',  $startDate)
-			->count();
-
-		if (!$user_id) {
-			$generalOffDay = $generalOffDay * count($this->userInTimeTotals);
-		}
-
-		// Full day off
-		$off_days['full'] = $generalOffDay + DB::connection('mysql')->table('off_days')
-			->join('users', 'users.id', '=', 'off_days.user_id')
-			->when($teamID, function ($query, $teamID) {
-				return $query->where('team', $teamID);
-			})
-			->when($user_id, function ($query, $user_id) {
-				return $query->where('user_id', $user_id);
-			})
-			->whereNotIn('users.id', $user_id ? [] : $this->notUserInTimeTotals)
-			->where('type', '=', 'all_day')
-			->where('date', '<=', $endDate)
-			->where('date', '>=',  $startDate)
-			->count();
-
-		// Half day off
-		$off_days['half'] = DB::connection('mysql')->table('off_days')
-			->join('users', 'users.id', '=', 'off_days.user_id')
-			->when($teamID, function ($query, $teamID) {
-				return $query->where('team', $teamID);
-			})
-			->when($user_id, function ($query, $user_id) {
-				return $query->where('user_id', $user_id);
-			})
-			->whereNotIn('users.id', $user_id ? [] : $this->notUserInTimeTotals)
-			->whereIn('type', array('morning', 'afternoon'))
-			->where('date', '<=', $endDate)
-			->where('date', '>=',  $startDate)
-			->count();
-
-		// Return disableUsersInMonth
-		$disableUsersInMonth = DB::connection('mysql')->table('role_user')
-			->select('users.id')
-			->join('users', 'users.id', '=', 'role_user.user_id')
-			->join('roles', 'roles.id', '=', 'role_user.role_id')
-			->whereNotIn('users.id', $user_id ? [] : $this->notUserInTimeTotals)
-			->when($teamID, function ($query, $teamID) {
-				return $query->where('team', $teamID);
-			})
-			// ->when($user_id, function ($query, $user_id) {
-			// 	return $query->where('user_id', $user_id);
-			// })
-			->where('users.disable_date', "<>", NULL)
-			->when($filterStartMonth, function ($query, $filterStartMonth) {
-				return $query->where('users.disable_date', ">=", $filterStartMonth);
-			})
-			->count();
-
-		$data['totalUsers'] = $usersTotal - $disableUsersInMonth;
-		$data['off_days'] = $off_days;
-		$data['hours'] = $hoursCurrentMonth;
-
-		if (!$user_id) {
-			$data['total'] = $data['totalUsers'] * (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
-		} else {
-			$data['total'] = (8 * $daysCurrentMonth + 8) - ($off_days['full'] * 8 + $off_days['half'] * 4);
-		}
-
-		return $data;
+		return $current;
 	}
 	
 	/**
@@ -1028,7 +1087,6 @@ class StatisticsController extends Controller
 				$disableUsersNumber = count($disableUsersMonths[$key]);
 				$disableUsersPerfectHours = $this->sumArrayByObjectKey($disableUsersMonths[$key], 'perfectHours');
 			}
-
 
 			if ($teamID != 2) {
 				for ($d = $carbStartDateM->day; $d <= $carbEndDateM->day; $d++) {

@@ -8,7 +8,9 @@
                             <i class="nc-icon nc-chart text-warning"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">{{$ml.with('VueJS').get('txtWorkedTime')}}</p>
+                            <p class="card-category">
+                                {{$ml.with('VueJS').get('txtTotalTime')}}
+                            </p>
                             <h4 class="card-title">{{ totalArrayObject(totalHoursProjects) | numeral('0,0') }}/{{ totalObject(totalPerfectHours) | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
@@ -22,11 +24,13 @@
                             <i class="nc-icon nc-light-3 text-success"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">{{$ml.with('VueJS').get('txtWorkingTime')}}</p>
-                            <h4 class="card-title" v-if="getCurrentMonth(currentMonth)"> {{ getCurrentMonth(currentMonth).hours | numeral('0,0') }}/{{ getCurrentMonth(currentMonth).total | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
+                            <p class="card-category">
+                                {{$ml.with('VueJS').get('txtWorkingTime')}}
+                            </p>
+                            <h4 class="card-title">{{ currentTotals | numeral('0,0') }}/{{ currentPerTotals | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonth.startDate }} - {{ currentMonth.currentDate }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonthText }}
                         </div>
                     </stats-card>
                 </div>
@@ -40,7 +44,7 @@
                             <h4 class="card-title">{{ jobs }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonth.currentDate }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ $ml.with('VueJS').get('txtThisMonth') }}
                         </div>
                     </stats-card>
                 </div>
@@ -51,10 +55,10 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtNewUser')}}</p>
-                            <h4 class="card-title">+{{ totalNewUsers(newUsersMonths) }}/{{ currentMonth.totalUsers }}</h4>
+                            <h4 class="card-title">{{ currentNewUsers }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ $ml.with('VueJS').get('txtThisMonth') }}
                         </div>
                     </stats-card>
                 </div>
@@ -214,7 +218,6 @@
                 monthsText: [],
                 monthYearText: {},
                 series: [],
-                newUsersMonths: {},
                 totalPerfectHours: {},
                 totalHoursProjects: [],
                 pageData: {
@@ -355,6 +358,19 @@
                 currentLang: 'currentLang',
                 loginUser: 'loginUser',
             }),
+            currentTotals: function() {
+                return Object.keys(this.currentMonth).length ? this.currentMonth.totals.totalHours : 0;
+            },
+            currentPerTotals: function() {
+                return Object.keys(this.currentMonth).length ? this.totalObject(this.currentMonth.totals.totalPerfectHours) : 0;
+            },
+            currentMonthText: function() {
+                return Object.keys(this.currentMonth).length ? this.currentMonth.daysOfMonth.start + ' - ' + this.currentMonth.daysOfMonth.end : 
+                'yyyy/mm/dd - yyyy/mm/dd';
+            },
+            currentNewUsers: function() {
+                return Object.keys(this.currentMonth).length ? '+' + this.totalNewUsers(this.currentMonth.users.newUsersMonths) + '/' + this.currentMonth.users.all.length : '+0/0';
+            }
         },
         mounted() {
             let _this = this;
@@ -407,12 +423,9 @@
                         }
 
                          // Assign data
-                        this.newUsersMonths = res.data.users.newUsersMonths;  
                         this.totalPerfectHours = res.data.totals.totalPerfectHours;
                         this.totalHoursProjects = res.data.totals.totalHoursProjects;
                         this.currentMonth = res.data.currentMonth;
-                        this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
-                        this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
                         this.monthYearText = res.data.monthYearText;
                         this.getSeries(this.types, this.totalPerfectHours, this.totalHoursProjects);
