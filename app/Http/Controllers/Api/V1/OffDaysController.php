@@ -109,8 +109,89 @@ class OffDaysController extends Controller
 		]);
 	}
 
+	public function deleteSpecialDays(Request $request) {
+		if ( $request->get('end_date') != null ) {
+			$oldSpecialDate = OffDay::where('user_id', $request->get('user_id'))
+			->where('type', 'special_day')
+			->where('date', '>=',  $request->get('start_date'))
+			->where('date', '<=',  $request->get('end_date'));
+		} else {
+			$oldSpecialDate = OffDay::where('user_id', $request->get('user_id'))
+			->where('type', 'special_day')
+			->where('date', '=',  $request->get('start_date'));
+		}
+
+		$oldSpecialDate->delete();
+
+		return response()->json(array(
+			'message' => 'Successfully.'
+		), 200);
+	}
+
 	public function updateSpecialDays(Request $request) {
-		return response()->json($request);
+		OffDay::where('user_id', $request->get('user_id'))
+		->where('date', $request->get('start_date'))
+		->update([
+			'reason' => $request->get('reason'),
+		]);
+
+		// If has repeat date
+		if ( $request->get('end_date') != null ) {
+			$ignoreDates = array();
+			$carbStartDate = Carbon::createFromFormat('Y-m-d', $request->get('start_date'));
+			$carbEndDate = Carbon::createFromFormat('Y-m-d', $request->get('end_date'));
+
+			if ( $carbStartDate->gte($carbEndDate) ) return response()->json('Only select date updated.');
+
+			// oldSpecialDate
+			$oldSpecialDate = OffDay::select('date')
+			->where('user_id', $request->get('user_id'))
+			->where('type', 'special_day')
+			->where('date', '>',  $request->get('start_date'))
+			->where('date', '<=',  $request->get('end_date'));
+
+			// Update reason $oldSpecialDate
+			$oldSpecialDate->update([
+				'reason' => $request->get('reason'),
+			]);
+
+			$ignoreDates = $oldSpecialDate->get()->pluck('date')->toArray();
+
+			// otherDate
+			$otherDate = OffDay::select('date')
+			->where('type', '!=', 'special_day')
+			->where('date', '>',  $request->get('start_date'))
+			->where('date', '<=',  $request->get('end_date'))
+			->where(function($query) use ($request){
+				$query->where('user_id', $request->get('user_id'));
+				$query->orWhere('type', 'holiday');
+				$query->orWhere('type', 'offday');
+			})
+			->get()->pluck('date')->toArray();
+
+			$ignoreDates = array_merge($ignoreDates, $otherDate);
+
+			// add repeat special date
+			$repeatDate = array();
+			while( $carbStartDate->lt($carbEndDate) ) {
+				$day = $carbStartDate->addDays('1');
+				if ( !$day->isSunday() && !in_array($day->format('Y-m-d'), $ignoreDates) ) {
+					$repeatDate[] = array(
+						'user_id' => $request->get('user_id'),
+						'type' => 'special_day',
+						'reason' => $request->get('reason'),
+						'date' => $day->format('Y-m-d'),
+						'status' => 'approved',
+						'created_at' => Carbon::now(),
+						'updated_at' => Carbon::now(),
+					);
+				}
+			}
+
+			if ( count($repeatDate) ) OffDay::insert($repeatDate);
+		}
+
+		return response()->json('Success.');
 	}
 
 	/**

@@ -32,7 +32,7 @@
 						<button
 							@click="updateSpecialDays({currentEvent, repeatToDate})"
 							type="button"
-							class="btn btn-primary ml-3"
+							class="btn btn-primary ml-auto"
 						>
 							{{ $ml.with("VueJS").get("txtSave") }}
 						</button>
@@ -92,11 +92,19 @@
 				>
 					{{ $ml.with("VueJS").get("txtPrint") }}
 				</button>
-                <!-- Kiểm tra nếu special và admin thì thêm button update -->
 				<button
-					v-if="showBtnDelete"
+					v-if="showBtnDelete && !isSpecialDay"
 					type="button"
 					@click="deleteEvent(currentEvent)"
+					class="btn btn-danger ml-3"
+				>
+					{{ $ml.with("VueJS").get("txtDelete") }}
+				</button>
+				<!-- Delete button for special day -->
+				<button
+					v-if="showBtnDelete && isSpecialDay"
+					type="button"
+					@click="deleteSpecialEvent({currentEvent, repeatToDate})"
 					class="btn btn-danger ml-3"
 				>
 					{{ $ml.with("VueJS").get("txtDelete") }}
@@ -159,6 +167,7 @@ export default {
 	methods: {
 		...mapActions("offdays", {
 			deleteEvent: "deleteEvent",
+			deleteSpecialEvent: "deleteSpecialEvent",
 			printEvent: "printEvent",
 			printEvents: "printEvents",
 			resetSelectedItem: "resetSelectedItem",
@@ -179,7 +188,10 @@ export default {
 				},
 				deep: true
 			}
-		]
+		],
+		repeat: function (value) {
+			if ( !value ) this.repeatToDate = '';
+		}
 	}
 };
 </script>

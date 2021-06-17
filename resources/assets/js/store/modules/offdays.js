@@ -211,6 +211,25 @@ export default {
 			}).catch(err => console.log(err));
 		},
 
+		deleteSpecialEvent({ dispatch, rootGetters }, data) {
+			const uri = '/data/delete-special-days';
+
+			const postData = {
+				user_id: data.currentEvent.extendedProps.user_id,
+				start_date: data.currentEvent.start ? rootGetters['dateFormat'](data.currentEvent.start, 'YYYY-MM-DD') : '',
+				end_date: data.repeatToDate ? rootGetters['dateFormat'](data.repeatToDate, 'YYYY-MM-DD') : '',
+			};
+
+			axios.post(uri, postData)
+				.then(res => {
+					dispatch('getAllOffDays');
+					$('#editEvent').modal('hide');
+				})
+				.catch(err => {
+					console.log(err);
+				});
+		},
+
 		clickEvent({ commit, rootGetters, state, dispatch, rootState }, item) {
 			const user_id = rootGetters['getObjectByID'](state.allOffDays, item.event.id * 1)['user_id'];
 			if ( (user_id == rootState.loginUser.id || 1 == rootState.loginUser.role.id || -1 != [45].indexOf(rootState.loginUser.id) ) && -1 == ['holiday', 'offday'].indexOf(item.event.extendedProps.type)) {
@@ -229,10 +248,10 @@ export default {
 			const { id, start, end, borderColor, backgroundColor, title } = event;
 			const user_id = state.filters.user_id ? 
 							state.filters.user_id.id : rootState.loginUser.id;
-			const uri = '/data/offdays?user_id=' + user_id;
+			const uri = '/data/offdays';
 
 			const newItem = {
-				user_id: this.userID,
+				user_id: user_id,
 				type: id,
 				date: rootGetters['dateFormat'](start, 'YYYY-MM-DD'),
 				start: start,
@@ -248,21 +267,41 @@ export default {
 						oldOffDays: res.data.oldEvent,
 						newOffDay: res.data.event
 					}
-					commit('ADD_OFF_DAY', data)
+
+					info.event.remove();
+					// commit('ADD_OFF_DAY', data)
+					
 					if (
 						rootState.loginUser.team.id != state.filters.team && 
 						rootState.loginUser.id == user_id
-					) state.filters.team = rootState.loginUser.team.id;
-					info.event.remove();
-					dispatch('getAllOffDays');
+					) {
+						state.filters.team = rootState.loginUser.team.id;
+					} else {
+						dispatch('getAllOffDays');
+					}
 				})
 				.catch(err => {
 					console.log(err);
 				});
 		},
 
-		updateSpecialDays({ commit }, data) {
-			console.log(data);
+		updateSpecialDays({ dispatch, rootGetters }, data) {
+			const uri = '/data/update-special-days';
+
+			const postData = {
+				user_id: data.currentEvent.extendedProps.user_id,
+				start_date: data.currentEvent.start ? rootGetters['dateFormat'](data.currentEvent.start, 'YYYY-MM-DD') : '',
+				end_date: data.repeatToDate ? rootGetters['dateFormat'](data.repeatToDate, 'YYYY-MM-DD') : '',
+				reason: data.currentEvent.reason,
+			};
+
+			axios.post(uri, postData)
+				.then(res => {
+					dispatch('getAllOffDays');
+				})
+				.catch(err => {
+					console.log(err);
+				});
 		},
 
 		printEvent({ dispatch }, event) {
