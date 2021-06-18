@@ -169,8 +169,9 @@ export default {
 							const type = rootGetters['getObjectByID'](state.offDayTypes, item.type);
 							const name = (-1 == ('holiday, offday').indexOf(item.type)) ? getters['recapName'](item.name) : '';
 							const reason = item.reason ? ' ' + item.reason + ' ' : '';
+							const title = reason ? '[' + reason + '] ' : getters['recapTime'](item.type, rootState.translateTexts);
 							return Object.assign({}, item, {
-								title: getters['recapTime'](item.type, rootState.translateTexts) + reason + name,
+								title: title + name,
 								className: ('printed' == item.status ? 'printed' : '') + ('holiday' == item.type ? 'holiday' : '') + ('offday' == item.type ? 'offday' : ''),
 								borderColor: type.color,
 								backgroundColor: type.color,
