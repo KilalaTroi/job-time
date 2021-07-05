@@ -1138,7 +1138,10 @@ class StatisticsController extends Controller
 
 			// Total work hours per month
 			$totalNewPerfectHours[$key] = $totalPerfectHours[$key] = ($startNumberUsers - $offMonth - $disableUsersNumber) * (8 * $daysInMonth) - ($offDays[$key] * 8);
-
+			
+			// Loại bỏ giá trị âm
+			if ( $totalPerfectHours[$key] < 0 ) $totalNewPerfectHours[$key] = $totalPerfectHours[$key] = 0;
+			
 			if ( $newUsersNumber ) {
 				$totalPerfectHours[$key] += $newUsersPerfectHours;
 				$totalNewPerfectHours[$key] += $newUsersPerfectHours;
@@ -1148,7 +1151,7 @@ class StatisticsController extends Controller
 				$totalPerfectHours[$key] += $disableUsersPerfectHours;
 				$totalNewPerfectHours[$key] += $disableUsersPerfectHours;
 			}
-			
+
 			// Loại bỏ giá trị âm
 			if ( $totalPerfectHours[$key] < 0 ) $totalNewPerfectHours[$key] = $totalPerfectHours[$key] = 0;
 
@@ -1213,7 +1216,7 @@ class StatisticsController extends Controller
 		// Insert new data total time to database
 		if ( count($totalNewHoursProjects) ) {
 			foreach ($totalNewHoursProjects as $item) {
-				if ($item['yearMonth'] < date('Ym')) {
+				if ($item['yearMonth'] < date('Ym') && date('d')*1 >= 3) {
 					DB::table('total_times')->insert(
 						array(
 							'type_id' => $item['id'],
@@ -1232,7 +1235,7 @@ class StatisticsController extends Controller
 		// Insert new data perfect time to database
 		if ( count($totalNewPerfectHours) ) {
 			foreach ($totalNewPerfectHours as $key => $value) {
-				if ($key < date('Ym')) {
+				if ($key < date('Ym') && date('d')*1 >= 3) {
 					DB::table('total_times')
 						->where('date', $key)
 						->where('user_id', $user_id)
