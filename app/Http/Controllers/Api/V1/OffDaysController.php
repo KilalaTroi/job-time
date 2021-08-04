@@ -49,6 +49,7 @@ class OffDaysController extends Controller
 		$startDate = $_GET['startDate'];
 		$endDate = $_GET['endDate'];
 		$teamID = $_GET['team_id'];
+		$userID = $_GET['user_id'];
 		$user = $request->session()->get('Auth');
 
 		// Check filter team for user
@@ -62,13 +63,17 @@ class OffDaysController extends Controller
 				'users.id as user_id',
 				'off_days.type as type',
 				'off_days.status as status',
-				'off_days.date as date'
+				'off_days.date as date',
+				'off_days.reason as reason'
 			)
 			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
 			->when($codition, function ($query) use ($teamID) {
 				return $query->where('users.team', $teamID);
 			}, function ($query) {
 				return $query;
+			})
+			->when($userID, function ($query) use ($userID) {
+				return $query->where('off_days.user_id', $userID);
 			})
 			->whereIn('off_days.status', array('approved', 'printed'))
 			->whereNotIn('off_days.type', array('holiday', 'offday'))
@@ -85,7 +90,8 @@ class OffDaysController extends Controller
 				'users.id as user_id',
 				'off_days.type as type',
 				'off_days.status as status',
-				'off_days.date as date'
+				'off_days.date as date',
+				'off_days.reason as reason'
 			)
 			->leftJoin('users', 'users.id', '=', 'off_days.user_id')
 			->whereIn('off_days.type', array('holiday', 'offday'))
@@ -98,8 +104,94 @@ class OffDaysController extends Controller
 
 		return response()->json([
 			'offDays' => array_merge($offDays, $holiDays),
-			'codition' => $codition
+			'codition' => $codition,
+			'users' => $this->getUsersByTeam($teamID)
 		]);
+	}
+
+	public function deleteSpecialDays(Request $request) {
+		if ( $request->get('end_date') != null ) {
+			$oldSpecialDate = OffDay::where('user_id', $request->get('user_id'))
+			->where('type', 'special_day')
+			->where('date', '>=',  $request->get('start_date'))
+			->where('date', '<=',  $request->get('end_date'));
+		} else {
+			$oldSpecialDate = OffDay::where('user_id', $request->get('user_id'))
+			->where('type', 'special_day')
+			->where('date', '=',  $request->get('start_date'));
+		}
+
+		$oldSpecialDate->delete();
+
+		return response()->json(array(
+			'message' => 'Successfully.'
+		), 200);
+	}
+
+	public function updateSpecialDays(Request $request) {
+		OffDay::where('user_id', $request->get('user_id'))
+		->where('date', $request->get('start_date'))
+		->update([
+			'reason' => $request->get('reason'),
+		]);
+
+		// If has repeat date
+		if ( $request->get('end_date') != null ) {
+			$ignoreDates = array();
+			$carbStartDate = Carbon::createFromFormat('Y-m-d', $request->get('start_date'));
+			$carbEndDate = Carbon::createFromFormat('Y-m-d', $request->get('end_date'));
+
+			if ( $carbStartDate->gte($carbEndDate) ) return response()->json('Only select date updated.');
+
+			// oldSpecialDate
+			$oldSpecialDate = OffDay::select('date')
+			->where('user_id', $request->get('user_id'))
+			->where('type', 'special_day')
+			->where('date', '>',  $request->get('start_date'))
+			->where('date', '<=',  $request->get('end_date'));
+
+			// Update reason $oldSpecialDate
+			$oldSpecialDate->update([
+				'reason' => $request->get('reason'),
+			]);
+
+			$ignoreDates = $oldSpecialDate->get()->pluck('date')->toArray();
+
+			// otherDate
+			$otherDate = OffDay::select('date')
+			->where('type', '!=', 'special_day')
+			->where('date', '>',  $request->get('start_date'))
+			->where('date', '<=',  $request->get('end_date'))
+			->where(function($query) use ($request){
+				$query->where('user_id', $request->get('user_id'));
+				$query->orWhere('type', 'holiday');
+				$query->orWhere('type', 'offday');
+			})
+			->get()->pluck('date')->toArray();
+
+			$ignoreDates = array_merge($ignoreDates, $otherDate);
+
+			// add repeat special date
+			$repeatDate = array();
+			while( $carbStartDate->lt($carbEndDate) ) {
+				$day = $carbStartDate->addDays('1');
+				if ( !$day->isSunday() && !in_array($day->format('Y-m-d'), $ignoreDates) ) {
+					$repeatDate[] = array(
+						'user_id' => $request->get('user_id'),
+						'type' => 'special_day',
+						'reason' => $request->get('reason'),
+						'date' => $day->format('Y-m-d'),
+						'status' => 'approved',
+						'created_at' => Carbon::now(),
+						'updated_at' => Carbon::now(),
+					);
+				}
+			}
+
+			if ( count($repeatDate) ) OffDay::insert($repeatDate);
+		}
+
+		return response()->json('Success.');
 	}
 
 	/**
@@ -233,6 +325,7 @@ class OffDaysController extends Controller
 			$offDay = OffDay::select('id', 'type', 'date')
 				->where('user_id', $user_id)
 				->where('date', $dataDate)
+				->whereIn('type', array('all_day', 'morning', 'afternoon'))
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
 			$offDay = $offDay->toArray();
@@ -262,6 +355,7 @@ class OffDaysController extends Controller
 			$offDay = OffDay::select('id', 'type', 'date')
 				->where('user_id', $user_id)
 				->where('date', $dataDate)
+				->whereIn('type', array('all_day', 'morning', 'afternoon'))
 				->whereIn('status', array('approved', 'printed'))->first();
 			if (NULL === $offDay || empty($offDay)) break;
 			$offDay = $offDay->toArray();
@@ -274,5 +368,19 @@ class OffDaysController extends Controller
 			$data[] = $offDay;
 		}
 		return $data;
+	}
+
+	private function getUsersByTeam($team)
+	{
+		return DB::table('role_user as ru')
+			->select(
+				'user.id as id',
+				'user.name as text'
+			)
+			->rightJoin('users as user', 'user.id', '=', 'ru.user_id')
+			->rightJoin('roles as role', 'role.id', '=', 'ru.role_id')
+			->where('team', $team)
+			->where('disable_date', NULL)
+			->orderBy('user.team', 'ASC')->orderBy('user.orderby', 'DESC')->orderBy('user.id', 'DESC')->get()->toArray();
 	}
 }

@@ -147,6 +147,7 @@ export default {
     txtRCPM: 'PM',
     txtRCOff: 'Off',
     txtRCHoliday: 'Holiday',
+    txtRCSpecial: 'Special',
     txtReportFilter: 'フィルタ',
     txtReportType: '種類',
     txtReportCreate: '新規レポートの作成',
@@ -236,4 +237,6 @@ export default {
     txtUseTheMeetingRoom: '会議室を使用する',
     txtEveryWeekTo: '毎週まで',
     txtPerfectMatch: '完全一致',
+    txtTotalTime: '合計時間',
+    txtThisMonth: '今月',
 }

@@ -29,7 +29,6 @@ export default {
   },
   watch: {
     value: function (newValue, oldValue) {
-      // console.log(1111, newValue, oldValue, newValue == oldValue);
       if (!(newValue == oldValue) && (newValue || newValue >= 0))
         $(this.$el).val(newValue).trigger("change");
     },
