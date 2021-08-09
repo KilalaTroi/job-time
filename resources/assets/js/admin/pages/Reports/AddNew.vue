@@ -502,7 +502,7 @@ export default {
     },
 
     getUrlFile(attachFile) {
-      return 'https://docs.google.com/gview?url=' + window.location.origin + '/data/attach-file/' + encodeURIComponent(attachFile);
+      return 'https://docs.google.com/gview?url=' + window.location.origin + '/attach-file/' + encodeURIComponent(attachFile);
     },
 
     preventNav(event) {

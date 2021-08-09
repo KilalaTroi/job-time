@@ -39,6 +39,21 @@ Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 Route::post('/pdf/report', 'pdfController@index')->name('report');
 Route::get('/pdf/absence', 'pdfController@absence')->name('absence');
 
+Route::get('attach-file/{filename}', function ($filename)
+{
+    $path = storage_path('app/attach-file') . $filename;
+
+    if(!File::exists($path)) abort(404);
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
+
 # Get Data
 Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace' => 'Api\V1', 'as' => 'data.'], function () {
     Route::resource('departments', 'DepartmentsController', ['except' => ['create', 'edit']]);
@@ -168,21 +183,6 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::get('reports/{filename}', function ($filename)
     {
         $path = storage_path() . '/app/reports/' . $filename;
-
-        if(!File::exists($path)) abort(404);
-
-        $file = File::get($path);
-        $type = File::mimeType($path);
-
-        $response = Response::make($file, 200);
-        $response->header("Content-Type", $type);
-
-        return $response;
-    });
-
-    Route::get('attach-file/{filename}', function ($filename)
-    {
-        $path = storage_path('app/attach-file') . $filename;
 
         if(!File::exists($path)) abort(404);
 
