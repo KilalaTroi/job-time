@@ -157,6 +157,19 @@
           </select-2>
         </div>
       </div>
+      <div class="col-sm-12" v-if="attachFile">
+        <div class="form-group">
+          <label><strong>{{ $ml.with("VueJS").get("txtAttachFile") }}</strong></label>
+          <div class="input-group mb-3">
+            <input v-model="attachFile" type="text" disabled class="form-control" />
+            <div class="input-group-append">
+              <a :href="getUrlFile(attachFile)" class="input-group-text" target="_blank">
+                <i class="fa fa-eye"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -193,11 +206,15 @@ export default {
 	},
 
 	computed: {
-    ...mapGetters('reports',{
-      filters: "filters",
-      selectedItem: "selectedItem",
-      options: "options",
-    }),
+      ...mapGetters('reports',{
+        filters: "filters",
+        selectedItem: "selectedItem",
+        options: "options",
+      }),
+
+      attachFile: function () {
+        return this.selectedItem.language == 'vi' ? this.selectedItem.attach_file : this.selectedItem.attach_file_ja;
+      }
   },
 
   data() {
@@ -228,8 +245,12 @@ export default {
 
       if (obj.length > 0) return obj[0];
     },
-    
-		getReporter(data) {
+
+    getUrlFile(attachFile) {
+      return 'https://docs.google.com/gview?url=' + window.location.origin + '/attach-file/' + encodeURIComponent(attachFile);
+    },
+
+    getReporter(data) {
       let result = [];
       if(data){
         let arrData = data.split(',');

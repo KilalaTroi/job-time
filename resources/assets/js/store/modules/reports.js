@@ -133,7 +133,7 @@ export default {
           console.log(err);
           alert("Could not load data");
         });
-      
+
       return true;
     },
 
@@ -271,10 +271,10 @@ export default {
     },
 
     backToList({ state, dispatch }) {
-      state.action.new = state.action.preview = state.action.edit = false;  
+      state.action.new = state.action.preview = state.action.edit = false;
       dispatch('resetSelectedItem');
-      dispatch('resetValidate'); 
-      state.action.reset = true; 
+      dispatch('resetValidate');
+      state.action.reset = true;
       dispatch('resetFilters', 'all');
     },
 
@@ -304,9 +304,9 @@ export default {
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
       if (!state.filters.user_id) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if ( !state.selectedItem.attendPerson ) 
+        if ( !state.selectedItem.attendPerson )
         state.validationErrors = [["Please choosing the user attend or destination"], ...state.validationErrors];
-      } 
+      }
 
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
       if (!state.validationErrors.length) {
@@ -340,6 +340,10 @@ export default {
           dataSend.issueYear = dataSend.issue_year = state.filters.issue_year ? state.filters.issue_year.id : null;
         }
 
+        // attach file
+
+        dataSend.attach_file = dataSend.attach_file_ja = state.selectedItem.attach_file;
+
         axios
           .post(uri, dataSend)
           .then((res) => {
@@ -356,10 +360,10 @@ export default {
       if (!state.selectedItem.date) state.validationErrors = [["Please choosing the date"], ...state.validationErrors];
       if (!state.filters.user_id) state.validationErrors = [["Please choosing the user report"], ...state.validationErrors];
       if ('Meeting' == state.filters.type || 'Notice' == state.filters.type) {
-        if (!state.selectedItem.attendPerson) 
+        if (!state.selectedItem.attendPerson)
         state.validationErrors = [["Please choosing the user attend or destination"], ...state.validationErrors];
       }
-      
+
       if (!state.selectedItem.content && !state.selectedItem.content_ja) state.validationErrors = [["Please typing the content"], ...state.validationErrors];
       if (!state.validationErrors.length) {
         let uri = "/data/reports-action/" + state.selectedItem.id;
@@ -390,6 +394,9 @@ export default {
           dataSend.issue = state.filters.issue ? state.filters.issue.id : null;
           dataSend.issueYear = dataSend.issue_year = state.filters.issue_year ? state.filters.issue_year.id : null;
         }
+
+        dataSend.attach_file = state.selectedItem.attach_file;
+        dataSend.attach_file_ja = state.selectedItem.attach_file_ja;
 
         axios
           .patch(uri, dataSend)

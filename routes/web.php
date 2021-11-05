@@ -16,10 +16,20 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
 
+Route::get('/attach-file/{filename}', function ($filename)
+{
+    $path = storage_path() . '/app/attach-file/' . $filename;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+    if(!File::exists($path)) abort(404);
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
 
 Route::get('/', 'Auth\LoginController@showLoginForm');
 
@@ -56,6 +66,8 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::resource('offdays', 'OffDaysController', ['except' => ['create', 'edit']]);
     Route::get('all-off-days', 'OffDaysController@allOffDays');
     Route::get('all-off-day-week', 'OffDaysController@allOffDayWeek');
+    Route::post('update-special-days', 'OffDaysController@updateSpecialDays');
+    Route::post('delete-special-days', 'OffDaysController@deleteSpecialDays');
 
     Route::resource('jobs', 'JobsController', ['except' => ['create', 'edit']]);
     Route::get('issue-pages', 'JobsController@getIssuePages');
@@ -82,6 +94,7 @@ Route::group(['middleware' => ['auth', 'cors'],  'prefix' => 'data', 'namespace'
     Route::post('translate-content', 'ReportsController@translateContent');
     Route::resource('reports-action', 'ReportsController', ['except' => ['create', 'edit']]);
     Route::post('import-projects', 'ProjectsController@importProjects');
+    Route::post('add-attach-file', 'ReportsController@addAttachFile');
 
     Route::post('finish/data', 'UploadController@getData');
     Route::post('finish/uploaded', 'UploadController@getFinishUploaded');

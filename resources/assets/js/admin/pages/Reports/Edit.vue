@@ -233,6 +233,34 @@
           </select-2>
         </div>
       </div>
+
+      <div class="col-sm-12">
+        <div class="form-group">
+          <label><strong>{{ $ml.with("VueJS").get("txtAttachFile") }}</strong></label>
+          <div class="d-flex align-items-center mb-3">
+            <div class="input-group mr-3" v-if="attachFile">
+              <input v-model="attachFile" type="text" disabled class="form-control" />
+              <div class="input-group-append">
+                <a :href="getUrlFile(attachFile)" class="input-group-text" target="_blank">
+                  <i class="fa fa-eye"></i>
+                </a>
+              </div>
+            </div>
+            <button
+                    type="button"
+                    class="btn btn-secondary flex-shrink-0"
+                    data-toggle="modal"
+                    data-target="#addAttachFile"
+                    data-backdrop="static"
+                    data-keyboard="false"
+            >
+              <i class="fa fa-pencil-square" v-if="attachFile"></i>
+              <i class="fa fa-plus-square" v-else></i>
+              {{ $ml.with("VueJS").get("txtAttachFile") }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -263,6 +291,8 @@
         {{ $ml.with("VueJS").get("txtUpdate") }}
       </button>
     </div>
+
+    <update-attach-file v-on:reset-upload="updateAttachFile" />
   </card>
 </template>
 <script>
@@ -275,6 +305,7 @@ import DecoupledEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import Card from "../../components/Cards/Card";
 import Select2 from "../../components/SelectTwo/SelectTwo.vue";
 import ErrorItem from "../../components/Validations/Error";
+import UpdateAttachFile from "./UpdateAttachFile";
 import { mapGetters, mapActions } from "vuex";
 
 class MyUploadAdapter {
@@ -398,6 +429,7 @@ export default {
     Card,
     ErrorItem,
     VueTimepicker,
+    UpdateAttachFile,
   },
 
   computed: {
@@ -416,6 +448,10 @@ export default {
       action: "action",
       validationErrors: "validationErrors"
     }),
+
+    attachFile: function () {
+      return this.selectedItem.language == 'vi' ? this.selectedItem.attach_file : this.selectedItem.attach_file_ja;
+    }
   },
 
   data() {
@@ -473,7 +509,19 @@ export default {
       deleteReport: "deleteReport",
       resetFilters: "resetFilters",
     }),
-    
+
+    updateAttachFile(file) {
+      if ( this.selectedItem.language == 'vi' ) {
+        this.selectedItem.attach_file = file;
+      } else {
+        this.selectedItem.attach_file_ja = file;
+      }
+    },
+
+    getUrlFile(attachFile) {
+      return 'https://docs.google.com/gview?url=' + window.location.origin + '/attach-file/' + encodeURIComponent(attachFile);
+    },
+
     checkTranslate() {
       return (!this.selectedItem.translatable && (this.selectedItem.language != this.editLanguage));
     },
@@ -527,16 +575,16 @@ export default {
 
           if ( _this.action.edit && !_this.action.reset ) {
             let data = await _this.getAll(-1);
-            
+
             if (value.team != _this.currentTeam.id) {
               _this.setCurrentTeam(value.team);
               _this.action.reset = true;
               _this.resetFilters('all');
-              
+
             } else {
               _this.action.reset = true;
               _this.resetFilters();
-            } 
+            }
           }
         },
         deep: true

@@ -404,7 +404,7 @@ class ReportsController extends Controller
 			->when($projectArr, function ($query, $projectArr) use ($perfectMatch) {
 				if ( is_array($projectArr) ) {
 					return $query->whereIn('p.id', $projectArr);
-				} 
+				}
 
 				if ( $perfectMatch )
 					return $query->where('p.name', $projectArr);
@@ -691,6 +691,8 @@ class ReportsController extends Controller
 					'attend_other_person',
 					'content',
 					'content_ja',
+                    'attach_file',
+                    'attach_file_ja',
 					'content as editorData',
 					'content_ja as editorDataJA',
 					'r.language as language',
@@ -835,4 +837,21 @@ class ReportsController extends Controller
 			->groupBy('d.id')
 			->get()->toArray();
 	}
+
+    public function addAttachFile(Request $request)
+    {
+        $this->validate($request, [
+            'file' => 'required'
+        ]);
+
+        $file = $request->file('file');
+        $fileName = time() . '-' . $file->getClientOriginalName();
+        $file->move(storage_path('app/attach-file'), $fileName);
+
+
+        return response()->json(array(
+            'message' => array(array('Successfully.')),
+            'file' => $fileName
+        ), 200);
+    }
 }

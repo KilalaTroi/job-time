@@ -8,7 +8,9 @@
                             <i class="nc-icon nc-chart text-warning"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">{{$ml.with('VueJS').get('txtWorkedTime')}}</p>
+                            <p class="card-category">
+                                {{$ml.with('VueJS').get('txtTotalTime')}}
+                            </p>
                             <h4 class="card-title">{{ totalArrayObject(totalHoursProjects) | numeral('0,0') }}/{{ totalObject(totalPerfectHours) | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
@@ -22,11 +24,13 @@
                             <i class="nc-icon nc-light-3 text-success"></i>
                         </div>
                         <div slot="content">
-                            <p class="card-category">{{$ml.with('VueJS').get('txtWorkingTime')}}</p>
-                            <h4 class="card-title" v-if="getCurrentMonth(currentMonth)"> {{ getCurrentMonth(currentMonth).hours | numeral('0,0') }}/{{ getCurrentMonth(currentMonth).total | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
+                            <p class="card-category">
+                                {{$ml.with('VueJS').get('txtWorkingTime')}}
+                            </p>
+                            <h4 class="card-title">{{ currentTotals | numeral('0,0') }}/{{ currentPerTotals | numeral('0,0') }} {{$ml.with('VueJS').get('txtHour')}}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonth.startDate }} - {{ currentMonth.currentDate }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonthText }}
                         </div>
                     </stats-card>
                 </div>
@@ -40,7 +44,7 @@
                             <h4 class="card-title">{{ jobs }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ currentMonth.currentDate }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ $ml.with('VueJS').get('txtThisMonth') }}
                         </div>
                     </stats-card>
                 </div>
@@ -51,10 +55,10 @@
                         </div>
                         <div slot="content">
                             <p class="card-category">{{$ml.with('VueJS').get('txtNewUser')}}</p>
-                            <h4 class="card-title">+{{ totalNewUsers(newUsersMonths) }}/{{ currentMonth.totalUsers }}</h4>
+                            <h4 class="card-title">{{ currentNewUsers }}</h4>
                         </div>
                         <div slot="footer">
-                            <i class="fa fa-calendar-o mr-1"></i>{{ customFormatterStr(startMonth) }} - {{ customFormatterEnd(endMonth) }}
+                            <i class="fa fa-calendar-o mr-1"></i>{{ $ml.with('VueJS').get('txtThisMonth') }}
                         </div>
                     </stats-card>
                 </div>
@@ -212,8 +216,8 @@
                 exportLink: '',
                 types: [],
                 monthsText: [],
+                monthYearText: {},
                 series: [],
-                newUsersMonths: {},
                 totalPerfectHours: {},
                 totalHoursProjects: [],
                 pageData: {
@@ -224,12 +228,13 @@
                 projectsData: [],
                 jobs: 0,
 
-                startMonth: teamDefault == 2 && moment().date() > 20 ? 
-                                new Date(moment().subtract(10, 'months').set('date', 21).format('YYYY/MM/DD')) :
-                                new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD')),
+                // Start and end dates init (Type Date)
+                startMonth: teamDefault == 2 && moment().date() <= 20 ? 
+                            new Date(moment().subtract(12, 'months').format('YYYY/MM/DD')) :
+                            new Date(moment().subtract(11, 'months').format('YYYY/MM/DD')),
                 endMonth: teamDefault == 2 && moment().date() > 20 ? 
-                                new Date(moment().add(1, 'months').endOf('month').format('YYYY/MM/DD')) :
-                                new Date(moment().subtract(0, 'months').endOf('month').format('YYYY/MM/DD')),
+                            new Date(moment().add(1, 'months').format('YYYY/MM/DD')) :
+                            new Date(moment().format('YYYY/MM/DD')),
                 currentMonth: {},
 
                 users: [],
@@ -353,17 +358,19 @@
                 currentLang: 'currentLang',
                 loginUser: 'loginUser',
             }),
-            // startMonth: {
-            //     get: function () {
-            //         let teamDefault = this.team ? this.team : JSON.parse(document.querySelector("meta[name='team-default']").getAttribute('content'))
-            //         return teamDefault == 2 ? 
-            //         new Date(moment().subtract(11, 'months').set('date', 21).format('YYYY/MM/DD')) :
-            //         new Date(moment().subtract(11, 'months').startOf('month').format('YYYY/MM/DD'));
-            //     },
-            //     set: function (newValue) {
-            //         return newValue;
-            //     }
-            // }
+            currentTotals: function() {
+                return Object.keys(this.currentMonth).length ? this.currentMonth.totals.totalHours : 0;
+            },
+            currentPerTotals: function() {
+                return Object.keys(this.currentMonth).length ? this.totalObject(this.currentMonth.totals.totalPerfectHours) : 0;
+            },
+            currentMonthText: function() {
+                return Object.keys(this.currentMonth).length ? this.currentMonth.daysOfMonth.start + ' - ' + this.currentMonth.daysOfMonth.end : 
+                'yyyy/mm/dd - yyyy/mm/dd';
+            },
+            currentNewUsers: function() {
+                return Object.keys(this.currentMonth).length ? '+' + this.totalNewUsers(this.currentMonth.users.newUsersMonths) + '/' + this.currentMonth.users.all.length : '+0/0';
+            }
         },
         mounted() {
             let _this = this;
@@ -416,13 +423,11 @@
                         }
 
                          // Assign data
-                        this.newUsersMonths = res.data.users.newUsersMonths;  
                         this.totalPerfectHours = res.data.totals.totalPerfectHours;
                         this.totalHoursProjects = res.data.totals.totalHoursProjects;
                         this.currentMonth = res.data.currentMonth;
-                        this.currentMonth.startDate = moment().startOf('month').format('YYYY/MM/DD');
-                        this.currentMonth.currentDate = moment().format('YYYY/MM/DD');
                         this.monthsText = this.pageChart.data.labels = this.jobChart.data.labels = this.projectChart.data.labels = this.barChart.data.labels = res.data.monthsText;
+                        this.monthYearText = res.data.monthYearText;
                         this.getSeries(this.types, this.totalPerfectHours, this.totalHoursProjects);
                     })
                     .catch(err => {
@@ -440,7 +445,7 @@
                 axios.get(url)
                 .then(res => {
                     this.pageData = res.data;
-                    this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page',this.totalPerfectHours)
+                    this.getCustomSeries(this.types,this.pageData.totalpage,'pageChart','page')
                     this.data.totalpage = this.pageData;
                 })
                 .catch(err => {
@@ -460,7 +465,7 @@
                 axios.get(url)
                 .then(res => {
                     this.jobsData = res.data;
-                    this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue',this.totalPerfectHours);
+                    this.getCustomSeries(this.types,this.jobsData.totaljob,'jobChart','issue');
                 })
                 .catch(err => {
                     console.log(err);
@@ -479,7 +484,7 @@
                 axios.get(url)
                 .then(res => {
                     this.projectsData = res.data;
-                    this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project',this.totalPerfectHours);
+                    this.getCustomSeries(this.types,this.projectsData.totalproject,'projectChart','project');
                 })
                 .catch(err => {
                     console.log(err);
@@ -507,7 +512,6 @@
             },
             customFormatterStr(date) {
                 if ( this.team && this.team == 2 ) {
-                    console.log(this.startMonth, this.endMonth)
                     if ( this.startMonth >= this.endMonth )
                         return moment(date).subtract(1, 'months').set('date', 21).format('YYYY/MM/DD');
                     return moment(date).set('date', 21).format('YYYY/MM/DD');
@@ -543,7 +547,7 @@
                 let _this = this;
                 let series = projectTypes.map((item, index) => {
                     let _item = item;
-                    let row = Object.keys(totalPerfectHours).map((key, index) => {
+                    let row = Object.keys(_this.monthYearText).map((key, index) => {
                         if ( _this.hasObjectValue(totalHoursProjects, _item.id, key) ) {
                             let percents = (_this.hasObjectValue(totalHoursProjects, _item.id, key).total*1/totalPerfectHours[key]*100).toFixed(2);
                             return {
@@ -562,11 +566,11 @@
                 this.series = this.barChart.data.series = [...series];
             },
 
-            getCustomSeries(type, data, chart, dataKey, totalPerfectHours){
+            getCustomSeries(type, data, chart, dataKey){
                 let _this = this;
                 let series = type.map((item, index) => {
                     let _item = item;
-                    let row = Object.keys(totalPerfectHours).map((key, index) => {
+                    let row = Object.keys(_this.monthYearText).map((key, index) => {
                         if ( _this.hasObjectValue(data, _item.id, key) ) {
                             return {
                                 value: _this.hasObjectValue(data, _item.id, key)[dataKey],
