@@ -123,6 +123,7 @@ class Uploadcontroller extends Controller
 				->leftJoin('schedules as s', 's.id', '=', 'p.schedule_id')
 				->leftJoin('users as u', 'u.id', '=', 'p.user_id')
 				->whereIn('p.issue_id', $issueIds)
+				->orderBy('p.created_at', 'asc')
 				->get()->toArray();
 		}
 

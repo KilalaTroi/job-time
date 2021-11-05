@@ -1,6 +1,6 @@
 <template>
   <modal id="UpdateReason" v-on:reset-validation="resetValidation">
-    <template slot="title">{{ $ml.with('VueJS').get('txtUpateReason') }}</template>
+    <template slot="title">{{ $ml.with('VueJS').get('txtUpdateReason') }}</template>
     <form>
       <div class="form-group">
         <div>
