@@ -635,7 +635,7 @@
                 }
             },
             checkUser(){
-                if(-1 != ('1,24,49','34').indexOf(this.loginUser.id)) return true;
+                if(-1 != ('1,24,49,34').indexOf(this.loginUser.id)) return true;
                 return false;
             },
 
