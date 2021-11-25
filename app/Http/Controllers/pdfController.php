@@ -31,12 +31,14 @@ class pdfController extends Controller
 		$offDay = false;
 		if (!empty($request->input('id')) && NULL !== $request->input('id')) $offDay = $this->absenceByID($request->input('id'));
 		else if (!empty($request->input('total')) && NULL !== $request->input('total')) {
-			$users = DB::table('users')->select('fullname')->where('id',$request->input('user_id'))->first();
+			$users = DB::table('users')->select('fullname','team')->where('id',$request->input('user_id'))->first();
+			$team = DB::table('teams')->select('name')->where('id',$users->team)->first();
 			$offDay = array(
 				'user_id' => $request->input('user_id'),
 				'user_fullname' => $users->fullname,
 				'totalOff' => $request->input('total'),
 				'type' => 1,
+				'team' => $team->name,
 				'date' => $request->input('date')
 			);
 			if (NULL !== $request->input('morning') && !empty($request->input('morning'))) $offDay['off']['morning'] = $request->input('morning');
@@ -61,6 +63,7 @@ class pdfController extends Controller
 			'type' => $offDay['type'],
 			'date' => $offDay['date'],
 			'totalOff' => $offDay['totalOff'],
+			'team' => $offDay['team'],
 			'now_date' => date("d/m/Y"),
 		);
 
@@ -82,7 +85,8 @@ class pdfController extends Controller
 		$offDay = DB::table('off_days')->where('id', $id)->first();
 
 		if (isset($offDay) && !empty($offDay)) {
-			$users = DB::table('users')->select('fullname')->where('id',$offDay->user_id)->first();
+			$users = DB::table('users')->select('fullname','team')->where('id',$offDay->user_id)->first();
+			$team = DB::table('teams')->select('name')->where('id',$users->team)->first();
 			$data['totalOff'] =  "all_day" == $offDay->type ? "1" : "0,5";
 			if ('morning' == $offDay->type) $data['off']['morning'] = date("d/m/Y", strtotime($offDay->date));
 			if ('afternoon' == $offDay->type) $data['off']['afternoon'] = date("d/m/Y", strtotime($offDay->date));
@@ -91,6 +95,7 @@ class pdfController extends Controller
 			$data['type'] = $offDay->type;
 			$data['user_id'] = $offDay->user_id;
 			$data['user_fullname'] = $users->fullname;
+			$data['team'] = $team->name;
 			return $data;
 		}
 		return false;
