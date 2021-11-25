@@ -10,18 +10,18 @@
     "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
   },
   "devDependencies": {
-    "axios": "^0.18.1",
+    "axios": "^0.21.2",
     "cross-env": "^5.0.1",
     "jquery": "^3.5.0",
     "laravel-mix": "^1.0",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "vue": "^2.1.10"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-decoupled-document": "^19.0.2",
     "@ckeditor/ckeditor5-table": "^19.1.0",
     "@ckeditor/ckeditor5-vue": "^1.0.1",
-    "@ckeditor/ckeditor5-widget": "^19.1.0",
+    "@ckeditor/ckeditor5-widget": "^27.0.0",
     "@fullcalendar/core": "^4.3.1",
     "@fullcalendar/daygrid": "^4.3.0",
     "@fullcalendar/interaction": "^4.3.0",
