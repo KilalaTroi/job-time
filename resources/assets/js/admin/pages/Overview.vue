@@ -229,10 +229,10 @@
                 jobs: 0,
 
                 // Start and end dates init (Type Date)
-                startMonth: teamDefault == 2 && moment().date() <= 20 ? 
+                startMonth: teamDefault == 2 && moment().date() <= 20 ?
                             new Date(moment().subtract(12, 'months').format('YYYY/MM/DD')) :
                             new Date(moment().subtract(11, 'months').format('YYYY/MM/DD')),
-                endMonth: teamDefault == 2 && moment().date() > 20 ? 
+                endMonth: teamDefault == 2 && moment().date() > 20 ?
                             new Date(moment().add(1, 'months').format('YYYY/MM/DD')) :
                             new Date(moment().format('YYYY/MM/DD')),
                 currentMonth: {},
@@ -365,7 +365,7 @@
                 return Object.keys(this.currentMonth).length ? this.totalObject(this.currentMonth.totals.totalPerfectHours) : 0;
             },
             currentMonthText: function() {
-                return Object.keys(this.currentMonth).length ? this.currentMonth.daysOfMonth.start + ' - ' + this.currentMonth.daysOfMonth.end : 
+                return Object.keys(this.currentMonth).length ? this.currentMonth.daysOfMonth.start + ' - ' + this.currentMonth.daysOfMonth.end :
                 'yyyy/mm/dd - yyyy/mm/dd';
             },
             currentNewUsers: function() {
@@ -434,7 +434,7 @@
                         console.log(err);
                         alert("Could not load data");
                     });
-                
+
                 // Reset Filter
                 this.isFilter = 0;
                 this.isTeamChange = 0;
@@ -531,7 +531,7 @@
                 return Object.keys(obj).reduce((total, key) => { return total + obj[key].length }, 0);
             },
             totalArrayObject(arr) {
-                return arr.reduce((total, item) => { 
+                return arr.reduce((total, item) => {
                     total += (item.total*1);
                     return total;
                 }, 0).toFixed(2);
@@ -635,7 +635,7 @@
                 }
             },
             checkUser(){
-                if(-1 != ('1,24,49').indexOf(this.loginUser.id)) return true;
+                if(-1 != ('1,24,49,34').indexOf(this.loginUser.id)) return true;
                 return false;
             },
 
