@@ -1235,7 +1235,7 @@ class StatisticsController extends Controller
 		// Insert new data perfect time to database
 		if ( count($totalNewPerfectHours) ) {
 			foreach ($totalNewPerfectHours as $key => $value) {
-				if ($key < date('Ym') && date('d')*1 >= 3) {
+				if ($key < date('Ym') && date('d')*1 >= 5) {
 					DB::table('total_times')
 						->where('date', $key)
 						->where('user_id', $user_id)
