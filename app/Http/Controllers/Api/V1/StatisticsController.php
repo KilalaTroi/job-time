@@ -1212,35 +1212,39 @@ class StatisticsController extends Controller
 				}
 			}
 		}
-		
-		// Insert new data total time to database
-		if ( count($totalNewHoursProjects) ) {
-			foreach ($totalNewHoursProjects as $item) {
-				if ($item['yearMonth'] < date('Ym') && date('d')*1 >= 3) {
-					DB::table('total_times')->insert(
-						array(
-							'type_id' => $item['id'],
-							'team_id' => $teamID,
-							'user_id' => $user_id,
-							'time' => $item['total'],
-							'date' => $item['yearMonth'],
-							'created_at' => date('Y-m-d H:i:s'),
-							'updated_at' => date('Y-m-d H:i:s'),
-						)
-					);
+
+		// Archive old in the 5th of every month 
+		if ( date('d')*1 >= 5 ) {
+			
+			// Insert new data total time to database
+			if ( count($totalNewHoursProjects) ) {
+				foreach ($totalNewHoursProjects as $item) {
+					if ($item['yearMonth'] < date('Ym')) {
+						DB::table('total_times')->insert(
+							array(
+								'type_id' => $item['id'],
+								'team_id' => $teamID,
+								'user_id' => $user_id,
+								'time' => $item['total'],
+								'date' => $item['yearMonth'],
+								'created_at' => date('Y-m-d H:i:s'),
+								'updated_at' => date('Y-m-d H:i:s'),
+							)
+						);
+					}
 				}
 			}
-		}
 
-		// Insert new data perfect time to database
-		if ( count($totalNewPerfectHours) ) {
-			foreach ($totalNewPerfectHours as $key => $value) {
-				if ($key < date('Ym') && date('d')*1 >= 5) {
-					DB::table('total_times')
-						->where('date', $key)
-						->where('user_id', $user_id)
-						->where('team_id', $teamID)
-						->update(['perfect_time' => $value]);
+			// Insert new data perfect time to database
+			if ( count($totalNewPerfectHours) ) {
+				foreach ($totalNewPerfectHours as $key => $value) {
+					if ($key < date('Ym')) {
+						DB::table('total_times')
+							->where('date', $key)
+							->where('user_id', $user_id)
+							->where('team_id', $teamID)
+							->update(['perfect_time' => $value]);
+					}
 				}
 			}
 		}

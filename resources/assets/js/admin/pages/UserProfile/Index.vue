@@ -42,7 +42,7 @@
           <table-user class="table-hover table-striped" />
 
           <div v-if="!users.length" class="text-center mt-3">
-            <img src="https://i.imgur.com/JfPpwOA.gif" />
+            <img src="/images/loading.gif" />
           </div>
         </div>
       </card>
