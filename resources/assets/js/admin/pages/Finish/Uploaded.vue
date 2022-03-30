@@ -159,7 +159,7 @@
                 v-on:update-process="getProcess"
               ></table-finished-upload>
               <div v-if="loading" class="text-center mt-3">
-                <img src="https://i.imgur.com/JfPpwOA.gif" />
+                <img src="/images/loading.gif" />
               </div>
             </div>
             <process-detail-modal

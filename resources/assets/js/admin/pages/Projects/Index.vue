@@ -177,7 +177,7 @@
           >
           </table-project>
           <div v-if="!projectData.data" class="text-center mt-3">
-            <img src="https://i.imgur.com/JfPpwOA.gif" />
+            <img src="/images/loading.gif" />
           </div>
         </div>
         <pagination

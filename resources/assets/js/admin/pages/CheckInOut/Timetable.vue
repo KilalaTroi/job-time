@@ -87,7 +87,7 @@
               @pagination-change-page="getAll"
             />
             <div v-if="!data.timetable.data" class="text-center mt-3">
-              <img src="https://i.imgur.com/JfPpwOA.gif" />
+              <img src="/images/loading.gif" />
             </div>
           </card>
         </div>
@@ -110,7 +110,7 @@
               dataAction="all"
             />
             <div v-if="!data.stimetable.data" class="text-center mt-3">
-              <img src="https://i.imgur.com/JfPpwOA.gif" />
+              <img src="/images/loading.gif" />
             </div>
           </card>
         </div>

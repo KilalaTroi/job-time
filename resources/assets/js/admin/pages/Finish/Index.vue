@@ -53,7 +53,7 @@
                 v-on:update-process="getProcess"
               ></table-finish>
               <div v-if="loading" class="text-center mt-3">
-                <img src="https://i.imgur.com/JfPpwOA.gif" />
+                <img src="/images/loading.gif" />
               </div>
             </div>
 
